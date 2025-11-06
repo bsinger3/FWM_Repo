@@ -23,9 +23,12 @@
       }
       form {
         display: grid;
-        grid-template-columns: repeat(6, 120px);
+        grid-template-columns: 60px 60px 120px 120px 120px 120px 120px;
         gap: 8px;
         align-items: end;
+      }
+      .height-group {
+        display: contents;
       }
       input,
       button {
@@ -64,9 +67,14 @@
     <h1>Find similar measurements</h1>
 
     <form id="f">
-      <label
-        >Height in<br /><input id="h" type="number" min="48" max="84" step="1"
-      /></label>
+      <div class="height-group">
+        <label
+          >Feet<br /><input id="h-ft" type="number" min="4" max="7" step="1"
+        /></label>
+        <label
+          >Inches<br /><input id="h-in" type="number" min="0" max="11" step="1"
+        /></label>
+      </div>
       <label
         >Weight lb<br /><input id="w" type="number" min="70" max="400" step="1"
       /></label>
@@ -84,8 +92,6 @@
 
     <div id="out" class="grid"></div>
 
-    <div></div>
-
     <script src="./config.js"></script>
     <script type="module">
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -97,8 +103,14 @@
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
         out.textContent = "Loading...";
+
+        // Calculate total height in inches from feet and inches
+        const feetVal = num(document.getElementById("h-ft").value);
+        const inchesVal = num(document.getElementById("h-in").value);
+        const totalHeightInches = (feetVal || 0) * 12 + (inchesVal || 0);
+
         const body = {
-          in_height: num(document.getElementById("h").value),
+          in_height: totalHeightInches > 0 ? totalHeightInches : null,
           in_weight: num(document.getElementById("w").value),
           in_bust: num(document.getElementById("b").value),
           in_waist: num(document.getElementById("t").value),
@@ -106,9 +118,17 @@
           limit_n: 24,
           offset_n: 0,
         };
+
+        console.log("Request body:", body);
+
         const { data, error } = await sb.rpc("match_by_measurements", body);
+
+        console.log("Response data:", data);
+        console.log("Response error:", error);
+
         if (error) {
-          out.textContent = error.message;
+          out.textContent = "Error: " + error.message;
+          console.error("API Error:", error);
           return;
         }
         render(data);
@@ -158,6 +178,7 @@
       }
 
       function num(v) {
+        if (v === "" || v === null || v === undefined) return null;
         const n = Number(v);
         return Number.isFinite(n) ? n : null;
       }
