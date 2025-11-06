@@ -1,93 +1,166 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <title>FriendsWithMeasurements • Find looks that match your measurements</title>
-  <meta name="description" content="Search real product photos by height and weight to find looks from people built like you.">
-  <link rel="icon" href="/favicon.ico">
+  <head>
+    <title>
+      FriendsWithMeasurements • Find looks that match your measurements
+    </title>
+    <meta
+      name="description"
+      content="Search real product photos by height and weight to find looks from people built like you."
+    />
+    <link rel="icon" href="/favicon.ico" />
 
-  <meta charset="utf-8">
-  <title>Friends With Measurements</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    body{font-family:system-ui,Arial,sans-serif;margin:20px}
-    h1{margin:0 0 12px}
-    form{display:grid;grid-template-columns:repeat(6,120px);gap:8px;align-items:end}
-    input,button{padding:8px;font-size:14px}
-    .grid{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-    .card{border:1px solid #ddd;border-radius:8px;overflow:hidden;text-decoration:none;color:#111;background:#fff}
-    .card img{width:100%;aspect-ratio:3/4;object-fit:cover;background:#f3f3f3}
-    .meta{padding:8px;font-size:12px;color:#333;line-height:1.4}
-  </style>
-</head>
-<body>
-  <h1>Find similar measurements</h1>
-
-  <form id="f">
-    <label>Height in<br><input id="h" type="number" min="48" max="84" step="1"></label>
-    <label>Weight lb<br><input id="w" type="number" min="70" max="400" step="1"></label>
-    <label>Bust in<br><input id="b" type="number" min="20" max="60" step="0.5"></label>
-    <label>Waist in<br><input id="t" type="number" min="18" max="60" step="0.5"></label>
-    <label>Hips in<br><input id="p" type="number" min="20" max="70" step="0.5"></label>
-    <button type="submit">Search</button>
-  </form>
-
-  <div id="out" class="grid"></div>
-
-  <script src="./config.js"></script>
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    const sb = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-
-    const f = document.getElementById('f');
-    const out = document.getElementById('out');
-
-    f.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      out.textContent = 'Loading...';
-      const body = {
-        in_height: num(document.getElementById('h').value),
-        in_weight: num(document.getElementById('w').value),
-        in_bust:   num(document.getElementById('b').value),
-        in_waist:  num(document.getElementById('t').value),
-        in_hips:   num(document.getElementById('p').value),
-        limit_n: 24, offset_n: 0
-      };
-      const { data, error } = await sb.rpc('match_by_measurements', body);
-      if (error) { out.textContent = error.message; return; }
-      render(data);
-    });
-
-    function render(rows){
-      out.innerHTML = '';
-      if (!rows || rows.length === 0) { out.textContent = 'No matches'; return; }
-      for (const r of rows) {
-        const a = document.createElement('a');
-        a.className = 'card';
-        a.href = r.monetized_product_url || r.product_page_url || r.original_url;
-        a.target = '_blank';
-
-        const img = document.createElement('img');
-        img.loading = 'lazy';
-        img.referrerPolicy = 'no-referrer';
-        const src = window.IMAGE_PROXY ? window.IMAGE_PROXY + encodeURIComponent(r.original_url) : r.original_url;
-        img.src = src;
-        img.onerror = () => { img.style.display = 'none'; };
-
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        meta.textContent =
-          [r.brand, r.source_site,
-           `H ${r.height_in ?? '?'}`, `W ${r.weight_lb ?? '?'}`,
-           `Size ${r.size_ordered_raw || '?'}`, `Color ${r.color_ordered_raw || '?'}`
-          ].filter(Boolean).join('  ·  ');
-
-        a.appendChild(img);
-        a.appendChild(meta);
-        out.appendChild(a);
+    <meta charset="utf-8" />
+    <title>Friends With Measurements</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body {
+        font-family: system-ui, Arial, sans-serif;
+        margin: 20px;
       }
-    }
+      h1 {
+        margin: 0 0 12px;
+      }
+      form {
+        display: grid;
+        grid-template-columns: repeat(6, 120px);
+        gap: 8px;
+        align-items: end;
+      }
+      input,
+      button {
+        padding: 8px;
+        font-size: 14px;
+      }
+      .grid {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+      }
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #111;
+        background: #fff;
+      }
+      .card img {
+        width: 100%;
+        aspect-ratio: 3/4;
+        object-fit: cover;
+        background: #f3f3f3;
+      }
+      .meta {
+        padding: 8px;
+        font-size: 12px;
+        color: #333;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Find similar measurements</h1>
 
-    function num(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }
-  </script>
-</body>
+    <form id="f">
+      <label
+        >Height in<br /><input id="h" type="number" min="48" max="84" step="1"
+      /></label>
+      <label
+        >Weight lb<br /><input id="w" type="number" min="70" max="400" step="1"
+      /></label>
+      <label
+        >Bust in<br /><input id="b" type="number" min="20" max="60" step="0.5"
+      /></label>
+      <label
+        >Waist in<br /><input id="t" type="number" min="18" max="60" step="0.5"
+      /></label>
+      <label
+        >Hips in<br /><input id="p" type="number" min="20" max="70" step="0.5"
+      /></label>
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="out" class="grid"></div>
+
+    <div></div>
+
+    <script src="./config.js"></script>
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+      const sb = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+      const f = document.getElementById("f");
+      const out = document.getElementById("out");
+
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        out.textContent = "Loading...";
+        const body = {
+          in_height: num(document.getElementById("h").value),
+          in_weight: num(document.getElementById("w").value),
+          in_bust: num(document.getElementById("b").value),
+          in_waist: num(document.getElementById("t").value),
+          in_hips: num(document.getElementById("p").value),
+          limit_n: 24,
+          offset_n: 0,
+        };
+        const { data, error } = await sb.rpc("match_by_measurements", body);
+        if (error) {
+          out.textContent = error.message;
+          return;
+        }
+        render(data);
+      });
+
+      function render(rows) {
+        out.innerHTML = "";
+        if (!rows || rows.length === 0) {
+          out.textContent = "No matches";
+          return;
+        }
+        for (const r of rows) {
+          const a = document.createElement("a");
+          a.className = "card";
+          a.href =
+            r.monetized_product_url || r.product_page_url || r.original_url;
+          a.target = "_blank";
+
+          const img = document.createElement("img");
+          img.loading = "lazy";
+          img.referrerPolicy = "no-referrer";
+          const src = window.IMAGE_PROXY
+            ? window.IMAGE_PROXY + encodeURIComponent(r.original_url)
+            : r.original_url;
+          img.src = src;
+          img.onerror = () => {
+            img.style.display = "none";
+          };
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.textContent = [
+            r.brand,
+            r.source_site,
+            `H ${r.height_in ?? "?"}`,
+            `W ${r.weight_lb ?? "?"}`,
+            `Size ${r.size_ordered_raw || "?"}`,
+            `Color ${r.color_ordered_raw || "?"}`,
+          ]
+            .filter(Boolean)
+            .join("  ·  ");
+
+          a.appendChild(img);
+          a.appendChild(meta);
+          out.appendChild(a);
+        }
+      }
+
+      function num(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+      }
+    </script>
+  </body>
 </html>
