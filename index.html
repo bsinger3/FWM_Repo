@@ -161,7 +161,11 @@
           const meta = document.createElement("div");
           meta.className = "meta";
           const metaParts = [];
-          if (r.height_in) metaParts.push(`H ${r.height_in}`);
+          if (r.height_in) {
+            const feet = Math.floor(r.height_in / 12);
+            const inches = Math.round(r.height_in % 12);
+            metaParts.push(`H ${feet}'${inches}"`);
+          }
           if (r.weight_lb) metaParts.push(`W ${r.weight_lb}`);
           if (r.size_ordered_raw) metaParts.push(`Size ${r.size_ordered_raw}`);
           if (r.color_ordered_raw)
