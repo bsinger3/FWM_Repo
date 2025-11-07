@@ -207,6 +207,43 @@
         }
       });
 
+      // Load random results on initial page load
+      async function loadRandomResults() {
+        isLoading = true;
+        out.textContent = "Loading...";
+
+        console.log("Loading random results...");
+
+        const { data, error } = await sb
+          .from("images_public")
+          .select(
+            "id, original_url, product_page_url, monetized_product_url, brand, source_site, height_in, weight_lb, size_ordered_raw, color_ordered_raw"
+          )
+          .not("original_url", "is", null)
+          .limit(24);
+
+        console.log("Random results data:", data);
+        console.log("Random results error:", error);
+
+        if (error) {
+          out.textContent = "Error loading images: " + error.message;
+          console.error("Error:", error);
+          isLoading = false;
+          return;
+        }
+
+        if (data && data.length > 0) {
+          render(data);
+        } else {
+          out.textContent = "No images available";
+        }
+
+        isLoading = false;
+      }
+
+      // Load random results when page loads
+      loadRandomResults();
+
       // Infinite scroll
       mainContent.addEventListener("scroll", async () => {
         if (isLoading || !hasMore || !currentSearchParams) return;
