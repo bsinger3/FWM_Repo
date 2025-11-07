@@ -49,9 +49,16 @@
         cursor: pointer;
         z-index: 100;
         transition: left 0.3s ease;
+        font-size: 18px;
+        line-height: 1;
+        opacity: 1;
+        color: #333;
       }
       .toggle-btn.collapsed {
         left: 20px;
+      }
+      .toggle-btn:hover {
+        background: #f0f0f0;
       }
       .main-content {
         margin-left: 280px;
@@ -130,7 +137,7 @@
     </style>
   </head>
   <body>
-    <button class="toggle-btn" id="toggle">☰</button>
+    <button class="toggle-btn" id="toggle">←</button>
 
     <div class="sidebar" id="sidebar">
       <h1>Find similar measurements</h1>
@@ -191,6 +198,13 @@
         sidebar.classList.toggle("collapsed");
         toggleBtn.classList.toggle("collapsed");
         mainContent.classList.toggle("expanded");
+
+        // Update button icon
+        if (sidebar.classList.contains("collapsed")) {
+          toggleBtn.textContent = "🔍";
+        } else {
+          toggleBtn.textContent = "←";
+        }
       });
 
       // Infinite scroll
