@@ -40,8 +40,8 @@
       }
       .toggle-btn {
         position: fixed;
-        left: 280px;
-        top: 20px;
+        left: 220px;
+        top: 7px;
         background: #fff;
         border: 1px solid #ddd;
         border-radius: 4px;
@@ -51,13 +51,16 @@
         transition: left 0.3s ease;
       }
       .toggle-btn.collapsed {
-        left: 0;
+        left: 20px;
       }
       .main-content {
         margin-left: 280px;
         padding: 20px;
         flex: 1;
         transition: margin-left 0.3s ease;
+        height: 100vh;
+        overflow-y: auto;
+        box-sizing: border-box;
       }
       .main-content.expanded {
         margin-left: 0;
@@ -178,6 +181,11 @@
       const toggleBtn = document.getElementById("toggle");
       const mainContent = document.getElementById("main");
 
+      let currentSearchParams = null;
+      let currentOffset = 0;
+      let isLoading = false;
+      let hasMore = true;
+
       // Toggle sidebar
       toggleBtn.addEventListener("click", () => {
         sidebar.classList.toggle("collapsed");
@@ -185,28 +193,71 @@
         mainContent.classList.toggle("expanded");
       });
 
+      // Infinite scroll
+      mainContent.addEventListener("scroll", async () => {
+        if (isLoading || !hasMore || !currentSearchParams) return;
+
+        const scrollTop = mainContent.scrollTop;
+        const scrollHeight = mainContent.scrollHeight;
+        const clientHeight = mainContent.clientHeight;
+
+        // Load more when user is 500px from bottom
+        if (scrollTop + clientHeight >= scrollHeight - 500) {
+          await loadMore();
+        }
+      });
+
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
-        out.textContent = "Loading...";
 
         // Calculate total height in inches from feet and inches
         const feetVal = num(document.getElementById("h-ft").value);
         const inchesVal = num(document.getElementById("h-in").value);
         const totalHeightInches = (feetVal || 0) * 12 + (inchesVal || 0);
 
-        const body = {
+        currentSearchParams = {
           in_height: totalHeightInches > 0 ? totalHeightInches : null,
           in_weight: num(document.getElementById("w").value),
           in_bust: num(document.getElementById("b").value),
           in_waist: num(document.getElementById("t").value),
           in_hips: num(document.getElementById("p").value),
+        };
+
+        // Reset for new search
+        currentOffset = 0;
+        hasMore = true;
+        out.innerHTML = "";
+
+        await loadMore();
+      });
+
+      async function loadMore() {
+        if (isLoading || !hasMore) return;
+
+        isLoading = true;
+
+        // Show loading indicator
+        const loadingDiv = document.createElement("div");
+        loadingDiv.textContent = "Loading...";
+        loadingDiv.style.gridColumn = "1 / -1";
+        loadingDiv.style.textAlign = "center";
+        loadingDiv.style.padding = "20px";
+        loadingDiv.id = "loading-indicator";
+        out.appendChild(loadingDiv);
+
+        const body = {
+          ...currentSearchParams,
           limit_n: 24,
-          offset_n: 0,
+          offset_n: currentOffset,
         };
 
         console.log("Request body:", body);
 
         const { data, error } = await sb.rpc("match_by_measurements", body);
+
+        // Remove loading indicator
+        const indicator = document.getElementById("loading-indicator");
+        if (indicator) indicator.remove();
 
         console.log("Response data:", data);
         console.log("Response error:", error);
@@ -214,15 +265,34 @@
         if (error) {
           out.textContent = "Error: " + error.message;
           console.error("API Error:", error);
+          isLoading = false;
           return;
         }
-        render(data);
-      });
 
-      function render(rows) {
-        out.innerHTML = "";
+        if (!data || data.length === 0) {
+          hasMore = false;
+          if (currentOffset === 0) {
+            out.textContent = "No matches";
+          }
+        } else {
+          render(data, true); // true = append mode
+          currentOffset += data.length;
+          if (data.length < 24) {
+            hasMore = false;
+          }
+        }
+
+        isLoading = false;
+      }
+
+      function render(rows, append = false) {
+        if (!append) {
+          out.innerHTML = "";
+        }
         if (!rows || rows.length === 0) {
-          out.textContent = "No matches";
+          if (!append) {
+            out.textContent = "No matches";
+          }
           return;
         }
         for (const r of rows) {
@@ -249,12 +319,11 @@
           if (r.height_in) {
             const feet = Math.floor(r.height_in / 12);
             const inches = Math.round(r.height_in % 12);
-            metaParts.push(`H ${feet}'${inches}"`);
+            metaParts.push(`${feet}'${inches}"`);
           }
-          if (r.weight_lb) metaParts.push(`W ${r.weight_lb}`);
-          if (r.size_ordered_raw) metaParts.push(`Size ${r.size_ordered_raw}`);
-          if (r.color_ordered_raw)
-            metaParts.push(`Color ${r.color_ordered_raw}`);
+          if (r.weight_lb) metaParts.push(`${r.weight_lb} lb`);
+          if (r.size_ordered_raw) metaParts.push(r.size_ordered_raw);
+          if (r.color_ordered_raw) metaParts.push(r.color_ordered_raw);
           meta.textContent = metaParts.join("  ·  ");
 
           a.appendChild(img);
