@@ -160,16 +160,13 @@
 
           const meta = document.createElement("div");
           meta.className = "meta";
-          meta.textContent = [
-            r.brand,
-            r.source_site,
-            `H ${r.height_in ?? "?"}`,
-            `W ${r.weight_lb ?? "?"}`,
-            `Size ${r.size_ordered_raw || "?"}`,
-            `Color ${r.color_ordered_raw || "?"}`,
-          ]
-            .filter(Boolean)
-            .join("  ·  ");
+          const metaParts = [];
+          if (r.height_in) metaParts.push(`H ${r.height_in}`);
+          if (r.weight_lb) metaParts.push(`W ${r.weight_lb}`);
+          if (r.size_ordered_raw) metaParts.push(`Size ${r.size_ordered_raw}`);
+          if (r.color_ordered_raw)
+            metaParts.push(`Color ${r.color_ordered_raw}`);
+          meta.textContent = metaParts.join("  ·  ");
 
           a.appendChild(img);
           a.appendChild(meta);
