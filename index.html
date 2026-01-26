@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>
@@ -8,7 +8,6 @@
       name="description"
       content="Search real product photos by height and weight to find looks from people built like you."
     />
-    <link rel="icon" href="/favicon.ico" />
 
     <meta charset="utf-8" />
     <title>Friends With Measurements</title>
@@ -162,10 +161,6 @@
           <input id="b" type="number" min="20" max="60" step="0.5" />
         </label>
         <label>
-          Waist in
-          <input id="t" type="number" min="18" max="60" step="0.5" />
-        </label>
-        <label>
           Hips in
           <input id="p" type="number" min="20" max="70" step="0.5" />
         </label>
@@ -215,11 +210,12 @@
         console.log("Loading random results...");
 
         const { data, error } = await sb
-          .from("images_public")
+          .from("images")
           .select(
-            "id, original_url, product_page_url, monetized_product_url, brand, source_site, height_in, weight_lb, size_ordered_raw, color_ordered_raw"
+            "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_ordered_raw_display, color_ordered_raw_display",
           )
-          .not("original_url", "is", null)
+
+          .not("original_url_display", "is", null)
           .limit(24);
 
         console.log("Random results data:", data);
@@ -270,7 +266,6 @@
           in_height: totalHeightInches > 0 ? totalHeightInches : null,
           in_weight: num(document.getElementById("w").value),
           in_bust: num(document.getElementById("b").value),
-          in_waist: num(document.getElementById("t").value),
           in_hips: num(document.getElementById("p").value),
         };
 
@@ -350,31 +345,46 @@
           const a = document.createElement("a");
           a.className = "card";
           a.href =
-            r.monetized_product_url || r.product_page_url || r.original_url;
+            r.monetized_product_url_display ||
+            r.product_page_url_display ||
+            r.original_url_display;
+
           a.target = "_blank";
 
           const img = document.createElement("img");
           img.loading = "lazy";
           img.referrerPolicy = "no-referrer";
-          const src = window.IMAGE_PROXY
-            ? window.IMAGE_PROXY + encodeURIComponent(r.original_url)
-            : r.original_url;
-          img.src = src;
+
+          const proxied = window.IMAGE_PROXY
+            ? window.IMAGE_PROXY + encodeURIComponent(r.original_url_display)
+            : null;
+
+          img.src = proxied || r.original_url_display;
+
           img.onerror = () => {
+            if (proxied && img.src === proxied && r.original_url_display) {
+              img.src = r.original_url_display;
+              return;
+            }
             img.style.display = "none";
           };
 
           const meta = document.createElement("div");
           meta.className = "meta";
           const metaParts = [];
-          if (r.height_in) {
-            const feet = Math.floor(r.height_in / 12);
-            const inches = Math.round(r.height_in % 12);
+          if (r.height_in_display) {
+            const h = Number(r.height_in_display);
+            const feet = Math.floor(h / 12);
+            const inches = Math.round(h % 12);
             metaParts.push(`${feet}'${inches}"`);
           }
-          if (r.weight_lb) metaParts.push(`${r.weight_lb} lb`);
-          if (r.size_ordered_raw) metaParts.push(r.size_ordered_raw);
-          if (r.color_ordered_raw) metaParts.push(r.color_ordered_raw);
+          if (r.weight_display_display)
+            metaParts.push(r.weight_display_display);
+          if (r.size_ordered_raw_display)
+            metaParts.push(r.size_ordered_raw_display);
+          if (r.color_ordered_raw_display)
+            metaParts.push(r.color_ordered_raw_display);
+
           meta.textContent = metaParts.join("  ·  ");
 
           a.appendChild(img);
