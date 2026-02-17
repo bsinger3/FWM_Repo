@@ -171,6 +171,12 @@
           Hips in
           <input id="p" type="number" min="20" max="70" step="0.5" />
         </label>
+        <label>
+          Clothing Type
+          <select id="clothing-type">
+            <option value="">All Types</option>
+          </select>
+        </label>
         <button type="submit">Search</button>
       </form>
 
@@ -200,6 +206,26 @@
       let currentOffset = 0;
       let isLoading = false;
       let hasMore = true;
+
+      // Load clothing types
+      async function loadClothingTypes() {
+        const { data, error } = await sb
+          .from("clothing_types")
+          .select("id, label, sort_order")
+          .order("sort_order", { ascending: true });
+
+        if (!error && data) {
+          const select = document.getElementById("clothing-type");
+          data.forEach((ct) => {
+            const option = document.createElement("option");
+            option.value = ct.id;
+            option.textContent = ct.label;
+            select.appendChild(option);
+          });
+        }
+      }
+
+      loadClothingTypes();
 
       // Toggle sidebar
       toggleBtn.addEventListener("click", () => {
@@ -281,6 +307,11 @@
           in_bust: num(document.getElementById("b").value),
           in_hips: num(document.getElementById("p").value),
         };
+
+        const clothingTypeId = document.getElementById("clothing-type").value;
+        if (clothingTypeId) {
+          currentSearchParams.in_clothing_type_id = clothingTypeId;
+        }
 
         // Reset for new search
         currentOffset = 0;
