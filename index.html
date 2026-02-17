@@ -251,10 +251,14 @@
         const { data, error } = await sb
           .from("images")
           .select(
-            "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_ordered_raw_display, color_ordered_raw_display",
+            "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_ordered_raw_display, color_ordered_raw_display, bust_in_display",
           )
-
           .not("original_url_display", "is", null)
+          .not("size_ordered_raw_display", "is", null)
+          .neq("size_ordered_raw_display", "")
+          .or(
+            "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_display.not.is.null",
+          )
           .limit(24);
 
         console.log("Random results data:", data);
