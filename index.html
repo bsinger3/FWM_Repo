@@ -217,6 +217,17 @@
       }
 
       const FWM_ANON_ID = getOrCreateAnonId();
+      function getOrCreateSessionId() {
+        let id = sessionStorage.getItem("fwm_session_id");
+        if (!id) {
+          id = crypto.randomUUID();
+          sessionStorage.setItem("fwm_session_id", id);
+        }
+        return id;
+      }
+
+      const FWM_SESSION_ID = getOrCreateSessionId();
+
       const f = document.getElementById("f");
       const out = document.getElementById("out");
       const sidebar = document.getElementById("sidebar");
