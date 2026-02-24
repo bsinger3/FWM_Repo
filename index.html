@@ -383,7 +383,7 @@
         };
         const utm = parseUtmFromStorage();
 
-        await sb.from("search_events").insert({
+        const { error } = await sb.from("search_events").insert({
           anon_id: FWM_ANON_ID,
           session_id: FWM_SESSION_ID,
 
@@ -406,6 +406,9 @@
           results_count: null,
           latency_ms: null,
         });
+
+        if (error) console.error("search_events insert error", error);
+
         const clothingTypeId = document.getElementById("clothing-type").value;
         if (clothingTypeId) {
           currentSearchParams.in_clothing_type_id = clothingTypeId;
