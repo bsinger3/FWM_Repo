@@ -1,7 +1,18 @@
 <!doctype html>
 <html>
   <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-98WRHGEPZG"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-98WRHGEPZG'); </script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-98WRHGEPZG"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-98WRHGEPZG");
+    </script>
     <title>
       FriendsWithMeasurements • Find looks that match your measurements
     </title>
@@ -196,7 +207,16 @@
     <script type="module">
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
       const sb = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+      function getOrCreateAnonId() {
+        let id = localStorage.getItem("fwm_anon_id");
+        if (!id) {
+          id = crypto.randomUUID();
+          localStorage.setItem("fwm_anon_id", id);
+        }
+        return id;
+      }
 
+      const FWM_ANON_ID = getOrCreateAnonId();
       const f = document.getElementById("f");
       const out = document.getElementById("out");
       const sidebar = document.getElementById("sidebar");
