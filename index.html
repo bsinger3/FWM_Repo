@@ -228,6 +228,36 @@
 
       const FWM_SESSION_ID = getOrCreateSessionId();
 
+      function getUtmParams() {
+        const p = new URLSearchParams(window.location.search);
+        const utm = {
+          utm_source: p.get("utm_source"),
+          utm_medium: p.get("utm_medium"),
+          utm_campaign: p.get("utm_campaign"),
+          utm_content: p.get("utm_content"),
+        };
+
+        // If no UTMs in the current URL, try the last saved ones
+        if (!utm.utm_source && sessionStorage.getItem("fwm_utm_source")) {
+          return {
+            utm_source: sessionStorage.getItem("fwm_utm_source"),
+            utm_medium: sessionStorage.getItem("fwm_utm_medium"),
+            utm_campaign: sessionStorage.getItem("fwm_utm_campaign"),
+            utm_content: sessionStorage.getItem("fwm_utm_content"),
+          };
+        }
+
+        // Save UTMs for the rest of this tab session
+        sessionStorage.setItem("fwm_utm_source", utm.utm_source || "");
+        sessionStorage.setItem("fwm_utm_medium", utm.utm_medium || "");
+        sessionStorage.setItem("fwm_utm_campaign", utm.utm_campaign || "");
+        sessionStorage.setItem("fwm_utm_content", utm.utm_content || "");
+
+        return utm;
+      }
+
+      const FWM_UTM = getUtmParams();
+
       const f = document.getElementById("f");
       const out = document.getElementById("out");
       const sidebar = document.getElementById("sidebar");
