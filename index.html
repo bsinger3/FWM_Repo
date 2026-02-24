@@ -476,10 +476,14 @@
             payload,
           });
 
-          const { error: updErr } = await sb
-            .from("search_events")
-            .update(payload)
-            .eq("id", currentSearchEventId);
+          const { error: updErr } = await sb.rpc(
+            "update_search_event_metrics",
+            {
+              p_id: currentSearchEventId,
+              p_results_count: payload.results_count,
+              p_latency_ms: payload.latency_ms,
+            },
+          );
 
           if (updErr) console.error("search_events update error", updErr);
         }
