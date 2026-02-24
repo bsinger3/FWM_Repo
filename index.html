@@ -466,17 +466,22 @@
         if (currentSearchEventId) {
           const resultsCount = Array.isArray(data) ? data.length : 0;
 
+          const payload = {
+            results_count: resultsCount,
+            latency_ms: latencyMs,
+          };
+
+          console.log("UPDATING SEARCH EVENT", {
+            currentSearchEventId,
+            payload,
+          });
+
           const { error: updErr } = await sb
             .from("search_events")
-            .update({ results_count: resultsCount, latency_ms: latencyMs })
+            .update(payload)
             .eq("id", currentSearchEventId);
 
           if (updErr) console.error("search_events update error", updErr);
-          console.log("UPDATING SEARCH EVENT", {
-            currentSearchEventId,
-            latencyMs,
-            resultsCount,
-          });
         }
 
         if (error) {
