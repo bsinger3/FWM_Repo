@@ -385,37 +385,36 @@
         };
         const utm = parseUtmFromStorage();
 
-        const { data: inserted, error } = await sb
-          .from("search_events")
-          .insert({
-            anon_id: FWM_ANON_ID,
-            session_id: FWM_SESSION_ID,
+        const searchEventId = crypto.randomUUID();
+        currentSearchEventId = searchEventId;
 
-            page_url: window.location.href,
-            referrer: document.referrer || null,
+        const { error } = await sb.from("search_events").insert({
+          id: searchEventId,
 
-            utm_source: utm.utm_source,
-            utm_medium: utm.utm_medium,
-            utm_campaign: utm.utm_campaign,
-            utm_content: utm.utm_content,
+          anon_id: FWM_ANON_ID,
+          session_id: FWM_SESSION_ID,
 
-            feet: feetVal || null,
-            inches: inchesVal || null,
-            weight_lb: currentSearchParams.in_weight || null,
-            bust_in: currentSearchParams.in_bust || null,
-            hips_in: currentSearchParams.in_hips || null,
-            clothing_type:
-              document.getElementById("clothing-type")?.value || null,
+          page_url: window.location.href,
+          referrer: document.referrer || null,
 
-            results_count: null,
-            latency_ms: null,
-          })
-          .select("id");
+          utm_source: utm.utm_source,
+          utm_medium: utm.utm_medium,
+          utm_campaign: utm.utm_campaign,
+          utm_content: utm.utm_content,
 
-        if (inserted && inserted[0] && inserted[0].id)
-          currentSearchEventId = inserted[0].id;
-        console.log("search_events insert id", currentSearchEventId);
+          feet: feetVal || null,
+          inches: inchesVal || null,
+          weight_lb: currentSearchParams.in_weight || null,
+          bust_in: currentSearchParams.in_bust || null,
+          hips_in: currentSearchParams.in_hips || null,
+          clothing_type:
+            document.getElementById("clothing-type")?.value || null,
 
+          results_count: null,
+          latency_ms: null,
+        });
+
+        console.log("search_events id", currentSearchEventId);
         if (error) console.error("search_events insert error", error);
         console.log("AFTER INSERT", { currentSearchEventId });
 
