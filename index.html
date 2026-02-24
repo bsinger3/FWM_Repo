@@ -22,7 +22,6 @@
     />
 
     <meta charset="utf-8" />
-    <title>Friends With Measurements</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
       body {
@@ -454,8 +453,8 @@
         console.log("Request body:", body);
 
         const searchStart = performance.now();
-
         const { data, error } = await sb.rpc("match_by_measurements", body);
+        const latencyMs = Math.round(performance.now() - searchStart);
 
         // Remove loading indicator
         const indicator = document.getElementById("loading-indicator");
@@ -463,6 +462,17 @@
 
         console.log("Response data:", data);
         console.log("Response error:", error);
+
+        if (currentSearchEventId) {
+          const resultsCount = Array.isArray(data) ? data.length : 0;
+
+          const { error: updErr } = await sb
+            .from("search_events")
+            .update({ results_count: resultsCount, latency_ms: latencyMs })
+            .eq("id", currentSearchEventId);
+
+          if (updErr) console.error("search_events update error", updErr);
+        }
 
         if (error) {
           out.textContent = "Error: " + error.message;
