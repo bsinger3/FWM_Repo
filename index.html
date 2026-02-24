@@ -359,6 +359,14 @@
         }
       });
 
+      function parseUtmFromStorage() {
+        return {
+          utm_source: sessionStorage.getItem("fwm_utm_source") || null,
+          utm_medium: sessionStorage.getItem("fwm_utm_medium") || null,
+          utm_campaign: sessionStorage.getItem("fwm_utm_campaign") || null,
+          utm_content: sessionStorage.getItem("fwm_utm_content") || null,
+        };
+      }
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -373,7 +381,31 @@
           in_bust: num(document.getElementById("b").value),
           in_hips: num(document.getElementById("p").value),
         };
+        const utm = parseUtmFromStorage();
 
+        await sb.from("search_events").insert({
+          anon_id: FWM_ANON_ID,
+          session_id: FWM_SESSION_ID,
+
+          page_url: window.location.href,
+          referrer: document.referrer || null,
+
+          utm_source: utm.utm_source,
+          utm_medium: utm.utm_medium,
+          utm_campaign: utm.utm_campaign,
+          utm_content: utm.utm_content,
+
+          feet: feetVal || null,
+          inches: inchesVal || null,
+          weight_lb: currentSearchParams.in_weight || null,
+          bust_in: currentSearchParams.in_bust || null,
+          hips_in: currentSearchParams.in_hips || null,
+          clothing_type:
+            document.getElementById("clothing-type")?.value || null,
+
+          results_count: null,
+          latency_ms: null,
+        });
         const clothingTypeId = document.getElementById("clothing-type").value;
         if (clothingTypeId) {
           currentSearchParams.in_clothing_type_id = clothingTypeId;
