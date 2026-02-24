@@ -471,11 +471,10 @@
             latency_ms: latencyMs,
           };
 
-          console.log("UPDATING SEARCH EVENT", {
+          console.log("CALLING update_search_event_metrics", {
             currentSearchEventId,
             payload,
           });
-
           const { error: updErr } = await sb.rpc(
             "update_search_event_metrics",
             {
