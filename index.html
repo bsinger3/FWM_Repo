@@ -472,6 +472,11 @@
             .eq("id", currentSearchEventId);
 
           if (updErr) console.error("search_events update error", updErr);
+          console.log("UPDATING SEARCH EVENT", {
+            currentSearchEventId,
+            latencyMs,
+            resultsCount,
+          });
         }
 
         if (error) {
