@@ -370,6 +370,7 @@
       }
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
+        console.log("SUBMIT HANDLER FIRED");
 
         // Calculate total height in inches from feet and inches
         const feetVal = num(document.getElementById("h-ft").value);
@@ -416,6 +417,7 @@
         console.log("search_events insert id", currentSearchEventId);
 
         if (error) console.error("search_events insert error", error);
+        console.log("AFTER INSERT", { currentSearchEventId });
 
         const clothingTypeId = document.getElementById("clothing-type").value;
         if (clothingTypeId) {
