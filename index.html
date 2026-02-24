@@ -444,6 +444,8 @@
 
         console.log("Request body:", body);
 
+        const searchStart = performance.now();
+
         const { data, error } = await sb.rpc("match_by_measurements", body);
 
         // Remove loading indicator
