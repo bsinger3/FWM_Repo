@@ -120,6 +120,13 @@
         text-decoration: none;
         color: #111;
         background: #fff;
+        cursor: pointer;
+        position: relative;
+        transition: transform 0.2s;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
       .card img {
         width: 100%;
@@ -128,10 +135,64 @@
         background: #f3f3f3;
       }
       .meta {
-        padding: 8px;
-        font-size: 12px;
-        color: #333;
+        padding: 8px 12px;
+        font-size: 11px;
+        color: #666;
         line-height: 1.4;
+        border-top: 1px solid #eee;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .meta-primary {
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+      .meta-grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 4px 8px;
+        font-size: 11px;
+        color: #666;
+      }
+      .meta-label {
+        font-weight: 500;
+        color: #888;
+      }
+      .expanded-details {
+        display: none;
+        padding: 12px;
+        background: #f9f9f9;
+        border-top: 1px solid #ddd;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .expanded-details dl {
+        margin: 0;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 8px 12px;
+      }
+      .expanded-details dt {
+        font-weight: 600;
+        color: #666;
+      }
+      .expanded-details dd {
+        margin: 0;
+      }
+      .product-link {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 6px 12px;
+        background: #111;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .product-link:hover {
+        background: #333;
       }
     </style>
   </head>
@@ -251,13 +312,14 @@
         const { data, error } = await sb
           .from("images")
           .select(
-            "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_ordered_raw_display, color_ordered_raw_display, bust_in_display",
+            "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_display, color_display, bust_in_number_display, cupsize_display, waist_in, hips_in_display, inseam_inches_display, age_years_display",
           )
           .not("original_url_display", "is", null)
-          .not("size_ordered_raw_display", "is", null)
-          .neq("size_ordered_raw_display", "")
+          .not("size_display", "is", null)
+          .neq("size_display", "")
+          .neq("size_display", "unknown")
           .or(
-            "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_display.not.is.null",
+            "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_number_display.not.is.null",
           )
           .limit(24);
 
@@ -369,8 +431,28 @@
             out.textContent = "No matches";
           }
         } else {
-          render(data, true); // true = append mode
-          currentOffset += data.length;
+          // Filter out records with unknown/missing size before rendering
+          const filtered = data.filter((r) => {
+            const hasSize =
+              r.size_display &&
+              r.size_display.toLowerCase() !== "unknown" &&
+              r.size_display !== "";
+            const hasImage = r.original_url_display;
+            const hasBodyMeasurement =
+              r.height_in_display ||
+              r.weight_display_display ||
+              r.bust_in_number_display ||
+              r.waist_in;
+            const hasLink =
+              r.monetized_product_url_display || r.product_page_url_display;
+            return hasSize && hasImage && hasBodyMeasurement && hasLink;
+          });
+
+          if (filtered.length > 0) {
+            render(filtered, true); // true = append mode
+            currentOffset += data.length;
+          }
+
           if (data.length < 24) {
             hasMore = false;
           }
@@ -380,6 +462,10 @@
       }
 
       function render(rows, append = false) {
+        console.log("=== RENDER FUNCTION CALLED ===");
+        console.log("Rows received:", rows ? rows.length : 0);
+        console.log("Append mode:", append);
+
         if (!append) {
           out.innerHTML = "";
         }
@@ -389,14 +475,47 @@
           }
           return;
         }
+
+        let displayed = 0;
+        let skipped = 0;
+
         for (const r of rows) {
+          const hasSize =
+            r.size_display &&
+            r.size_display.toLowerCase() !== "unknown" &&
+            r.size_display !== "";
+          const hasImage = r.original_url_display;
+          const hasBodyMeasurement =
+            r.height_in_display ||
+            r.weight_display_display ||
+            r.bust_in_number_display ||
+            r.waist_in;
+          const hasLink =
+            r.monetized_product_url_display || r.product_page_url_display;
+
+          if (!hasSize || !hasImage || !hasBodyMeasurement || !hasLink) {
+            skipped++;
+            console.log(`Skip #${skipped}:`, {
+              hasSize,
+              hasImage,
+              hasBodyMeasurement,
+              hasLink,
+              size: r.size_display,
+              image: r.original_url_display ? "yes" : "no",
+              link:
+                r.monetized_product_url_display || r.product_page_url_display
+                  ? "yes"
+                  : "no",
+            });
+            continue;
+          }
+
+          displayed++;
+
           const a = document.createElement("a");
           a.className = "card";
           a.href =
-            r.monetized_product_url_display ||
-            r.product_page_url_display ||
-            r.original_url_display;
-
+            r.monetized_product_url_display || r.product_page_url_display;
           a.target = "_blank";
 
           const img = document.createElement("img");
@@ -420,25 +539,52 @@
           const meta = document.createElement("div");
           meta.className = "meta";
           const metaParts = [];
+
+          // Normalize size display
+          let sizeText = r.size_display;
+          if (sizeText) {
+            // Remove "Size Purchased: " or "Size: " prefix if present
+            sizeText = sizeText.replace(/^Size Purchased:\s*/i, "");
+            sizeText = sizeText.replace(/^Size:\s*/i, "");
+            // Add consistent "Size: " prefix
+            sizeText = "Size: " + sizeText;
+          }
+          metaParts.push(sizeText);
+
           if (r.height_in_display) {
             const h = Number(r.height_in_display);
             const feet = Math.floor(h / 12);
             const inches = Math.round(h % 12);
             metaParts.push(`${feet}'${inches}"`);
           }
-          if (r.weight_display_display)
+          if (
+            r.weight_display_display &&
+            r.weight_display_display.toLowerCase() !== "unknown"
+          )
             metaParts.push(r.weight_display_display);
-          if (r.size_ordered_raw_display)
-            metaParts.push(r.size_ordered_raw_display);
-          if (r.color_ordered_raw_display)
-            metaParts.push(r.color_ordered_raw_display);
+          if (
+            r.bust_in_number_display &&
+            r.bust_in_number_display.toString().toLowerCase() !== "unknown"
+          )
+            metaParts.push(`B${r.bust_in_number_display}"`);
+          if (
+            r.hips_in_display &&
+            r.hips_in_display.toString().toLowerCase() !== "unknown"
+          )
+            metaParts.push(`H${r.hips_in_display}"`);
+          if (r.waist_in && r.waist_in.toString().toLowerCase() !== "unknown")
+            metaParts.push(`W${r.waist_in}"`);
+          if (r.color_display && r.color_display.toLowerCase() !== "unknown")
+            metaParts.push(r.color_display);
 
-          meta.textContent = metaParts.join("  ·  ");
+          meta.textContent = metaParts.join(" • ");
 
           a.appendChild(img);
           a.appendChild(meta);
           out.appendChild(a);
         }
+
+        console.log(`RESULT: Displayed ${displayed} cards, skipped ${skipped}`);
       }
 
       function num(v) {
