@@ -699,11 +699,22 @@
             r.weight_display_display.toLowerCase() !== "unknown"
           )
             metaParts.push(r.weight_display_display);
+
+          // Format bra size as 32DD if both bust and cup size are available
           if (
             r.bust_in_number_display &&
+            r.cupsize_display &&
+            r.bust_in_number_display.toString().toLowerCase() !== "unknown" &&
+            r.cupsize_display.toLowerCase() !== "unknown"
+          ) {
+            metaParts.push(`${r.bust_in_number_display}${r.cupsize_display}`);
+          } else if (
+            r.bust_in_number_display &&
             r.bust_in_number_display.toString().toLowerCase() !== "unknown"
-          )
+          ) {
             metaParts.push(`B${r.bust_in_number_display}"`);
+          }
+
           if (
             r.hips_in_display &&
             r.hips_in_display.toString().toLowerCase() !== "unknown"
