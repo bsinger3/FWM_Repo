@@ -433,6 +433,12 @@
         e.preventDefault();
         console.log("SUBMIT HANDLER FIRED");
 
+        // Collapse sidebar on search
+        sidebar.classList.add("collapsed");
+        toggleBtn.classList.add("collapsed");
+        mainContent.classList.add("expanded");
+        toggleBtn.textContent = "🔍";
+
         // Calculate total height in inches from feet and inches
         const feetVal = num(document.getElementById("h-ft").value);
         const inchesVal = num(document.getElementById("h-in").value);
