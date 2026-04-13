@@ -278,6 +278,7 @@
 
     <script src="./config.js"></script>
     <script type="module">
+        /// <reference path="./database.types.ts" />
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
       const sb = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
       function getOrCreateAnonId() {
