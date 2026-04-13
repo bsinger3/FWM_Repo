@@ -119,6 +119,18 @@
       button:hover {
         background: #333;
       }
+      .result-count {
+        padding: 16px 20px;
+        font-size: 14px;
+        color: #666;
+        border-bottom: 1px solid #eee;
+        background: #fafafa;
+        margin-bottom: 16px;
+      }
+      .result-count strong {
+        color: #333;
+        font-weight: 600;
+      }
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -260,6 +272,7 @@
     </div>
 
     <div class="main-content" id="main">
+      <div id="result-count-container"></div>
       <div id="out" class="grid"></div>
     </div>
 
@@ -323,12 +336,31 @@
       const sidebar = document.getElementById("sidebar");
       const toggleBtn = document.getElementById("toggle");
       const mainContent = document.getElementById("main");
+      const resultCountContainer = document.getElementById("result-count-container");
 
       let currentSearchParams = null;
       let currentSearchEventId = null;
       let currentOffset = 0;
       let isLoading = false;
       let hasMore = true;
+      let totalResultCount = 0;
+
+      // Update result count display
+      function updateResultCount(count, hasMoreResults) {
+        if (count === null || count === undefined) {
+          resultCountContainer.innerHTML = "";
+          return;
+        }
+
+        if (count === 0) {
+          resultCountContainer.innerHTML = `<div class="result-count">Found <strong>0 results</strong></div>`;
+          return;
+        }
+
+        const countText = count === 1 ? "1 result" : `${count.toLocaleString()} results`;
+        const moreText = hasMoreResults ? "+" : "";
+        resultCountContainer.innerHTML = `<div class="result-count">Found <strong>${countText}${moreText}</strong></div>`;
+      }
 
       // Load clothing types
       async function loadClothingTypes() {
@@ -368,6 +400,7 @@
       async function loadRandomResults() {
         isLoading = true;
         out.textContent = "Loading...";
+        updateResultCount(null); // Hide result count for random results
 
         console.log("Loading random results...");
 
@@ -493,7 +526,9 @@
         // Reset for new search
         currentOffset = 0;
         hasMore = true;
+        totalResultCount = 0;
         out.innerHTML = "";
+        updateResultCount(null); // Clear count while loading
 
         await loadMore();
       });
@@ -566,6 +601,7 @@
           hasMore = false;
           if (currentOffset === 0) {
             out.textContent = "No matches";
+            updateResultCount(0, false);
           }
         } else {
           // Filter out records with unknown/missing size before rendering
@@ -588,11 +624,18 @@
           if (filtered.length > 0) {
             render(filtered, true); // true = append mode
             currentOffset += data.length;
+
+            // Update the total count based on cards currently displayed
+            const displayedCards = out.querySelectorAll('.card').length;
+            totalResultCount = displayedCards;
           }
 
           if (data.length < 24) {
             hasMore = false;
           }
+
+          // Update result count display
+          updateResultCount(totalResultCount, hasMore);
         }
 
         isLoading = false;
