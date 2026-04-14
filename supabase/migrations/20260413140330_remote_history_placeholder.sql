@@ -1,0 +1,3 @@
+-- Placeholder migration to reconcile local history with the linked remote
+-- Supabase project. The remote project already has migration version
+-- 20260413140330 applied, but the SQL body was not present in this repo.

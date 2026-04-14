@@ -87,14 +87,40 @@
         flex-direction: column;
         gap: 12px;
       }
+      .intro-copy {
+        font-size: 13px;
+        color: #666;
+        margin: 0 0 20px;
+        line-height: 1.5;
+      }
+      .helper-copy {
+        font-size: 12px;
+        color: #666;
+        margin: -4px 0 4px;
+        line-height: 1.5;
+      }
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 12px;
+        border: 1px solid #e4e4e4;
+        border-radius: 8px;
+        background: #fff;
+      }
+      .field-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #111;
+      }
       .height-group {
         display: flex;
         gap: 8px;
       }
-      .height-group label {
+      .height-group .input-label {
         flex: 1;
       }
-      label {
+      .input-label {
         display: flex;
         flex-direction: column;
         font-size: 14px;
@@ -102,12 +128,27 @@
         margin-bottom: 4px;
       }
       input,
+      select,
       button {
         padding: 8px;
         font-size: 14px;
         border: 1px solid #ddd;
         border-radius: 4px;
         margin-top: 4px;
+      }
+      .require-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #555;
+        font-weight: 500;
+      }
+      .require-toggle input {
+        margin: 0;
+      }
+      .require-toggle.disabled {
+        color: #aaa;
       }
       button {
         background: #111;
@@ -121,6 +162,7 @@
       }
       .result-count {
         padding: 16px 20px;
+        padding-left: 68px;
         font-size: 14px;
         color: #666;
         border-bottom: 1px solid #eee;
@@ -224,39 +266,75 @@
 
     <div class="sidebar" id="sidebar">
       <h1>Friends With Measurements</h1>
-      <p
-        style="font-size: 13px; color: #666; margin: 0 0 20px; line-height: 1.5"
-      >
-        Search real product photos from people with your exact measurements.
-        Find clothing that actually fits by browsing looks from shoppers with
-        similar height, weight, bust, and hips.
+      <p class="intro-copy">
+        Enter the measurements you know, then choose which ones should be strict
+        requirements. Unchecked measurements help rank the closest results
+        without excluding near matches.
+      </p>
+      <p class="helper-copy">
+        Sorting by closeness happens in search, not only in the browser.
       </p>
 
       <form id="f">
-        <div class="height-group">
-          <label>
-            Feet
-            <input id="h-ft" type="number" min="4" max="7" step="1" />
-          </label>
-          <label>
-            Inches
-            <input id="h-in" type="number" min="0" max="11" step="1" />
+        <div class="field-group">
+          <div class="field-label">Height</div>
+          <div class="height-group">
+            <label class="input-label">
+              Feet
+              <input id="h-ft" type="number" min="4" max="7" step="1" />
+            </label>
+            <label class="input-label">
+              Inches
+              <input id="h-in" type="number" min="0" max="11" step="1" />
+            </label>
+          </div>
+          <label class="require-toggle" data-require-label="height">
+            <input id="require-height" type="checkbox" disabled />
+            <span>Require results to match this measurement</span>
           </label>
         </div>
-        <label>
-          Weight lb
-          <input id="w" type="number" min="70" max="400" step="1" />
-        </label>
-        <label>
-          Bust in
-          <input id="b" type="number" min="20" max="60" step="0.5" />
-        </label>
-        <label>
-          Hips in
-          <input id="p" type="number" min="20" max="70" step="0.5" />
-        </label>
-        <label>
-          Clothing Type
+        <div class="field-group">
+          <label class="input-label">
+            <span class="field-label">Weight lb</span>
+            <input id="w" type="number" min="70" max="400" step="1" />
+          </label>
+          <label class="require-toggle" data-require-label="weight">
+            <input id="require-weight" type="checkbox" disabled />
+            <span>Require results to match this measurement</span>
+          </label>
+        </div>
+        <div class="field-group">
+          <label class="input-label">
+            <span class="field-label">Bust in</span>
+            <input id="b" type="number" min="20" max="60" step="0.5" />
+          </label>
+          <label class="require-toggle" data-require-label="bust">
+            <input id="require-bust" type="checkbox" disabled />
+            <span>Require results to match this measurement</span>
+          </label>
+        </div>
+        <div class="field-group">
+          <label class="input-label">
+            <span class="field-label">Waist in</span>
+            <input id="waist" type="number" min="20" max="70" step="0.5" />
+          </label>
+          <label class="require-toggle" data-require-label="waist">
+            <input id="require-waist" type="checkbox" disabled />
+            <span>Require results to match this measurement</span>
+          </label>
+        </div>
+        <div class="field-group">
+          <label class="input-label">
+            <span class="field-label">Hips in</span>
+            <input id="p" type="number" min="20" max="70" step="0.5" />
+          </label>
+          <label class="require-toggle" data-require-label="hips">
+            <input id="require-hips" type="checkbox" disabled />
+            <span>Require results to match this measurement</span>
+          </label>
+        </div>
+        <label class="input-label">
+          <span class="field-label">Clothing Type</span>
           <select id="clothing-type">
             <option value="">All Types</option>
           </select>
@@ -338,6 +416,13 @@
       const toggleBtn = document.getElementById("toggle");
       const mainContent = document.getElementById("main");
       const resultCountContainer = document.getElementById("result-count-container");
+      const measurementFieldIds = {
+        height: ["h-ft", "h-in"],
+        weight: ["w"],
+        bust: ["b"],
+        waist: ["waist"],
+        hips: ["p"],
+      };
 
       let currentSearchParams = null;
       let currentSearchEventId = null;
@@ -383,6 +468,31 @@
 
       loadClothingTypes();
 
+      function syncRequireToggle(fieldName) {
+        const checkbox = document.getElementById(`require-${fieldName}`);
+        const wrapper = document.querySelector(
+          `[data-require-label="${fieldName}"]`,
+        );
+        const hasValue = measurementFieldIds[fieldName].some((id) => {
+          const input = document.getElementById(id);
+          return input && input.value !== "";
+        });
+
+        checkbox.disabled = !hasValue;
+        if (!hasValue) {
+          checkbox.checked = false;
+        }
+        wrapper.classList.toggle("disabled", !hasValue);
+      }
+
+      Object.keys(measurementFieldIds).forEach((fieldName) => {
+        measurementFieldIds[fieldName].forEach((id) => {
+          const input = document.getElementById(id);
+          input.addEventListener("input", () => syncRequireToggle(fieldName));
+        });
+        syncRequireToggle(fieldName);
+      });
+
       // Toggle sidebar
       toggleBtn.addEventListener("click", () => {
         sidebar.classList.toggle("collapsed");
@@ -415,7 +525,7 @@
           .neq("size_display", "")
           .neq("size_display", "unknown")
           .or(
-            "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_number_display.not.is.null",
+            "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_number_display.not.is.null,hips_in_display.not.is.null,waist_in.not.is.null",
           )
           .limit(24);
 
@@ -477,12 +587,29 @@
         const feetVal = num(document.getElementById("h-ft").value);
         const inchesVal = num(document.getElementById("h-in").value);
         const totalHeightInches = (feetVal || 0) * 12 + (inchesVal || 0);
+        const waistVal = num(document.getElementById("waist").value);
 
         currentSearchParams = {
           in_height: totalHeightInches > 0 ? totalHeightInches : null,
           in_weight: num(document.getElementById("w").value),
           in_bust: num(document.getElementById("b").value),
+          in_waist: waistVal,
           in_hips: num(document.getElementById("p").value),
+          require_height:
+            totalHeightInches > 0 &&
+            document.getElementById("require-height").checked,
+          require_weight:
+            document.getElementById("w").value !== "" &&
+            document.getElementById("require-weight").checked,
+          require_bust:
+            document.getElementById("b").value !== "" &&
+            document.getElementById("require-bust").checked,
+          require_waist:
+            document.getElementById("waist").value !== "" &&
+            document.getElementById("require-waist").checked,
+          require_hips:
+            document.getElementById("p").value !== "" &&
+            document.getElementById("require-hips").checked,
         };
         const utm = parseUtmFromStorage();
 
@@ -616,6 +743,7 @@
               r.height_in_display ||
               r.weight_display_display ||
               r.bust_in_number_display ||
+              r.hips_in_display ||
               r.waist_in;
             const hasLink =
               r.monetized_product_url_display || r.product_page_url_display;
@@ -670,6 +798,7 @@
             r.height_in_display ||
             r.weight_display_display ||
             r.bust_in_number_display ||
+            r.hips_in_display ||
             r.waist_in;
           const hasLink =
             r.monetized_product_url_display || r.product_page_url_display;

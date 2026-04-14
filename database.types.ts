@@ -699,22 +699,33 @@ export type Database = {
           in_clothing_type_id?: string
           in_height?: number
           in_hips?: number
+          in_waist?: number
           in_weight?: number
           limit_n?: number
           offset_n?: number
+          require_bust?: boolean
+          require_height?: boolean
+          require_hips?: boolean
+          require_waist?: boolean
+          require_weight?: boolean
         }
         Returns: {
-          brand: string
-          bust_in_number_display: number
-          color_display: string
-          height_in_display: number
+          age_years_display: number | null
+          brand: string | null
+          bust_in_number_display: number | null
+          color_display: string | null
+          cupsize_display: string | null
+          height_in_display: number | null
           id: string
-          monetized_product_url_display: string
-          original_url_display: string
-          product_page_url_display: string
+          inseam_inches_display: number | null
+          monetized_product_url_display: string | null
+          original_url_display: string | null
+          product_page_url_display: string | null
           size_display: string
-          source_site_display: string
-          weight_display_display: string
+          source_site_display: string | null
+          waist_in: string | null
+          weight_display_display: string | null
+          hips_in_display: number | null
         }[]
       }
       match_by_measurements_deprecated:
@@ -729,16 +740,16 @@ export type Database = {
               offset_n?: number
             }
             Returns: {
-              brand: string
-              color_ordered_raw: string
-              height_in: number
+              brand: string | null
+              color_ordered_raw: string | null
+              height_in: number | null
               id: string
-              monetized_product_url: string
-              original_url: string
-              product_page_url: string
-              size_ordered_raw: string
-              source_site: string
-              weight_lb: number
+              monetized_product_url: string | null
+              original_url: string | null
+              product_page_url: string | null
+              size_ordered_raw: string | null
+              source_site: string | null
+              weight_lb: number | null
             }[]
           }
         | {
@@ -755,19 +766,19 @@ export type Database = {
               size_raw?: string
             }
             Returns: {
-              brand: string
-              color_ordered_raw: string
-              created_at: string
-              height_in: number
+              brand: string | null
+              color_ordered_raw: string | null
+              created_at: string | null
+              height_in: number | null
               id: string
-              monetized_product_url: string
-              original_url: string
-              product_page_url: string
-              score: number
-              size_ordered_raw: string
-              source_site: string
-              weight_display: string
-              weight_lb: number
+              monetized_product_url: string | null
+              original_url: string | null
+              product_page_url: string | null
+              score: number | null
+              size_ordered_raw: string | null
+              source_site: string | null
+              weight_display: string | null
+              weight_lb: number | null
             }[]
           }
       parse_age_years: { Args: { t: string }; Returns: number }
