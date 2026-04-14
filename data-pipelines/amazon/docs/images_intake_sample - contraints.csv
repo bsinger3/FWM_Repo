@@ -1,0 +1,42 @@
+column_name,data_type_or_expected_format,constraints
+created_at_display,timestamptz,NOT NULL in public.images; auto-filled by database default now() in public.images; can be NULL in staging unless backfilled
+id,uuid,NOT NULL in public.images; must be a valid UUID; auto-generated in public.images; can be NULL in staging unless backfilled
+original_url_display,text,nullable; expected to be a URL
+product_page_url_display,text,nullable; expected to be a URL
+monetized_product_url_display,text,nullable; expected to be a URL
+height_raw,text,nullable
+weight_raw,text,nullable
+user_comment,text,nullable
+date_review_submitted_raw,text,nullable
+height_in_display,numeric,nullable; must be numeric if present
+review_date,text,nullable
+source_site_display,text,nullable
+status_code,text,nullable
+content_type,text,nullable
+bytes,text,nullable
+width,text,nullable
+height,text,nullable
+hash_md5,text,nullable
+fetched_at,text,nullable
+updated_at,text,nullable
+brand,text,nullable
+waist_raw_display,text,nullable
+hips_raw,text,nullable
+age_raw,text,nullable
+waist_in,numeric,nullable; must be numeric if present
+hips_in_display,numeric,nullable; must be numeric if present
+age_years_display,text,nullable
+search_fts,text,nullable
+weight_display_display,text,nullable
+weight_raw_needs_correction,text,nullable
+clothing_type_id,text,"nullable; if present must match public.clothing_types.id exactly; should be lowercase values like jeans, pants, dress, top"
+reviewer_profile_url,text,nullable; expected to be a URL
+reviewer_name_raw,text,nullable
+inseam_inches_display,numeric,nullable; must be numeric if present
+color_canonical,text,nullable
+color_display,text,nullable
+size_display,text,NOT NULL in public.images; should never be blank if row is inserted into public.images
+bust_in_number_display,numeric,nullable; must be numeric if present
+cupsize_display,text,nullable
+weight_lbs_display,text,nullable
+weight_lbs_raw_issue,text,nullable

@@ -1,0 +1,594 @@
+Amazon CSV normalization plan
+
+Purpose
+-------
+This folder is a data-prep workspace, not a traditional codebase. The goal is
+to prepare normalized output CSVs from the Amazon-named source sheets for
+database import into the images intake schema.
+
+The output should follow the column intent in:
+
+- images_intake_sample - contraints.csv
+- images_intake_sample - sampleOutput1.csv, as an example output shape
+
+For now, do not worry about these image metadata fields:
+
+- content_type
+- bytes
+- width
+- height
+- hash_md5
+
+Approval-batch review outputs
+-----------------------------
+The approval-batch review sheets are a separate downstream workflow from the
+normalized import CSVs.
+
+For approval-batch review sheets:
+
+- Keep the approval-batch source CSVs in approval_batches/images_to_approve as
+  the raw inputs.
+- Write generated review sheets to data/step_3_image_annotation/machine_annotated_outputs.
+- Before a full refresh, move outdated generated approval sheets into an
+  approval_batches/archive folder rather than overwriting them in place.
+- Any approval-sheet column that is not one of the columns in
+  images_intake_sample - sampleOutput1.csv must include REVIEWONLY in the
+  column name.
+- This REVIEWONLY rule applies to generated computer-vision columns such as
+  has_person_REVIEWONLY, lighting_ok_REVIEWONLY, and
+  full_lower_body_visible_REVIEWONLY, as well as extra helper columns like
+  color_canonical_REVIEWONLY, weight_lbs_raw_issue_REVIEWONLY, and
+  measurement_count_REVIEWONLY.
+
+
+Reference files
+---------------
+images_intake_sample - contraints.csv
+
+- Formal target schema reference.
+- Defines target column names, expected data types, and constraints.
+- Important target fields include original_url_display,
+  product_page_url_display, monetized_product_url_display, user_comment,
+  review_date, reviewer fields, size/color fields, measurement fields, and
+  clothing_type_id.
+
+images_intake_sample - sampleOutput1.csv
+
+- Example normalized output.
+- It has 34 columns and 413 parsed CSV rows.
+- It demonstrates the intended row shape, including one image URL per row and a
+  monetized_product_url_display generated from product_page_url_display.
+- It does not include every column listed in the constraints file.
+
+clothingtypes.csv
+
+- Lookup/reference file for allowed clothing type labels.
+- One column: Unique clothing_types.label values.
+- Current allowed labels:
+  Blouse, Bralette, Bustier, Cami, Culottes, Dress, Gown, Jeans, Jumpsuit,
+  Leggings, Other, Overalls, Pants, Romper, Shirt, Skirt, Sweater, T-Shirt,
+  Tank, Top, Tunic, Vest.
+- For clothing_type_id in normalized output, use lowercase IDs derived from
+  these labels when possible, for example Jeans -> jeans, Pants -> pants,
+  Dress -> dress.
+
+function monetizeurl   (input) {.pdf
+
+- Reference for generating monetized_product_url_display.
+- It contains JavaScript logic that takes an input URL, URI-encodes it, and
+  wraps it in a VigLink redirect URL.
+
+javascriptToGenerateMonetizedLinks.csv
+
+- Supplemental reference for the same monetized-link logic.
+- It appears to contain the JavaScript lines in one CSV column, but the final
+  return line appears truncated in the current file.
+- Use the PDF and sample output pattern as the reliable source for the complete
+  monetized URL formula.
+
+
+Source files to normalize
+-------------------------
+Amazon_2026_Tall - allBigImages.csv
+
+- Raw/messy Amazon scraped review/image data.
+- Parsed CSV shape: 26 columns, 11,941 data rows.
+- Contains review title, review URL, profile URL, avatar URL, reviewer name,
+  rating text, review date text, product review URL, size/color/inseam text,
+  review body, helpful count, HTML fragments, source page URL, page title, and
+  several image URL fields.
+- Has two blank header columns at positions 17 and 20.
+- Image data can appear in View2, View3, bigImages, BigImages 1 through
+  BigImages 6, and sometimes Keep?.
+- Variant data is often concatenated, for example:
+  Fit Type: 25.5" Inseam PetiteSize: MediumColor: Black.
+
+Amazon_prodLinks_jeans_25Feb2026 - allBigImages.csv
+
+- Raw/messy Amazon jeans scraped/generated data.
+- Parsed CSV shape: 26 columns, 41,564 data rows.
+- Contains some cleaner generated fields, including DateReviewed(Generated),
+  SizeOrdered(generated), ColorOrdered(Generated), weightPounds(generated),
+  HEIGHT_INCHES(generated), heightSnippet(generated), and other snippet fields.
+- This file is structurally inconsistent. Many rows do not follow the header
+  semantics and appear shifted or contaminated with product metadata, HTML,
+  image URLs, page titles, or timestamps in unexpected columns.
+- The ETL should classify/filter valid review rows before mapping, or search
+  across row values for useful URL/image/ASIN patterns.
+
+amazon_reviews_snowflake_raw_scrape.csv
+
+- Older normalized-ish review/image format, but not the target schema.
+- Parsed CSV shape: 12 columns, 41,766 data rows.
+- Columns:
+  product_url, size_color, title, body, prev1, prev2, prev3, prev4, image1,
+  image2, image3, image4.
+- prev1 through prev4 are empty in the inspected file.
+- image1 is populated for all rows; image2, image3, and image4 are partially
+  populated.
+- Missing reviewer profile URL, reviewer name, review date, generated
+  measurements, source site, fetched metadata, and most other target fields.
+
+
+Output strategy
+---------------
+Create new normalized output CSVs from the Amazon-named files. Do not edit the
+source CSVs.
+
+The normalized output should be image-centric:
+
+- Emit one output row per image URL.
+- Deduplicate repeated image URLs within the same source row.
+- Preserve the review/product context for each emitted image row.
+
+Likely output files:
+
+- normalized_Amazon_2026_Tall.csv
+- normalized_Amazon_prodLinks_jeans_25Feb2026.csv
+- normalized_Amazon_Reviews_SnowFlakeFormat.csv
+
+
+Monetized product URL rule
+--------------------------
+Every output row should include product_page_url_display and
+monetized_product_url_display.
+
+Derive product_page_url_display from the best available Amazon product URL or
+ASIN in the source row.
+
+Preferred product URL format:
+
+https://www.amazon.com/dp/{ASIN}/ref=cm_cr_arp_d_product_top?ie=UTF8
+
+If the source already has a usable product page URL, it can be preserved. If
+the source has a product review URL such as /product-reviews/{ASIN}, extract
+the ASIN and convert it to the product-page URL format above.
+
+Generate monetized_product_url_display from product_page_url_display using:
+
+http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=<encoded_product_page_url_display>
+
+The encoded URL should match JavaScript encodeURIComponent behavior.
+
+
+Product URL extraction by source file
+-------------------------------------
+Amazon_2026_Tall - allBigImages.csv
+
+- Candidate fields:
+  - Original_URL
+  - asizemini_URL
+  - Title_URL if needed, though it is usually a customer review URL
+- Extract ASIN from /product-reviews/{ASIN} or /dp/{ASIN}.
+- Convert review URLs to the preferred /dp/{ASIN}/ref=cm_cr_arp_d_product_top?ie=UTF8
+  product-page form.
+
+Amazon_prodLinks_jeans_25Feb2026 - allBigImages.csv
+
+- Candidate fields:
+  - asizemini_URL for well-formed review rows
+  - Title_URL if it is a product page URL rather than a review URL
+  - any row value containing /dp/{ASIN} or /product-reviews/{ASIN}, because rows
+    can be shifted
+- Extract ASIN and generate the preferred product-page URL.
+
+amazon_reviews_snowflake_raw_scrape.csv
+
+- Candidate field:
+  - product_url
+- This is usually already a product-page URL in /dp/{ASIN} format.
+- It can be preserved or normalized to the preferred product-page form.
+
+
+Image URL extraction by source file
+-----------------------------------
+Amazon_2026_Tall - allBigImages.csv
+
+- Primary image fields:
+  - BigImages 1
+  - BigImages 2
+  - BigImages 3
+  - BigImages 4
+  - BigImages 5
+  - BigImages 6
+- Secondary image fields:
+  - bigImages, split on newlines if numbered image columns are incomplete
+  - View2 and View3 if they contain valid image URLs not already captured
+  - Keep? only if it contains a valid image URL
+
+Amazon_prodLinks_jeans_25Feb2026 - allBigImages.csv
+
+- Because the file has shifted rows, do not trust fixed image columns only.
+- Search across row values for Amazon media image URLs, especially values
+  containing media-amazon.com/images or images-na.ssl-images-amazon.com/images.
+- Deduplicate image URLs per source row.
+- Exclude avatar URLs if the image appears to be a reviewer profile/avatar
+  rather than a customer review image.
+
+amazon_reviews_snowflake_raw_scrape.csv
+
+- Explode these fields:
+  - image1
+  - image2
+  - image3
+  - image4
+
+
+Target field mapping
+--------------------
+Core fields:
+
+- original_url_display:
+  individual customer image URL
+
+- product_page_url_display:
+  normalized Amazon product page URL
+
+- monetized_product_url_display:
+  VigLink URL generated from product_page_url_display
+
+- user_comment:
+  review text. Use title + body when both are available, or the best available
+  review body/title field for the source.
+
+- date_review_submitted_raw:
+  raw review date string, when available
+
+- review_date:
+  ISO date, YYYY-MM-DD, if the raw date is parseable
+
+- source_site_display:
+  https://www.amazon.com/
+
+- reviewer_profile_url:
+  reviewer profile URL, when available
+
+- reviewer_name_raw:
+  reviewer name, when available
+
+- size_display:
+  parsed size value. This should not be blank for rows inserted into the final
+  public.images table.
+
+- color_display:
+  parsed color value
+
+- color_canonical:
+  optional normalized/canonical color value; can be left blank unless a color
+  normalization rule is defined
+
+- clothing_type_id:
+  lowercase value mapped from clothingtypes.csv, for example jeans, pants,
+  dress, top. Leave blank if it cannot be inferred safely.
+
+Measurement fields:
+
+- height_in_display:
+  numeric height in inches if available
+
+- weight_display_display:
+  raw/display weight value if available
+
+- weight_lbs_display:
+  weight in pounds if available
+
+- weight_raw:
+  raw weight text if preserving unparsed text
+
+- weight_raw_needs_correction:
+  flag or note if the weight parse appears suspect
+
+- weight_lbs_raw_issue:
+  optional issue note for problematic weight parsing
+
+- waist_raw_display:
+  raw waist text if available
+
+- waist_in:
+  numeric waist inches if parseable
+
+- hips_raw:
+  raw hips text if available
+
+- hips_in_display:
+  numeric hips inches if parseable
+
+- age_raw:
+  raw age text if available
+
+- age_years_display:
+  age in years if parseable
+
+- inseam_inches_display:
+  numeric inseam inches if parseable
+
+Database/default fields:
+
+- id:
+  leave blank for staging unless explicitly backfilled; public.images can
+  auto-generate it
+
+- created_at_display:
+  leave blank for staging unless explicitly backfilled; public.images can
+  default it to now()
+
+- fetched_at:
+  ETL-chosen date if needed
+
+- updated_at:
+  ETL-chosen date if needed
+
+- status_code:
+  leave blank unless HTTP fetching is performed
+
+- search_fts:
+  leave blank unless generated by database/search pipeline
+
+- brand:
+  leave blank unless reliably inferred
+
+
+Parsing and cleaning requirements
+---------------------------------
+- Use CSV-aware parsing. Shell line counts are not reliable because review text
+  can contain embedded newlines.
+- Normalize date strings like "Reviewed in the United States on January 2, 2026"
+  into raw date text and ISO review_date.
+- Parse size/color strings such as "Size: LargeColor: Light Blue".
+- Parse harder combined strings such as:
+  "Fit Type: 25.5\" Inseam PetiteSize: MediumColor: Black".
+- Convert height text like 5'3" or generated height values into inches.
+- Convert weight text like 133 lbs into numeric/display weight fields.
+- Only populate numeric target fields with numeric values.
+- Deduplicate repeated image URLs per row.
+- For shifted rows in Amazon_prodLinks_jeans_25Feb2026, classify rows or use
+  pattern extraction rather than relying only on fixed column positions.
+- Validate size_display before final database import, because it is expected to
+  be nonblank in public.images.
+- Validate clothing_type_id against lowercase labels from clothingtypes.csv.
+
+
+Free-form review measurement extraction
+---------------------------------------
+Each Amazon source row should have a reviewer-written free-form text field.
+This text is important because reviewers often type body measurements that need
+to be extracted into the normalized output.
+
+Source text fields to inspect:
+
+- Amazon_2026_Tall - allBigImages.csv:
+  - View1 is the primary free-form review text field.
+  - Title can be prepended or stored with the comment, but measurement
+    extraction should primarily use View1.
+
+- Amazon_prodLinks_jeans_25Feb2026 - allBigImages.csv:
+  - View1 is the primary free-form review text field for well-formed rows.
+  - Some rows are shifted, so the ETL may need to identify the review body by
+    looking for the longest natural-language text field in the row.
+  - Generated snippet fields can be used as supporting signals, but the
+    original free-form text should remain the main source of truth.
+
+- amazon_reviews_snowflake_raw_scrape.csv:
+  - body is the primary free-form review text field.
+  - title can be prepended or stored with the comment, but measurement
+    extraction should primarily use body.
+
+The output user_comment should preserve useful review text. The measurement
+extractor should not remove measurements from user_comment; it should copy
+parsed values into separate structured fields.
+
+Measurement targets to populate from free-form text:
+
+- height_in_display:
+  height converted to total inches
+
+- height_raw:
+  raw height text when useful for traceability
+
+- weight_lbs_display:
+  weight in pounds
+
+- weight_display_display:
+  display/raw-ish weight value if the sample output style needs it
+
+- weight_raw:
+  raw weight text when useful for traceability
+
+- weight_raw_needs_correction:
+  flag or note if a weight parse looks suspicious
+
+- weight_lbs_raw_issue:
+  optional issue note for ambiguous/problematic weight parsing
+
+- waist_in:
+  waist measurement in inches
+
+- waist_raw_display:
+  raw waist text when useful for traceability
+
+- hips_in_display:
+  hips measurement in inches
+
+- hips_raw:
+  raw hips text when useful for traceability
+
+- inseam_inches_display:
+  inseam measurement in inches
+
+- age_years_display:
+  age in years
+
+- age_raw:
+  raw age text when useful for traceability
+
+- bust_in_number_display:
+  bust band or bust measurement depending on the phrasing. Be careful not to
+  confuse bra band size with full bust circumference.
+
+- cupsize_display:
+  bra cup size such as A, B, C, D, DD, DDD, F, G, H.
+
+Common height formats to detect:
+
+- 5'3"
+- 5' 3"
+- 5 ft 3 in
+- 5ft 3in
+- 5 foot 3
+- 5 feet 3 inches
+- 5-3, when the surrounding text indicates height
+- 63 inches
+- 63 in, when the surrounding text indicates height
+
+Height parsing rules:
+
+- Convert feet/inches to total inches, for example 5'3" -> 63.
+- Only interpret a value like 63 as height if nearby words indicate height or
+  stature. Do not assume every number in the low 60s is height.
+- If multiple heights appear, prefer the one closest to words like height, tall,
+  I am, I'm, or my height.
+
+Common weight formats to detect:
+
+- 133 lbs
+- 133lb
+- 133 pounds
+- weight: 133
+- I weigh 133
+- 5'3" and 133lbs
+- 114 lbs, 152lb, 155 pounds
+
+Weight parsing rules:
+
+- Store pounds as numeric text in weight_lbs_display when the unit/context is
+  clear.
+- Do not treat clothing size numbers as weight.
+- Do not treat measurements like 34D, 27 waist, 35 hips, or 29 inseam as
+  weight.
+- If a value is unusually low or high for body weight, leave structured weight
+  blank and record an issue in weight_raw_needs_correction or
+  weight_lbs_raw_issue if those columns are included.
+
+Common waist formats to detect:
+
+- 27" waist
+- 27 inch waist
+- waist 27
+- waist: 27
+- 30 inches at the waist
+- natural waist is 30 inches
+- 27 waist, 35.5 hips
+
+Waist parsing rules:
+
+- Store numeric inches in waist_in.
+- Preserve raw text in waist_raw_display when useful.
+- Do not confuse product waist size or jeans size with body waist unless the
+  surrounding text indicates a body measurement.
+
+Common hips formats to detect:
+
+- 35.5" hips
+- hips 35.5
+- hip measurement 35
+- 27 waist, 35.5 hips
+- measurements: 27" waist, 35.5" hips
+
+Hips parsing rules:
+
+- Store numeric inches in hips_in_display.
+- Preserve raw text in hips_raw when useful.
+- Accept decimal values such as 35.5.
+
+Common inseam formats to detect:
+
+- 29" inseam
+- 29 in inseam
+- typical inseam: 29
+- 28.3 minimum inseam
+- 25.5" Inseam Petite
+- 27.5" Inseam Regular
+- size/variant strings with inseam embedded, for example
+  Fit Type: 25.5" Inseam PetiteSize: MediumColor: Black
+
+Inseam parsing rules:
+
+- Store numeric inches in inseam_inches_display.
+- Inseam can come from the structured variant field as well as the free-form
+  review text.
+- Prefer explicit inseam context over unrelated numbers.
+
+Common age formats to detect:
+
+- 42 years old
+- 42 yrs old
+- age 42
+- 42yo
+- 42 y/o
+- I am 42
+
+Age parsing rules:
+
+- Only populate age_years_display when the number is clearly age-related.
+- Do not infer age from dates, sizes, weights, or review counts.
+
+Common bra/bust/cup formats to detect:
+
+- 34D
+- 34 DD
+- 34DD
+- 36B
+- 38C bra
+- bra size 36B
+- bust 38
+- 38" bust
+- 38C bra, carry my weight in my mid-section
+
+Bra/bust parsing rules:
+
+- For bra sizes like 34D, put 34 in bust_in_number_display and D in
+  cupsize_display.
+- Preserve cup values such as DD and DDD exactly enough to distinguish them.
+- For text like "38C bra", treat 38 as the bra band/bust number and C as the
+  cup size.
+- For text like "38 inch bust" with no cup letter, populate
+  bust_in_number_display and leave cupsize_display blank.
+- Do not confuse product size 38 or EU sizing with bust/bra size unless nearby
+  text says bra, bust, chest, or measurements.
+
+General extraction approach:
+
+- Run deterministic pattern extraction first for clear cases.
+- Keep raw matched snippets for traceability where a raw field exists.
+- Use context windows around matches, not just isolated numbers.
+- Prefer explicit labels over positional guesses.
+- If two candidate values conflict, prefer the one with the strongest label
+  context, or leave the structured field blank rather than guessing.
+- Avoid extracting from product names, URLs, helpful-count text, rating text, or
+  generated page metadata unless the field is explicitly a size/variant field.
+- Normalize punctuation variants such as curly quotes, straight quotes, unicode
+  feet/inch marks, and hyphenated forms before matching.
+- The output numeric fields should contain only numeric values, for example 63,
+  133, 27, 35.5, or 29.
+- Ambiguous values should remain blank rather than polluting the import with
+  incorrect body measurements.

@@ -1,0 +1,11 @@
+function monetizeurl(input) {
+  // API key used for VigLink redirect generation.
+  const key = "2aba39b05bc3c8c85f46f6f98c7c728d";
+  const uri = input;
+
+  // Encode the original product URL before wrapping it.
+  const encoded = encodeURIComponent(uri);
+
+  // Return the monetized redirect URL.
+  return `http://redirect.viglink.com?key=${key}&u=${encoded}`;
+}
