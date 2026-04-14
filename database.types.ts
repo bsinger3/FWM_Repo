@@ -680,6 +680,12 @@ export type Database = {
         Returns: string
       }
       host_name: { Args: { u: string }; Returns: string }
+      get_distinct_cup_sizes: {
+        Args: { limit_n?: number; prefix_text?: string }
+        Returns: {
+          cup_size: string
+        }[]
+      }
       inspect_table_columns_examples: {
         Args: { example_limit?: number; in_schema: string; in_table: string }
         Returns: {
@@ -696,6 +702,7 @@ export type Database = {
       match_by_measurements: {
         Args: {
           in_bust?: number
+          in_cup_size?: string
           in_clothing_type_id?: string
           in_height?: number
           in_hips?: number

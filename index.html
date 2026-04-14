@@ -50,22 +50,30 @@
       }
       .toggle-btn {
         position: fixed;
-        left: 220px;
-        top: 7px;
+        left: 280px;
+        top: 20px;
+        transform: translateX(-50%);
         background: #fff;
         border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 8px 12px;
+        border-radius: 999px;
+        width: 40px;
+        height: 40px;
+        padding: 0;
         cursor: pointer;
         z-index: 100;
-        transition: left 0.3s ease;
-        font-size: 18px;
+        transition: left 0.3s ease, transform 0.3s ease, background 0.2s ease;
+        font-size: 22px;
         line-height: 1;
         opacity: 1;
         color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       }
       .toggle-btn.collapsed {
         left: 20px;
+        transform: none;
       }
       .toggle-btn:hover {
         background: #f0f0f0;
@@ -117,8 +125,17 @@
         display: flex;
         gap: 8px;
       }
+      .bra-size-group {
+        display: flex;
+        gap: 8px;
+      }
       .height-group .input-label {
         flex: 1;
+        min-width: 0;
+      }
+      .bra-size-group .input-label {
+        flex: 1;
+        min-width: 0;
       }
       .input-label {
         display: flex;
@@ -135,6 +152,8 @@
         border: 1px solid #ddd;
         border-radius: 4px;
         margin-top: 4px;
+        box-sizing: border-box;
+        width: 100%;
       }
       .require-toggle {
         display: flex;
@@ -205,9 +224,25 @@
         color: #666;
         line-height: 1.4;
         border-top: 1px solid #eee;
+      }
+      .meta-part {
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+      }
+      .meta-separator {
+        color: #aaa;
+        margin: 0 4px;
+      }
+      .match-height {
+        color: #c62828;
+        font-weight: 700;
+      }
+      .match-bra {
+        color: #7b2cbf;
+        font-weight: 700;
+      }
+      .match-bra-partial {
+        color: #7b2cbf;
+        font-weight: 700;
       }
       .meta-primary {
         font-weight: 600;
@@ -304,10 +339,26 @@
           </label>
         </div>
         <div class="field-group">
-          <label class="input-label">
-            <span class="field-label">Bust in</span>
-            <input id="b" type="number" min="20" max="60" step="0.5" />
-          </label>
+          <div class="field-label">Bra size</div>
+          <div class="bra-size-group">
+            <label class="input-label">
+              Under bust
+              <input id="b" type="number" min="20" max="60" step="0.5" placeholder='34"' />
+            </label>
+            <label class="input-label">
+              Cup size
+              <input
+                id="cup-size"
+                type="text"
+                list="cup-size-options"
+                placeholder="DD"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+              />
+            </label>
+          </div>
+          <datalist id="cup-size-options"></datalist>
           <label class="require-toggle" data-require-label="bust">
             <input id="require-bust" type="checkbox" disabled />
             <span>Require results to match this measurement</span>
@@ -430,6 +481,8 @@
       let isLoading = false;
       let hasMore = true;
       let totalResultCount = 0;
+      let supportsCupSizeRpc = true;
+      let supportsCupSizeSearchRpc = true;
 
       // Update result count display
       function updateResultCount(count, hasMoreResults) {
@@ -467,6 +520,81 @@
       }
 
       loadClothingTypes();
+
+      function normalizeCupSize(value) {
+        return value ? value.trim().toUpperCase() : "";
+      }
+
+      async function loadCupSizes(query = "") {
+        const normalizedQuery = normalizeCupSize(query);
+        let cupSizes = [];
+
+        if (supportsCupSizeRpc) {
+          const { data, error } = await sb.rpc("get_distinct_cup_sizes", {
+            prefix_text: normalizedQuery || null,
+            limit_n: 20,
+          });
+
+          if (error) {
+            console.error("Error loading cup sizes via RPC:", error);
+            supportsCupSizeRpc = false;
+          } else {
+            cupSizes = (data || []).map((row) => row.cup_size);
+          }
+        }
+
+        if (!supportsCupSizeRpc) {
+          let queryBuilder = sb
+            .from("images")
+            .select("cupsize_display")
+            .not("cupsize_display", "is", null)
+            .neq("cupsize_display", "")
+            .neq("cupsize_display", "unknown")
+            .limit(200);
+
+          if (normalizedQuery) {
+            queryBuilder = queryBuilder.ilike(
+              "cupsize_display",
+              `${normalizedQuery}%`,
+            );
+          }
+
+          const { data, error } = await queryBuilder;
+          if (error) {
+            console.error("Error loading cup sizes from images:", error);
+            return;
+          }
+
+          cupSizes = Array.from(
+            new Set(
+              (data || [])
+                .map((row) => normalizeCupSize(row.cupsize_display))
+                .filter(Boolean),
+            ),
+          )
+            .sort()
+            .slice(0, 20);
+        }
+
+        const dataList = document.getElementById("cup-size-options");
+        dataList.innerHTML = "";
+
+        cupSizes.forEach((cupSize) => {
+          const option = document.createElement("option");
+          option.value = cupSize;
+          dataList.appendChild(option);
+        });
+      }
+
+      const cupSizeInput = document.getElementById("cup-size");
+      cupSizeInput.addEventListener("focus", () => loadCupSizes(cupSizeInput.value.trim()));
+      cupSizeInput.addEventListener("input", () => {
+        const normalizedValue = normalizeCupSize(cupSizeInput.value);
+        if (normalizedValue !== cupSizeInput.value) {
+          cupSizeInput.value = normalizedValue;
+        }
+        loadCupSizes(normalizedValue.trim());
+      });
 
       function syncRequireToggle(fieldName) {
         const checkbox = document.getElementById(`require-${fieldName}`);
@@ -593,6 +721,9 @@
           in_height: totalHeightInches > 0 ? totalHeightInches : null,
           in_weight: num(document.getElementById("w").value),
           in_bust: num(document.getElementById("b").value),
+          in_cup_size: normalizeCupSize(
+            document.getElementById("cup-size").value,
+          ) || null,
           in_waist: waistVal,
           in_hips: num(document.getElementById("p").value),
           require_height:
@@ -684,7 +815,59 @@
         console.log("Request body:", body);
 
         const searchStart = performance.now();
-        const { data, error } = await sb.rpc("match_by_measurements", body);
+        let data;
+        let error;
+
+        if (supportsCupSizeSearchRpc) {
+          const response = await sb.rpc("match_by_measurements", body);
+          data = response.data;
+          error = response.error;
+
+          if (
+            error &&
+            error.message &&
+            error.message.includes(
+              "Could not find the function public.match_by_measurements",
+            )
+          ) {
+            console.warn(
+              "Falling back to legacy match_by_measurements signature without cup size.",
+            );
+            supportsCupSizeSearchRpc = false;
+          }
+        }
+
+        if (!supportsCupSizeSearchRpc) {
+          const legacyBody = {
+            in_clothing_type_id: currentSearchParams.in_clothing_type_id || null,
+            in_height: currentSearchParams.in_height,
+            in_hips: currentSearchParams.in_hips,
+            in_weight: currentSearchParams.in_weight,
+            in_bust: currentSearchParams.in_bust,
+            in_waist: currentSearchParams.in_waist,
+            require_height: currentSearchParams.require_height,
+            require_hips: currentSearchParams.require_hips,
+            require_weight: currentSearchParams.require_weight,
+            require_bust: currentSearchParams.require_bust,
+            require_waist: currentSearchParams.require_waist,
+            limit_n: 24,
+            offset_n: currentOffset,
+          };
+          const legacyResponse = await sb.rpc("match_by_measurements", legacyBody);
+          data = legacyResponse.data;
+          error = legacyResponse.error;
+        }
+
+        if (!error && Array.isArray(data) && currentSearchParams?.in_cup_size) {
+          const normalizedSearchCupSize = normalizeCupSize(
+            currentSearchParams.in_cup_size,
+          );
+          data = data.filter(
+            (row) =>
+              normalizeCupSize(row.cupsize_display) === normalizedSearchCupSize,
+          );
+        }
+
         const latencyMs = Math.round(performance.now() - searchStart);
 
         // Remove loading indicator
@@ -850,6 +1033,40 @@
           meta.className = "meta";
           const metaParts = [];
 
+          function addMetaPart(text, className = "") {
+            if (!text) return;
+            metaParts.push({ text, className });
+          }
+
+          function addMetaNode(node) {
+            if (!node) return;
+            metaParts.push({ node });
+          }
+
+          function renderMetaParts(parts) {
+            meta.innerHTML = "";
+            parts.forEach((part, index) => {
+              if (index > 0) {
+                const separator = document.createElement("span");
+                separator.className = "meta-separator";
+                separator.textContent = "•";
+                meta.appendChild(separator);
+              }
+
+              if (part.node) {
+                part.node.classList.add("meta-part");
+                meta.appendChild(part.node);
+              } else {
+                const partSpan = document.createElement("span");
+                partSpan.className = part.className
+                  ? `meta-part ${part.className}`
+                  : "meta-part";
+                partSpan.textContent = part.text;
+                meta.appendChild(partSpan);
+              }
+            });
+          }
+
           // Normalize size display
           let sizeText = r.size_display;
           if (sizeText) {
@@ -859,19 +1076,31 @@
             // Add consistent "Size: " prefix
             sizeText = "Size: " + sizeText;
           }
-          metaParts.push(sizeText);
+          addMetaPart(sizeText);
 
           if (r.height_in_display) {
             const h = Number(r.height_in_display);
             const feet = Math.floor(h / 12);
             const inches = Math.round(h % 12);
-            metaParts.push(`${feet}'${inches}"`);
+            const heightText = `${feet}'${inches}"`;
+            const isHeightMatch =
+              currentSearchParams?.in_height !== null &&
+              currentSearchParams?.in_height !== undefined &&
+              Number(currentSearchParams.in_height) === h;
+            addMetaPart(heightText, isHeightMatch ? "match-height" : "");
           }
           if (
             r.weight_display_display &&
             r.weight_display_display.toLowerCase() !== "unknown"
           )
-            metaParts.push(r.weight_display_display);
+            addMetaPart(r.weight_display_display);
+
+          const normalizedSearchCupSize = currentSearchParams?.in_cup_size
+            ? currentSearchParams.in_cup_size.trim().toUpperCase()
+            : null;
+          const normalizedRowCupSize = r.cupsize_display
+            ? r.cupsize_display.trim().toUpperCase()
+            : null;
 
           // Format bra size as 32DD if both bust and cup size are available
           if (
@@ -880,25 +1109,65 @@
             r.bust_in_number_display.toString().toLowerCase() !== "unknown" &&
             r.cupsize_display.toLowerCase() !== "unknown"
           ) {
-            metaParts.push(`${r.bust_in_number_display}${r.cupsize_display}`);
+            const isBandMatch =
+              currentSearchParams?.in_bust !== null &&
+              currentSearchParams?.in_bust !== undefined &&
+              Number(currentSearchParams.in_bust) ===
+                Number(r.bust_in_number_display);
+            const isCupMatch =
+              normalizedSearchCupSize &&
+              normalizedRowCupSize &&
+              normalizedSearchCupSize === normalizedRowCupSize;
+            const isBraMatch =
+              currentSearchParams?.in_bust !== null &&
+              currentSearchParams?.in_bust !== undefined &&
+              isBandMatch &&
+              isCupMatch;
+
+            const braWrapper = document.createElement("span");
+            if (isBraMatch) {
+              braWrapper.className = "match-bra";
+            }
+
+            const bandSpan = document.createElement("span");
+            bandSpan.textContent = `${r.bust_in_number_display}`;
+            if (!isBraMatch && isBandMatch) {
+              bandSpan.className = "match-bra-partial";
+            }
+
+            const cupSpan = document.createElement("span");
+            cupSpan.textContent = r.cupsize_display;
+            if (!isBraMatch && isCupMatch) {
+              cupSpan.className = "match-bra-partial";
+            }
+
+            braWrapper.appendChild(bandSpan);
+            braWrapper.appendChild(cupSpan);
+            addMetaNode(braWrapper);
           } else if (
             r.bust_in_number_display &&
             r.bust_in_number_display.toString().toLowerCase() !== "unknown"
           ) {
-            metaParts.push(`B${r.bust_in_number_display}"`);
+            const bustText = `B${r.bust_in_number_display}"`;
+            const isBustMatch =
+              currentSearchParams?.in_bust !== null &&
+              currentSearchParams?.in_bust !== undefined &&
+              Number(currentSearchParams.in_bust) ===
+                Number(r.bust_in_number_display);
+            addMetaPart(bustText, isBustMatch ? "match-bra" : "");
           }
 
           if (
             r.hips_in_display &&
             r.hips_in_display.toString().toLowerCase() !== "unknown"
           )
-            metaParts.push(`H${r.hips_in_display}"`);
+            addMetaPart(`H${r.hips_in_display}"`);
           if (r.waist_in && r.waist_in.toString().toLowerCase() !== "unknown")
-            metaParts.push(`W${r.waist_in}"`);
+            addMetaPart(`W${r.waist_in}"`);
           if (r.color_display && r.color_display.toLowerCase() !== "unknown")
-            metaParts.push(r.color_display);
+            addMetaPart(r.color_display);
 
-          meta.textContent = metaParts.join(" • ");
+          renderMetaParts(metaParts);
 
           a.appendChild(img);
           a.appendChild(meta);
