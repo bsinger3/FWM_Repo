@@ -89,6 +89,13 @@ Step 4 is a human-facing working review sheet, so readability matters.
   replaced rather than kept under a misleading name
 - the `Approved for publishing` column should appear immediately after the
   machine-generated review columns
+- the `exceeds_cap` column should record rows that are retained in storage but
+  should not appear in search results because they exceed the reviewer-product
+  cap
+- the reviewer-product cap should allow at most 3 search-eligible images per
+  synthetic reviewer identity per `product_page_url_display`
+- when selecting which rows remain inside the cap, prefer rows with
+  `has_face_yunet = true`
 
 
 ## Current State
