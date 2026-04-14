@@ -44,6 +44,36 @@ Run summary from the session:
   connection reset during fetch
 
 
+### 3. Added workbook-only YOLO pose columns for approval testing
+
+A second test script was added:
+
+- `scripts/step_4_human_review_and_visibility_decisions/add_yolo_pose_columns_to_workbook.py`
+
+This script updates only a selected review workbook and adds these columns:
+
+- `person_count_yolo_pose`
+- `main_person_height_pct_yolo_pose`
+- `main_person_bbox_area_pct_yolo_pose`
+- `body_coverage_score_yolo_pose`
+
+These fields were added only to:
+
+- `data/step_4_human_review_and_visibility_decisions/manual_chunks/images_to_approve_part_001_SORTED.xlsx`
+
+The purpose of this pass was to compare four higher-value composition signals
+against the manual approval column before running anything across the rest of
+the review chunks.
+
+Initial directional results against manual approval labels:
+
+- approved rows averaged higher `main_person_height_pct_yolo_pose`
+- approved rows averaged much higher `body_coverage_score_yolo_pose`
+- rejected rows contained many more `person_count_yolo_pose = 0`
+- `main_person_bbox_area_pct_yolo_pose` had weaker separation than the other
+  three new fields
+
+
 ## Findings From Approved vs Rejected Sample Review
 
 A random sample of approved and not-approved images was reviewed against the
