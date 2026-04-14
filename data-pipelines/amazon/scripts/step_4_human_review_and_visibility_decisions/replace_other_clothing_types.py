@@ -15,6 +15,8 @@ OTHER_VALUE = "other"
 PRODUCT_MAJORITY_MIN_ROWS = 3
 PRODUCT_MAJORITY_MIN_SHARE = 0.70
 PRODUCT_OVERRIDE_SHARE = 0.85
+PRODUCT_SMALL_SAMPLE_MIN_ROWS = 1
+PRODUCT_SMALL_SAMPLE_REQUIRED_SHARE = 1.00
 
 KEYWORD_PATTERNS = {
     "dress": [r"\bdresses?\b", r"\bgown\b"],
@@ -31,6 +33,13 @@ KEYWORD_PATTERNS = {
     "t-shirt": [r"\bt[- ]?shirt\b", r"\btee\b"],
     "sweater": [r"\bsweater\b", r"\bcardigan\b"],
     "shorts": [r"\bshorts\b", r"\bbermuda shorts?\b"],
+    "swimsuit": [r"\bswimsuit\b", r"\bswim suit\b", r"\bbathing suit\b", r"\bone piece\b", r"\bmonokini\b"],
+    "bikini": [r"\bbikini\b", r"\bbikini top\b", r"\bbikini bottom\b"],
+    "coverup": [r"\bcover[- ]?up\b", r"\bbeach cover\b"],
+    "bra": [r"\bbra\b"],
+    "jacket": [r"\bjacket\b", r"\bblazer\b", r"\bcoat\b"],
+    "bodysuit": [r"\bbodysuit\b"],
+    "capris": [r"\bcapris?\b"],
 }
 
 
@@ -75,16 +84,18 @@ def build_product_type_counts(rows_by_file: Dict[Path, List[Dict[str, str]]]) ->
 
 def infer_by_product_majority(
     product_url: str, product_type_counts: Dict[str, Counter]
-) -> Tuple[Optional[str], Optional[float], Optional[int]]:
+) -> Tuple[Optional[str], Optional[float], Optional[int], str]:
     counts = product_type_counts.get(product_url)
     if not counts:
-        return None, None, None
+        return None, None, None, "no_product_signal"
     total = sum(counts.values())
     top_type, top_count = counts.most_common(1)[0]
     share = top_count / total if total else 0.0
     if total >= PRODUCT_MAJORITY_MIN_ROWS and share >= PRODUCT_MAJORITY_MIN_SHARE:
-        return top_type, share, total
-    return None, share, total
+        return top_type, share, total, "product_majority"
+    if total >= PRODUCT_SMALL_SAMPLE_MIN_ROWS and share >= PRODUCT_SMALL_SAMPLE_REQUIRED_SHARE:
+        return top_type, share, total, "product_small_sample"
+    return None, share, total, "product_insufficient_confidence"
 
 
 def infer_by_keywords(row: Dict[str, str]) -> Tuple[Optional[str], str]:
@@ -113,16 +124,22 @@ def infer_by_keywords(row: Dict[str, str]) -> Tuple[Optional[str], str]:
 
 def infer_replacement(row: Dict[str, str], product_type_counts: Dict[str, Counter]) -> Tuple[str, str]:
     product_url = (row.get("product_page_url_display") or "").strip()
-    product_type, product_share, _ = infer_by_product_majority(product_url, product_type_counts)
+    product_type, product_share, _, product_source = infer_by_product_majority(product_url, product_type_counts)
     keyword_type, _ = infer_by_keywords(row)
 
     if product_type and keyword_type:
         if product_type == keyword_type:
+            if product_source == "product_small_sample":
+                return product_type, "product_small_sample+keyword_agree"
             return product_type, "product+keyword_agree"
         if product_share is not None and product_share >= PRODUCT_OVERRIDE_SHARE:
+            if product_source == "product_small_sample":
+                return product_type, "product_small_sample_override"
             return product_type, "product_majority_override"
         return "", "unresolved"
     if product_type:
+        if product_source == "product_small_sample":
+            return product_type, "product_small_sample_only"
         return product_type, "product_majority_only"
     if keyword_type:
         return keyword_type, "keyword_only"
