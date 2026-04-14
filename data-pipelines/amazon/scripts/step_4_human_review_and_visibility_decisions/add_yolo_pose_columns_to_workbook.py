@@ -142,12 +142,11 @@ def insert_columns(worksheet, headers: dict[str, int], anchor_column: str) -> di
     if all(column in headers for column in NEW_COLUMNS):
         return headers
     insert_after = headers.get(anchor_column, worksheet.max_column)
+    worksheet.insert_cols(insert_after + 1, amount=len(NEW_COLUMNS))
     for offset, column_name in enumerate(NEW_COLUMNS, start=1):
         target_col = insert_after + offset
-        worksheet.insert_cols(target_col)
         worksheet.cell(row=1, column=target_col, value=column_name)
         copy_column_style(worksheet, insert_after, target_col, worksheet.max_row)
-        insert_after = target_col
     return find_header_map(worksheet)
 
 

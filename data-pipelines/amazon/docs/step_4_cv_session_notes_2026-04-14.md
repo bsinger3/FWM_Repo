@@ -73,6 +73,15 @@ Initial directional results against manual approval labels:
 - `main_person_bbox_area_pct_yolo_pose` had weaker separation than the other
   three new fields
 
+Follow-up repair:
+
+- the first YOLO workbook insertion pass shifted columns incorrectly
+- the workbook was restored from the clean scrfd-only version
+- the insertion logic was fixed so the YOLO columns are added as one contiguous
+  block
+- the corrected workbook was regenerated and verified against original fields
+  such as `age_years_display`, `reviewer_profile_url`, and `reviewer_name_raw`
+
 
 ## Findings From Approved vs Rejected Sample Review
 
