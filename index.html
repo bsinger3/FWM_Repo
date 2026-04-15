@@ -522,6 +522,70 @@
       let supportsCupSizeRpc = true;
       let supportsCupSizeSearchRpc = true;
 
+      async function fetchLegacyMatchesWithOptionalCupFilter() {
+        const normalizedSearchCupSize = currentSearchParams?.in_cup_size
+          ? normalizeCupSize(currentSearchParams.in_cup_size)
+          : null;
+        const requestedLimit = 24;
+        const legacyBatchSize = normalizedSearchCupSize ? 100 : requestedLimit;
+        let fetchOffset = currentOffset;
+        let reachedEnd = false;
+        let collected = [];
+        let lastError = null;
+
+        while (collected.length < requestedLimit && !reachedEnd) {
+          const legacyBody = {
+            in_clothing_type_id: currentSearchParams.in_clothing_type_id || null,
+            in_height: currentSearchParams.in_height,
+            in_hips: currentSearchParams.in_hips,
+            in_weight: currentSearchParams.in_weight,
+            in_bust: currentSearchParams.in_bust,
+            in_waist: currentSearchParams.in_waist,
+            require_height: currentSearchParams.require_height,
+            require_hips: currentSearchParams.require_hips,
+            require_weight: currentSearchParams.require_weight,
+            require_bust: currentSearchParams.require_bust,
+            require_waist: currentSearchParams.require_waist,
+            limit_n: legacyBatchSize,
+            offset_n: fetchOffset,
+          };
+
+          const legacyResponse = await sb.rpc("match_by_measurements", legacyBody);
+          const rawRows = legacyResponse.data || [];
+          lastError = legacyResponse.error;
+
+          if (lastError) {
+            return {
+              data: null,
+              error: lastError,
+              nextOffset: fetchOffset,
+              hasMoreAfterPage: false,
+            };
+          }
+
+          fetchOffset += rawRows.length;
+          if (rawRows.length < legacyBatchSize) {
+            reachedEnd = true;
+          }
+
+          const filteredRows = normalizedSearchCupSize
+            ? rawRows.filter(
+                (row) =>
+                  normalizeCupSize(row.cupsize_display) === normalizedSearchCupSize,
+              )
+            : rawRows;
+
+          collected = collected.concat(filteredRows);
+        }
+
+        return {
+          data: collected.slice(0, requestedLimit),
+          error: null,
+          nextOffset: fetchOffset,
+          hasMoreAfterPage: !reachedEnd,
+        };
+      }
+
       // Update result count display
       function updateResultCount(count, hasMoreResults) {
         if (count === null || count === undefined) {
@@ -875,35 +939,15 @@
           }
         }
 
+        let nextOffset = currentOffset;
+        let hasMoreAfterPage = true;
+
         if (!supportsCupSizeSearchRpc) {
-          const legacyBody = {
-            in_clothing_type_id: currentSearchParams.in_clothing_type_id || null,
-            in_height: currentSearchParams.in_height,
-            in_hips: currentSearchParams.in_hips,
-            in_weight: currentSearchParams.in_weight,
-            in_bust: currentSearchParams.in_bust,
-            in_waist: currentSearchParams.in_waist,
-            require_height: currentSearchParams.require_height,
-            require_hips: currentSearchParams.require_hips,
-            require_weight: currentSearchParams.require_weight,
-            require_bust: currentSearchParams.require_bust,
-            require_waist: currentSearchParams.require_waist,
-            limit_n: 24,
-            offset_n: currentOffset,
-          };
-          const legacyResponse = await sb.rpc("match_by_measurements", legacyBody);
+          const legacyResponse = await fetchLegacyMatchesWithOptionalCupFilter();
           data = legacyResponse.data;
           error = legacyResponse.error;
-        }
-
-        if (!error && Array.isArray(data) && currentSearchParams?.in_cup_size) {
-          const normalizedSearchCupSize = normalizeCupSize(
-            currentSearchParams.in_cup_size,
-          );
-          data = data.filter(
-            (row) =>
-              normalizeCupSize(row.cupsize_display) === normalizedSearchCupSize,
-          );
+          nextOffset = legacyResponse.nextOffset;
+          hasMoreAfterPage = legacyResponse.hasMoreAfterPage;
         }
 
         const latencyMs = Math.round(performance.now() - searchStart);
@@ -973,14 +1017,22 @@
 
           if (filtered.length > 0) {
             render(filtered, true); // true = append mode
-            currentOffset += data.length;
+            if (supportsCupSizeSearchRpc) {
+              currentOffset += data.length;
+            } else {
+              currentOffset = nextOffset;
+            }
 
             // Update the total count based on cards currently displayed
             const displayedCards = out.querySelectorAll('.card').length;
             totalResultCount = displayedCards;
           }
 
-          if (data.length < 24) {
+          if (supportsCupSizeSearchRpc && data.length < 24) {
+            hasMore = false;
+          }
+
+          if (!supportsCupSizeSearchRpc && !hasMoreAfterPage) {
             hasMore = false;
           }
 
