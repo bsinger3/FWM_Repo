@@ -225,12 +225,37 @@
         line-height: 1.4;
         border-top: 1px solid #eee;
       }
-      .meta-part {
-        white-space: nowrap;
+      .meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 4px 8px;
       }
-      .meta-separator {
-        color: #aaa;
-        margin: 0 4px;
+      .meta-row + .meta-row {
+        margin-top: 6px;
+      }
+      .meta-pill {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 3px;
+        min-width: 0;
+      }
+      .meta-pill-label {
+        color: #8a8a8a;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+      .meta-pill-value {
+        color: inherit;
+        font-weight: 500;
+      }
+      .meta-pill-value.match-height,
+      .meta-pill-value.match-weight {
+        font-weight: 700;
+      }
+      .meta-measurements {
+        padding-top: 6px;
+        border-top: 1px solid #f0f0f0;
       }
       .match-height {
         color: #c62828;
@@ -238,6 +263,10 @@
       }
       .match-bra {
         color: #7b2cbf;
+        font-weight: 700;
+      }
+      .match-weight {
+        color: #1565c0;
         font-weight: 700;
       }
       .match-bra-partial {
@@ -1031,40 +1060,49 @@
 
           const meta = document.createElement("div");
           meta.className = "meta";
-          const metaParts = [];
 
-          function addMetaPart(text, className = "") {
-            if (!text) return;
-            metaParts.push({ text, className });
+          function createMetaRow(className = "") {
+            const row = document.createElement("div");
+            row.className = className ? `meta-row ${className}` : "meta-row";
+            return row;
           }
 
-          function addMetaNode(node) {
+          function appendMetaPill(row, label, value, className = "") {
+            if (!value) return;
+            const pill = document.createElement("span");
+            pill.className = className ? `meta-pill ${className}` : "meta-pill";
+
+            if (label) {
+              const labelSpan = document.createElement("span");
+              labelSpan.className = "meta-pill-label";
+              labelSpan.textContent = label;
+              pill.appendChild(labelSpan);
+            }
+
+            const valueSpan = document.createElement("span");
+            valueSpan.className = className
+              ? `meta-pill-value ${className}`
+              : "meta-pill-value";
+            valueSpan.textContent = value;
+            pill.appendChild(valueSpan);
+
+            row.appendChild(pill);
+          }
+
+          function appendMetaNode(row, node, label = "") {
             if (!node) return;
-            metaParts.push({ node });
-          }
+            const pill = document.createElement("span");
+            pill.className = "meta-pill";
 
-          function renderMetaParts(parts) {
-            meta.innerHTML = "";
-            parts.forEach((part, index) => {
-              if (index > 0) {
-                const separator = document.createElement("span");
-                separator.className = "meta-separator";
-                separator.textContent = "•";
-                meta.appendChild(separator);
-              }
+            if (label) {
+              const labelSpan = document.createElement("span");
+              labelSpan.className = "meta-pill-label";
+              labelSpan.textContent = label;
+              pill.appendChild(labelSpan);
+            }
 
-              if (part.node) {
-                part.node.classList.add("meta-part");
-                meta.appendChild(part.node);
-              } else {
-                const partSpan = document.createElement("span");
-                partSpan.className = part.className
-                  ? `meta-part ${part.className}`
-                  : "meta-part";
-                partSpan.textContent = part.text;
-                meta.appendChild(partSpan);
-              }
-            });
+            pill.appendChild(node);
+            row.appendChild(pill);
           }
 
           // Normalize size display
@@ -1073,11 +1111,11 @@
             // Remove "Size Purchased: " or "Size: " prefix if present
             sizeText = sizeText.replace(/^Size Purchased:\s*/i, "");
             sizeText = sizeText.replace(/^Size:\s*/i, "");
-            // Add consistent "Size: " prefix
-            sizeText = "Size: " + sizeText;
           }
-          addMetaPart(sizeText);
+          const primaryRow = createMetaRow();
+          appendMetaPill(primaryRow, "Size", sizeText);
 
+          const summaryRow = createMetaRow();
           if (r.height_in_display) {
             const h = Number(r.height_in_display);
             const feet = Math.floor(h / 12);
@@ -1087,13 +1125,41 @@
               currentSearchParams?.in_height !== null &&
               currentSearchParams?.in_height !== undefined &&
               Number(currentSearchParams.in_height) === h;
-            addMetaPart(heightText, isHeightMatch ? "match-height" : "");
+            appendMetaPill(
+              summaryRow,
+              "",
+              heightText,
+              isHeightMatch ? "match-height" : "",
+            );
           }
           if (
             r.weight_display_display &&
             r.weight_display_display.toLowerCase() !== "unknown"
-          )
-            addMetaPart(r.weight_display_display);
+          ) {
+            const normalizedSearchWeight =
+              currentSearchParams?.in_weight !== null &&
+              currentSearchParams?.in_weight !== undefined
+                ? Number(currentSearchParams.in_weight)
+                : null;
+            const normalizedRowWeight =
+              r.weight_lbs_display !== null && r.weight_lbs_display !== undefined
+                ? Number(r.weight_lbs_display)
+                : null;
+            const isWeightMatch =
+              normalizedSearchWeight !== null &&
+              normalizedRowWeight !== null &&
+              normalizedSearchWeight === normalizedRowWeight;
+
+            appendMetaPill(
+              summaryRow,
+              "",
+              r.weight_display_display,
+              isWeightMatch ? "match-weight" : "",
+            );
+          }
+
+          let hasSummaryMeasurements = summaryRow.childNodes.length > 0;
+          const measurementsRow = createMetaRow("meta-measurements");
 
           const normalizedSearchCupSize = currentSearchParams?.in_cup_size
             ? currentSearchParams.in_cup_size.trim().toUpperCase()
@@ -1125,8 +1191,9 @@
               isCupMatch;
 
             const braWrapper = document.createElement("span");
+            braWrapper.className = "meta-pill-value";
             if (isBraMatch) {
-              braWrapper.className = "match-bra";
+              braWrapper.classList.add("match-bra");
             }
 
             const bandSpan = document.createElement("span");
@@ -1143,31 +1210,48 @@
 
             braWrapper.appendChild(bandSpan);
             braWrapper.appendChild(cupSpan);
-            addMetaNode(braWrapper);
+            appendMetaNode(summaryRow, braWrapper);
+            hasSummaryMeasurements = true;
           } else if (
             r.bust_in_number_display &&
             r.bust_in_number_display.toString().toLowerCase() !== "unknown"
           ) {
-            const bustText = `B${r.bust_in_number_display}"`;
+            const bustText = `${r.bust_in_number_display}"`;
             const isBustMatch =
               currentSearchParams?.in_bust !== null &&
               currentSearchParams?.in_bust !== undefined &&
               Number(currentSearchParams.in_bust) ===
                 Number(r.bust_in_number_display);
-            addMetaPart(bustText, isBustMatch ? "match-bra" : "");
+            appendMetaPill(
+              summaryRow,
+              "",
+              bustText,
+              isBustMatch ? "match-bra" : "",
+            );
+            hasSummaryMeasurements = true;
           }
 
           if (
             r.hips_in_display &&
             r.hips_in_display.toString().toLowerCase() !== "unknown"
           )
-            addMetaPart(`H${r.hips_in_display}"`);
+            appendMetaPill(measurementsRow, "", `${r.hips_in_display}"`);
           if (r.waist_in && r.waist_in.toString().toLowerCase() !== "unknown")
-            addMetaPart(`W${r.waist_in}"`);
-          if (r.color_display && r.color_display.toLowerCase() !== "unknown")
-            addMetaPart(r.color_display);
+            appendMetaPill(measurementsRow, "", `${r.waist_in}"`);
 
-          renderMetaParts(metaParts);
+          const colorRow = createMetaRow();
+          if (r.color_display && r.color_display.toLowerCase() !== "unknown")
+            appendMetaPill(colorRow, "", r.color_display);
+
+          if (!hasSummaryMeasurements && measurementsRow.childNodes.length > 0) {
+            measurementsRow.classList.remove("meta-measurements");
+          }
+
+          [primaryRow, summaryRow, measurementsRow, colorRow].forEach((row) => {
+            if (row.childNodes.length > 0) {
+              meta.appendChild(row);
+            }
+          });
 
           a.appendChild(img);
           a.appendChild(meta);
