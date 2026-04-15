@@ -261,12 +261,24 @@
         color: #c62828;
         font-weight: 700;
       }
+      .match-bust {
+        color: #7b2cbf;
+        font-weight: 700;
+      }
       .match-bra {
         color: #7b2cbf;
         font-weight: 700;
       }
       .match-weight {
         color: #1565c0;
+        font-weight: 700;
+      }
+      .match-waist {
+        color: #2e7d32;
+        font-weight: 700;
+      }
+      .match-hips {
+        color: #ef6c00;
         font-weight: 700;
       }
       .match-bra-partial {
@@ -1111,6 +1123,9 @@
           }
           const primaryRow = createMetaRow();
           appendMetaPill(primaryRow, "Size", sizeText);
+          if (r.color_display && r.color_display.toLowerCase() !== "unknown") {
+            appendMetaPill(primaryRow, "", r.color_display);
+          }
 
           const summaryRow = createMetaRow();
           if (r.height_in_display) {
@@ -1133,14 +1148,17 @@
             r.weight_display_display &&
             r.weight_display_display.toLowerCase() !== "unknown"
           ) {
+            const parsedRowWeight = Number.parseFloat(
+              String(r.weight_display_display).replace(/[^0-9.]+/g, ""),
+            );
             const normalizedSearchWeight =
               currentSearchParams?.in_weight !== null &&
               currentSearchParams?.in_weight !== undefined
                 ? Number(currentSearchParams.in_weight)
                 : null;
             const normalizedRowWeight =
-              r.weight_lbs_display !== null && r.weight_lbs_display !== undefined
-                ? Number(r.weight_lbs_display)
+              Number.isFinite(parsedRowWeight)
+                ? parsedRowWeight
                 : null;
             const isWeightMatch =
               normalizedSearchWeight !== null &&
@@ -1164,6 +1182,31 @@
           const normalizedRowCupSize = r.cupsize_display
             ? r.cupsize_display.trim().toUpperCase()
             : null;
+          const normalizedSearchBust =
+            currentSearchParams?.in_bust !== null &&
+            currentSearchParams?.in_bust !== undefined
+              ? Number(currentSearchParams.in_bust)
+              : null;
+          const normalizedRowBust =
+            r.bust_in_number_display !== null &&
+            r.bust_in_number_display !== undefined
+              ? Number(r.bust_in_number_display)
+              : null;
+          const normalizedSearchWaist =
+            currentSearchParams?.in_waist !== null &&
+            currentSearchParams?.in_waist !== undefined
+              ? Number(currentSearchParams.in_waist)
+              : null;
+          const normalizedRowWaist = num(r.waist_in);
+          const normalizedSearchHips =
+            currentSearchParams?.in_hips !== null &&
+            currentSearchParams?.in_hips !== undefined
+              ? Number(currentSearchParams.in_hips)
+              : null;
+          const normalizedRowHips =
+            r.hips_in_display !== null && r.hips_in_display !== undefined
+              ? Number(r.hips_in_display)
+              : null;
 
           // Format bra size as 32DD if both bust and cup size are available
           if (
@@ -1173,19 +1216,15 @@
             r.cupsize_display.toLowerCase() !== "unknown"
           ) {
             const isBandMatch =
-              currentSearchParams?.in_bust !== null &&
-              currentSearchParams?.in_bust !== undefined &&
-              Number(currentSearchParams.in_bust) ===
-                Number(r.bust_in_number_display);
+              normalizedSearchBust !== null &&
+              normalizedRowBust !== null &&
+              normalizedSearchBust === normalizedRowBust;
             const isCupMatch =
               normalizedSearchCupSize &&
               normalizedRowCupSize &&
               normalizedSearchCupSize === normalizedRowCupSize;
             const isBraMatch =
-              currentSearchParams?.in_bust !== null &&
-              currentSearchParams?.in_bust !== undefined &&
-              isBandMatch &&
-              isCupMatch;
+              isBandMatch && isCupMatch;
 
             const braWrapper = document.createElement("span");
             braWrapper.className = "meta-pill-value";
@@ -1215,15 +1254,14 @@
           ) {
             const bustText = `${r.bust_in_number_display}"`;
             const isBustMatch =
-              currentSearchParams?.in_bust !== null &&
-              currentSearchParams?.in_bust !== undefined &&
-              Number(currentSearchParams.in_bust) ===
-                Number(r.bust_in_number_display);
+              normalizedSearchBust !== null &&
+              normalizedRowBust !== null &&
+              normalizedSearchBust === normalizedRowBust;
             appendMetaPill(
               summaryRow,
               "",
               bustText,
-              isBustMatch ? "match-bra" : "",
+              isBustMatch ? "match-bust" : "",
             );
             hasSummaryMeasurements = true;
           }
@@ -1231,20 +1269,36 @@
           if (
             r.hips_in_display &&
             r.hips_in_display.toString().toLowerCase() !== "unknown"
-          )
-            appendMetaPill(measurementsRow, "", `${r.hips_in_display}"`);
-          if (r.waist_in && r.waist_in.toString().toLowerCase() !== "unknown")
-            appendMetaPill(measurementsRow, "", `${r.waist_in}"`);
-
-          const colorRow = createMetaRow();
-          if (r.color_display && r.color_display.toLowerCase() !== "unknown")
-            appendMetaPill(colorRow, "", r.color_display);
+          ) {
+            const isHipsMatch =
+              normalizedSearchHips !== null &&
+              normalizedRowHips !== null &&
+              normalizedSearchHips === normalizedRowHips;
+            appendMetaPill(
+              measurementsRow,
+              "",
+              `${r.hips_in_display}"`,
+              isHipsMatch ? "match-hips" : "",
+            );
+          }
+          if (r.waist_in && r.waist_in.toString().toLowerCase() !== "unknown") {
+            const isWaistMatch =
+              normalizedSearchWaist !== null &&
+              normalizedRowWaist !== null &&
+              normalizedSearchWaist === normalizedRowWaist;
+            appendMetaPill(
+              measurementsRow,
+              "",
+              `${r.waist_in}"`,
+              isWaistMatch ? "match-waist" : "",
+            );
+          }
 
           if (!hasSummaryMeasurements && measurementsRow.childNodes.length > 0) {
             measurementsRow.classList.remove("meta-measurements");
           }
 
-          [primaryRow, summaryRow, measurementsRow, colorRow].forEach((row) => {
+          [primaryRow, summaryRow, measurementsRow].forEach((row) => {
             if (row.childNodes.length > 0) {
               meta.appendChild(row);
             }
