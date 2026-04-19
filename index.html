@@ -335,6 +335,88 @@
       .product-link:hover {
         background: #333;
       }
+      .report-btn {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 4px 5px;
+        opacity: 0.15;
+        transition: opacity 0.2s;
+        z-index: 10;
+        line-height: 1;
+        width: auto;
+        margin: 0;
+        border-radius: 4px;
+        color: inherit;
+      }
+      .card:hover .report-btn {
+        opacity: 0.45;
+      }
+      .report-btn:hover {
+        opacity: 1 !important;
+        background: rgba(0, 0, 0, 0.07);
+      }
+      .report-dropdown {
+        display: none;
+        position: absolute;
+        bottom: 34px;
+        right: 6px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+        z-index: 30;
+        min-width: 210px;
+        overflow: hidden;
+      }
+      .report-dropdown.open {
+        display: block;
+      }
+      .report-dropdown-header {
+        padding: 7px 12px 5px;
+        font-size: 11px;
+        color: #999;
+        border-bottom: 1px solid #eee;
+        pointer-events: none;
+        user-select: none;
+      }
+      .report-dropdown button {
+        display: block;
+        width: 100%;
+        background: none;
+        border: none;
+        border-radius: 0;
+        padding: 8px 12px;
+        font-size: 12px;
+        text-align: left;
+        color: #333;
+        cursor: pointer;
+        margin: 0;
+      }
+      .report-dropdown button:hover {
+        background: #f5f5f5;
+        color: #111;
+      }
+      .report-thanks {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.92);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: #555;
+        z-index: 20;
+        border-radius: 8px;
+      }
+      .card.fading-out {
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
     </style>
   </head>
   <body>
@@ -1356,8 +1438,69 @@
             }
           });
 
+          // Report button + dropdown
+          const reportBtn = document.createElement("button");
+          reportBtn.className = "report-btn";
+          reportBtn.textContent = "🚩";
+          reportBtn.title = "Report this image";
+
+          const reportDropdown = document.createElement("div");
+          reportDropdown.className = "report-dropdown";
+
+          const reportHeader = document.createElement("div");
+          reportHeader.className = "report-dropdown-header";
+          reportHeader.textContent = "Something wrong with this image?";
+          reportDropdown.appendChild(reportHeader);
+
+          const reportReasons = [
+            { value: "duplicate_image", label: "Duplicate image" },
+            { value: "incorrect_data", label: "Incorrect measurements/category/size" },
+            { value: "image_not_helpful", label: "Image not helpful" },
+            { value: "dead_link", label: "Dead link" },
+            { value: "sold_out", label: "Sold out" },
+            { value: "other_link_problem", label: "Other link problem" },
+          ];
+
+          for (const reason of reportReasons) {
+            const reasonBtn = document.createElement("button");
+            reasonBtn.textContent = reason.label;
+            reasonBtn.addEventListener("click", async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const { error: reportError } = await sb.from("image_reports").insert({
+                image_id: r.id,
+                reason: reason.value,
+                anon_id: FWM_ANON_ID,
+              });
+              if (reportError) {
+                console.error("image_reports insert error:", reportError);
+                return;
+              }
+              reportDropdown.classList.remove("open");
+              const thanks = document.createElement("div");
+              thanks.className = "report-thanks";
+              thanks.textContent = "Thanks for the report!";
+              a.appendChild(thanks);
+              setTimeout(() => {
+                a.classList.add("fading-out");
+                a.addEventListener("transitionend", () => a.remove(), { once: true });
+              }, 800);
+            });
+            reportDropdown.appendChild(reasonBtn);
+          }
+
+          reportBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = reportDropdown.classList.contains("open");
+            document.querySelectorAll(".report-dropdown.open").forEach((d) => d.classList.remove("open"));
+            if (!isOpen) reportDropdown.classList.add("open");
+          });
+
           a.appendChild(img);
           a.appendChild(meta);
+          a.appendChild(reportBtn);
+          a.appendChild(reportDropdown);
           out.appendChild(a);
         }
 
@@ -1369,6 +1512,10 @@
         const n = Number(v);
         return Number.isFinite(n) ? n : null;
       }
+
+      document.addEventListener("click", () => {
+        document.querySelectorAll(".report-dropdown.open").forEach((d) => d.classList.remove("open"));
+      });
     </script>
   </body>
 </html>
