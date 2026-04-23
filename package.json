@@ -1,0 +1,12 @@
+{
+  "name": "friends-with-measurements",
+  "private": true,
+  "scripts": {
+    "playwright:install": "node scripts/run-playwright.mjs install chromium",
+    "test:e2e": "node scripts/run-playwright.mjs test",
+    "test:precommit": "node scripts/run-playwright.mjs test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}

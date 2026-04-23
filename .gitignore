@@ -1,4 +1,31 @@
-data-pipelines/amazon/data/step_1_raw_scraping_data/
-data-pipelines/
-data-pipelines/
-data-pipelines/
+# macOS
+.DS_Store
+
+# Local tool/cache directories
+.claude/
+.codex_tmp/
+.codex_vendor/
+.playwright-browsers/
+.wrangler/
+.npm-cache/
+node_modules/
+playwright-report/
+supabase/.temp/
+test-results/
+
+# Scraping data and generated pipeline artifacts live outside this repo.
+# See DATA.md for the local directory and S3 backup workflow.
+data-pipelines/**/data
+data-pipelines/**/data/
+data-pipelines/**/models
+data-pipelines/**/models/
+
+# Local model weights and downloaded ML assets
+*.pt
+*.onnx
+*.caffemodel
+
+# Local environment/secrets
+.env
+.env.*
+!.env.example
