@@ -194,6 +194,51 @@ export type Database = {
         }
         Relationships: []
       }
+      codex_chat_transcripts: {
+        Row: {
+          chat_key: string
+          context_summary: string | null
+          context_summary_json: Json
+          created_at: string
+          full_text: string
+          id: string
+          local_file_path: string | null
+          message_count: number
+          source: string
+          title: string | null
+          transcript_json: Json
+          updated_at: string
+        }
+        Insert: {
+          chat_key: string
+          context_summary?: string | null
+          context_summary_json?: Json
+          created_at?: string
+          full_text: string
+          id?: string
+          local_file_path?: string | null
+          message_count?: number
+          source?: string
+          title?: string | null
+          transcript_json: Json
+          updated_at?: string
+        }
+        Update: {
+          chat_key?: string
+          context_summary?: string | null
+          context_summary_json?: Json
+          created_at?: string
+          full_text?: string
+          id?: string
+          local_file_path?: string | null
+          message_count?: number
+          source?: string
+          title?: string | null
+          transcript_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       images: {
         Row: {
           age_raw: string | null

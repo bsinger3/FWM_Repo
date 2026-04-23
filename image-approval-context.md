@@ -95,7 +95,7 @@ The visible UI labels are:
 Relevant repo sources:
 
 - `index.html`
-- `supabase/migrations/20260419_add_image_reports.sql`
+- `supabase/migrations/20260419010000_add_image_reports.sql`
 
 ## Computer Vision Decision Boundary
 
