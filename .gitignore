@@ -1,5 +1,7 @@
 # macOS
 .DS_Store
+__pycache__/
+*.pyc
 
 # Local tool/cache directories
 .claude/
@@ -19,6 +21,7 @@ data-pipelines/**/data
 data-pipelines/**/data/
 data-pipelines/**/models
 data-pipelines/**/models/
+_preserved_local_before_sync_*/
 
 # Local model weights and downloaded ML assets
 *.pt
