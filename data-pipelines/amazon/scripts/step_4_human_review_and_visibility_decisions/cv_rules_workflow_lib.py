@@ -71,16 +71,23 @@ REQUIRED_EXPORT_COLUMNS = CV_METADATA_COLUMNS + REQUIRED_CV_COLUMNS + RULE_OUTPU
 REJECT_NO_PERSON_COUNT = 0
 REJECT_MIN_BODY_COVERAGE = 66.7
 REJECT_MIN_SUBJECT_HEIGHT_PCT = 0.50
+REJECT_NO_FACE_SMALL_SUBJECT_HEIGHT_PCT = 0.70
+REJECT_NO_FACE_SMALL_SUBJECT_AREA_PCT = 0.25
 APPROVE_MIN_BODY_COVERAGE = 75.0
 APPROVE_MIN_SUBJECT_HEIGHT_PCT = 0.60
 APPROVE_MIN_SUBJECT_AREA_PCT = 0.15
+APPROVE_FACE_PRESENT_SMALL_SUBJECT_MIN_BODY_COVERAGE = 100.0
+APPROVE_FACE_PRESENT_SMALL_SUBJECT_HEIGHT_PCT = 0.55
+APPROVE_FACE_PRESENT_SMALL_SUBJECT_AREA_PCT = 0.12
 
 REASON_SUMMARIES = {
     "NO_PERSON": "No person detected",
     "MULTIPLE_PEOPLE": "Multiple people detected",
     "LOW_BODY_COVERAGE": "Too little body visible",
     "SUBJECT_TOO_SMALL": "Person too small in frame",
+    "SMALL_SUBJECT_NO_FACE": "Faceless subject is too small or distant",
     "CLEAR_PASS": "Single person, strong framing, enough body visible",
+    "FACE_PRESENT_SMALL_SUBJECT_CLEAR": "Face present and framing is clear despite a smaller subject",
     "MISSING_CV_DATA": "Required CV data missing",
     "BORDERLINE_BODY_COVERAGE": "Body visibility is borderline",
     "BORDERLINE_SUBJECT_SIZE": "Person size is borderline",
@@ -472,12 +479,35 @@ def evaluate_cv_rules(row: Dict[str, object]) -> Tuple[str, str, str]:
 
     if (
         int(person_count) == 1
+        and has_face is False
+        and subject_area is not None
+        and (
+            subject_height < REJECT_NO_FACE_SMALL_SUBJECT_HEIGHT_PCT
+            or subject_area < REJECT_NO_FACE_SMALL_SUBJECT_AREA_PCT
+        )
+    ):
+        code = "SMALL_SUBJECT_NO_FACE"
+        return "REJECT", code, reason_summary(code)
+
+    if (
+        int(person_count) == 1
         and body_coverage >= APPROVE_MIN_BODY_COVERAGE
         and subject_height >= APPROVE_MIN_SUBJECT_HEIGHT_PCT
         and subject_area is not None
         and subject_area >= APPROVE_MIN_SUBJECT_AREA_PCT
     ):
         code = "CLEAR_PASS"
+        return "APPROVE", code, reason_summary(code)
+
+    if (
+        int(person_count) == 1
+        and has_face is True
+        and body_coverage >= APPROVE_FACE_PRESENT_SMALL_SUBJECT_MIN_BODY_COVERAGE
+        and subject_height >= APPROVE_FACE_PRESENT_SMALL_SUBJECT_HEIGHT_PCT
+        and subject_area is not None
+        and subject_area >= APPROVE_FACE_PRESENT_SMALL_SUBJECT_AREA_PCT
+    ):
+        code = "FACE_PRESENT_SMALL_SUBJECT_CLEAR"
         return "APPROVE", code, reason_summary(code)
 
     if REJECT_MIN_BODY_COVERAGE <= body_coverage < APPROVE_MIN_BODY_COVERAGE:
