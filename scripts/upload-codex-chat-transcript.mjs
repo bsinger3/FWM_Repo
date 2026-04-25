@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
 const DEFAULT_OPENAI_MODEL = "gpt-5.2";
@@ -60,6 +60,97 @@ function flattenMessages(messages) {
     .join("\n\n---\n\n");
 }
 
+function normalizeIsoTimestamp(value) {
+  if (!value) return null;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value.toISOString();
+  }
+  if (typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const parsed = new Date(trimmed);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
+  return null;
+}
+
+function findMessageTimestamp(message) {
+  if (!message || typeof message !== "object") return null;
+  const directKeys = [
+    "timestamp",
+    "created_at",
+    "createdAt",
+    "time",
+    "sent_at",
+    "sentAt",
+  ];
+  for (const key of directKeys) {
+    const normalized = normalizeIsoTimestamp(message[key]);
+    if (normalized) return normalized;
+  }
+
+  if (message.metadata && typeof message.metadata === "object") {
+    for (const key of directKeys) {
+      const normalized = normalizeIsoTimestamp(message.metadata[key]);
+      if (normalized) return normalized;
+    }
+  }
+
+  return null;
+}
+
+async function resolveTranscriptTiming(parsed, transcriptPath) {
+  const metadata = parsed?.metadata && typeof parsed.metadata === "object" ? parsed.metadata : {};
+  const startedCandidates = [
+    parsed?.transcript_started_at,
+    parsed?.conversation_started_at,
+    parsed?.started_at,
+    metadata.transcript_started_at,
+    metadata.conversation_started_at,
+    metadata.started_at,
+  ];
+  const endedCandidates = [
+    parsed?.transcript_ended_at,
+    parsed?.conversation_ended_at,
+    parsed?.ended_at,
+    parsed?.generated_at,
+    metadata.transcript_ended_at,
+    metadata.conversation_ended_at,
+    metadata.ended_at,
+    metadata.generated_at,
+  ];
+
+  let transcriptStartedAt =
+    startedCandidates.map(normalizeIsoTimestamp).find(Boolean) || null;
+  let transcriptEndedAt =
+    endedCandidates.map(normalizeIsoTimestamp).find(Boolean) || null;
+
+  const messages = Array.isArray(parsed?.messages) ? parsed.messages : [];
+  if (!transcriptStartedAt) {
+    transcriptStartedAt = messages.map(findMessageTimestamp).find(Boolean) || null;
+  }
+  if (!transcriptEndedAt) {
+    transcriptEndedAt = [...messages].reverse().map(findMessageTimestamp).find(Boolean) || null;
+  }
+
+  const fileStats = await stat(transcriptPath);
+  if (!transcriptStartedAt && fileStats.birthtimeMs > 0) {
+    transcriptStartedAt = new Date(fileStats.birthtimeMs).toISOString();
+  }
+  if (!transcriptEndedAt) {
+    transcriptEndedAt = new Date(fileStats.mtimeMs).toISOString();
+  }
+
+  return {
+    transcriptStartedAt,
+    transcriptEndedAt,
+  };
+}
+
 function buildChatKey({ source, title, fullText }) {
   const hash = createHash("sha256").update(fullText).digest("hex").slice(0, 16);
   const titleSlug = String(title || "untitled-chat")
@@ -70,7 +161,15 @@ function buildChatKey({ source, title, fullText }) {
   return `${source}-${titleSlug}-${hash}`;
 }
 
-function buildSummaryPrompt({ title, source, messageCount, localFilePath, fullText }) {
+function buildSummaryPrompt({
+  title,
+  source,
+  messageCount,
+  localFilePath,
+  transcriptStartedAt,
+  transcriptEndedAt,
+  fullText,
+}) {
   return [
     "Summarize this Codex work transcript into durable project context.",
     "Use only facts grounded in the transcript.",
@@ -80,13 +179,23 @@ function buildSummaryPrompt({ title, source, messageCount, localFilePath, fullTe
     `Source: ${source}`,
     `Message count: ${messageCount}`,
     `Local transcript path: ${localFilePath}`,
+    `Conversation started at: ${transcriptStartedAt || ""}`,
+    `Conversation ended at: ${transcriptEndedAt || ""}`,
     "",
     "Transcript:",
     fullText,
   ].join("\n");
 }
 
-async function generateContextSummary({ title, source, messageCount, localFilePath, fullText }) {
+async function generateContextSummary({
+  title,
+  source,
+  messageCount,
+  localFilePath,
+  transcriptStartedAt,
+  transcriptEndedAt,
+  fullText,
+}) {
   const apiKey = requiredEnv("OPENAI_API_KEY");
   const model = process.env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL;
 
@@ -114,7 +223,15 @@ async function generateContextSummary({ title, source, messageCount, localFilePa
           content: [
             {
               type: "input_text",
-              text: buildSummaryPrompt({ title, source, messageCount, localFilePath, fullText }),
+              text: buildSummaryPrompt({
+                title,
+                source,
+                messageCount,
+                localFilePath,
+                transcriptStartedAt,
+                transcriptEndedAt,
+                fullText,
+              }),
             },
           ],
         },
@@ -198,6 +315,32 @@ async function generateContextSummary({ title, source, messageCount, localFilePa
   };
 }
 
+async function generateContextSummaryWithFallback(input) {
+  try {
+    return {
+      ...(await generateContextSummary(input)),
+      summaryError: null,
+    };
+  } catch (error) {
+    return {
+      model: null,
+      summary: "",
+      summaryJson: {
+        summary: "",
+        project: "",
+        goals: [],
+        decisions_made: [],
+        open_tasks: [],
+        blockers: [],
+        important_paths: [],
+        important_env_vars: [],
+        next_steps: [],
+      },
+      summaryError: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
 async function main() {
   await loadDotEnv();
 
@@ -212,24 +355,45 @@ async function main() {
   const title = parsed.title || path.basename(transcriptPath);
   const now = new Date().toISOString();
   const chatKey = buildChatKey({ source, title, fullText });
-  const { model, summary, summaryJson } = await generateContextSummary({
+  const { transcriptStartedAt, transcriptEndedAt } = await resolveTranscriptTiming(parsed, transcriptPath);
+  const { model, summary, summaryJson, summaryError } = await generateContextSummaryWithFallback({
     title,
     source,
     messageCount: messages.length,
     localFilePath: transcriptPath,
+    transcriptStartedAt,
+    transcriptEndedAt,
     fullText,
   });
+
+  const transcriptWithTiming = {
+    ...parsed,
+    transcript_started_at: transcriptStartedAt,
+    transcript_ended_at: transcriptEndedAt,
+    generated_at: parsed.generated_at || now,
+    metadata: {
+      ...(parsed.metadata && typeof parsed.metadata === "object" ? parsed.metadata : {}),
+      transcript_started_at: transcriptStartedAt,
+      transcript_ended_at: transcriptEndedAt,
+      uploaded_at: now,
+    },
+  };
 
   const row = {
     chat_key: chatKey,
     source,
     title,
-    transcript_json: parsed,
+    transcript_started_at: transcriptStartedAt,
+    transcript_ended_at: transcriptEndedAt,
+    transcript_json: transcriptWithTiming,
     full_text: fullText,
     context_summary: summary,
     context_summary_json: {
       ...summaryJson,
       summary_model: model,
+      summary_error: summaryError,
+      transcript_started_at: transcriptStartedAt,
+      transcript_ended_at: transcriptEndedAt,
     },
     message_count: messages.length,
     local_file_path: transcriptPath,
@@ -266,7 +430,10 @@ async function main() {
         chat_key: saved?.chat_key ?? chatKey,
         message_count: row.message_count,
         title,
+        transcript_started_at: transcriptStartedAt,
+        transcript_ended_at: transcriptEndedAt,
         summary_model: model,
+        summary_error: summaryError,
         context_summary: summary,
       },
       null,

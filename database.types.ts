@@ -206,6 +206,8 @@ export type Database = {
           message_count: number
           source: string
           title: string | null
+          transcript_ended_at: string | null
+          transcript_started_at: string | null
           transcript_json: Json
           updated_at: string
         }
@@ -220,6 +222,8 @@ export type Database = {
           message_count?: number
           source?: string
           title?: string | null
+          transcript_ended_at?: string | null
+          transcript_started_at?: string | null
           transcript_json: Json
           updated_at?: string
         }
@@ -234,6 +238,8 @@ export type Database = {
           message_count?: number
           source?: string
           title?: string | null
+          transcript_ended_at?: string | null
+          transcript_started_at?: string | null
           transcript_json?: Json
           updated_at?: string
         }

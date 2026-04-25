@@ -7,6 +7,8 @@ CREATE TABLE codex_chat_transcripts (
   chat_key             text NOT NULL UNIQUE,
   source               text NOT NULL DEFAULT 'codex',
   title                text,
+  transcript_started_at timestamptz,
+  transcript_ended_at   timestamptz,
   transcript_json      jsonb NOT NULL,
   full_text            text NOT NULL,
   context_summary      text,

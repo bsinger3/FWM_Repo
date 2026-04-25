@@ -42,12 +42,24 @@ Use the service role key, not the anon key. The table is intentionally locked do
 The upload script:
 
 1. Reads `codex-chat-transcript.json`
-2. Builds a `full_text` version from all messages
-3. Uses the OpenAI Responses API to generate a structured context summary
-4. Computes a deterministic `chat_key`
-5. Upserts the transcript into `codex_chat_transcripts`
+2. Resolves conversation start/end timestamps from transcript metadata when available
+3. Builds a `full_text` version from all messages
+4. Uses the OpenAI Responses API to generate a structured context summary
+5. Computes a deterministic `chat_key`
+6. Upserts the transcript into `codex_chat_transcripts`
 
 It also handles slightly richer transcript message shapes than plain `{ role, text }`, so a future export with nested `content` still gets flattened into `full_text`.
+
+For timing, the uploader looks first for top-level or `metadata` fields such as:
+
+```json
+{
+  "transcript_started_at": "2026-04-23T16:42:11-04:00",
+  "transcript_ended_at": "2026-04-25T11:00:00-04:00"
+}
+```
+
+If those are missing, it falls back to any per-message timestamps it can find, then to the transcript file's filesystem timestamps as a best effort.
 
 If you rerun the script for the same transcript, it updates the existing row instead of creating duplicates.
 
@@ -99,6 +111,8 @@ After a successful sync, Codex should report:
 
 - `chat_key`
 - `message_count`
+- `transcript_started_at`
+- `transcript_ended_at`
 - whether the upload succeeded
 
 The upload script itself returns a JSON result with fields like:
@@ -109,6 +123,8 @@ The upload script itself returns a JSON result with fields like:
   "chat_key": "codex-...",
   "message_count": 71,
   "title": "Codex Chat Transcript",
+  "transcript_started_at": "2026-04-23T16:42:11.000Z",
+  "transcript_ended_at": "2026-04-25T15:00:00.000Z",
   "summary_model": "gpt-5.2",
   "context_summary": "..."
 }
