@@ -60,6 +60,72 @@ function flattenMessages(messages) {
     .join("\n\n---\n\n");
 }
 
+async function uploadTranscriptRow({ supabaseUrl, serviceRoleKey, row }) {
+  const endpoint = `${supabaseUrl}/rest/v1/codex_chat_transcripts?on_conflict=chat_key`;
+  const headers = {
+    apikey: serviceRoleKey,
+    Authorization: `Bearer ${serviceRoleKey}`,
+    "Content-Type": "application/json",
+    Prefer: "resolution=merge-duplicates,return=representation",
+  };
+
+  async function postRow(bodyRow) {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(bodyRow),
+    });
+
+    if (response.ok) {
+      return response;
+    }
+
+    const text = await response.text();
+    let parsedError = null;
+    try {
+      parsedError = JSON.parse(text);
+    } catch {
+      parsedError = null;
+    }
+
+    return {
+      ok: false,
+      status: response.status,
+      text,
+      parsedError,
+    };
+  }
+
+  const initial = await postRow(row);
+  if (initial.ok) {
+    return initial;
+  }
+
+  const missingTimingColumn =
+    initial.status === 400 &&
+    initial.parsedError?.code === "PGRST204" &&
+    typeof initial.parsedError?.message === "string" &&
+    (
+      initial.parsedError.message.includes("transcript_started_at") ||
+      initial.parsedError.message.includes("transcript_ended_at")
+    );
+
+  if (!missingTimingColumn) {
+    throw new Error(`Supabase upload failed (${initial.status}): ${initial.text}`);
+  }
+
+  const fallbackRow = { ...row };
+  delete fallbackRow.transcript_started_at;
+  delete fallbackRow.transcript_ended_at;
+
+  const fallback = await postRow(fallbackRow);
+  if (!fallback.ok) {
+    throw new Error(`Supabase upload failed (${fallback.status}): ${fallback.text}`);
+  }
+
+  return fallback;
+}
+
 function normalizeIsoTimestamp(value) {
   if (!value) return null;
   if (value instanceof Date) {
@@ -402,24 +468,7 @@ async function main() {
 
   const supabaseUrl = requiredEnv("SUPABASE_URL");
   const serviceRoleKey = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/codex_chat_transcripts?on_conflict=chat_key`,
-    {
-      method: "POST",
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates,return=representation",
-      },
-      body: JSON.stringify(row),
-    },
-  );
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Supabase upload failed (${response.status}): ${text}`);
-  }
+  const response = await uploadTranscriptRow({ supabaseUrl, serviceRoleKey, row });
 
   const result = await response.json();
   const saved = Array.isArray(result) ? result[0] : result;
