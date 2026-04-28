@@ -37,7 +37,14 @@ function makeImage(id: string, overrides: TableRow = {}): TableRow {
   };
 }
 
-const randomRows = [makeImage("random-1"), makeImage("random-2", { size_display: "L" })];
+const randomRows = [
+  makeImage("random-1"),
+  makeImage("random-2", {
+    size_display: "L",
+    weight_display_display: "120",
+    cupsize_display: null,
+  }),
+];
 const searchRows = [
   makeImage("search-1", {
     height_in_display: 65,
@@ -108,6 +115,23 @@ test("homepage renders random results and loads browser-visible cards", async ({
       expect.objectContaining({ type: "select", table: "clothing_types" }),
       expect.objectContaining({ type: "select", table: "images" }),
     ]),
+  );
+});
+
+test("product cards keep measurements in one wrapping row with clear units", async ({ page }) => {
+  await page.goto("/");
+
+  const firstCard = page.locator("#out .card").first();
+  await expect(firstCard.locator(".meta-row")).toHaveCount(2);
+  await expect(firstCard.locator(".meta-row").nth(1)).toContainText('140 lb');
+  await expect(firstCard.locator(".meta-row").nth(1)).toContainText('Hips40"');
+  await expect(firstCard.locator(".meta-row").nth(1)).toContainText('Waist29"');
+
+  await expect(page.locator("#out .card").nth(1).locator(".meta-row").nth(1)).toContainText(
+    "120 lb",
+  );
+  await expect(page.locator("#out .card").nth(1).locator(".meta-row").nth(1)).toContainText(
+    'Bust34"',
   );
 });
 

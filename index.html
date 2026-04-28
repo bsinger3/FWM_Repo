@@ -253,10 +253,6 @@
       .meta-pill-value.match-weight {
         font-weight: 700;
       }
-      .meta-measurements {
-        padding-top: 6px;
-        border-top: 1px solid #f0f0f0;
-      }
       .match-height {
         color: #c62828;
         font-weight: 700;
@@ -1334,6 +1330,20 @@
             row.appendChild(pill);
           }
 
+          function formatWeightText(value) {
+            if (!value) return "";
+            const raw = String(value).trim();
+            if (!raw || raw.toLowerCase() === "unknown") return "";
+            const numeric = Number.parseFloat(raw.replace(/[^0-9.]+/g, ""));
+            if (!Number.isFinite(numeric)) return raw;
+            const formattedNumber = Number.isInteger(numeric)
+              ? String(numeric)
+              : String(numeric).replace(/\.0+$/, "");
+            return /\b(lb|lbs|pound|pounds)\b/i.test(raw)
+              ? raw.replace(/\s*(lbs?|pounds?)\b/i, " lb")
+              : `${formattedNumber} lb`;
+          }
+
           // Normalize size display
           let sizeText = r.size_display;
           if (sizeText) {
@@ -1384,17 +1394,15 @@
               normalizedSearchWeight !== null &&
               normalizedRowWeight !== null &&
               normalizedSearchWeight === normalizedRowWeight;
+            const weightText = formatWeightText(r.weight_display_display);
 
             appendMetaPill(
               summaryRow,
               "",
-              r.weight_display_display,
+              weightText,
               isWeightMatch ? "match-weight" : "",
             );
           }
-
-          let hasSummaryMeasurements = summaryRow.childNodes.length > 0;
-          const measurementsRow = createMetaRow("meta-measurements");
 
           const normalizedSearchCupSize = currentSearchParams?.in_cup_size
             ? currentSearchParams.in_cup_size.trim().toUpperCase()
@@ -1467,7 +1475,6 @@
             braWrapper.appendChild(bandSpan);
             braWrapper.appendChild(cupSpan);
             appendMetaNode(summaryRow, braWrapper);
-            hasSummaryMeasurements = true;
           } else if (
             r.bust_in_number_display &&
             r.bust_in_number_display.toString().toLowerCase() !== "unknown"
@@ -1479,11 +1486,10 @@
               normalizedSearchBust === normalizedRowBust;
             appendMetaPill(
               summaryRow,
-              "",
+              "Bust",
               bustText,
               isBustMatch ? "match-bust" : "",
             );
-            hasSummaryMeasurements = true;
           }
 
           if (
@@ -1495,8 +1501,8 @@
               normalizedRowHips !== null &&
               normalizedSearchHips === normalizedRowHips;
             appendMetaPill(
-              measurementsRow,
-              "",
+              summaryRow,
+              "Hips",
               `${r.hips_in_display}"`,
               isHipsMatch ? "match-hips" : "",
             );
@@ -1507,18 +1513,14 @@
               normalizedRowWaist !== null &&
               normalizedSearchWaist === normalizedRowWaist;
             appendMetaPill(
-              measurementsRow,
-              "",
+              summaryRow,
+              "Waist",
               `${r.waist_in}"`,
               isWaistMatch ? "match-waist" : "",
             );
           }
 
-          if (!hasSummaryMeasurements && measurementsRow.childNodes.length > 0) {
-            measurementsRow.classList.remove("meta-measurements");
-          }
-
-          [primaryRow, summaryRow, measurementsRow].forEach((row) => {
+          [primaryRow, summaryRow].forEach((row) => {
             if (row.childNodes.length > 0) {
               meta.appendChild(row);
             }
