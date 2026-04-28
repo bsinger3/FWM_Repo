@@ -526,6 +526,24 @@
     </div>
 
     <script src="./config.js"></script>
+    <script type="text/javascript">
+      if (window.SOVRN_COMMERCE_API_KEY) {
+        window.vglnk = {
+          key: window.SOVRN_COMMERCE_API_KEY,
+          enabled: Boolean(window.SOVRN_COMMERCE?.enabled),
+          reaffiliate: Boolean(window.SOVRN_COMMERCE?.reaffiliate),
+        };
+
+        (function (d, t) {
+          var s = d.createElement(t);
+          s.type = "text/javascript";
+          s.async = true;
+          s.src = "https://cdn.viglink.com/api/vglnk.js";
+          var r = d.getElementsByTagName(t)[0];
+          r.parentNode.insertBefore(s, r);
+        })(document, "script");
+      }
+    </script>
     <script type="module">
         /// <reference path="./database.types.ts" />
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -583,12 +601,6 @@
         } else if (config.cuid) {
           window.vglnk.cuid = config.cuid;
         }
-
-        const script = document.createElement("script");
-        script.type = "text/javascript";
-        script.async = true;
-        script.src = "https://cdn.viglink.com/api/vglnk.js";
-        document.body.appendChild(script);
       }
 
       installSovrnCommerce();
