@@ -111,6 +111,97 @@ test("homepage renders random results and loads browser-visible cards", async ({
   );
 });
 
+test("product cards keep plain merchant URLs ready for Sovrn Commerce", async ({ page }) => {
+  await page.goto("/");
+
+  const firstCard = page.locator("#out .card").first();
+  await expect(firstCard).toHaveAttribute("href", "https://shop.example.com/products/random-1");
+  await expect(firstCard).toHaveAttribute("rel", /sponsored/);
+
+  await page.waitForFunction(() => {
+    const calls = (window as typeof window & { __fwmCalls?: SupabaseCall[] }).__fwmCalls || [];
+    return calls.some(
+      (call) =>
+        call.type === "insert" &&
+        call.table === "product_card_events" &&
+        Array.isArray(call.payload) &&
+        call.payload.some((row) => row.event_type === "impression"),
+    );
+  });
+
+  await page.waitForFunction(() => {
+    const calls = (window as typeof window & { __fwmCalls?: SupabaseCall[] }).__fwmCalls || [];
+    return calls.some(
+      (call) =>
+        call.type === "insert" &&
+        call.table === "product_card_events" &&
+        !Array.isArray(call.payload) &&
+        call.payload.event_type === "view",
+    );
+  });
+
+  await firstCard.dispatchEvent("click", { button: 0 });
+  await page.waitForFunction(() => {
+    const calls = (window as typeof window & { __fwmCalls?: SupabaseCall[] }).__fwmCalls || [];
+    return calls.some(
+      (call) =>
+        call.type === "insert" &&
+        call.table === "product_card_events" &&
+        !Array.isArray(call.payload) &&
+        call.payload.event_type === "click",
+    );
+  });
+
+  const calls = await readSupabaseCalls(page);
+  const impressionInsert = calls.find(
+    (call): call is Extract<SupabaseCall, { type: "insert" }> =>
+      call.type === "insert" &&
+      call.table === "product_card_events" &&
+      Array.isArray(call.payload),
+  );
+  const viewInsert = calls.find(
+    (call): call is Extract<SupabaseCall, { type: "insert" }> =>
+      call.type === "insert" &&
+      call.table === "product_card_events" &&
+      !Array.isArray(call.payload) &&
+      call.payload.event_type === "view",
+  );
+  const clickInsert = calls.find(
+    (call): call is Extract<SupabaseCall, { type: "insert" }> =>
+      call.type === "insert" &&
+      call.table === "product_card_events" &&
+      !Array.isArray(call.payload) &&
+      call.payload.event_type === "click",
+  );
+
+  expect(impressionInsert?.payload).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        event_type: "impression",
+        image_id: "random-1",
+        product_url: "https://shop.example.com/products/random-1",
+        result_context: "random",
+      }),
+    ]),
+  );
+  expect(viewInsert?.payload).toEqual(
+    expect.objectContaining({
+      event_type: "view",
+      image_id: "random-1",
+      product_url: "https://shop.example.com/products/random-1",
+      result_context: "random",
+    }),
+  );
+  expect(clickInsert?.payload).toEqual(
+    expect.objectContaining({
+      event_type: "click",
+      image_id: "random-1",
+      product_url: "https://shop.example.com/products/random-1",
+      result_context: "random",
+    }),
+  );
+});
+
 test("search renders results and records the expected Supabase inserts and RPC calls", async ({ page }) => {
   await page.goto("/");
 

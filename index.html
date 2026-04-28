@@ -514,9 +514,9 @@
       </form>
 
       <p style="font-size: 12px; color: #666; margin-top: 20px">
-        <a href="/about.html" style="color: inherit">About</a> •
-        <a href="/privacy.html" style="color: inherit">Privacy</a> •
-        <a href="/terms.html" style="color: inherit">Terms</a>
+        <a href="/about.html" class="norewrite nooptimize" style="color: inherit">About</a> •
+        <a href="/privacy.html" class="norewrite nooptimize" style="color: inherit">Privacy</a> •
+        <a href="/terms.html" class="norewrite nooptimize" style="color: inherit">Terms</a>
       </p>
     </div>
 
@@ -550,6 +550,48 @@
       }
 
       const FWM_SESSION_ID = getOrCreateSessionId();
+
+      function getSovrnCommerceConfig() {
+        const defaults = {
+          key: "",
+          enabled: false,
+          reaffiliate: false,
+          cuidFromAnonId: true,
+          preferPlainProductUrls: true,
+          useDynamicOpen: true,
+        };
+
+        return {
+          ...defaults,
+          ...(window.SOVRN_COMMERCE || {}),
+        };
+      }
+
+      function installSovrnCommerce() {
+        const config = getSovrnCommerceConfig();
+        if (!config.key) return;
+
+        window.vglnk = {
+          ...(window.vglnk || {}),
+          key: config.key,
+          enabled: Boolean(config.enabled),
+          reaffiliate: Boolean(config.reaffiliate),
+        };
+
+        if (config.cuidFromAnonId) {
+          window.vglnk.cuid = FWM_ANON_ID;
+        } else if (config.cuid) {
+          window.vglnk.cuid = config.cuid;
+        }
+
+        const script = document.createElement("script");
+        script.type = "text/javascript";
+        script.async = true;
+        script.src = "https://cdn.viglink.com/api/vglnk.js";
+        document.body.appendChild(script);
+      }
+
+      installSovrnCommerce();
 
       function getUtmParams() {
         const p = new URLSearchParams(window.location.search);
@@ -603,6 +645,35 @@
       let totalResultCount = 0;
       let supportsCupSizeRpc = true;
       let supportsCupSizeSearchRpc = true;
+      const trackedProductCardImpressions = new Set();
+      const trackedProductCardViews = new Set();
+      const productCardViewObserver =
+        "IntersectionObserver" in window
+          ? new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (!entry.isIntersecting || entry.intersectionRatio < 0.5) {
+                    return;
+                  }
+
+                  const target = entry.target;
+                  productCardViewObserver.unobserve(target);
+                  const event = target.__fwmViewEvent;
+                  const viewKey = target.__fwmViewKey;
+                  if (!event || !viewKey || trackedProductCardViews.has(viewKey)) {
+                    return;
+                  }
+
+                  trackedProductCardViews.add(viewKey);
+                  trackProductCardEventPayload(event);
+                });
+              },
+              {
+                root: mainContent,
+                threshold: 0.5,
+              },
+            )
+          : null;
 
       async function fetchLegacyMatchesWithOptionalCupFilter() {
         const normalizedSearchCupSize = currentSearchParams?.in_cup_size
@@ -1092,8 +1163,7 @@
               r.bust_in_number_display ||
               r.hips_in_display ||
               r.waist_in;
-            const hasLink =
-              r.monetized_product_url_display || r.product_page_url_display;
+            const hasLink = getProductUrl(r);
             return hasSize && hasImage && hasBodyMeasurement && hasLink;
           });
 
@@ -1142,6 +1212,8 @@
 
         let displayed = 0;
         let skipped = 0;
+        const baseCardPosition = append ? out.querySelectorAll(".card").length : 0;
+        const impressionEvents = [];
 
         for (const r of rows) {
           const hasSize =
@@ -1155,8 +1227,7 @@
             r.bust_in_number_display ||
             r.hips_in_display ||
             r.waist_in;
-          const hasLink =
-            r.monetized_product_url_display || r.product_page_url_display;
+          const hasLink = getProductUrl(r);
 
           if (!hasSize || !hasImage || !hasBodyMeasurement || !hasLink) {
             skipped++;
@@ -1167,21 +1238,24 @@
               hasLink,
               size: r.size_display,
               image: r.original_url_display ? "yes" : "no",
-              link:
-                r.monetized_product_url_display || r.product_page_url_display
-                  ? "yes"
-                  : "no",
+              link: getProductUrl(r) ? "yes" : "no",
             });
             continue;
           }
 
           displayed++;
+          const cardPosition = baseCardPosition + displayed;
 
           const a = document.createElement("a");
           a.className = "card";
-          a.href =
-            r.monetized_product_url_display || r.product_page_url_display;
+          const productUrl = getProductUrl(r);
+          a.href = productUrl;
           a.target = "_blank";
+          a.rel = "noopener noreferrer sponsored";
+          a.addEventListener("click", (e) => {
+            trackProductCardEvent("click", r, productUrl, cardPosition);
+            maybeOpenWithSovrn(e, productUrl, a.target);
+          });
 
           const img = document.createElement("img");
           img.loading = "lazy";
@@ -1502,9 +1576,116 @@
           a.appendChild(reportBtn);
           a.appendChild(reportDropdown);
           out.appendChild(a);
+
+          const impressionKey = [
+            currentSearchEventId || "random",
+            r.id,
+            cardPosition,
+          ].join(":");
+          if (!trackedProductCardImpressions.has(impressionKey)) {
+            trackedProductCardImpressions.add(impressionKey);
+            impressionEvents.push(
+              buildProductCardEvent("impression", r, productUrl, cardPosition),
+            );
+          }
+
+          registerProductCardView(a, r, productUrl, cardPosition);
+        }
+
+        if (impressionEvents.length > 0) {
+          sb.from("product_card_events")
+            .insert(impressionEvents)
+            .then(({ error }) => {
+              if (error) {
+                console.error("product_card_events impression insert error:", error);
+              }
+            });
         }
 
         console.log(`RESULT: Displayed ${displayed} cards, skipped ${skipped}`);
+      }
+
+      function buildProductCardEvent(eventType, row, productUrl, cardPosition) {
+        return {
+          event_type: eventType,
+          image_id: row.id || null,
+          search_event_id: currentSearchEventId,
+          anon_id: FWM_ANON_ID,
+          session_id: FWM_SESSION_ID,
+          page_url: window.location.href,
+          product_url: productUrl || null,
+          source_site_display: row.source_site_display || null,
+          card_position: cardPosition,
+          result_context: currentSearchEventId ? "search" : "random",
+        };
+      }
+
+      function trackProductCardEvent(eventType, row, productUrl, cardPosition) {
+        trackProductCardEventPayload(
+          buildProductCardEvent(eventType, row, productUrl, cardPosition),
+        );
+      }
+
+      function trackProductCardEventPayload(payload) {
+        sb.from("product_card_events")
+          .insert(payload)
+          .then(({ error }) => {
+            if (error) {
+              console.error(
+                `product_card_events ${payload.event_type} insert error:`,
+                error,
+              );
+            }
+          });
+      }
+
+      function registerProductCardView(card, row, productUrl, cardPosition) {
+        const viewKey = [
+          currentSearchEventId || "random",
+          row.id,
+          cardPosition,
+        ].join(":");
+        if (trackedProductCardViews.has(viewKey)) return;
+
+        const viewEvent = buildProductCardEvent("view", row, productUrl, cardPosition);
+        if (!productCardViewObserver) {
+          trackedProductCardViews.add(viewKey);
+          trackProductCardEventPayload(viewEvent);
+          return;
+        }
+
+        card.__fwmViewEvent = viewEvent;
+        card.__fwmViewKey = viewKey;
+        productCardViewObserver.observe(card);
+      }
+
+      function getProductUrl(row) {
+        const config = getSovrnCommerceConfig();
+        if (config.preferPlainProductUrls && row.product_page_url_display) {
+          return row.product_page_url_display;
+        }
+        return row.monetized_product_url_display || row.product_page_url_display;
+      }
+
+      function maybeOpenWithSovrn(event, url, target) {
+        const config = getSovrnCommerceConfig();
+        if (
+          !url ||
+          !config.enabled ||
+          !config.useDynamicOpen ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          !window.vglnk ||
+          typeof window.vglnk.open !== "function"
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        window.vglnk.open(url, target || "_blank");
       }
 
       function num(v) {

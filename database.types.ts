@@ -658,6 +658,66 @@ export type Database = {
         }
         Relationships: []
       }
+      product_card_events: {
+        Row: {
+          anon_id: string
+          card_position: number | null
+          created_at: string
+          event_type: Database["public"]["Enums"]["product_card_event_type"]
+          id: string
+          image_id: string | null
+          page_url: string | null
+          product_url: string | null
+          result_context: string
+          search_event_id: string | null
+          session_id: string
+          source_site_display: string | null
+        }
+        Insert: {
+          anon_id: string
+          card_position?: number | null
+          created_at?: string
+          event_type: Database["public"]["Enums"]["product_card_event_type"]
+          id?: string
+          image_id?: string | null
+          page_url?: string | null
+          product_url?: string | null
+          result_context?: string
+          search_event_id?: string | null
+          session_id: string
+          source_site_display?: string | null
+        }
+        Update: {
+          anon_id?: string
+          card_position?: number | null
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["product_card_event_type"]
+          id?: string
+          image_id?: string | null
+          page_url?: string | null
+          product_url?: string | null
+          result_context?: string
+          search_event_id?: string | null
+          session_id?: string
+          source_site_display?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_card_events_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_card_events_search_event_id_fkey"
+            columns: ["search_event_id"]
+            isOneToOne: false
+            referencedRelation: "search_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       search_events: {
         Row: {
           anon_id: string
@@ -723,7 +783,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      product_card_ctr_daily: {
+        Row: {
+          clicks: number | null
+          click_through_rate: number | null
+          event_date: string | null
+          impressions: number | null
+          view_click_through_rate: number | null
+          views: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       format_weight_display: {
@@ -872,6 +942,7 @@ export type Database = {
       }
     }
     Enums: {
+      product_card_event_type: "impression" | "view" | "click"
       [_ in never]: never
     }
     CompositeTypes: {
@@ -1002,6 +1073,8 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      product_card_event_type: ["impression", "view", "click"],
+    },
   },
 } as const
