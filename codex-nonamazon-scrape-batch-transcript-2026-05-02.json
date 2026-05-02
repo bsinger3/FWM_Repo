@@ -1,0 +1,95 @@
+{
+  "title": "Non-Amazon Product-Level Scrape Batch - 2026-05-02",
+  "transcript_started_at": "2026-05-01T20:00:00-04:00",
+  "transcript_ended_at": "2026-05-02T11:40:00-04:00",
+  "messages": [
+    {
+      "role": "user",
+      "text": "Asked Codex to continue the non-Amazon scraping queue, repeatedly saying next to move through each site. After an early scrape missed products, explicitly instructed Codex not to settle for summaries, to scrape each product, and to document product-coverage rules that are read at the beginning of every scrape."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated new-scrape-rules.md with required pre-scrape reading and product coverage requirements: discover products from products.json, sitemaps, collection pages, and widget IDs; reconcile sources; scan every product before exclusions; document skipped products and reasons; avoid aggregate-only scraping; include product_sources, products_discovered, products_scanned, products_excluded_from_output, review_pages_scanned, exhaustive_review_paging, and per-product counts in summaries."
+    },
+    {
+      "role": "assistant",
+      "text": "Built or refreshed product-level non-Amazon scrapers under data-pipelines/non-amazon/scripts/step_1_raw_scrape for Evelyn Bobbie, Leonisa, MiracleSuit, HSIA Life, Shapedly, Under 510, MBM Swim, Oliver Logan, Anne Cole, Kasper, Shapellx, Miss Me, Babyboo Fashion, and Universal Standard. Each scrape read the scrape rules first, discovered/reconciled product catalogs, scanned every product, and wrote current intake CSV plus summary JSON under FWM_Data/non-amazon/data/step_1_raw_scraping_data."
+    },
+    {
+      "role": "assistant",
+      "text": "Evelyn Bobbie scrape corrected an initial undercount from 23 to all 26 products. Final metrics: 26 products scanned, 826 review pages, 2 rows, 2 distinct images, 0 size rows, 0 measurement rows, 0 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Leonisa scrape used Judge.me shop leonisa-usa.myshopify.com. Final metrics: 176 products scanned, 27 review pages, 17 rows, 13 distinct reviews, 17 images, 13 products, 1 size row, 0 measurement rows, 0 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "MiracleSuit scrape used Yotpo key kAnlBhdJrX7F2vUWmsX1T7dORtDmsXtvQGXcb76l. Final metrics: 1066 products scanned, 1409 review pages, product_review_count_hint 83013, 44 rows, 38 distinct reviews, 44 images, 28 products, 0 size rows, 8 measurement rows, 0 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "HSIA Life scrape used Okendo store 0cc616d6-d35d-46a6-af6c-6a54931b1b18 and patched bra variant parsing so values like 46 / I populate band and cup. Final metrics: 620 products scanned, 339 review pages, product_review_count_hint 11248, 105 rows, 62 distinct reviews, 105 images, 30 products, 52 size rows, 21 measurement rows, 11 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Shapedly scrape used the LAI Reviews load-more endpoint for shop 2fc540. Final metrics: 59 products scanned, 4 products excluded after scan, 132 review pages, product_review_count_hint 27095, 764 rows, 370 distinct reviews, 764 images, 9 products, 0 size rows, 274 measurement rows, 0 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Under 510 was determined to be a men's clothing site and was fully audited as skipped. Final metrics: 122 products discovered/scanned/excluded, 0 rows, 0 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "MBM Swim scrape used Loox app key VJWi6coNCD, hash 1777507737217, and shop marcia-b-maxwell.myshopify.com. Final metrics: 40 products scanned, 1 product excluded, 83 review pages, product_review_count_hint 1092, 616 rows, 615 distinct reviews, 616 images, 34 products, 360 size rows, 185 measurement rows, 99 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Oliver Logan scrape patched existing scraper with sitemap coverage reconciliation, product exclusions after scanning, and full summary fields. Final metrics: 106 products discovered/scanned, 3 exclusions, 122 review pages, product_review_count_hint 28698, 314 rows, 196 distinct reviews, 314 images, 59 products, 98 size rows, 118 measurement rows, 66 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Anne Cole scrape used Okendo store 1dc5cfe2-35fb-4c7d-867b-c9b34787ff4e. Final metrics: 672 products discovered/scanned, 3 exclusions, 1033 review pages, product_review_count_hint 62173, 36 rows, 30 distinct reviews, 36 images, 18 products, 25 size rows, 10 measurement rows, 8 Supabase-qualified rows. Sample product and image URLs validated with 200 responses."
+    },
+    {
+      "role": "assistant",
+      "text": "Kasper scrape used Junip store key 3oq4pZLqF9RW9GN1JZKKkDPE and product endpoint api.juniphq.com/en/v2/products/remote/<shopify_product_id>/reviews. Exclusion logic was corrected to avoid false positives on belted garments. Final metrics: 653 products discovered/scanned, 1 gift-card exclusion, 954 review pages, product_review_count_hint 30449, 43 rows, 26 distinct reviews, 43 images, 21 products, 38 size rows, 22 measurement rows, 22 Supabase-qualified rows. Sample URLs validated with 200 responses."
+    },
+    {
+      "role": "assistant",
+      "text": "Shapellx scrape used Stamped product-level API with public key pubkey-cp3qk4sHz627bDUSBW61Q1w6PNy371 and store ID 225222. Final metrics: 185 products discovered/scanned, 9 exclusions, 565 review pages, product_review_count_hint 47847, 1908 rows, 838 distinct reviews, 1908 distinct images, 103 products, 138 size rows, 170 measurement rows, 133 Supabase-qualified rows. Sample product and image URLs validated with 200 responses."
+    },
+    {
+      "role": "assistant",
+      "text": "Miss Me scrape used Okendo store 507e03e6-5a26-42f9-9813-8373d642ffbb. During audit the first scope filter was fixed because it falsely treated baggy, capri, and womens as accessory/mens terms. Final metrics: 626 products discovered/scanned, 36 exclusions, 665 review pages, product_review_count_hint 3324, 283 raw image occurrences, 3 invalid image URLs filtered, 280 rows, 183 distinct reviews, 280 distinct images, 133 distinct product URLs, 239 size rows, 192 measurement rows, 182 Supabase-qualified rows. Sample URLs validated with 200 responses."
+    },
+    {
+      "role": "assistant",
+      "text": "Babyboo Fashion scrape used Yotpo app key tO3jqlCKujvE6ZF5NeHgnBnKgT8x148OgHudA2TC. A first full run hit the one-hour timeout while validating image URLs serially, so the stale process was stopped and image validation was parallelized. Final metrics: 1645 products discovered/scanned, 215 exclusions, 2837 review pages, product_review_count_hint 175756, 27825 raw image occurrences, 13 invalid image URLs filtered, 21645 grouped-review duplicate rows filtered, 6167 rows, 4676 distinct reviews, 6167 distinct images, 549 distinct product URLs, 6139 size rows, 6092 measurement rows, 6071 Supabase-qualified rows. Sample URLs validated with 200 responses."
+    },
+    {
+      "role": "assistant",
+      "text": "Universal Standard scrape used Yotpo app key jIFTSQDKKpIDorJipCqCUf95WrenWpxc3l0wPUc7. Final metrics: 2010 products discovered/scanned, 99 exclusions, 3946 review pages, product_review_count_hint 244647, 2214 raw image occurrences, 0 invalid image URLs filtered, 1899 grouped-review duplicate rows filtered, 315 rows, 252 distinct reviews, 315 distinct images, 127 distinct product URLs, 166 size rows, 163 measurement rows, 142 Supabase-qualified rows. Sample URLs validated with 200 responses."
+    },
+    {
+      "role": "user",
+      "text": "Asked Codex to back everything up to S3 and git and update the transcripts table."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran scripts/sync-data-to-s3.ps1 using the configured fwm AWS profile and s3://fwm-scraping-data-briannasinger bucket. The sync uploaded new and changed FWM_Data scrape outputs including Babyboo Fashion, Universal Standard, Miss Me, Shapellx, Anne Cole, Kasper, HSIA Life, Leonisa, MiracleSuit, Shapedly, Under 510, MBM Swim, Oliver Logan, and Evelyn Bobbie artifacts."
+    }
+  ],
+  "metadata": {
+    "scope": "Product-level non-Amazon scrape batch and backup handoff",
+    "s3_bucket": "s3://fwm-scraping-data-briannasinger",
+    "major_output_root": "FWM_Data/non-amazon/data/step_1_raw_scraping_data",
+    "major_script_root": "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape",
+    "next_queue_site": "superfithero.com",
+    "notes": [
+      "Do not skip products in future scrapes; read new-scrape-rules.md before every scrape.",
+      "Babyboo and Universal Standard both needed grouped-review duplicate filtering by review id plus original image URL.",
+      "S3 sync completed successfully before this transcript file was created."
+    ]
+  }
+}

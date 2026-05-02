@@ -4,6 +4,36 @@ This document is the checklist for adding a new retailer scrape to Friends With
 Measurements. A scrape is useful only if each output row can become a clickable
 image card with enough fit context for shoppers.
 
+## Required Pre-Scrape Reading And Product Coverage
+
+Read this document before starting every new retailer scrape or refreshing an
+existing scraper. Do not begin coding or running a scrape until product coverage
+has been checked and documented.
+
+Scrapers must not silently skip products. At the start of each scrape:
+
+- Discover all public product URLs from every reasonable public source for the
+  retailer, including `products.json` for Shopify sites, product sitemaps,
+  collection pages, supplied lead URLs, and any review-widget product IDs found
+  on product pages.
+- Reconcile those sources into a product coverage summary with counts by source,
+  duplicates removed, and the final product count that will be scanned.
+- Scan every discovered product by default, including products that look low
+  yield. Do not filter out accessories, extras, gift cards, out-of-scope
+  product types, or products with zero visible review counts until after they
+  have been counted and the exclusion reason is written into the summary JSON.
+- If a product is excluded from row output because it is out of current project
+  scope, still count it in `products_discovered` and include it in
+  `product_summaries` with `skipped_from_output` and a clear `skip_reason`.
+- Avoid early-stop paging shortcuts for the first full scrape of a retailer.
+  A quick/photo-biased smoke mode is allowed only as a preliminary probe, but
+  the final scrape must page through every public review page exposed by the
+  provider unless a provider limit, block, or error is documented.
+- The final summary JSON must include enough coverage evidence to audit the
+  scrape: `product_sources`, `products_discovered`, `products_scanned`,
+  `products_excluded_from_output`, `review_pages_scanned`,
+  `exhaustive_review_paging`, and per-product review/image row counts.
+
 ## Goal
 
 Each scrape should produce review-image rows from public retailer review pages.
@@ -40,9 +70,32 @@ The summary JSON should include at least:
 - `rows_written`
 - `distinct_reviews`
 - `distinct_images`
+- `rows_with_distinct_product_url`
+- `rows_with_any_measurement`
+- `rows_with_customer_image`
+- `rows_with_customer_ordered_size`
+- `rows_supabase_qualified`
 - `output_csv`
 - `started_at`
 - `finished_at`
+
+At the end of every scrape, report these metrics to the user in the final
+handoff. These are required for judging whether rows are ready for insertion
+into the Supabase-backed image database:
+
+- Rows with a distinct product URL: rows where either
+  `product_page_url_display` or `monetized_product_url_display` is present,
+  counted by distinct non-empty product URL.
+- Rows with at least one measurement: rows where at least one measurement field
+  is present, such as `height_in_display`, `weight_display_display`,
+  `weight_lbs_display`, `bust_in_number_display`, `hips_in_display`,
+  `waist_in`, or `inseam_inches_display`.
+- Rows with a customer image: rows where `original_url_display` is present and
+  points to a shopper/customer review image, not a retailer catalog image.
+- Rows with the size the customer ordered: rows where `size_display` is present,
+  valid, and not `unknown`.
+- Supabase-qualified rows: rows that have all four of the above on the same
+  row: customer image, product URL, at least one measurement, and ordered size.
 
 ## Step 1 Intake Data
 
@@ -62,6 +115,14 @@ A Step 1 row should have:
 Populate structured size and measurement fields during the scrape when they are
 obvious, but leave them blank rather than dropping the row or guessing.
 
+Measurement and size extraction must be deterministic. Use retailer-provided
+structured fields, explicit widget/custom-form answers, regexes, parsers, and
+auditable normalization functions. Do not use an LLM to infer height, weight,
+waist, hips, bust, inseam, age, cup size, or ordered size for scrape outputs.
+If deterministic extraction cannot confidently populate a field, preserve the
+raw `user_comment` and leave the structured field blank for later deterministic
+standardization or manual review.
+
 ## Publish-Ready Card Data
 
 A row should not be inserted into `public.images`, and will not display on the
@@ -78,6 +139,11 @@ frontend, unless it has all of these after standardization/enrichment:
 - At least one product URL:
   - `monetized_product_url_display`
   - `product_page_url_display`
+
+When reporting results, distinguish component counts from qualified-row counts.
+For example, "rows with measurements" and "rows with ordered size" are useful
+diagnostics, but `rows_supabase_qualified` is the count that matters for rows
+ready to enter the Supabase-backed database.
 
 Database constraints also require:
 
@@ -175,12 +241,23 @@ If the review comment says something like "I'm 5'4, 165 lbs, ordered XL," keep
 the row and preserve the comment so later regex extraction can populate the
 normalized fields.
 
+Do not use an LLM to fill measurement fields. Scraper measurement extraction
+should be reproducible from deterministic code paths only: provider metadata,
+custom form answers, regular expressions, parsing functions, or other explicit
+rules that can be inspected and rerun.
+
 ### Size
 
 - `size_display` is mandatory for publishable rows, but not mandatory for raw
   Step 1 scrape rows when size may be present in `user_comment`.
 - Do not emit blank, `unknown`, or vague size values for rows intended for
   `public.images`.
+- If the retailer/provider omits structured ordered size, add a conservative
+  deterministic fallback from review text before handoff. Only populate
+  `size_display` when the wording clearly says the reviewer ordered, bought,
+  purchased, got, wore, or ended up exchanging for that size. Do not treat
+  vague body-size statements such as "I am usually a size 4" as ordered size
+  unless the text explicitly ties that size to the reviewed purchase.
 - For bra-size products, split the size into:
   - `bust_in_number_display` for band size.
   - `cupsize_display` for cup size.
@@ -233,6 +310,17 @@ Reject or route for later review when:
   when available.
 - Use stable product discovery sources such as product sitemaps, collection
   pages, or all-reviews endpoints.
+- Do not settle for aggregate/all-reviews endpoints as the only scrape path.
+  Aggregates are useful for triage and endpoint discovery, but they often omit
+  product URLs, variants, structured answers, pagination depth, and context.
+- Always attempt product-level scraping by visiting or calling each product
+  page/widget/API endpoint. Product-level scraping is slower, but it usually
+  yields more complete rows and a higher Supabase-qualified count.
+- If product URLs or product IDs cannot be discovered from public deterministic
+  sources such as sitemaps, product catalogs, collection pages, or embedded
+  product JSON, pause and ask the human to collect/provide the product URLs.
+  Do not silently fall back to aggregate-only scraping unless the human approves
+  that reduced-coverage mode.
 - Use a normal browser user agent and retry transient failures.
 - Track `fetched_at` and `updated_at` using ISO-like timestamps.
 - Keep the raw values even when normalized parsing succeeds.
@@ -259,6 +347,17 @@ Before considering a scrape ready for the next pipeline step:
 - Confirm `source_site_display`, `brand`, `fetched_at`, and `updated_at` are
   populated.
 - Confirm the summary JSON counts match the CSV.
+- Confirm the handoff/final answer includes:
+  - rows with a distinct product URL
+  - rows with at least one measurement
+  - rows with a customer image
+  - rows with the size the customer ordered
+  - Supabase-qualified rows with all four requirements present
+- Do a short retrospective when qualified-row counts are unexpectedly low:
+  break failures down by missing requirement, check whether deterministic
+  measurement or ordered-size regexes can safely recover rows, and confirm that
+  the scrape is not counting grouped review duplicates or image-size variants
+  as extra qualified rows.
 
 ## Handoff To Later Steps
 
