@@ -530,7 +530,7 @@ def scrape_reviews(limit_products: Optional[int] = None, exhaustive: bool = True
         "products_with_review_rows": 0,
         "review_pages_scanned": 0,
         "product_review_count_hint": 0,
-        "access_policy": "public_pages_only; no_auth_bypass; no_captcha_bypass; polite_retries",
+        "access_policy": "public_product_and_review_pages_only; restricted_or_unavailable_pages_are_skipped; polite_retries",
         "measurement_extraction": "deterministic_regex_and_provider_fields_only",
         "errors": [],
     }

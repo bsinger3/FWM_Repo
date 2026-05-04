@@ -1,0 +1,84 @@
+{
+  "title": "Non-Amazon US Scope and Catalog Guardrails - 2026-05-04",
+  "transcript_started_at": "2026-05-04T10:30:00-04:00",
+  "transcript_ended_at": "2026-05-04T16:55:00-04:00",
+  "messages": [
+    {
+      "role": "user",
+      "text": "Asked Codex what scrapes were in the pipeline, then instructed Codex to replace bfreeaustralia.com with https://www.bfreeusa.com/ so non-Amazon scraping focuses on products that ship to US customers."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated local lead/inventory CSVs to replace the B Free Australia storefront with the B Free US storefront. Added scrape_bfreeusa_reviews.py using Shopify products.json plus the public Stamped reviews endpoint, scoped out baby and non-clothing products, and ran the scrape."
+    },
+    {
+      "role": "assistant",
+      "text": "BFree US final metrics: 1193 products discovered/scanned, 426 rows written, 342 distinct reviews, 426 distinct images, 90 distinct product URLs, 88 rows with size, 9 rows with any measurement, 6 image+product+size+measurement qualified rows, and 0 baby rows."
+    },
+    {
+      "role": "user",
+      "text": "Asked for the next scrape. Codex identified Margovil as an adapter-build candidate because the generic scraper had previously attached aggregate Judge.me review media to unrelated products."
+    },
+    {
+      "role": "assistant",
+      "text": "Added scrape_margovil_reviews.py. The scraper discovers the Shopify catalog through products.json and calls only the public product-level Judge.me reviews_for_widget endpoint. It explicitly avoids the all_reviews aggregate fallback and only accepts review blocks matching the current product URL."
+    },
+    {
+      "role": "assistant",
+      "text": "Margovil final metrics: 1765 products discovered/scanned, 126 rows written, 51 distinct reviews, 126 distinct images, 38 distinct products, 6 rows with size, 18 rows with any measurement, 2 image+product+size+measurement qualified rows, aggregate_review_feed_used false, and 18 product-widget checks hit HTTP 429."
+    },
+    {
+      "role": "user",
+      "text": "Asked for the next scrape. Codex ran SwimOutlet through the generic scraper using --only-seed-products as a smoke test."
+    },
+    {
+      "role": "assistant",
+      "text": "SwimOutlet seed scrape used the Okendo adapter and scanned only two seed URLs from triage. The homepage seed was skipped out of scope; the product seed produced 12 rows from one review with 12 images. Inventory was initially marked scraped, then corrected after the user asked why the row count was so low."
+    },
+    {
+      "role": "user",
+      "text": "Asked what needed to change so all future scrapes scan every product page, not just the given lead URL or a summary."
+    },
+    {
+      "role": "assistant",
+      "text": "Explained the new operating rule: lead URLs are seeds, not scope. A scrape is complete only when it discovers and scans the full product catalog or documents why discovery is unavailable."
+    },
+    {
+      "role": "user",
+      "text": "Said to implement that guardrail."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated scrape_p0_lead_reviews.py to stamp every run with seed_url_count, seed_urls, discovery_method, catalog_discovery_attempted, products_discovered, product_pages_scanned, scrape_scope_status, full_catalog_scrape_complete, seed_scrape_only, and aggregate_feed_used. Seed-only mode now requires --allow-incomplete-seed-scrape and writes a warning that the retailer should not be marked fully scraped."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated summarize_non_amazon_scrapes.py so report CSV and Markdown include product discovery, product pages scanned, seed count, discovery method, scrape scope status, full-catalog completion, and aggregate-feed usage. Corrected SwimOutlet inventory to scrape_status seed scrape only with notes that it needs a full product discovery adapter."
+    },
+    {
+      "role": "user",
+      "text": "Asked Codex to update git, S3, and the transcripts table."
+    }
+  ],
+  "metadata": {
+    "scope": "Non-Amazon US storefront replacement, product-level scraper additions, and future full-catalog scrape guardrails",
+    "s3_bucket": "s3://fwm-scraping-data-briannasinger",
+    "major_output_root": "FWM_Data/non-amazon/data/step_1_raw_scraping_data",
+    "major_report_root": "FWM_Data/non-amazon/data/reports",
+    "major_script_root": "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape",
+    "important_paths": [
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_bfreeusa_reviews.py",
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_margovil_reviews.py",
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_p0_lead_reviews.py",
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/summarize_non_amazon_scrapes.py",
+      "FWM_Data/website_scrape_inventory_2026-04-29.csv",
+      "FWM_Data/non-amazon/data/reports/non_amazon_merchant_scrape_summary.csv",
+      "FWM_Data/non-amazon/data/reports/non_amazon_merchant_scrape_summary.md"
+    ],
+    "notes": [
+      "Do not mark seed-only outputs as fully scraped.",
+      "Production non-Amazon scrapes should discover and scan the full product catalog.",
+      "Aggregate review feeds are only acceptable if product URLs are reliably preserved and not assigned to unrelated products."
+    ]
+  }
+}

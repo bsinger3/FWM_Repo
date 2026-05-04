@@ -1,7 +1,7 @@
 {
   "title": "Non-Amazon Product-Level Scrape Batch - 2026-05-02",
   "transcript_started_at": "2026-05-01T20:00:00-04:00",
-  "transcript_ended_at": "2026-05-02T11:40:00-04:00",
+  "transcript_ended_at": "2026-05-04T16:45:00-04:00",
   "messages": [
     {
       "role": "user",
@@ -78,6 +78,18 @@
     {
       "role": "assistant",
       "text": "Ran scripts/sync-data-to-s3.ps1 using the configured fwm AWS profile and s3://fwm-scraping-data-briannasinger bucket. The sync uploaded new and changed FWM_Data scrape outputs including Babyboo Fashion, Universal Standard, Miss Me, Shapellx, Anne Cole, Kasper, HSIA Life, Leonisa, MiracleSuit, Shapedly, Under 510, MBM Swim, Oliver Logan, and Evelyn Bobbie artifacts."
+    },
+    {
+      "role": "user",
+      "text": "Continued the non-Amazon scrape queue on May 4, 2026; asked to keep wording low-risk, update git, S3, and the transcripts table, and explicitly note sites that still need full scrapes."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran goelia1995.com. A full catalog pass discovered 1764 products and was stopped after 421 scanned products because the run was uniformly zero-row. Then ran a clean seed-only pass for the supplied lead product and wrote standard outputs under FWM_Data/non-amazon/data/step_1_raw_scraping_data/goelia1995_com. Final seed-only metrics: rows_written 0, distinct_reviews 0, distinct_images 0, rows_with_distinct_product_url 0, rows_with_any_measurement 0, rows_with_customer_image 0, rows_with_customer_ordered_size 0, rows_supabase_qualified 0, started_at 2026-05-04T16:40:06Z, finished_at 2026-05-04T16:40:07Z. The Goelia report is marked seed_scrape_only and still needs a full scrape."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated scraper/report wording to use neutral public-data language: public product and review pages only; restricted or unavailable pages are skipped. Refreshed the non-Amazon merchant rollup so goelia1995_com notes include seed_scrape_only and still needs full scrape. Synced the changed FWM_Data reports and Goelia summary JSON to s3://fwm-scraping-data-briannasinger."
     }
   ],
   "metadata": {
@@ -85,11 +97,14 @@
     "s3_bucket": "s3://fwm-scraping-data-briannasinger",
     "major_output_root": "FWM_Data/non-amazon/data/step_1_raw_scraping_data",
     "major_script_root": "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape",
-    "next_queue_site": "superfithero.com",
+    "next_queue_site": "continue after goelia1995.com; goelia1995_com still needs full scrape",
     "notes": [
       "Do not skip products in future scrapes; read new-scrape-rules.md before every scrape.",
       "Babyboo and Universal Standard both needed grouped-review duplicate filtering by review id plus original image URL.",
-      "S3 sync completed successfully before this transcript file was created."
-    ]
+      "S3 sync completed successfully before this transcript file was created.",
+      "goelia1995_com seed-only output has zero rows and must not be treated as fully scraped.",
+      "Use neutral public-data wording in scraper metadata and reports."
+    ],
+    "latest_s3_sync": "2026-05-04T16:45:00-04:00"
   }
 }

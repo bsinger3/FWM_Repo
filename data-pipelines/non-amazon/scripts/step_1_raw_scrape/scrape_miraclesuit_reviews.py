@@ -369,7 +369,7 @@ def scrape(limit_products: Optional[int] = None, limit_pages_per_product: Option
         "review_pages_scanned": sum(int(item["review_pages_scanned"]) for item in summaries),
         "product_review_count_hint": sum(int(item["review_count_hint"]) for item in summaries),
         "products_with_review_rows": sum(1 for item in summaries if int(item["rows"]) > 0), "product_summaries": summaries,
-        "errors": errors, "access_policy": "public_pages_only; no_auth_bypass; no_captcha_bypass; polite_retries",
+        "errors": errors, "access_policy": "public_product_and_review_pages_only; restricted_or_unavailable_pages_are_skipped; polite_retries",
         "measurement_extraction": "deterministic_regex_and_provider_fields_only",
     }
     return deduped, summary

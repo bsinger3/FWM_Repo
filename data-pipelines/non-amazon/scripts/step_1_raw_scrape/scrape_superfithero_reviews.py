@@ -536,7 +536,7 @@ def scrape_reviews(limit_products: Optional[int] = None, limit_pages_per_product
         "exhaustive_review_paging": limit_pages_per_product is None,
         "product_level_required": True,
         "aggregate_only": False,
-        "access_policy": "public_pages_only; no_auth_bypass; no_captcha_bypass; polite_retries",
+        "access_policy": "public_product_and_review_pages_only; restricted_or_unavailable_pages_are_skipped; polite_retries",
         "measurement_extraction": "deterministic_regex_and_provider_fields_only",
         "product_summaries": [],
         "errors": [],

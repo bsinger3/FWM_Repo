@@ -507,7 +507,7 @@ def scrape_reviews(limit_pages: Optional[int] = None) -> Tuple[List[Dict[str, st
         "source_url": SOURCE_SITE,
         "started_at": started_at,
         "finished_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "access_policy": "public_pages_only; no_auth_bypass; no_captcha_bypass; polite_retries",
+        "access_policy": "public_product_and_review_pages_only; restricted_or_unavailable_pages_are_skipped; polite_retries",
         "review_blocks_found": len(blocks),
         "review_pages_scanned": pages_scanned,
         "review_pages_available": total_pages,
