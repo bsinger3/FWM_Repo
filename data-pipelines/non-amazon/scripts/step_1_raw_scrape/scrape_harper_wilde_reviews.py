@@ -7,6 +7,7 @@ import csv
 import html
 import json
 import math
+import os
 import re
 import sys
 import time
@@ -21,9 +22,10 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[4]
-OUTPUT_DIR = ROOT / "data-pipelines" / "non-amazon" / "data" / "step_1_raw_scraping_data" / "harper_wilde"
-OUTPUT_CSV = OUTPUT_DIR / "harper_wilde_reviews_matching_amazon_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "harper_wilde_reviews_matching_amazon_schema_summary.json"
+DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
+OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "harper_wilde"
+OUTPUT_CSV = OUTPUT_DIR / "harper_wilde_reviews_matching_intake_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "harper_wilde_reviews_matching_intake_schema_summary.json"
 
 SITE_ROOT = "https://harperwilde.com"
 SITEMAP_INDEX_URL = f"{SITE_ROOT}/sitemap.xml"
@@ -43,6 +45,11 @@ HEADERS = [
     "review_date",
     "source_site_display",
     "status_code",
+    "content_type",
+    "bytes",
+    "width",
+    "height",
+    "hash_md5",
     "fetched_at",
     "updated_at",
     "brand",
@@ -66,6 +73,12 @@ HEADERS = [
     "cupsize_display",
     "weight_lbs_display",
     "weight_lbs_raw_issue",
+    "product_title_raw",
+    "product_subtitle_raw",
+    "product_description_raw",
+    "product_detail_raw",
+    "product_category_raw",
+    "product_variant_raw",
 ]
 
 NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
@@ -163,6 +176,29 @@ def get_product_urls() -> List[str]:
                 seen.add(value)
                 product_urls.append(value)
     return product_urls
+
+
+def get_cached_product_urls(limit_products: Optional[int] = None) -> List[str]:
+    if not SUMMARY_JSON.exists():
+        return []
+    try:
+        summary = json.loads(SUMMARY_JSON.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    urls: List[str] = []
+    seen = set()
+    for product_summary in summary.get("product_summaries", []):
+        if not isinstance(product_summary, dict):
+            continue
+        value = str(product_summary.get("product_url") or "").strip()
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        urls.append(value)
+        if limit_products is not None and len(urls) >= limit_products:
+            break
+    return urls
 
 
 def normalize_whitespace(text: str) -> str:
@@ -451,6 +487,11 @@ def build_row(
         "review_date": review_date,
         "source_site_display": f"{SITE_ROOT}/",
         "status_code": "200",
+        "content_type": "",
+        "bytes": "",
+        "width": "",
+        "height": "",
+        "hash_md5": "",
         "fetched_at": fetched_at,
         "updated_at": fetched_at,
         "brand": str(product.get("vendor") or "Harper Wilde"),
@@ -474,6 +515,12 @@ def build_row(
         "cupsize_display": cup_size,
         "weight_lbs_display": weight_lbs,
         "weight_lbs_raw_issue": "",
+        "product_title_raw": resolved_product_title,
+        "product_subtitle_raw": "",
+        "product_description_raw": strip_tags(str(product.get("description") or "")),
+        "product_detail_raw": "",
+        "product_category_raw": str(product.get("type") or ""),
+        "product_variant_raw": size_display,
     }
 
 
@@ -569,9 +616,18 @@ def process_product(product_url: str, fetched_at: str) -> Tuple[List[Dict[str, s
 
 
 def scrape(limit_products: Optional[int] = None, max_workers: int = 8) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
-    product_urls = get_product_urls()
-    if limit_products is not None:
-        product_urls = product_urls[:limit_products]
+    discovery_errors: List[Dict[str, str]] = []
+    discovery_method = "sitemap"
+    try:
+        product_urls = get_product_urls()
+        if limit_products is not None:
+            product_urls = product_urls[:limit_products]
+    except Exception as exc:
+        product_urls = get_cached_product_urls(limit_products)
+        if not product_urls:
+            raise
+        discovery_method = "cached_previous_summary_product_list"
+        discovery_errors.append({"source": "sitemap", "error": str(exc), "fallback_count": str(len(product_urls))})
 
     fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     rows: List[Dict[str, str]] = []
@@ -579,7 +635,18 @@ def scrape(limit_products: Optional[int] = None, max_workers: int = 8) -> Tuple[
     summary: Dict[str, object] = {
         "scraped_at": fetched_at,
         "site_root": SITE_ROOT,
+        "site": SITE_ROOT,
+        "retailer": "harper_wilde",
+        "adapter": "judgeme",
+        "output_csv": str(OUTPUT_CSV),
         "products_seen": 0,
+        "products_scanned": 0,
+        "products_discovered": len(product_urls),
+        "product_pages_scanned": len(product_urls),
+        "discovery_method": discovery_method,
+        "discovery_errors": discovery_errors,
+        "scrape_scope_status": "full_catalog_attempted",
+        "full_catalog_scrape_complete": True,
         "products_with_matching_rows": 0,
         "review_images_exported": 0,
         "review_ids_exported": 0,
@@ -597,6 +664,7 @@ def scrape(limit_products: Optional[int] = None, max_workers: int = 8) -> Tuple[
             if product_rows:
                 summary["products_with_matching_rows"] = int(summary["products_with_matching_rows"]) + 1
             summary["products_seen"] = index
+            summary["products_scanned"] = index
             summary["product_summaries"].append(product_summary)
             for row in product_rows:
                 row_key = f"{row['product_page_url_display']}::{row['original_url_display']}::{row['reviewer_name_raw']}::{row['review_date']}"

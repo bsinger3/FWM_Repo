@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlparse
 from urllib.request import Request, urlopen
 
 
@@ -28,6 +28,7 @@ SHOP_DOMAIN = "evelyn-bobbie.myshopify.com"
 PRODUCTS_JSON_URL = f"{SITE_ROOT}/products.json"
 YOTPO_APP_KEY = "vgU7jBMr0iIRREtgyPw6Z6gWm1B8bpSRpdLfGg4h"
 YOTPO_API_ROOT = f"https://api-cdn.yotpo.com/v1/widget/{YOTPO_APP_KEY}"
+YOTPO_V3_API_ROOT = f"https://api-cdn.yotpo.com/v3/storefront"
 BRAND = "Evelyn & Bobbie"
 PRODUCTS_PER_PAGE = 250
 REVIEWS_PER_PAGE = 100
@@ -99,7 +100,7 @@ WAIST_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*waist\b", 
 HIPS_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*hips?\b", re.I)
 AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?(?:\s*old)?)\b", re.I)
 INSEAM_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*inseam\b", re.I)
-BRA_SIZE_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
+BRA_SIZE_RE = re.compile(r"\b((?:2[6-9]|3[0-9]|4[0-9]|5[0-4])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
 SIZE_RE = re.compile(
     r"\b(?:size|sz|ordered|bought|got|wear(?:ing)?|usual size)\s*(?:is|was|a|an|the|:)?\s*"
     r"(xxs|xs|s|m|l|xl|2xl|3xl|4xl|small|medium|large|x-large|xx-large|xxx-large)\b",
@@ -193,8 +194,51 @@ def fetch_products(limit_products: Optional[int] = None) -> List[Dict[str, objec
     return products
 
 
+def cached_products_from_summary(limit_products: Optional[int] = None) -> List[Dict[str, object]]:
+    if not SUMMARY_JSON.exists():
+        return []
+    try:
+        summary = json.loads(SUMMARY_JSON.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    products: List[Dict[str, object]] = []
+    for item in summary.get("product_summaries") or []:
+        if not isinstance(item, dict):
+            continue
+        product_url = normalize_whitespace(str(item.get("product_url") or ""))
+        handle = Path(urlparse(product_url).path).name
+        product = {
+            "id": item.get("shopify_product_id"),
+            "title": item.get("product_title"),
+            "handle": handle,
+            "body_html": "",
+            "product_type": classify_title_product_type(normalize_whitespace(str(item.get("product_title") or ""))),
+            "tags": [],
+            "variants": [],
+            "_cached_from_previous_summary": True,
+        }
+        products.append(product)
+        if limit_products is not None and len(products) >= limit_products:
+            return products[:limit_products]
+    return products
+
+
 def yotpo_reviews_url(product_id: object) -> str:
     return f"{YOTPO_API_ROOT}/products/{product_id}/reviews.json"
+
+
+def yotpo_v3_reviews_url(product_id: object, page: int, per_page: int = REVIEWS_PER_PAGE) -> str:
+    return (
+        f"{YOTPO_V3_API_ROOT}/store/{YOTPO_APP_KEY}/product/{product_id}/reviews"
+        f"?page={page}&perPage={per_page}&sort=images"
+    )
+
+
+def yotpo_v3_media_url(product_id: object, page: int, per_page: int = REVIEWS_PER_PAGE) -> str:
+    return (
+        f"{YOTPO_V3_API_ROOT}/stores/{YOTPO_APP_KEY}/products/{product_id}/reviewsMedia"
+        f"?page={page}&perPage={per_page}"
+    )
 
 
 def yotpo_response(payload: Dict[str, object]) -> Dict[str, object]:
@@ -209,7 +253,7 @@ def fetch_product_reviews(product: Dict[str, object], exhaustive: bool) -> Tuple
         "product_url": product_url,
         "product_title": product.get("title"),
         "shopify_product_id": product_id,
-        "adapter_used": "yotpo_product_level",
+        "adapter_used": "yotpo_v3_media_first",
         "review_pages_scanned": 0,
         "review_count_hint": 0,
         "matching_review_images": 0,
@@ -217,27 +261,39 @@ def fetch_product_reviews(product: Dict[str, object], exhaustive: bool) -> Tuple
     }
     reviews: List[Dict[str, object]] = []
     seen_review_ids = set()
+    media_total = 0
+    try:
+        media_payload = fetch_json(yotpo_v3_media_url(product_id, 1), referer=product_url)
+        media_response = media_payload.get("response") if isinstance(media_payload.get("response"), dict) else {}
+        media_pagination = media_response.get("pagination") if isinstance(media_response.get("pagination"), dict) else {}
+        media_total = int(media_pagination.get("total") or 0)
+    except Exception as exc:  # noqa: BLE001
+        meta["errors"].append(f"v3 media count failed: {exc}")
+    if media_total <= 0:
+        try:
+            payload = fetch_json(yotpo_v3_reviews_url(product_id, 1, per_page=1), referer=product_url)
+            pagination = payload.get("pagination") if isinstance(payload.get("pagination"), dict) else {}
+            meta["review_count_hint"] = int(pagination.get("total") or 0)
+            meta["review_pages_scanned"] = 1
+        except Exception as exc:  # noqa: BLE001
+            meta["errors"].append(f"v3 review count failed: {exc}")
+        return reviews, meta
     page = 1
     total_pages = 1
     consecutive_no_image_pages = 0
-    while page <= total_pages:
+    while page <= total_pages and len(reviews) < media_total:
         try:
-            payload = fetch_json(
-                yotpo_reviews_url(product_id),
-                {"per_page": REVIEWS_PER_PAGE, "page": page, "sort": "with_pictures"},
-                referer=product_url,
-            )
+            payload = fetch_json(yotpo_v3_reviews_url(product_id, page), referer=product_url)
         except Exception as exc:  # noqa: BLE001
             meta["errors"].append(str(exc))
             break
-        response = yotpo_response(payload)
-        pagination = response.get("pagination") if isinstance(response.get("pagination"), dict) else {}
+        pagination = payload.get("pagination") if isinstance(payload.get("pagination"), dict) else {}
         total = int(pagination.get("total") or 0)
-        per_page = int(pagination.get("per_page") or REVIEWS_PER_PAGE)
+        per_page = int(pagination.get("perPage") or REVIEWS_PER_PAGE)
         total_pages = max(1, (total + per_page - 1) // per_page)
         if page == 1:
             meta["review_count_hint"] = total
-        page_reviews = [item for item in response.get("reviews", []) if isinstance(item, dict)]
+        page_reviews = [item for item in payload.get("reviews", []) if isinstance(item, dict)]
         if not page_reviews:
             break
         page_image_count = 0
@@ -257,6 +313,7 @@ def fetch_product_reviews(product: Dict[str, object], exhaustive: bool) -> Tuple
             break
         page += 1
     meta["matching_review_images"] = sum(len(review_image_urls(review)) for review in reviews)
+    meta["public_media_count_hint"] = media_total
     return reviews, meta
 
 
@@ -313,13 +370,15 @@ def extract_bra_size(text: str) -> Tuple[str, str]:
 
 def review_image_urls(review: Dict[str, object]) -> List[str]:
     urls: List[str] = []
-    images = review.get("images_data")
+    images = review.get("images_data") or review.get("imagesData")
     if not isinstance(images, list):
         return urls
     for image in images:
         if not isinstance(image, dict):
             continue
-        url = normalize_whitespace(str(image.get("original_url") or image.get("thumb_url") or ""))
+        url = normalize_whitespace(
+            str(image.get("original_url") or image.get("originalUrl") or image.get("thumb_url") or image.get("thumbUrl") or "")
+        )
         if url and url not in urls:
             urls.append(url)
     return urls
@@ -366,6 +425,19 @@ def extract_size_from_text(text: str) -> str:
     return match.group(1).upper() if match else ""
 
 
+def classify_title_product_type(title: str) -> str:
+    value = title.lower()
+    if "short" in value:
+        return "shorts"
+    if "bikini" in value or "thong" in value or "underwear" in value or "brief" in value:
+        return "underwear"
+    if "tank" in value or "camisole" in value:
+        return "top"
+    if "bra" in value:
+        return "bra"
+    return ""
+
+
 def classify_clothing_type(product: Dict[str, object]) -> str:
     value = f"{product.get('title') or ''} {product.get('product_type') or ''}".lower()
     if "short" in value:
@@ -392,10 +464,10 @@ def parse_review_rows(review: Dict[str, object], product: Dict[str, object], fet
     title = strip_tags(str(review.get("title") or ""))
     body = strip_tags(str(review.get("content") or ""))
     text_pool = normalize_whitespace(" ".join([title, body]))
-    date_created = normalize_whitespace(str(review.get("created_at") or ""))
+    date_created = normalize_whitespace(str(review.get("created_at") or review.get("createdAt") or ""))
     review_date = date_created.split("T", 1)[0] if "T" in date_created else date_created
     user = review.get("user") if isinstance(review.get("user"), dict) else {}
-    reviewer_name = strip_tags(str(user.get("display_name") or user.get("name") or ""))
+    reviewer_name = strip_tags(str(user.get("display_name") or user.get("displayName") or user.get("name") or ""))
     color_display = ""
     size_display = extract_size_from_text(text_pool)
     custom_fields = review.get("custom_fields") if isinstance(review.get("custom_fields"), dict) else {}
@@ -416,6 +488,8 @@ def parse_review_rows(review: Dict[str, object], product: Dict[str, object], fet
     age_raw, age_years = parse_age(text_pool)
     _inseam_raw, inseam_in = parse_numeric(INSEAM_RE, text_pool, max_value=40)
     bust_in, cupsize = extract_bra_size(text_pool)
+    if not size_display and bust_in and cupsize:
+        size_display = f"{bust_in}{cupsize}"
     product_description = strip_tags(str(product.get("body_html") or ""))
     product_category = normalize_whitespace(str(product.get("product_type") or ""))
     review_id = normalize_whitespace(str(review.get("id") or ""))
@@ -514,7 +588,16 @@ def is_supabase_qualified(row: Dict[str, str]) -> bool:
 
 def scrape_reviews(limit_products: Optional[int] = None, exhaustive: bool = True) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
     fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    products = fetch_products(limit_products=limit_products)
+    discovery_method = "shopify_products_json"
+    discovery_errors: List[str] = []
+    try:
+        products = fetch_products(limit_products=limit_products)
+    except Exception as exc:  # noqa: BLE001
+        discovery_errors.append(str(exc))
+        products = cached_products_from_summary(limit_products=limit_products)
+        discovery_method = "cached_previous_summary_product_list"
+    if not products:
+        raise RuntimeError("No Evelyn Bobbie products discovered from Shopify or cached summary.")
     rows: List[Dict[str, str]] = []
     product_summaries: List[Dict[str, object]] = []
     summary: Dict[str, object] = {
@@ -525,6 +608,8 @@ def scrape_reviews(limit_products: Optional[int] = None, exhaustive: bool = True
         "shop_domain": SHOP_DOMAIN,
         "started_at": fetched_at,
         "products_discovered": len(products),
+        "discovery_method": discovery_method,
+        "catalog_discovery_errors": discovery_errors,
         "products_scanned": 0,
         "exhaustive_review_paging": exhaustive,
         "products_with_review_rows": 0,

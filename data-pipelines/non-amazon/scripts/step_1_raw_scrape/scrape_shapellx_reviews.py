@@ -128,16 +128,22 @@ def fetch_products(limit_products: Optional[int] = None) -> Tuple[List[Dict[str,
     products: List[Dict[str, object]] = []
     sources: List[Dict[str, object]] = []
     page = 1
-    while True:
-        payload = fetch_json(PRODUCTS_JSON_URL, {"limit": PRODUCTS_PER_PAGE, "page": page})
-        page_products = [item for item in payload.get("products", []) if isinstance(item, dict)]
-        sources.append({"source": "products.json", "page": page, "count": len(page_products)})
-        if not page_products:
-            break
-        products.extend(page_products)
-        if len(page_products) < PRODUCTS_PER_PAGE or (limit_products and len(products) >= limit_products):
-            break
-        page += 1
+    try:
+        while True:
+            payload = fetch_json(PRODUCTS_JSON_URL, {"limit": PRODUCTS_PER_PAGE, "page": page})
+            page_products = [item for item in payload.get("products", []) if isinstance(item, dict)]
+            sources.append({"source": "products.json", "page": page, "count": len(page_products)})
+            if not page_products:
+                break
+            products.extend(page_products)
+            if len(page_products) < PRODUCTS_PER_PAGE or (limit_products and len(products) >= limit_products):
+                break
+            page += 1
+    except Exception as exc:  # noqa: BLE001
+        cached = cached_products_from_summary(limit_products)
+        if cached:
+            return cached, [{"source": "cached_previous_summary_product_list", "count": len(cached), "error": str(exc)}]
+        raise
 
     sitemap_index = fetch_text(SITEMAP_URL)
     sitemap_urls = [html.unescape(url) for url in re.findall(r"<loc>(https://www\.shapellx\.com/[^<]*sitemap_products_[^<]+)</loc>", sitemap_index)]
@@ -159,6 +165,39 @@ def fetch_products(limit_products: Optional[int] = None) -> Tuple[List[Dict[str,
     if limit_products:
         products_out = products_out[:limit_products]
     return products_out, sources
+
+
+def cached_products_from_summary(limit_products: Optional[int] = None) -> List[Dict[str, object]]:
+    if not SUMMARY_JSON.exists():
+        return []
+    try:
+        summary = json.loads(SUMMARY_JSON.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    products: List[Dict[str, object]] = []
+    for item in summary.get("product_summaries") or []:
+        if not isinstance(item, dict):
+            continue
+        product_id = norm(item.get("product_id"))
+        product_url = norm(item.get("product_url"))
+        handle = product_url.rstrip("/").rsplit("/", 1)[-1] if "/products/" in product_url else ""
+        if not product_id or not handle:
+            continue
+        products.append(
+            {
+                "id": product_id,
+                "handle": handle,
+                "title": norm(item.get("product_title")),
+                "product_type": "",
+                "body_html": "",
+                "variants": [],
+                "tags": [],
+                "_cached_from_previous_summary": True,
+            }
+        )
+        if limit_products and len(products) >= limit_products:
+            break
+    return products
 
 
 def review_photo_urls(review: Dict[str, object]) -> List[str]:
