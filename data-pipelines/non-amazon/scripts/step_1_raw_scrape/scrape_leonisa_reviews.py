@@ -178,6 +178,9 @@ def fetch_json(url: str, params: Optional[Dict[str, object]] = None, retries: in
 
 
 def product_url_for(product: Dict[str, object]) -> str:
+    explicit_url = normalize_whitespace(str(product.get("url") or ""))
+    if explicit_url:
+        return clean_url(explicit_url)
     handle = normalize_whitespace(str(product.get("handle") or ""))
     return f"{SITE_ROOT}/products/{quote(handle, safe='/-._~')}" if handle else ""
 
@@ -199,6 +202,86 @@ def fetch_products_from_json() -> Tuple[List[Dict[str, object]], List[Dict[str, 
     return products, pages
 
 
+def json_loads_relaxed(raw: str) -> Optional[object]:
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        try:
+            return json.loads(raw.encode("utf-8").decode("unicode_escape"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return None
+
+
+def extract_product_from_page(product_url: str) -> Dict[str, object]:
+    text = fetch_text(product_url)
+    handle = product_url.rstrip("/").rsplit("/", 1)[-1]
+    product_id = ""
+    title = ""
+    product_type = ""
+    body_html = ""
+    variants: List[Dict[str, object]] = []
+
+    id_patterns = [
+        r"\bProductID\s*:\s*(\d+)",
+        r'"product_id"\s*:\s*"?(?P<id>\d+)"?',
+        r'"productId"\s*:\s*"?(?P<id>\d+)"?',
+        r'"id"\s*:\s*(?P<id>\d{10,})',
+    ]
+    for pattern in id_patterns:
+        match = re.search(pattern, text, flags=re.I)
+        if match:
+            product_id = match.groupdict().get("id") or match.group(1)
+            break
+
+    variants_match = re.search(r'"variants"\s*:\s*(\[[\s\S]{0,250000}?\])\s*,\s*"available"', text)
+    if not variants_match:
+        variants_match = re.search(r'"variants"\s*:\s*(\[[\s\S]{0,250000}?\])\s*,\s*"images"', text)
+    if variants_match:
+        parsed = json_loads_relaxed(variants_match.group(1))
+        if isinstance(parsed, list):
+            variants = [item for item in parsed if isinstance(item, dict)]
+            if not product_id:
+                for variant in variants:
+                    variant_product_id = variant.get("product_id")
+                    if variant_product_id:
+                        product_id = str(variant_product_id)
+                        break
+
+    json_ld_matches = re.findall(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>([\s\S]*?)</script>', text, flags=re.I)
+    for raw_json in json_ld_matches:
+        parsed = json_loads_relaxed(html.unescape(raw_json.strip()))
+        candidates = parsed if isinstance(parsed, list) else [parsed]
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                continue
+            if candidate.get("@type") != "Product":
+                continue
+            title = title or strip_tags(str(candidate.get("name") or ""))
+            body_html = body_html or strip_tags(str(candidate.get("description") or ""))
+            brand = candidate.get("brand")
+            if isinstance(brand, dict):
+                product_type = product_type or strip_tags(str(brand.get("name") or ""))
+
+    if not title:
+        match = re.search(r'<meta\s+property=["\']og:title["\']\s+content=["\']([^"\']+)["\']', text, flags=re.I)
+        if match:
+            title = strip_tags(match.group(1))
+    if not body_html:
+        match = re.search(r'<meta\s+property=["\']og:description["\']\s+content=["\']([^"\']+)["\']', text, flags=re.I)
+        if match:
+            body_html = strip_tags(match.group(1))
+
+    return {
+        "id": int(product_id) if product_id.isdigit() else product_id,
+        "handle": handle,
+        "url": product_url,
+        "title": title or handle.replace("-", " ").title(),
+        "product_type": "" if product_type == BRAND else product_type,
+        "body_html": body_html,
+        "variants": variants,
+    }
+
+
 def product_urls_from_sitemap() -> Tuple[List[str], List[Dict[str, object]]]:
     index = fetch_text(SITEMAP_URL)
     sitemap_urls = [html.unescape(match) for match in re.findall(r"<loc>(https://www\.leonisa\.com/sitemap_products_[^<]+)</loc>", index)]
@@ -215,13 +298,30 @@ def product_urls_from_sitemap() -> Tuple[List[str], List[Dict[str, object]]]:
 
 
 def discover_products(limit_products: Optional[int] = None) -> Tuple[List[Dict[str, object]], List[Dict[str, object]]]:
-    products, product_sources = fetch_products_from_json()
+    products: List[Dict[str, object]] = []
+    product_sources: List[Dict[str, object]] = []
+    try:
+        products, product_sources = fetch_products_from_json()
+    except Exception as exc:  # noqa: BLE001
+        product_sources.append({"source": "products.json", "error": str(exc), "fallback": "product_sitemap_and_product_pages"})
     sitemap_urls, sitemap_sources = product_urls_from_sitemap()
     by_url: Dict[str, Dict[str, object]] = {product_url_for(product): product for product in products if product_url_for(product)}
     missing_urls = [url for url in sitemap_urls if url not in by_url]
     for url in missing_urls:
-        handle = url.rstrip("/").rsplit("/", 1)[-1]
-        by_url[url] = {"id": "", "handle": handle, "title": handle.replace("-", " ").title(), "product_type": "", "body_html": "", "variants": []}
+        try:
+            by_url[url] = extract_product_from_page(url)
+        except Exception as exc:  # noqa: BLE001
+            handle = url.rstrip("/").rsplit("/", 1)[-1]
+            by_url[url] = {
+                "id": "",
+                "handle": handle,
+                "url": url,
+                "title": handle.replace("-", " ").title(),
+                "product_type": "",
+                "body_html": "",
+                "variants": [],
+                "page_parse_error": str(exc),
+            }
     ordered = list(by_url.values())
     if limit_products is not None:
         ordered = ordered[:limit_products]
