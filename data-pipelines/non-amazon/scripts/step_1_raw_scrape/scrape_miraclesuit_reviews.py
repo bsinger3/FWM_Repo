@@ -33,6 +33,7 @@ BRAND = "Miraclesuit"
 PRODUCTS_PER_PAGE = 250
 REVIEWS_PER_PAGE = 100
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36"
+DEFAULT_REQUEST_DELAY_SECONDS = 0.5
 
 HEADERS = [
     "created_at_display", "id", "original_url_display", "product_page_url_display", "monetized_product_url_display",
@@ -55,6 +56,14 @@ HIPS_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*hips?\b", r
 INSEAM_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*inseam\b", re.I)
 AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re.I)
 BRA_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
+SIZE_TOKEN_RE = re.compile(
+    r"\b(?:size|sz|ordered|purchased|bought|wear(?:ing)?|wore|in)\s+"
+    r"(?:a|an|the)?\s*"
+    r"((?:xxs|xs|s|m|l|xl|xxl|xxxl|[2-5]x|x-small|small|medium|large|x-large|extra large)|(?:[0-9]|1[0-9]|2[0-8]))"
+    r"(?:\b|/)",
+    re.I,
+)
+CUSTOM_SIZE_KEYS = ("size", "ordered size", "size purchased", "what size did you purchase", "usual size")
 
 
 def norm(text: str) -> str:
@@ -65,15 +74,23 @@ def strip_tags(value: str) -> str:
     return norm(html.unescape(TAG_RE.sub(" ", re.sub(r"</p\s*>|<br\s*/?>", " ", value or "", flags=re.I))))
 
 
+def polite_pause(seconds: float) -> None:
+    if seconds > 0:
+        time.sleep(seconds)
+
+
 def fetch_text(url: str) -> str:
     req = Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"})
     with urlopen(req, timeout=60) as resp:
-        return resp.read().decode("utf-8", "replace")
+        text = resp.read().decode("utf-8", "replace")
+    polite_pause(float(os.environ.get("MIRACLESUIT_REQUEST_DELAY_SECONDS", DEFAULT_REQUEST_DELAY_SECONDS)))
+    return text
 
 
 def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: Optional[str] = None, retries: int = 5) -> Dict[str, object]:
     query_url = f"{url}?{urlencode(params)}" if params else url
     last_error: Optional[Exception] = None
+    delay_seconds = float(os.environ.get("MIRACLESUIT_REQUEST_DELAY_SECONDS", DEFAULT_REQUEST_DELAY_SECONDS))
     for attempt in range(retries):
         req = Request(
             query_url,
@@ -87,14 +104,16 @@ def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: Op
         )
         try:
             with urlopen(req, timeout=60) as resp:
-                return json.load(resp)
+                payload = json.load(resp)
+            polite_pause(delay_seconds)
+            return payload
         except HTTPError as exc:
             last_error = exc
             if exc.code not in {429, 500, 502, 503, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
-        time.sleep(min(2 ** attempt, 20))
+        time.sleep(min(2 ** attempt, 20) + delay_seconds)
     raise RuntimeError(f"Failed JSON request for {query_url}: {last_error}")
 
 
@@ -202,6 +221,43 @@ def parse_bra(text: str) -> Tuple[str, str]:
     return (band.group(1) if band else "", cup.group(0) if cup else "")
 
 
+def custom_fields(review: Dict[str, object]) -> Dict[str, str]:
+    fields = review.get("custom_fields")
+    if not isinstance(fields, dict):
+        return {}
+    cleaned: Dict[str, str] = {}
+    for key, value in fields.items():
+        if isinstance(value, dict):
+            value = value.get("value") or value.get("title") or value.get("name") or ""
+        clean_key = norm(str(key)).lower()
+        clean_value = norm(str(value))
+        if clean_key and clean_value:
+            cleaned[clean_key] = clean_value
+    return cleaned
+
+
+def normalize_size(value: str) -> str:
+    clean = norm(value).upper()
+    aliases = {
+        "X-SMALL": "XS",
+        "SMALL": "S",
+        "MEDIUM": "M",
+        "LARGE": "L",
+        "X-LARGE": "XL",
+        "EXTRA LARGE": "XL",
+    }
+    return aliases.get(clean, clean)
+
+
+def parse_size(review: Dict[str, object], text: str) -> str:
+    fields = custom_fields(review)
+    for key, value in fields.items():
+        if any(size_key in key for size_key in CUSTOM_SIZE_KEYS):
+            return normalize_size(value)
+    match = SIZE_TOKEN_RE.search(text)
+    return normalize_size(match.group(1)) if match else ""
+
+
 def variant_detail(product: Dict[str, object]) -> str:
     vals: List[str] = []
     variants = product.get("variants")
@@ -245,6 +301,7 @@ def row_for(review: Dict[str, object], product: Dict[str, object], image_url: st
     _inseam_raw, inseam = parse_num(INSEAM_RE, text, 40)
     age_raw, age = parse_age(text)
     bust, cup = parse_bra(text)
+    size = parse_size(review, text)
     product_title = strip_tags(str(product.get("title") or ""))
     product_desc = strip_tags(str(product.get("body_html") or ""))
     product_url = product_url_for(product)
@@ -285,7 +342,7 @@ def row_for(review: Dict[str, object], product: Dict[str, object], image_url: st
         "inseam_inches_display": maybe_num(inseam),
         "color_canonical": "",
         "color_display": "",
-        "size_display": "",
+        "size_display": size,
         "bust_in_number_display": bust,
         "cupsize_display": cup,
         "weight_lbs_display": maybe_num(weight),
@@ -307,7 +364,8 @@ def is_qualified(row: Dict[str, str]) -> bool:
     return bool(row.get("original_url_display") and row.get("product_page_url_display") and row.get("size_display") and has_measurement(row))
 
 
-def scrape(limit_products: Optional[int] = None, limit_pages_per_product: Optional[int] = None) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
+def scrape(limit_products: Optional[int] = None, limit_pages_per_product: Optional[int] = None, request_delay_seconds: float = DEFAULT_REQUEST_DELAY_SECONDS) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
+    os.environ["MIRACLESUIT_REQUEST_DELAY_SECONDS"] = str(request_delay_seconds)
     fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     products, product_sources = fetch_products()
     if limit_products is not None:
@@ -369,7 +427,7 @@ def scrape(limit_products: Optional[int] = None, limit_pages_per_product: Option
         "review_pages_scanned": sum(int(item["review_pages_scanned"]) for item in summaries),
         "product_review_count_hint": sum(int(item["review_count_hint"]) for item in summaries),
         "products_with_review_rows": sum(1 for item in summaries if int(item["rows"]) > 0), "product_summaries": summaries,
-        "errors": errors, "access_policy": "public_product_and_review_pages_only; restricted_or_unavailable_pages_are_skipped; polite_retries",
+        "errors": errors, "access_policy": "public_product_and_review_pages_only; no_auth_bypass; no_captcha_bypass; restricted_or_unavailable_pages_are_skipped; polite_retries; request_delay_seconds=" + str(request_delay_seconds),
         "measurement_extraction": "deterministic_regex_and_provider_fields_only",
     }
     return deduped, summary
@@ -416,7 +474,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     argv = list(argv or sys.argv[1:])
     limit_products = int(argv[argv.index("--limit-products") + 1]) if "--limit-products" in argv else None
     limit_pages = int(argv[argv.index("--limit-pages-per-product") + 1]) if "--limit-pages-per-product" in argv else None
-    rows, summary = scrape(limit_products=limit_products, limit_pages_per_product=limit_pages)
+    request_delay = float(argv[argv.index("--request-delay-seconds") + 1]) if "--request-delay-seconds" in argv else DEFAULT_REQUEST_DELAY_SECONDS
+    rows, summary = scrape(limit_products=limit_products, limit_pages_per_product=limit_pages, request_delay_seconds=request_delay)
     rows.sort(key=lambda row: (row.get("review_date", ""), row.get("product_page_url_display", ""), row.get("original_url_display", "")), reverse=True)
     write_csv(rows)
     summary = enrich(summary, rows)
