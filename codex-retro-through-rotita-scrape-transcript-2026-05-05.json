@@ -1,0 +1,119 @@
+{
+  "title": "Non-Amazon Full Catalog Scrapes: Retro Stage through Rotita - 2026-05-05",
+  "transcript_started_at": "2026-05-05T13:00:00-04:00",
+  "transcript_ended_at": "2026-05-05T15:50:00-04:00",
+  "messages": [
+    {
+      "role": "user",
+      "text": "Asked Codex to run the retro-stage.com full catalog scrape and reminded that final counts must include Supabase-qualified rows: rows with image URL, product URL, ordered size, and at least one deterministic measurement regex match. Also clarified that scrapes should go by product page, not aggregates."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated the generic non-Amazon scraper to handle Retro Stage's Loox review media and product URL mapping, then ran the full catalog scrape. Final Retro Stage counts: 2411 rows written, 2411 rows with image and product URL, 295 rows with size, 310 rows with any measurement, and 105 Supabase-qualified rows."
+    },
+    {
+      "role": "user",
+      "text": "Asked why there were no more rows and emphasized that aggregate-only counts were not acceptable."
+    },
+    {
+      "role": "assistant",
+      "text": "Corrected the approach to keep product-page linkage as the source of truth and continued the non-Amazon queue while avoiding sites claimed by concurrent Codex chats."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran breakoutbras.com with product-level review scraping. Final counts: 5463 products discovered, 147 rows written, 147 rows with image and product URL, 79 rows with size, 104 rows with any measurement, and 73 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran ever-pretty.com with product-level scraping. Final counts: 760 products discovered, 2357 rows written, 2357 rows with image and product URL, 941 rows with size, 325 rows with any measurement, and 230 Supabase-qualified rows."
+    },
+    {
+      "role": "user",
+      "text": "Asked whether Quince had been done recently, then asked Codex to move to the next site."
+    },
+    {
+      "role": "assistant",
+      "text": "Added scrape_quince_reviews.py and ran a dedicated Quince full catalog scrape using product-page review data. Final counts: 2892 products scanned, 47946 rows written, 43137 distinct reviews, 43123 distinct images, 769 distinct products, 35110 rows with size, 8633 rows with any measurement, and 6957 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Added scrape_lilyease_reviews.py and ran a dedicated LilyEase scrape. The scraper tightened ordered-size extraction to avoid false positives such as pronoun-sized 'I/it' matches. Final counts: 529 products scanned, 2824 rows written, 1636 distinct reviews, 1636 distinct images, 194 distinct products, 62 rows with size, 37 rows with any measurement, and 26 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Triaged additional next-site candidates while checking active scrape claims from concurrent chats. us.mavi.com had stale low-value prior output, catchallstore.com review APIs were Cloudflare-challenged, karenmillen.com had reviews disabled, prana.com was blocked, and whitehouseblackmarket.com lacked useful media hints. These claims were released."
+    },
+    {
+      "role": "assistant",
+      "text": "Added scrape_rotita_reviews.py for Rotita's public product-page dynamic review endpoint. The scraper discovers the product sitemap, fetches each product page, posts to dynamic.php for product-specific review images, extracts ordered size from goods_attr, and converts structured height, weight, waist, hips, and bust values into deterministic regex-friendly intake fields."
+    },
+    {
+      "role": "assistant",
+      "text": "During Rotita verification, found and fixed a pagination response-shape bug where some comments-page responses returned a JSON list instead of an object. The fix increased the full run from 856 rows and 201 Supabase-qualified rows to 1691 rows and 281 Supabase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Final Rotita counts: 3582 products scanned, 1691 rows written, 1155 distinct reviews, 1686 distinct images, 649 distinct products, 1691 rows with image and product URL, 1263 rows with size, 281 rows with any measurement, and 281 Supabase-qualified rows. Errors were almost entirely stale 404 product URLs from the sitemap, plus one transient 502 from dynamic.php."
+    },
+    {
+      "role": "user",
+      "text": "Said the chat thread is done and asked Codex to update git, S3, and the transcripts table."
+    }
+  ],
+  "metadata": {
+    "scope": "Non-Amazon full-catalog review-image scrape thread from Retro Stage through Rotita",
+    "s3_bucket": "s3://fwm-scraping-data-briannasinger",
+    "major_output_root": "FWM_Data/non-amazon/data/step_1_raw_scraping_data",
+    "major_script_root": "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape",
+    "important_paths": [
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_p0_lead_reviews.py",
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/step1_intake_utils.py",
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_quince_reviews.py",
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_lilyease_reviews.py",
+      "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_rotita_reviews.py",
+      "FWM_Data/non-amazon/data/step_1_raw_scraping_data/retro_stage_com",
+      "FWM_Data/non-amazon/data/step_1_raw_scraping_data/breakoutbras_com",
+      "FWM_Data/non-amazon/data/step_1_raw_scraping_data/ever_pretty_com",
+      "FWM_Data/non-amazon/data/step_1_raw_scraping_data/quince_com",
+      "FWM_Data/non-amazon/data/step_1_raw_scraping_data/lilyease_com",
+      "FWM_Data/non-amazon/data/step_1_raw_scraping_data/rotita_com"
+    ],
+    "final_counts": {
+      "retro_stage_com": {
+        "rows_written": 2411,
+        "supabase_qualified_rows": 105
+      },
+      "breakoutbras_com": {
+        "products_discovered": 5463,
+        "rows_written": 147,
+        "supabase_qualified_rows": 73
+      },
+      "ever_pretty_com": {
+        "products_discovered": 760,
+        "rows_written": 2357,
+        "supabase_qualified_rows": 230
+      },
+      "quince_com": {
+        "products_scanned": 2892,
+        "rows_written": 47946,
+        "supabase_qualified_rows": 6957
+      },
+      "lilyease_com": {
+        "products_scanned": 529,
+        "rows_written": 2824,
+        "supabase_qualified_rows": 26
+      },
+      "rotita_com": {
+        "products_scanned": 3582,
+        "rows_written": 1691,
+        "supabase_qualified_rows": 281
+      }
+    },
+    "notes": [
+      "Final counts must include supabase_qualified_rows.",
+      "A Supabase-qualified row has image URL, product URL, ordered size, and at least one deterministic measurement field.",
+      "Product-page scraping is the preferred source of truth; aggregate feeds should not be used to assign reviews to unrelated product pages.",
+      "Rotita claim was released after completion."
+    ]
+  }
+}

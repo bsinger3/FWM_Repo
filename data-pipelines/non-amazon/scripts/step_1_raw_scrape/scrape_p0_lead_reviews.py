@@ -8,8 +8,13 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 from urllib.parse import parse_qs, urlencode, urljoin, urlparse
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 from step1_intake_utils import (
     ProductContext,
@@ -90,6 +95,12 @@ def unique(values: Iterable[str]) -> List[str]:
     return out
 
 
+def retro_stage_product_url_from_title(site_root: str, title: str) -> str:
+    slug = normalize_whitespace(title).lower().replace("&", "and")
+    slug = re.sub(r"[^a-z0-9]+", "-", slug).strip("-")
+    return f"{site_root.rstrip('/')}/products/{slug}" if slug else ""
+
+
 def is_in_scope_product(context: ProductContext) -> bool:
     if urlparse(context.url).netloc.lower() in OUT_OF_SCOPE_DOMAINS:
         return False
@@ -117,6 +128,7 @@ class JudgeMeAdapter(ProviderAdapter):
     name = "judgeme"
     widget_url = "https://api.judge.me/reviews/reviews_for_widget"
     all_reviews_url = "https://api.judge.me/reviews/all_reviews_js_based"
+    aggregate_consumed: Set[str] = set()
 
     def scrape_product(self, context: ProductContext) -> List[ReviewImage]:
         reviews = self._widget_reviews(context)
@@ -159,6 +171,10 @@ class JudgeMeAdapter(ProviderAdapter):
         return reviews
 
     def _all_reviews(self, context: ProductContext) -> List[ReviewImage]:
+        aggregate_key = context.shop_domain or urlparse(context.url).netloc
+        if aggregate_key in self.aggregate_consumed:
+            return []
+        self.aggregate_consumed.add(aggregate_key)
         params = {
             "shop_domain": context.shop_domain,
             "platform": "shopify",
@@ -1159,6 +1175,81 @@ def scrape_domain(
     errors: List[str] = []
     adapter_names = set()
     fetched_at = utc_now()
+
+    if domain in {"retro-stage.com", "www.retro-stage.com"} and product_urls:
+        try:
+            seed_context = hydrate_shopify_context(extract_product_context(seed_urls[0] if seed_urls else product_urls[0]))
+            app_ids = LooxAdapter()._app_ids(seed_context)
+        except Exception as exc:
+            app_ids = []
+            errors.append(f"{domain}: Retro Stage Loox app discovery failed: {exc}")
+        if app_ids:
+            adapter = LooxAdapter()
+            site_with_www = "https://www.retro-stage.com"
+            seen = set()
+            for page in range(1, 10000):
+                url = build_url(
+                    f"https://loox.io/widget/{app_ids[0]}/reviews",
+                    {"productId": seed_context.product_id, "page": page, "limit": 20, "sort_by": "photo"},
+                )
+                try:
+                    payload = fetch_text(url, referer=seed_context.url, retries=2)
+                except Exception as exc:
+                    errors.append(f"{domain}: Retro Stage Loox page {page} failed: {exc}")
+                    break
+                batch = adapter._parse_embedded(payload)
+                if not batch:
+                    break
+                for review in batch:
+                    product_title = normalize_whitespace(review.extra.get("product_title"))
+                    product_url = retro_stage_product_url_from_title(site_with_www, product_title)
+                    if not product_title or not product_url:
+                        continue
+                    review.extra["product_title"] = product_title
+                    review.extra["product_url"] = product_url
+                    key = (review.review_id, review.image_url, product_url)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    context = ProductContext(
+                        url=product_url,
+                        title=product_title,
+                        brand="Retro Stage",
+                        provider_hints="Loox product-box-attributed media",
+                    )
+                    rows.append(build_intake_row(context, review, fetched_at))
+            rows = dedupe_rows(rows)
+            output_csv, summary_json = output_paths(domain)
+            write_intake_csv(rows, output_csv)
+            product_summaries.append(
+                {
+                    "product_url": seed_context.url,
+                    "product_title": seed_context.title,
+                    "provider_hints": seed_context.provider_hints,
+                    "adapter_used": "loox-product-box-title-to-product-page-url",
+                    "matching_review_images": len(rows),
+                    "product_index": 1,
+                    "note": (
+                        "Rows retained only when the Loox media card includes a product-box title; "
+                        "product_page_url is reconstructed from that Retro Stage product title."
+                    ),
+                }
+            )
+            write_summary(
+                summary_json,
+                site=site_root,
+                retailer=domain,
+                rows=rows,
+                output_csv=output_csv,
+                started_at=started_at,
+                finished_at=utc_now(),
+                products_scanned=product_count,
+                adapter="loox-product-box-title-to-product-page-url",
+                product_summaries=product_summaries,
+                errors=errors,
+            )
+            enrich_summary(summary_json, product_count, aggregate_used=False)
+            return rows, {"output_csv": str(output_csv), "summary_json": str(summary_json), "rows": len(rows), "errors": errors}
 
     if product_contexts:
         aggregate_feed_used = True

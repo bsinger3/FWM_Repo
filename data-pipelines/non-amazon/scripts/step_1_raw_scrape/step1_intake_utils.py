@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import html
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -14,9 +15,19 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urljoin, urlparse, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
+try:
+    import requests
+except ImportError:  # pragma: no cover - scraper still works through urllib where accepted.
+    requests = None
+
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-DATA_ROOT = (REPO_ROOT / "data-pipelines" / "non-amazon" / "data").resolve()
+FWM_DATA_DIR = os.environ.get("FWM_DATA_DIR")
+DATA_ROOT = (
+    Path(FWM_DATA_DIR).expanduser() / "non-amazon" / "data"
+    if FWM_DATA_DIR
+    else REPO_ROOT / "data-pipelines" / "non-amazon" / "data"
+).resolve()
 STEP1_OUTPUT_ROOT = DATA_ROOT / "step_1_raw_scraping_data"
 
 INTAKE_HEADERS = [
@@ -71,8 +82,8 @@ INTAKE_HEADERS = [
 ]
 
 USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
 )
 
 SCRAPE_ACCESS_POLICY = (
@@ -211,6 +222,18 @@ def strip_tags(fragment: object) -> str:
     return normalize_whitespace(html.unescape(text))
 
 
+def unique(values: Iterable[str]) -> List[str]:
+    seen = set()
+    out: List[str] = []
+    for value in values:
+        clean = normalize_whitespace(value)
+        if not clean or clean in seen:
+            continue
+        seen.add(clean)
+        out.append(clean)
+    return out
+
+
 def iri_to_uri(url: str) -> str:
     """Convert human-readable URLs with symbols/non-ASCII text into request-safe URLs."""
     parts = urlsplit(url)
@@ -250,6 +273,10 @@ def fetch_text(
             last_error = exc
         time.sleep(min(2 ** attempt, 12))
     if last_error:
+        if isinstance(last_error, HTTPError) and last_error.code == 429 and requests is not None:
+            response = requests.get(iri_to_uri(url), headers=headers, timeout=timeout)
+            response.raise_for_status()
+            return response.text
         raise last_error
     raise RuntimeError(f"Failed to fetch {url}")
 
@@ -484,11 +511,13 @@ def is_obvious_non_clothing_product(product: Dict[str, object], product_url: str
 
 def discover_shopify_product_urls(site_root: str, seed_urls: Sequence[str]) -> List[str]:
     seen = set()
+    seen_handles = set()
     urls: List[str] = []
     for seed_url in seed_urls:
         canonical = canonical_product_url(seed_url)
         if "/products/" in urlparse(canonical).path and canonical not in seen:
             seen.add(canonical)
+            seen_handles.add(urlparse(canonical).path.rstrip("/").rsplit("/", 1)[-1])
             urls.append(canonical)
 
     root = site_root.rstrip("/")
@@ -507,14 +536,48 @@ def discover_shopify_product_urls(site_root: str, seed_urls: Sequence[str]) -> L
             handle = normalize_whitespace(product.get("handle"))
             if not handle:
                 continue
+            if handle in seen_handles:
+                continue
             product_url = f"{root}/products/{handle}"
             if is_obvious_non_clothing_product(product, product_url):
                 continue
             if product_url not in seen:
                 seen.add(product_url)
+                seen_handles.add(handle)
                 urls.append(product_url)
         if len(products) < 250:
             break
+
+    try:
+        sitemap_index = fetch_text(f"{root}/sitemap.xml", referer=root, retries=2)
+    except Exception:
+        sitemap_index = ""
+    sitemap_urls = []
+    sitemap_seen = set()
+    for match in re.findall(r"<loc>([^<]*sitemap_products_[^<]+)</loc>", sitemap_index, re.I):
+        sitemap_url = html.unescape(match)
+        if sitemap_url not in sitemap_seen:
+            sitemap_seen.add(sitemap_url)
+            sitemap_urls.append(sitemap_url)
+    for sitemap_url in sitemap_urls:
+        try:
+            sitemap_text = fetch_text(sitemap_url, referer=root, retries=2)
+        except Exception:
+            continue
+        for product_url in re.findall(r"https?://[^<\s\"']+/products/[^<\s\"']+", sitemap_text, re.I):
+            canonical = canonical_product_url(html.unescape(product_url))
+            parsed = urlparse(canonical)
+            root_host = urlparse(root).netloc.lower().removeprefix("www.")
+            product_host = parsed.netloc.lower().removeprefix("www.")
+            if product_host != root_host or not parsed.path.startswith("/products/"):
+                continue
+            handle = parsed.path.rstrip("/").rsplit("/", 1)[-1]
+            if handle in seen_handles:
+                continue
+            if canonical not in seen:
+                seen.add(canonical)
+                seen_handles.add(handle)
+                urls.append(canonical)
     return urls
 
 
@@ -670,6 +733,10 @@ def classify_clothing_type(context: ProductContext) -> str:
         (r"\bpants?\b", "pants"),
         (r"\bleggings?\b", "leggings"),
         (r"\bdress(?:es)?\b", "dress"),
+        (r"\bjackets?\b", "jacket"),
+        (r"\bcoats?\b", "jacket"),
+        (r"\bblazers?\b", "jacket"),
+        (r"\bvests?\b", "top"),
         (r"\bskirts?\b", "skirt"),
         (r"\bskorts?\b", "skirt"),
         (r"\bshorts?\b", "shorts"),
@@ -826,6 +893,14 @@ def validate_rows(rows: Sequence[Dict[str, str]]) -> Dict[str, object]:
             for row in rows
             if row.get("original_url_display")
             and row.get("product_page_url_display")
+            and any(row.get(field) for field in MEASUREMENT_FIELDS)
+        ),
+        "supabase_qualified_rows": sum(
+            1
+            for row in rows
+            if row.get("original_url_display")
+            and row.get("product_page_url_display")
+            and row.get("size_display")
             and any(row.get(field) for field in MEASUREMENT_FIELDS)
         ),
         "rows_with_image_product_size_and_measurement": sum(
