@@ -1,0 +1,67 @@
+{
+  "title": "Leonisa, Premcurve, Petal & Pup, Bare Necessities scrape thread",
+  "source": "codex",
+  "transcript_started_at": "2026-05-05T00:00:00-04:00",
+  "transcript_ended_at": "2026-05-05T15:55:00-04:00",
+  "metadata": {
+    "workspace": "C:\\Users\\bsing\\OneDrive\\Documents\\Projects",
+    "repo": "C:\\Users\\bsing\\OneDrive\\Documents\\Projects\\FWM_Repo",
+    "data_root": "C:\\Users\\bsing\\OneDrive\\Documents\\Projects\\FWM_Data",
+    "summary_kind": "focused_handoff_transcript",
+    "note": "Created at end of Codex scrape thread because a full desktop transcript export was not directly available."
+  },
+  "messages": [
+    {
+      "role": "user",
+      "text": "Scrape every product page of leonisa.com according to the scrape procedure."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran the Leonisa full scrape. The run discovered and scanned 174 products and wrote 17 review-image rows, with 13 distinct reviews and 17 distinct images. No rows qualified with size plus measurement. Updated scrape_leonisa_reviews.py so product_url_for respects explicit URLs and so discovery can fall back from products.json 429s to sitemap product URLs plus product-page context extraction."
+    },
+    {
+      "role": "user",
+      "text": "Which site next? Keep in mind we are scraping sites in concurrent chats and we do not want to be redundant."
+    },
+    {
+      "role": "assistant",
+      "text": "Checked the shared rollup, scrape triage plan, and claim folders before selecting the next site. Avoided currently claimed or blocked sites, including active claims and sites marked 429 cool-down. Recommended Premcurve as the next useful non-redundant target."
+    },
+    {
+      "role": "user",
+      "text": "Go for it."
+    },
+    {
+      "role": "assistant",
+      "text": "Claimed Premcurve and ran a full/rescue scrape. Patched step1_intake_utils.py to use a Windows Chrome user agent, honor FWM_DATA_DIR for canonical data output, add a requests-based retry fallback for urllib HTTP 429 responses, add sitemap product discovery, avoid duplicate product handles, and add a supabase_qualified_rows validation count. Premcurve output: 1054 rows, 355 distinct reviews, 1054 distinct images, 103 distinct product URLs, 124 rows with size, 130 rows with measurements, and 68 qualified rows. Refreshed the non-Amazon merchant rollup and marked Premcurve completed."
+    },
+    {
+      "role": "user",
+      "text": "Good move on."
+    },
+    {
+      "role": "assistant",
+      "text": "Rechecked active scrape claims and the rollup. Skipped Under 5'10 because it was already documented as an out-of-scope men's retailer. Released SwimOutlet because the triage plan said to wait after 429 rate limiting. Claimed Petal & Pup as an unclaimed zero-row gap."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran the Petal & Pup scraper. The command wrapper timed out, but the scraper had completed a useful bounded partial run. Output status: partial_completed_rate_limited_full_catalog. It discovered 750 products, scanned 705 apparel products, found 947 review-image rows across 126 products, with 947 distinct reviews, 790 distinct images, 694 rows with size, 690 rows with measurements, and 688 qualified rows. The run stopped at the public endpoint 429 boundary after products.json pages 1-3 and sitemap product .js metadata also hit 429. Refreshed the rollup and marked the claim completed."
+    },
+    {
+      "role": "assistant",
+      "text": "Selected Bare Necessities next because it was unclaimed and the prior output was a one-product seed result with 2 rows. The triage CSV marked it build-adapter rather than scrape-now, so the CLI refused it; called the existing generic scraper function directly with the seed URL. The broader Yotpo pass scanned 1000 product contexts and wrote 19 rows across 9 products, with 11 distinct reviews, 19 image rows, 9 rows with size, 9 rows with measurements, and 9 qualified rows. Copied the generated files from the repo data path into the canonical FWM_Data path, corrected the summary output path, refreshed the rollup, and marked the claim completed."
+    },
+    {
+      "role": "assistant",
+      "text": "Checked Evelyn & Bobbie because it had only 2 rows in the rollup. A generic provider pass found 3 rows, but the extra row was effectively a duplicate image without useful size or measurement enrichment. Reran the dedicated Evelyn & Bobbie scraper and kept its full-catalog Yotpo output because it preserved the one measurement-qualified row. Marked the rescue check completed and refreshed the rollup."
+    },
+    {
+      "role": "assistant",
+      "text": "End state: shared non-Amazon rollup was refreshed to 98 merchant rows. Claim notes were updated for Premcurve, SwimOutlet, Under510, Petal & Pup, Bare Necessities, and Evelyn & Bobbie. Primary data outputs live under FWM_Data/non-amazon/data/step_1_raw_scraping_data. Repo code changes from this thread are scrape_leonisa_reviews.py and step1_intake_utils.py."
+    },
+    {
+      "role": "user",
+      "text": "This chat thread is done. Update the git, S3, and the transcripts table."
+    }
+  ]
+}
