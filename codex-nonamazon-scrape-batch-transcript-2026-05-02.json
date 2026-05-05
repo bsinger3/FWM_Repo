@@ -90,6 +90,10 @@
     {
       "role": "assistant",
       "text": "Updated scraper/report wording to use neutral public-data language: public product and review pages only; restricted or unavailable pages are skipped. Refreshed the non-Amazon merchant rollup so goelia1995_com notes include seed_scrape_only and still needs full scrape. Synced the changed FWM_Data reports and Goelia summary JSON to s3://fwm-scraping-data-briannasinger."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran premcurve.com on May 5, 2026. A broad catalog attempt began returning repeated aggregate-looking row counts across products, so it was stopped and rerun as a seed-only scrape with the incomplete-output flag. Final seed-only metrics: rows_written 6, distinct_reviews 3, distinct_images 6, rows_with_distinct_product_url 1, rows_with_any_measurement 0, rows_with_customer_image 6, rows_with_customer_ordered_size 0, rows_supabase_qualified 0, started_at 2026-05-05T01:54:38Z, finished_at 2026-05-05T01:54:42Z. The Premcurve report is marked seed_scrape_only and still needs a full scrape/adapter pass."
     }
   ],
   "metadata": {
@@ -97,14 +101,15 @@
     "s3_bucket": "s3://fwm-scraping-data-briannasinger",
     "major_output_root": "FWM_Data/non-amazon/data/step_1_raw_scraping_data",
     "major_script_root": "FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape",
-    "next_queue_site": "continue after goelia1995.com; goelia1995_com still needs full scrape",
+    "next_queue_site": "continue after premcurve.com; goelia1995_com and premcurve_com still need full scrapes",
     "notes": [
       "Do not skip products in future scrapes; read new-scrape-rules.md before every scrape.",
       "Babyboo and Universal Standard both needed grouped-review duplicate filtering by review id plus original image URL.",
       "S3 sync completed successfully before this transcript file was created.",
       "goelia1995_com seed-only output has zero rows and must not be treated as fully scraped.",
-      "Use neutral public-data wording in scraper metadata and reports."
+      "Use neutral public-data wording in scraper metadata and reports.",
+      "premcurve_com seed-only output has 6 rows and must not be treated as fully scraped."
     ],
-    "latest_s3_sync": "2026-05-04T16:45:00-04:00"
+    "latest_s3_sync": "2026-05-05T02:00:00Z"
   }
 }
