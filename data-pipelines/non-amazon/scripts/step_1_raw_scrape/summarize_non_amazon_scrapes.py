@@ -22,6 +22,8 @@ REPORT_HEADERS = [
     "summary_json_path",
     "rows_scraped",
     "rows_with_image_url",
+    "rows_with_customer_review_image",
+    "rows_with_catalog_model_image",
     "distinct_review_ids",
     "distinct_image_urls",
     "distinct_product_urls",
@@ -233,6 +235,18 @@ def summarize_merchant(merchant_dir: Path) -> Dict[str, str]:
         for row in rows
         if get_value(row, ["original_url_display", "image_url", "image", "photo_url", "review_image_url"])
     }
+    customer_review_image_rows = [
+        row
+        for row in rows
+        if get_value(row, ["original_url_display", "image_url", "image", "photo_url", "review_image_url"])
+        and (get_value(row, ["image_source_type"]) or "customer_review_image") == "customer_review_image"
+    ]
+    catalog_model_image_rows = [
+        row
+        for row in rows
+        if get_value(row, ["original_url_display", "image_url", "image", "photo_url", "review_image_url"])
+        and get_value(row, ["image_source_type"]) == "catalog_model_image"
+    ]
     product_values = {
         get_value(row, ["product_page_url_display", "monetized_product_url_display", "product_url", "product link", "link"])
         for row in rows
@@ -267,6 +281,12 @@ def summarize_merchant(merchant_dir: Path) -> Dict[str, str]:
         "summary_json_path": str(summary_file) if summary_file else "",
         "rows_scraped": str(len(rows) or summary_payload.get("rows_written") or ""),
         "rows_with_image_url": str(len(rows_with_image) or summary_payload.get("rows_with_image_url") or ""),
+        "rows_with_customer_review_image": str(
+            len(customer_review_image_rows) or summary_payload.get("rows_with_customer_review_image") or ""
+        ),
+        "rows_with_catalog_model_image": str(
+            len(catalog_model_image_rows) or summary_payload.get("rows_with_catalog_model_image") or ""
+        ),
         "distinct_review_ids": str(len(review_ids) or summary_payload.get("distinct_reviews") or ""),
         "distinct_image_urls": str(len(image_values) or summary_payload.get("distinct_images") or ""),
         "distinct_product_urls": str(len(product_values) or summary_payload.get("distinct_products") or ""),
@@ -338,15 +358,16 @@ def write_markdown(rows: Sequence[Dict[str, str]], output_md: Path) -> None:
     lines = [
         "# Non-Amazon Merchant Scrape Summary",
         "",
-        "| Merchant | Rows | Images | Reviews | Products | Scanned | Scope | Comments | Ordered Size | Measurements | Qualified Fit Rows | Bra Rows | Bra Rows w/ Bra Size | Image+Product | Image+Product+Measurement | Missing Product URL | Context | Kind | Notes |",
-        "|---|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|",
+        "| Merchant | Rows | Images | Catalog Model Images | Reviews | Products | Scanned | Scope | Comments | Ordered Size | Measurements | Qualified Fit Rows | Bra Rows | Bra Rows w/ Bra Size | Image+Product | Image+Product+Measurement | Missing Product URL | Context | Kind | Notes |",
+        "|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|",
     ]
     for row in rows:
         lines.append(
-            "| {merchant} | {rows} | {images} | {reviews} | {products} | {scanned} | {scope} | {comments} | {ordered_size} | {measurements} | {qualified_fit_rows} | {bra_rows} | {bra_size_rows} | {image_product} | {image_product_measurement} | {missing_product} | {context} | {kind} | {notes} |".format(
+            "| {merchant} | {rows} | {images} | {catalog_model_images} | {reviews} | {products} | {scanned} | {scope} | {comments} | {ordered_size} | {measurements} | {qualified_fit_rows} | {bra_rows} | {bra_size_rows} | {image_product} | {image_product_measurement} | {missing_product} | {context} | {kind} | {notes} |".format(
                 merchant=md_cell(row["merchant"]),
                 rows=row["rows_scraped"] or "0",
                 images=row["distinct_image_urls"] or "0",
+                catalog_model_images=row["rows_with_catalog_model_image"] or "0",
                 reviews=row["distinct_review_ids"] or "0",
                 products=row["distinct_product_urls"] or "0",
                 scanned=row["product_pages_scanned"] or row["products_discovered"] or "",

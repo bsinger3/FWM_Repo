@@ -34,6 +34,8 @@ INTAKE_HEADERS = [
     "created_at_display",
     "id",
     "original_url_display",
+    "image_source_type",
+    "image_source_detail",
     "product_page_url_display",
     "monetized_product_url_display",
     "height_raw",
@@ -790,11 +792,15 @@ def build_intake_row(context: ProductContext, review: ReviewImage, fetched_at: s
     product_detail = normalize_whitespace(review.extra.get("product_detail")) or (context.detail if use_context_product else "")
     product_category = normalize_whitespace(review.extra.get("product_category")) or (context.category if use_context_product else "")
     product_variant = normalize_whitespace(review.extra.get("product_variant")) or (context.variant if use_context_product else "")
+    image_source_type = normalize_whitespace(review.extra.get("image_source_type")) or "customer_review_image"
+    image_source_detail = normalize_whitespace(review.extra.get("image_source_detail"))
     row = {header: "" for header in INTAKE_HEADERS}
     row.update(
         {
             "id": review.review_id,
             "original_url_display": review.image_url,
+            "image_source_type": image_source_type,
+            "image_source_detail": image_source_detail,
             "product_page_url_display": product_url,
             "user_comment": comment,
             "date_review_submitted_raw": review.date_raw,
@@ -872,6 +878,14 @@ def validate_rows(rows: Sequence[Dict[str, str]]) -> Dict[str, object]:
         "distinct_images": len({row.get("original_url_display", "") for row in rows if row.get("original_url_display")}),
         "distinct_products": len({row.get("product_page_url_display", "") for row in rows if row.get("product_page_url_display")}),
         "rows_with_image_url": sum(1 for row in rows if row.get("original_url_display")),
+        "rows_with_customer_review_image": sum(
+            1
+            for row in rows
+            if row.get("original_url_display") and (row.get("image_source_type") or "customer_review_image") == "customer_review_image"
+        ),
+        "rows_with_catalog_model_image": sum(
+            1 for row in rows if row.get("original_url_display") and row.get("image_source_type") == "catalog_model_image"
+        ),
         "rows_missing_image_url": sum(1 for row in rows if not row.get("original_url_display")),
         "rows_missing_product_url": sum(1 for row in rows if not row.get("product_page_url_display")),
         "rows_with_user_comment": sum(1 for row in rows if row.get("user_comment")),
