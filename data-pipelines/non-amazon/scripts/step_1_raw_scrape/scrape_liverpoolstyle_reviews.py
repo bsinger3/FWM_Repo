@@ -2,17 +2,22 @@
 from __future__ import annotations
 
 import json
+import re
+import sys
 import time
-from typing import Dict, List
+from typing import Dict, List, Sequence
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote
+from urllib.request import Request, urlopen
 
 from step1_intake_utils import (
+    MEASUREMENT_FIELDS,
     ProductContext,
     ReviewImage,
+    USER_AGENT,
     build_intake_row,
     classify_clothing_type,
     dedupe_rows,
-    fetch_json,
     normalize_whitespace,
     output_paths,
     strip_tags,
@@ -27,6 +32,32 @@ DOMAIN = "liverpoolstyle.com"
 KLAVIYO_COMPANY_ID = "JeMYJL"
 KLAVIYO_API_ROOT = "https://fast.a.klaviyo.com/reviews/api"
 KLAVIYO_IMAGE_ROOT = "https://klaviyo.s3.amazonaws.com/reviews/images"
+REQUEST_DELAY_SECONDS = 0.75
+
+
+class PressureStop(RuntimeError):
+    pass
+
+
+def fetch_json_public(url: str, *, referer: str = "", timeout: int = 45) -> Dict[str, object]:
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/json,text/plain,*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+    if referer:
+        headers["Referer"] = referer
+    try:
+        with urlopen(Request(url, headers=headers), timeout=timeout) as response:
+            return json.loads(response.read().decode("utf-8-sig", errors="replace"))
+    except HTTPError as exc:
+        if exc.code in {401, 403, 407, 408, 409, 423, 429, 430, 503}:
+            raise PressureStop(f"stopping on HTTP {exc.code} for {url}") from exc
+        raise
+    except URLError as exc:
+        raise PressureStop(f"stopping on URL error for {url}: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"invalid JSON from {url}: {exc}") from exc
 
 
 def product_url(handle: str) -> str:
@@ -65,7 +96,7 @@ def discover_products() -> List[Dict[str, object]]:
     products: List[Dict[str, object]] = []
     seen_ids = set()
     for page in range(1, 10000):
-        payload = fetch_json(f"{SITE_ROOT}/products.json?limit=250&page={page}", referer=SITE_ROOT)
+        payload = fetch_json_public(f"{SITE_ROOT}/products.json?limit=250&page={page}", referer=SITE_ROOT)
         batch = payload.get("products") if isinstance(payload, dict) else []
         if not isinstance(batch, list) or not batch:
             break
@@ -82,6 +113,7 @@ def discover_products() -> List[Dict[str, object]]:
         print(f"[{DOMAIN} products.json page {page}] {new_count} new products", flush=True)
         if len(batch) < 250:
             break
+        time.sleep(REQUEST_DELAY_SECONDS)
     return products
 
 
@@ -112,7 +144,7 @@ def fetch_review_counts(product_ids: List[str]) -> Dict[str, Dict[str, object]]:
     for index in range(0, len(product_ids), 50):
         chunk = product_ids[index : index + 50]
         encoded = quote(json.dumps(chunk, separators=(",", ":")))
-        payload = fetch_json(
+        payload = fetch_json_public(
             f"{KLAVIYO_API_ROOT}/client_reviews/?company_id={KLAVIYO_COMPANY_ID}&products={encoded}",
             referer=SITE_ROOT,
         )
@@ -122,7 +154,7 @@ def fetch_review_counts(product_ids: List[str]) -> Dict[str, Dict[str, object]]:
                 if shopify_id:
                     counts[shopify_id] = product
         print(f"[{DOMAIN} klaviyo counts {index + len(chunk)}/{len(product_ids)}]", flush=True)
-        time.sleep(0.1)
+        time.sleep(REQUEST_DELAY_SECONDS)
     return counts
 
 
@@ -160,7 +192,7 @@ def fetch_media_reviews(context: ProductContext) -> tuple[List[ReviewImage], int
     pages_scanned = 0
     filtered_count = 0
     for offset in range(0, 10000, 50):
-        payload = fetch_json(klaviyo_reviews_url(context.product_id, offset=offset), referer=context.url)
+        payload = fetch_json_public(klaviyo_reviews_url(context.product_id, offset=offset), referer=context.url)
         pages_scanned += 1
         filtered_count = int(payload.get("filtered_count") or filtered_count or 0)
         batch = payload.get("reviews") or []
@@ -201,15 +233,89 @@ def fetch_media_reviews(context: ProductContext) -> tuple[List[ReviewImage], int
                 )
         if not payload.get("has_more"):
             break
-        time.sleep(0.1)
+        time.sleep(REQUEST_DELAY_SECONDS)
     return reviews, pages_scanned, filtered_count
 
 
-def main() -> int:
+def product_image_urls(product: Dict[str, object]) -> List[str]:
+    images = product.get("images") if isinstance(product.get("images"), list) else []
+    urls: List[str] = []
+    seen = set()
+    for image in images:
+        if not isinstance(image, dict):
+            continue
+        src = normalize_whitespace(image.get("src"))
+        if not src or src in seen:
+            continue
+        seen.add(src)
+        urls.append(src)
+    return urls
+
+
+def model_measurement_text(context: ProductContext) -> str:
+    text = normalize_whitespace(" ".join([context.description, context.detail, context.category]))
+    model_patterns = [
+        r"(?:model|model\s+info|model\s+is|our\s+model|she\s+is)[^.]{0,220}(?:wearing|wears|size|height|waist|hips|bust|inseam)[^.]{0,220}",
+        r"(?:wearing|wears)\s+(?:a\s+)?(?:size\s+)?[A-Za-z0-9/.\- ]{1,16}[^.]{0,180}(?:model|height|waist|hips|bust|inseam)[^.]{0,180}",
+    ]
+    matches = [match.group(0) for pattern in model_patterns for match in re.finditer(pattern, text, re.I)]
+    return normalize_whitespace(" ".join(matches))
+
+
+def has_measurement(row: Dict[str, str]) -> bool:
+    return any(row.get(field) for field in MEASUREMENT_FIELDS)
+
+
+def catalog_model_rows(product: Dict[str, object], context: ProductContext, fetched_at: str) -> List[Dict[str, str]]:
+    comment = model_measurement_text(context)
+    if not comment:
+        return []
+    rows: List[Dict[str, str]] = []
+    for image_index, image_url in enumerate(product_image_urls(product), start=1):
+        row = build_intake_row(
+            context,
+            ReviewImage(
+                image_url=image_url,
+                review_id=f"catalog-model-{context.product_id}-{image_index}",
+                review_title="Catalog model image",
+                review_body=comment,
+                size_raw="",
+                extra={
+                    "image_source_type": "catalog_model_image",
+                    "image_source_detail": "shopify_product_catalog_image_with_product_page_model_measurements",
+                },
+            ),
+            fetched_at,
+        )
+        if row.get("size_display") and has_measurement(row):
+            rows.append(row)
+    return rows
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    global REQUEST_DELAY_SECONDS
+    argv = list(argv or sys.argv[1:])
+    if "--request-delay-seconds" in argv:
+        REQUEST_DELAY_SECONDS = float(argv[argv.index("--request-delay-seconds") + 1])
+    limit_products = int(argv[argv.index("--limit-products") + 1]) if "--limit-products" in argv else None
     started_at = utc_now()
-    products = discover_products()
+    stopped_for_pressure = False
+    try:
+        products = discover_products()
+    except PressureStop as exc:
+        products = []
+        stopped_for_pressure = True
+        print(str(exc), flush=True)
+    if limit_products is not None:
+        products = products[:limit_products]
     product_by_id = {normalize_whitespace(product.get("id")): product for product in products}
-    review_counts = fetch_review_counts([product_id for product_id in product_by_id if product_id])
+    errors: List[str] = []
+    try:
+        review_counts = fetch_review_counts([product_id for product_id in product_by_id if product_id]) if products else {}
+    except PressureStop as exc:
+        stopped_for_pressure = True
+        review_counts = {}
+        errors.append(str(exc))
     product_summaries: List[Dict[str, object]] = []
     in_scope_count = 0
     out_of_scope_count = 0
@@ -217,7 +323,6 @@ def main() -> int:
     products_with_reviews = 0
     total_public_reviews = 0
     rows: List[Dict[str, str]] = []
-    errors: List[str] = []
     fetched_at = utc_now()
     for index, product in enumerate(products, start=1):
         context = product_context(product)
@@ -238,9 +343,15 @@ def main() -> int:
             try:
                 product_reviews, pages_scanned, media_review_count = fetch_media_reviews(context)
                 review_pages_scanned += pages_scanned
+            except PressureStop as exc:
+                stopped_for_pressure = True
+                errors.append(str(exc))
+                break
             except Exception as exc:
                 errors.append(f"{context.url}: klaviyo media reviews failed: {exc}")
         product_rows = [build_intake_row(context, review, fetched_at) for review in product_reviews if review.image_url]
+        if in_scope:
+            product_rows.extend(catalog_model_rows(product, context, fetched_at))
         rows.extend(product_rows)
         product_summaries.append(
             {
@@ -252,6 +363,8 @@ def main() -> int:
                 "public_review_count": review_count,
                 "public_media_review_count": media_review_count,
                 "matching_review_images": len(product_rows),
+                "matching_customer_review_images": len(product_reviews),
+                "matching_catalog_model_images": sum(1 for row in product_rows if row.get("image_source_type") == "catalog_model_image"),
                 "product_index": index,
                 "clothing_type_id": clothing_type,
                 "skipped_from_output": not in_scope,
@@ -299,17 +412,19 @@ def main() -> int:
             "rows_supabase_qualified": payload.get("rows_with_image_product_size_and_measurement", 0),
             "scrape_scope_status": "full_catalog_attempted",
             "full_catalog_scrape_complete": True,
+            "stopped_for_pressure": stopped_for_pressure,
             "seed_scrape_only": False,
             "aggregate_feed_used": True,
             "review_pages_scanned": review_pages_scanned,
             "exhaustive_review_paging": True,
             "warnings": [
                 "Liverpool Style uses Klaviyo Reviews; only reviews with public image_uuid media are written as Step 1 rows.",
-                "Catalog/model images are not written to Step 1 because original_url_display must be a shopper/customer review image.",
+                "Catalog/model image rows are written only when public product-page/catalog text exposes model size plus measurements.",
             ],
         }
     )
     summary_json.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    json.loads(summary_json.read_text(encoding="utf-8-sig"))
     print(
         json.dumps(
             {
@@ -322,6 +437,10 @@ def main() -> int:
                     "products_with_public_reviews": products_with_reviews,
                     "total_public_reviews": total_public_reviews,
                     "rows": len(rows),
+                    "customer_review_rows": payload.get("rows_with_customer_review_image", 0),
+                    "catalog_model_rows": payload.get("rows_with_catalog_model_image", 0),
+                    "qualified_rows": payload.get("rows_with_image_product_size_and_measurement", 0),
+                    "summary_json_readable_utf8_sig": True,
                 }
             },
             indent=2,

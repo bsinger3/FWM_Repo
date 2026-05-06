@@ -86,6 +86,20 @@ npm run sync:codex-chat
 
 right after the transcript JSON has been updated.
 
+If a full desktop transcript export is not available, create a focused handoff transcript JSON for the current session and upload that file with:
+
+```bash
+node scripts/upload-codex-chat-transcript.mjs path/to/session-transcript.json
+```
+
+The handoff transcript should include the user requests, major assistant actions, verification results, changed files, blockers, and next steps. It is not a perfect replacement for a full chat export, but it is still useful durable project memory for the next Codex session.
+
+## Focused Handoff Transcripts
+
+| File | Date | Scope |
+| --- | --- | --- |
+| `codex-nonamazon-liverpool-vs-aliava-transcript-2026-05-06.json` | 2026-05-06 | Liverpool Style refresh, Victoria's Secret workbook conversion, blocked-site triage, and Aliava catalog-model scrape. |
+
 ## End-of-Chat Prompt
 
 At the end of a Codex conversation, use this prompt:
