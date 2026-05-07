@@ -42,6 +42,7 @@ function redactText(raw, replacements) {
     [/(SUPABASE_SERVICE_ROLE_KEY\s*[=:]\s*)[^\s"'`\\]+/gi, "$1[REDACTED_SUPABASE_SERVICE_ROLE_KEY]"],
     [/(OPENAI_API_KEY\s*[=:]\s*)[^\s"'`\\]+/gi, "$1[REDACTED_OPENAI_API_KEY]"],
     [/eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/g, "[REDACTED_JWT]"],
+    [/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[REDACTED_EMAIL]"],
     [/s3:\/\/fwm-scraping-data-briannasinger/g, "s3://[REDACTED_FWM_S3_BUCKET]"],
     [/fwm-scraping-data-briannasinger/g, "[REDACTED_FWM_S3_BUCKET]"],
     [/https:\/\/gosqgqpftqlawvnyelkt\.supabase\.co/g, "https://[REDACTED_SUPABASE_PROJECT].supabase.co"],

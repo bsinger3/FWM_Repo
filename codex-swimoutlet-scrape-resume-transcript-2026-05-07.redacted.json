@@ -44,7 +44,7 @@
     "Keep the public-endpoint guardrail: stop immediately on 429, captcha, WAF, auth wall, or suspicious-request behavior."
   ],
   "redaction": {
-    "redacted_at": "2026-05-07T17:04:52.501Z",
+    "redacted_at": "2026-05-07T17:06:59.884Z",
     "source_file": "codex-swimoutlet-scrape-resume-transcript-2026-05-07.json",
     "notes": [
       "Exact .env sensitive values replaced when present.",

@@ -125,7 +125,7 @@
     },
     {
       "role": "assistant",
-      "text": "Yes, using your personal email is fine if this is your own project and you control the billing.\n\nA few practical tips:\n\n- Use an email you’ll keep long-term.\n- Turn on MFA right away.\n- Use a strong unique password.\n- Add billing alerts/budgets during setup.\n- Don’t share the root login with anyone.\n- Later, use IAM/CLI access for day-to-day work instead of the root account.\n\nIf this might become a company/team project soon, you could use a dedicated project email like `admin@friendswithmeasurements.com`, but personal email is completely okay for getting started."
+      "text": "Yes, using your personal email is fine if this is your own project and you control the billing.\n\nA few practical tips:\n\n- Use an email you’ll keep long-term.\n- Turn on MFA right away.\n- Use a strong unique password.\n- Add billing alerts/budgets during setup.\n- Don’t share the root login with anyone.\n- Later, use IAM/CLI access for day-to-day work instead of the root account.\n\nIf this might become a company/team project soon, you could use a dedicated project email like `[REDACTED_EMAIL]`, but personal email is completely okay for getting started."
     },
     {
       "role": "user",
@@ -133,7 +133,7 @@
     },
     {
       "role": "assistant",
-      "text": "That’s okay. You have two sane options:\n\n1. Recover the old AWS account attached to your personal email\n   Best if you might already have billing history/resources there. Use AWS password reset/account recovery.\n\n2. Create a new AWS account with a different email\n   Fastest path. Use a dedicated project email if you have one, like:\n   `admin@friendswithmeasurements.com`\n   or create something like:\n   `friendswithmeasurements@gmail.com`\n\nI’d choose option 2 if you don’t care about the old AWS account and just want to keep moving.\n\nOne important thing: if you create a new AWS account, still use a real inbox you control long-term, because AWS will send billing/security notices there."
+      "text": "That’s okay. You have two sane options:\n\n1. Recover the old AWS account attached to your personal email\n   Best if you might already have billing history/resources there. Use AWS password reset/account recovery.\n\n2. Create a new AWS account with a different email\n   Fastest path. Use a dedicated project email if you have one, like:\n   `[REDACTED_EMAIL]`\n   or create something like:\n   `[REDACTED_EMAIL]`\n\nI’d choose option 2 if you don’t care about the old AWS account and just want to keep moving.\n\nOne important thing: if you create a new AWS account, still use a real inbox you control long-term, because AWS will send billing/security notices there."
     },
     {
       "role": "user",
@@ -577,7 +577,7 @@
     }
   ],
   "redaction": {
-    "redacted_at": "2026-05-07T17:04:48.363Z",
+    "redacted_at": "2026-05-07T17:06:56.416Z",
     "source_file": "codex-chat-transcript.json",
     "notes": [
       "Exact .env sensitive values replaced when present.",
