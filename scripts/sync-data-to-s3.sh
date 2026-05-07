@@ -18,6 +18,7 @@ fi
 
 FWM_DATA_DIR="${FWM_DATA_DIR:-/Users/briannasinger/Projects/FWM_Data}"
 FWM_S3_BUCKET="${FWM_S3_BUCKET:-}"
+FWM_AWS_PROFILE="${FWM_AWS_PROFILE:-fwm}"
 
 if [[ -z "${FWM_S3_BUCKET}" || "${FWM_S3_BUCKET}" == "s3://your-private-fwm-data-bucket" ]]; then
   echo "Set FWM_S3_BUCKET in ${ENV_FILE} before syncing." >&2
@@ -29,6 +30,6 @@ if [[ ! -d "${FWM_DATA_DIR}" ]]; then
   exit 1
 fi
 
-aws s3 sync "${FWM_DATA_DIR}" "${FWM_S3_BUCKET}" \
+aws --profile "${FWM_AWS_PROFILE}" s3 sync "${FWM_DATA_DIR}" "${FWM_S3_BUCKET}" \
   --exclude ".DS_Store" \
   --exclude "**/.DS_Store"

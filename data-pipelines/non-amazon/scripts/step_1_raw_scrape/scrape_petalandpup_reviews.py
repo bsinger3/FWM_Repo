@@ -31,6 +31,8 @@ CSV_COLUMNS = [
     "created_at_display",
     "id",
     "original_url_display",
+    "image_source_type",
+    "image_source_detail",
     "product_page_url_display",
     "monetized_product_url_display",
     "height_raw",
@@ -102,12 +104,26 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def fetch_json(url: str, timeout: int = 30, retries: int = 2, delay: float = 0.5) -> tuple[int | None, dict[str, Any] | None, str]:
+SUSPICIOUS_RE = re.compile(r"(captcha|cloudflare|access denied|temporarily blocked|suspicious request|bot detection|waf)", re.I)
+
+
+def suspicious_response(status: int | None, body: str) -> str:
+    if status == 429:
+        return "rate_limited"
+    if status in {403, 503} and SUSPICIOUS_RE.search(body or ""):
+        return "suspicious_request"
+    if SUSPICIOUS_RE.search((body or "")[:5000]):
+        return "suspicious_request"
+    return ""
+
+
+def fetch_json(url: str, timeout: int = 30, retries: int = 0, delay: float = 0.5) -> tuple[int | None, dict[str, Any] | None, str]:
     for attempt in range(retries + 1):
         try:
             status, raw, err = fetch_with_curl(url, "application/json,text/plain,*/*", timeout)
-            if status == 429:
-                return status, None, "rate_limited"
+            suspicious = suspicious_response(status, raw)
+            if suspicious:
+                return status, None, suspicious
             if status != 200:
                 return status, None, err or f"http_{status}"
             return status, json.loads(raw), ""
@@ -156,7 +172,7 @@ def fetch_with_curl(url: str, accept: str, timeout: int = 30) -> tuple[int | Non
     return status, body, proc.stderr.strip()
 
 
-def fetch_text(url: str, timeout: int = 30, retries: int = 2, delay: float = 0.5) -> tuple[int | None, str, str]:
+def fetch_text(url: str, timeout: int = 30, retries: int = 0, delay: float = 0.5) -> tuple[int | None, str, str]:
     for attempt in range(retries + 1):
         try:
             status, body, err = fetch_with_curl(
@@ -164,8 +180,9 @@ def fetch_text(url: str, timeout: int = 30, retries: int = 2, delay: float = 0.5
                 "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 timeout,
             )
-            if status == 429:
-                return status, "", "rate_limited"
+            suspicious = suspicious_response(status, body)
+            if suspicious:
+                return status, "", suspicious
             if status != 200:
                 return status, body, err or f"http_{status}"
             return status, body, ""
@@ -176,19 +193,25 @@ def fetch_text(url: str, timeout: int = 30, retries: int = 2, delay: float = 0.5
     return None, "", err
 
 
+def fetch_products_json_page(page: int) -> tuple[int | None, list[dict[str, Any]], str]:
+    url = f"{BASE}/products.json?limit=250&page={page}"
+    status, payload, error = fetch_json(url)
+    if status != 200 or not payload:
+        return status, [], error or f"http_{status}"
+    return status, list(payload.get("products") or []), ""
+
+
 def discover_products_json(limit_pages: int | None, request_delay: float) -> list[dict[str, Any]]:
     products: list[dict[str, Any]] = []
     page = 1
     while True:
         if limit_pages and page > limit_pages:
             break
-        url = f"{BASE}/products.json?limit=250&page={page}"
-        status, payload, error = fetch_json(url)
+        status, batch, error = fetch_products_json_page(page)
         if status == 429:
             raise RuntimeError(f"catalog_rate_limited_page_{page}")
-        if status != 200 or not payload:
+        if status != 200:
             raise RuntimeError(f"catalog_fetch_failed_page_{page}: {error or status}")
-        batch = payload.get("products") or []
         if not batch:
             break
         products.extend(batch)
@@ -365,6 +388,8 @@ def rows_for_product(product: dict[str, Any], per_page: int, request_delay: floa
                     "created_at_display": date_raw,
                     "id": row_id(product, review, image),
                     "original_url_display": image_url,
+                    "image_source_type": "customer_review_image",
+                    "image_source_detail": "Yotpo public widget review image",
                     "product_page_url_display": purl,
                     "monetized_product_url_display": "",
                     "height_raw": height,
@@ -424,6 +449,73 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow({column: row.get(column, "") for column in CSV_COLUMNS})
 
 
+def read_existing_rows(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    with path.open("r", newline="", encoding="utf-8") as fh:
+        rows = []
+        for row in csv.DictReader(fh):
+            if row.get("original_url_display") and not row.get("image_source_type"):
+                row["image_source_type"] = "customer_review_image"
+                row["image_source_detail"] = "Yotpo public widget review image"
+            rows.append(dict(row))
+        return rows
+
+
+def read_existing_summary(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    with path.open("r", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def count_qualified(rows: list[dict[str, Any]]) -> int:
+    return sum(
+        1
+        for row in rows
+        if row.get("original_url_display")
+        and row.get("product_page_url_display")
+        and row.get("size_display")
+        and (
+            row.get("height_raw")
+            or row.get("weight_raw")
+            or row.get("bust_in_number_display")
+            or row.get("cupsize_display")
+        )
+    )
+
+
+def merge_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    unique_rows: OrderedDict[str, dict[str, Any]] = OrderedDict()
+    for row in rows:
+        key = str(row.get("id") or row.get("original_url_display"))
+        unique_rows[key] = row
+    return list(unique_rows.values())
+
+
+def scan_products(apparel_products: list[dict[str, Any]], args: argparse.Namespace) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str]:
+    all_rows: list[dict[str, Any]] = []
+    product_results: list[dict[str, Any]] = []
+    blocker = ""
+    max_workers = max(1, args.workers)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(rows_for_product, product, args.per_page, args.review_delay): product
+            for product in apparel_products
+        }
+        for idx, future in enumerate(as_completed(futures), 1):
+            rows, result = future.result()
+            all_rows.extend(rows)
+            product_results.append(result)
+            status = str(result.get("status") or "")
+            if "rate_limited" in status or "suspicious" in status:
+                blocker = f"review_{status}_{result.get('product_url')}"
+                break
+            if idx % 50 == 0 or idx == len(apparel_products):
+                print(f"processed {idx}/{len(apparel_products)} apparel products; rows={len(all_rows)}", flush=True)
+    return all_rows, product_results, blocker
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-prefix", default="petalandpup_com")
@@ -433,48 +525,87 @@ def main() -> int:
     parser.add_argument("--per-page", type=int, default=100)
     parser.add_argument("--catalog-delay", type=float, default=0.25)
     parser.add_argument("--review-delay", type=float, default=0.05)
+    parser.add_argument("--resume-existing", action="store_true")
+    parser.add_argument("--catalog-start-page", type=int)
+    parser.add_argument("--page-checkpoint", action="store_true")
     args = parser.parse_args()
 
     root = data_root()
     output_dir = root / "non-amazon/data/step_1_raw_scraping_data/petalandpup_com"
     csv_path = output_dir / f"{args.output_prefix}_reviews_matching_intake_schema.csv"
     summary_path = output_dir / f"{args.output_prefix}_reviews_matching_intake_schema_summary.json"
+    checkpoint_path = output_dir / f"{args.output_prefix}_catalog_pages_checkpoint.jsonl"
     started = utc_now()
 
-    products = discover_products(args.limit_catalog_pages, args.catalog_delay, args.limit_products, args.workers)
-    apparel_products = [product for product in products if is_apparel(product)]
-    if args.limit_products:
-        apparel_products = apparel_products[: args.limit_products]
+    existing_rows = read_existing_rows(csv_path) if args.resume_existing else []
+    existing_summary = read_existing_summary(summary_path) if args.resume_existing else {}
+    product_results: list[dict[str, Any]] = list(existing_summary.get("product_results") or [])
+    all_rows: list[dict[str, Any]] = list(existing_rows)
+    catalog_blocker = ""
+    products_discovered = int(existing_summary.get("products_discovered") or 0) if args.resume_existing else 0
+    apparel_products_scanned = int(existing_summary.get("apparel_products_scanned") or 0) if args.resume_existing else 0
+    pages_completed: list[int] = []
 
-    all_rows: list[dict[str, Any]] = []
-    product_results: list[dict[str, Any]] = []
-    with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        futures = {
-            executor.submit(rows_for_product, product, args.per_page, args.review_delay): product
-            for product in apparel_products
-        }
-        for idx, future in enumerate(as_completed(futures), 1):
-            rows, result = future.result()
+    if args.catalog_start_page or args.page_checkpoint:
+        page = args.catalog_start_page or 1
+        while True:
+            if args.limit_catalog_pages and page > args.limit_catalog_pages:
+                break
+            status, batch, error = fetch_products_json_page(page)
+            if status != 200:
+                catalog_blocker = f"products.json page {page}: {error or status}"
+                print(f"stopping on catalog blocker: {catalog_blocker}", flush=True)
+                break
+            if not batch:
+                pages_completed.append(page)
+                break
+            products_discovered += len(batch)
+            pages_completed.append(page)
+            if args.page_checkpoint:
+                with checkpoint_path.open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps({"page": page, "fetched_at": utc_now(), "products": batch}, ensure_ascii=False) + "\n")
+            page_apparel = [product for product in batch if is_apparel(product)]
+            if args.limit_products:
+                remaining = max(args.limit_products - (apparel_products_scanned if args.resume_existing else 0), 0)
+                page_apparel = page_apparel[:remaining]
+            print(f"catalog page {page}: {len(batch)} products; apparel_to_scan={len(page_apparel)}", flush=True)
+            rows, results, review_blocker = scan_products(page_apparel, args)
             all_rows.extend(rows)
-            product_results.append(result)
-            if idx % 50 == 0 or idx == len(apparel_products):
-                print(f"processed {idx}/{len(apparel_products)} apparel products; rows={len(all_rows)}", flush=True)
+            product_results.extend(results)
+            apparel_products_scanned += len(page_apparel)
+            all_rows = merge_rows(all_rows)
+            write_csv(csv_path, all_rows)
+            if review_blocker:
+                catalog_blocker = review_blocker
+                print(f"stopping on review blocker: {catalog_blocker}", flush=True)
+                break
+            if args.limit_products and apparel_products_scanned >= args.limit_products:
+                break
+            page += 1
+            if args.catalog_delay:
+                time.sleep(args.catalog_delay)
+    else:
+        products = discover_products(args.limit_catalog_pages, args.catalog_delay, args.limit_products, args.workers)
+        products_discovered = len(products)
+        apparel_products = [product for product in products if is_apparel(product)]
+        if args.limit_products:
+            apparel_products = apparel_products[: args.limit_products]
+        rows, product_results, catalog_blocker = scan_products(apparel_products, args)
+        all_rows.extend(rows)
+        apparel_products_scanned = len(apparel_products)
 
-    unique_rows: OrderedDict[str, dict[str, Any]] = OrderedDict()
-    for row in all_rows:
-        unique_rows[str(row["id"])] = row
-    all_rows = list(unique_rows.values())
+    all_rows = merge_rows(all_rows)
     write_csv(csv_path, all_rows)
 
     summary = {
         "site": "https://petalandpup.com",
         "retailer": "petalandpup_com",
         "adapter": "yotpo_widget_json",
-        "status": "completed",
+        "status": "blocked_rate_limited_or_suspicious" if catalog_blocker else "completed",
         "started_at": started,
         "finished_at": utc_now(),
-        "products_discovered": len(products),
-        "apparel_products_scanned": len(apparel_products),
+        "products_discovered": products_discovered,
+        "apparel_products_scanned": apparel_products_scanned,
         "products_with_review_image_rows": sum(1 for result in product_results if result.get("rows_found")),
         "output_csv": str(csv_path),
         "rows_written": len(all_rows),
@@ -482,6 +613,14 @@ def main() -> int:
         "distinct_images": len({row["original_url_display"] for row in all_rows}),
         "distinct_products": len({row["product_page_url_display"] for row in all_rows}),
         "rows_with_image_url": sum(1 for row in all_rows if row.get("original_url_display")),
+        "rows_with_customer_review_image": sum(
+            1
+            for row in all_rows
+            if row.get("original_url_display") and (row.get("image_source_type") or "customer_review_image") == "customer_review_image"
+        ),
+        "rows_with_catalog_model_image": sum(
+            1 for row in all_rows if row.get("original_url_display") and row.get("image_source_type") == "catalog_model_image"
+        ),
         "rows_with_user_comment": sum(1 for row in all_rows if row.get("user_comment")),
         "rows_with_size": sum(1 for row in all_rows if row.get("size_display")),
         "rows_with_any_measurement": sum(
@@ -520,11 +659,17 @@ def main() -> int:
                 or row.get("cupsize_display")
             )
         ),
+        "supabase_qualified_rows": count_qualified(all_rows),
+        "catalog_pages_completed_this_run": pages_completed,
+        "catalog_blocker": catalog_blocker,
+        "checkpoint_jsonl": str(checkpoint_path) if checkpoint_path.exists() else "",
         "product_results": product_results,
         "notes": [
             "Catalog discovery uses public Shopify products.json.",
             "Review rows use public Yotpo widget JSON keyed by Shopify product id.",
             "Rows are one per public customer review image URL.",
+            "Rows are marked image_source_type=customer_review_image.",
+            "Run stops on HTTP 429, captcha, WAF, or suspicious-request responses without aggressive retries.",
         ],
     }
     with summary_path.open("w", encoding="utf-8") as fh:

@@ -45,6 +45,8 @@ DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / RETAILER
 OUTPUT_CSV = OUTPUT_DIR / f"{RETAILER}_reviews_matching_intake_schema.csv"
 SUMMARY_JSON = OUTPUT_DIR / f"{RETAILER}_reviews_matching_intake_schema_summary.json"
+CHECKPOINT_JSON = OUTPUT_DIR / f"{RETAILER}_store_reviews_checkpoint.json"
+CHECKPOINT_ROWS_JSONL = OUTPUT_DIR / f"{RETAILER}_store_reviews_rows.jsonl"
 
 
 def utc_now() -> str:
@@ -58,6 +60,31 @@ def norm(value: object) -> str:
 def polite_pause(seconds: float) -> None:
     if seconds > 0:
         time.sleep(seconds)
+
+
+def load_jsonl_rows(path: Path) -> List[Dict[str, str]]:
+    if not path.exists():
+        return []
+    rows: List[Dict[str, str]] = []
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            payload = json.loads(line)
+            if isinstance(payload, dict):
+                rows.append({str(key): str(value) for key, value in payload.items()})
+    return rows
+
+
+def append_jsonl_rows(path: Path, rows: Sequence[Dict[str, str]]) -> None:
+    if not rows:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        for row in rows:
+            handle.write(json.dumps(row, ensure_ascii=True, sort_keys=True))
+            handle.write("\n")
 
 
 def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: str = SOURCE_SITE, retries: int = 4, delay: float = DEFAULT_REQUEST_DELAY_SECONDS) -> Dict[str, object]:
@@ -251,6 +278,8 @@ def review_to_rows(review: Dict[str, object], context: ProductContext, fetched_a
     color, size = variant_parts(review.get("productVariantName"))
     size = purchased_size(review, size)
     product_url = normalize_product_url(review.get("productUrl"), context.url)
+    if "/products/" not in product_url:
+        return []
     product_title = norm(review.get("productName")) or context.title
     review_date = norm(review.get("dateCreated")).split("T", 1)[0]
     rows: List[Dict[str, str]] = []
@@ -335,10 +364,14 @@ def fetch_store_reviews(
     products: List[Dict[str, object]],
     limit_pages: Optional[int],
     delay: float,
+    *,
+    checkpoint_path: Optional[Path] = None,
+    checkpoint_rows_path: Optional[Path] = None,
+    resume: bool = False,
 ) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
     products_by_id = {norm(product.get("id")): product for product in products if norm(product.get("id"))}
     products_by_handle = {norm(product.get("handle")): product for product in products if norm(product.get("handle"))}
-    rows: List[Dict[str, str]] = []
+    rows: List[Dict[str, str]] = load_jsonl_rows(checkpoint_rows_path) if resume and checkpoint_rows_path else []
     errors: List[str] = []
     review_count = 0
     media_review_count = 0
@@ -346,6 +379,13 @@ def fetch_store_reviews(
     next_url = okendo_store_reviews_url()
     params: Optional[Dict[str, object]] = {"limit": REVIEWS_PER_PAGE}
     product_stats: Dict[str, Dict[str, object]] = {}
+    if resume and checkpoint_path and checkpoint_path.exists():
+        checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+        next_url = norm(checkpoint.get("next_url")) or ""
+        params = None
+        review_count = int(checkpoint.get("reviews_seen") or 0)
+    elif checkpoint_rows_path and checkpoint_rows_path.exists():
+        checkpoint_rows_path.unlink()
     while next_url:
         if limit_pages is not None and pages >= limit_pages:
             break
@@ -360,12 +400,14 @@ def fetch_store_reviews(
             break
         pages += 1
         review_count += len(page_reviews)
+        page_rows: List[Dict[str, str]] = []
         for review in page_reviews:
             context = context_from_review(review, products_by_id, products_by_handle)
             review_rows = review_to_rows(review, context, utc_now())
             if review_rows:
                 media_review_count += 1
                 rows.extend(review_rows)
+                page_rows.extend(review_rows)
             key = context.url or norm(review.get("productUrl")) or norm(review.get("productId"))
             stats = product_stats.setdefault(
                 key,
@@ -386,6 +428,27 @@ def fetch_store_reviews(
         print(f"[review page {pages}] reviews={len(page_reviews)} total_reviews={review_count} rows={len(rows)}", flush=True)
         relative_next = norm(payload.get("nextUrl"))
         next_url = urljoin("https://api.okendo.io/v1/", relative_next.lstrip("/")) if relative_next else ""
+        if checkpoint_rows_path:
+            append_jsonl_rows(checkpoint_rows_path, page_rows)
+        if checkpoint_path:
+            checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+            checkpoint_path.write_text(
+                json.dumps(
+                    {
+                        "retailer": RETAILER,
+                        "updated_at": utc_now(),
+                        "review_pages_scanned": pages,
+                        "reviews_seen": review_count,
+                        "rows_collected": len(rows),
+                        "rows_checkpoint": str(checkpoint_rows_path) if checkpoint_rows_path else "",
+                        "distinct_product_urls_seen": len(product_stats),
+                        "next_url": next_url,
+                        "complete": not bool(next_url),
+                    },
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
     return rows, {
         "review_pages_scanned": pages,
         "reviews_seen": review_count,
@@ -395,10 +458,36 @@ def fetch_store_reviews(
     }
 
 
-def scrape(limit_products: Optional[int], limit_review_pages: Optional[int], request_delay_seconds: float) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
+def scrape(
+    limit_products: Optional[int],
+    limit_review_pages: Optional[int],
+    request_delay_seconds: float,
+    *,
+    discovery_mode: str,
+    checkpoint_path: Optional[Path],
+    checkpoint_rows_path: Optional[Path],
+    resume: bool,
+) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
     started_at = utc_now()
-    products, product_sources = fetch_products(limit_products, request_delay_seconds)
-    all_rows, store_meta = fetch_store_reviews(products, limit_review_pages, request_delay_seconds)
+    if discovery_mode == "products-json":
+        products, product_sources = fetch_products(limit_products, request_delay_seconds)
+    else:
+        products = []
+        product_sources = [
+            {
+                "source": "okendo_store_reviews",
+                "count": 0,
+                "note": "Store-feed-assisted retry avoids Shopify products.json after prior 429; product URLs/handles come from public Okendo review rows.",
+            }
+        ]
+    all_rows, store_meta = fetch_store_reviews(
+        products,
+        limit_review_pages,
+        request_delay_seconds,
+        checkpoint_path=checkpoint_path,
+        checkpoint_rows_path=checkpoint_rows_path,
+        resume=resume,
+    )
     product_summaries = store_meta["product_summaries"]
     errors = [{"scope": "store_reviews", "errors": store_meta.get("errors")}] if store_meta.get("errors") else []
     rows = dedupe_rows(all_rows)
@@ -412,9 +501,9 @@ def scrape(limit_products: Optional[int], limit_review_pages: Optional[int], req
         "finished_at": utc_now(),
         "output_csv": str(OUTPUT_CSV),
         "product_sources": product_sources,
-        "products_discovered": len(products),
-        "products_scanned": len(products),
-        "product_pages_scanned": len(products),
+        "products_discovered": len(products) if products else len(product_summaries),
+        "products_scanned": len(products) if products else len(product_summaries),
+        "product_pages_scanned": len(products) if products else len(product_summaries),
         "review_pages_scanned": store_meta["review_pages_scanned"],
         "product_review_count_hint": store_meta["reviews_seen"],
         "store_reviews_seen": store_meta["reviews_seen"],
@@ -423,11 +512,22 @@ def scrape(limit_products: Optional[int], limit_review_pages: Optional[int], req
         "product_summaries": product_summaries,
         "errors": errors,
         "access_policy": f"public_product_and_review_pages_only; no_auth_bypass; no_captcha_bypass; restricted_or_unavailable_pages_are_skipped; polite_retries; request_delay_seconds={request_delay_seconds}",
-        "discovery_method": "shopify_products_json_and_okendo_store_reviews",
-        "scrape_scope_status": "full_catalog_attempted" if limit_products is None and limit_review_pages is None else "limited_smoke",
-        "full_catalog_scrape_complete": limit_products is None and limit_review_pages is None and not errors,
+        "discovery_method": "okendo_store_reviews_product_url_feed" if discovery_mode == "store-feed" else "shopify_products_json_and_okendo_store_reviews",
+        "scrape_scope_status": (
+            "full_store_review_feed_complete"
+            if discovery_mode == "store-feed" and limit_review_pages is None and not errors
+            else "full_catalog_attempted"
+            if discovery_mode == "products-json" and limit_products is None and limit_review_pages is None
+            else "limited_smoke"
+        ),
+        "full_catalog_scrape_complete": discovery_mode == "products-json" and limit_products is None and limit_review_pages is None and not errors,
+        "full_store_review_feed_complete": discovery_mode == "store-feed" and limit_review_pages is None and not errors,
         "seed_scrape_only": False,
-        "warnings": [],
+        "warnings": [
+            "Store-feed-assisted run: every collected row is tied to an Okendo product URL, but this did not paginate Shopify products.json."
+        ]
+        if discovery_mode == "store-feed"
+        else [],
     }
     summary.update(validate_rows(rows))
     return rows, summary
@@ -438,8 +538,34 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--limit-products", type=int)
     parser.add_argument("--limit-review-pages", "--limit-pages-per-product", dest="limit_review_pages", type=int)
     parser.add_argument("--request-delay-seconds", type=float, default=DEFAULT_REQUEST_DELAY_SECONDS)
+    parser.add_argument(
+        "--discovery-mode",
+        choices=["store-feed", "products-json"],
+        default="store-feed",
+        help="Default uses the public Okendo store review feed for product URLs to avoid Shopify products.json pressure.",
+    )
+    parser.add_argument(
+        "--no-checkpoint",
+        action="store_true",
+        help="Do not write the store review pagination checkpoint.",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume store-feed pagination from the checkpoint and merge rows from the row sidecar.",
+    )
     args = parser.parse_args(argv)
-    rows, summary = scrape(args.limit_products, args.limit_review_pages, args.request_delay_seconds)
+    checkpoint_path = None if args.no_checkpoint else CHECKPOINT_JSON
+    checkpoint_rows_path = None if args.no_checkpoint else CHECKPOINT_ROWS_JSONL
+    rows, summary = scrape(
+        args.limit_products,
+        args.limit_review_pages,
+        args.request_delay_seconds,
+        discovery_mode=args.discovery_mode,
+        checkpoint_path=checkpoint_path,
+        checkpoint_rows_path=checkpoint_rows_path,
+        resume=args.resume,
+    )
     write_intake_csv(rows, OUTPUT_CSV)
     SUMMARY_JSON.parent.mkdir(parents=True, exist_ok=True)
     SUMMARY_JSON.write_text(json.dumps(summary, indent=2), encoding="utf-8")

@@ -21,7 +21,7 @@ Current queued claim files:
 
 1. `petalandpup_com`: resume full catalog from partial output. Prior bounded run wrote 947 rows and 688 qualified rows; public Yotpo worked, but catalog continuation hit 429.
 2. `andieswim_com`: retry after strong smoke. Prior 60-product sample wrote 110 rows and 106 qualified rows; prefer store-feed-only mode or slow checkpointed catalog.
-3. `swimoutlet_com`: resume with slow catalog/checkpointing. Prior discovery reached products.json page 8 after 1,750 product records, then stopped on 429.
+3. `swimoutlet_com`: checkpointed partial resume reached 2,090 Okendo store-review pages / 209,000 reviews and wrote 611 final deduped rows; feed still has `nextUrl`, continue later only in store-feed-only chunks if needed.
 4. `miraclesuit_com`: completed 2026-05-06 sitewide rerun with fixed Yotpo size parser and 1.5s delay. Output matched corrected prior counts: 44 rows and 8 qualified rows.
 5. `liverpoolstyle_com`: inspect/refresh the existing small output; triage sheet has 58 review-media hints and no active conflict.
 
@@ -45,15 +45,15 @@ Claim files live in:
 
 ### swimoutlet_com
 
-- Status: claimed and attempted on 2026-05-05 after the previous seed-only scrape.
-- Problem encountered: full catalog discovery via public Shopify `products.json` hit `HTTP 429 Too Many Requests` on page 8 after pages 1-7 returned 1,750 product records.
-- Action taken: stopped retrying immediately to avoid suspicious or high-pressure traffic.
-- Implementation state: `scrape_swimoutlet_reviews.py` was added and a targeted Okendo sanity check against the known seed product returned image rows with ordered size/color from `productVariantName`.
+- Status: checkpointed partial resume as of 2026-05-07.
+- Current output: 611 final deduped rows, including 597 `customer_review_image` rows and 14 `catalog_model_image` rows; 62 qualified rows. The store-review checkpoint contains 2,714 raw retained customer rows before final dedupe.
+- Product discovery: checkpointed public `products.json` discovery reached 25,000 products and public endpoint boundary at page 101; sitemap checkpoint has 44,902 product URLs.
+- Store-review coverage: public Okendo store feed reached 2,090 pages / 209,000 reviews / 1,978 media reviews; the feed still has `nextUrl`, so this is not complete historical store-feed coverage.
+- Implementation state: `scrape_swimoutlet_reviews.py` supports `--store-feed-only` to resume the Okendo checkpoint without reloading the very large product checkpoint.
 - Revisit plan:
-  - Wait for a later scrape window before retrying.
-  - Rerun with a much slower catalog delay, at least `--request-delay-seconds 2.0`.
-  - Consider adding catalog checkpoint/resume before retrying, so a future 429 does not discard already discovered product pages.
-  - Keep the active claim file until this is either resumed or deliberately released.
+  - Continue only with `--store-feed-only --request-delay-seconds 3.0` and bounded `--limit-review-pages` chunks if deeper historical tail is needed.
+  - Do not restart catalog discovery unless there is a specific reason; the product checkpoint is very large and the sitemap already gives broader product URL signal.
+  - Keep public pages/endpoints only; no auth bypass, captcha bypass, WAF bypass, or aggressive retries.
 
 ### miraclesuit_com
 

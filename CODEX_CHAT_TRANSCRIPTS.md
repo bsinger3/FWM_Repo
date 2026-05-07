@@ -98,6 +98,7 @@ The handoff transcript should include the user requests, major assistant actions
 
 | File | Date | Scope |
 | --- | --- | --- |
+| `codex-swimoutlet-scrape-resume-transcript-2026-05-07.json` | 2026-05-07 | SwimOutlet checkpointed non-Amazon scrape resume: products.json boundary, sitemap discovery, Okendo store-review checkpoint, final bounded CSV/summary, and claim update. |
 | `codex-nonamazon-liverpool-vs-aliava-transcript-2026-05-06.json` | 2026-05-06 | Liverpool Style refresh, Victoria's Secret workbook conversion, blocked-site triage, and Aliava catalog-model scrape. |
 
 ## End-of-Chat Prompt

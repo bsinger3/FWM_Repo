@@ -27,24 +27,30 @@ Important:
 
 ## Current Auth Situation
 
-At the time of this handoff, AWS CLI was installed but `aws sts get-caller-identity` failed with:
+At the time of this handoff:
 
-- `NoCredentials: Unable to locate credentials`
+- AWS CLI access-key credentials were configured under profile `fwm`
+- region for `fwm` was set to `us-east-1`
+- `aws sts get-caller-identity --profile fwm` succeeded
+- the authenticated identity was `arn:aws:iam::326804802943:user/codex-sync`
+- `codex-sync` has bucket-scoped access to `s3://fwm-scraping-data-briannasinger`
 
-So the next Codex chat should first check whether the user is already logged in on this machine.
+That means backup and restore commands should use `--profile fwm` by default.
 
-## Login Command
+## Credential Refresh
 
-If not logged in, ask the user to run:
+The `fwm` profile now uses IAM access keys, not `aws login`.
+
+If the key is ever invalid or rotated, use an AWS admin/root session to create a new access key for IAM user `codex-sync`, then update the local `fwm` profile:
 
 ```powershell
-& 'C:\Program Files\Amazon\AWSCLIV2\aws.exe' login
+& 'C:\Program Files\Amazon\AWSCLIV2\aws.exe' configure --profile fwm
 ```
 
-After login completes, verify with:
+Verify with:
 
 ```powershell
-& 'C:\Program Files\Amazon\AWSCLIV2\aws.exe' sts get-caller-identity
+& 'C:\Program Files\Amazon\AWSCLIV2\aws.exe' sts get-caller-identity --profile fwm
 ```
 
 ## Restore Command
@@ -52,7 +58,7 @@ After login completes, verify with:
 Use this exact command to restore `FWM_Data` from S3:
 
 ```powershell
-& 'C:\Program Files\Amazon\AWSCLIV2\aws.exe' s3 sync `
+& 'C:\Program Files\Amazon\AWSCLIV2\aws.exe' --profile fwm s3 sync `
   's3://fwm-scraping-data-briannasinger' `
   'C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data' `
   --exclude '.DS_Store'
@@ -76,10 +82,12 @@ Only one repo folder should exist:
 ## Useful Related Files
 
 - [DATA.md](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\DATA.md)
+- [AWS_BACKUP_SETUP.md](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\AWS_BACKUP_SETUP.md)
 - [README.md](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\README.md)
+- [scripts/sync-data-to-s3.ps1](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\scripts\sync-data-to-s3.ps1)
 - [scripts/sync-data-to-s3.sh](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\scripts\sync-data-to-s3.sh)
 - [scripts/create-private-s3-bucket.sh](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\scripts\create-private-s3-bucket.sh)
 
 ## Known Note
 
-This machine is Windows, while some repo docs still show older macOS-style paths like `/Users/briannasinger/Projects/FWM_Data`. For this machine, use the Windows paths in this handoff note.
+This machine is Windows. Prefer the Windows paths and the PowerShell sync script in this handoff note.

@@ -407,12 +407,40 @@ async function generateContextSummaryWithFallback(input) {
   }
 }
 
+function buildLocalContextSummary({ title, parsed }) {
+  const nextSteps = Array.isArray(parsed.next_steps)
+    ? parsed.next_steps.map(String).filter(Boolean)
+    : [];
+  const changedFiles = Array.isArray(parsed.changed_files)
+    ? parsed.changed_files.map(String).filter(Boolean)
+    : [];
+  return {
+    model: null,
+    summary: `Focused handoff transcript: ${title}`,
+    summaryJson: {
+      summary: `Focused handoff transcript: ${title}`,
+      project: "Friends with Measurements",
+      goals: [],
+      decisions_made: [],
+      open_tasks: nextSteps,
+      blockers: [],
+      important_paths: changedFiles,
+      important_env_vars: [],
+      next_steps: nextSteps,
+    },
+    summaryError: null,
+  };
+}
+
 async function main() {
   await loadDotEnv();
 
-  const transcriptPathArg = process.argv[2] || "codex-chat-transcript.json";
+  const args = process.argv.slice(2);
+  const skipOpenAiSummary = args.includes("--skip-openai-summary");
+  const positionalArgs = args.filter((arg) => arg !== "--skip-openai-summary");
+  const transcriptPathArg = positionalArgs[0] || "codex-chat-transcript.json";
   const transcriptPath = path.resolve(process.cwd(), transcriptPathArg);
-  const source = process.argv[3] || "codex";
+  const source = positionalArgs[1] || "codex";
 
   const raw = await readFile(transcriptPath, "utf8");
   const parsed = JSON.parse(raw);
@@ -422,15 +450,17 @@ async function main() {
   const now = new Date().toISOString();
   const chatKey = buildChatKey({ source, title, fullText });
   const { transcriptStartedAt, transcriptEndedAt } = await resolveTranscriptTiming(parsed, transcriptPath);
-  const { model, summary, summaryJson, summaryError } = await generateContextSummaryWithFallback({
-    title,
-    source,
-    messageCount: messages.length,
-    localFilePath: transcriptPath,
-    transcriptStartedAt,
-    transcriptEndedAt,
-    fullText,
-  });
+  const { model, summary, summaryJson, summaryError } = skipOpenAiSummary
+    ? buildLocalContextSummary({ title, parsed })
+    : await generateContextSummaryWithFallback({
+        title,
+        source,
+        messageCount: messages.length,
+        localFilePath: transcriptPath,
+        transcriptStartedAt,
+        transcriptEndedAt,
+        fullText,
+      });
 
   const transcriptWithTiming = {
     ...parsed,

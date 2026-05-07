@@ -10,4 +10,4 @@ This is a static site hosted on Cloudflare Pages, connected to the GitHub repo [
 
 ## Data
 
-Scraped data and generated pipeline artifacts are stored outside this repo in `/Users/briannasinger/Projects/FWM_Data` so the GitHub repo stays lightweight. See [DATA.md](DATA.md) for the local data layout and S3 backup workflow.
+Scraped data and generated pipeline artifacts are stored outside this repo in `C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data` so the GitHub repo stays lightweight. See [DATA.md](DATA.md) for the local data layout and [AWS_BACKUP_SETUP.md](AWS_BACKUP_SETUP.md) for the current S3 backup and login workflow.

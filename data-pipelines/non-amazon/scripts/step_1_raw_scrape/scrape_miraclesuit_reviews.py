@@ -35,8 +35,14 @@ REVIEWS_PER_PAGE = 100
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36"
 DEFAULT_REQUEST_DELAY_SECONDS = 0.5
 
+
+class AccessBlockedError(RuntimeError):
+    """Raised when the site asks us to stop or slow down."""
+
+
 HEADERS = [
-    "created_at_display", "id", "original_url_display", "product_page_url_display", "monetized_product_url_display",
+    "created_at_display", "id", "original_url_display", "image_source_type", "image_source_detail",
+    "product_page_url_display", "monetized_product_url_display",
     "height_raw", "weight_raw", "user_comment", "date_review_submitted_raw", "height_in_display", "review_date",
     "source_site_display", "status_code", "content_type", "bytes", "width", "height", "hash_md5", "fetched_at",
     "updated_at", "brand", "waist_raw_display", "hips_raw", "age_raw", "waist_in", "hips_in_display",
@@ -81,8 +87,15 @@ def polite_pause(seconds: float) -> None:
 
 def fetch_text(url: str) -> str:
     req = Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"})
-    with urlopen(req, timeout=60) as resp:
-        text = resp.read().decode("utf-8", "replace")
+    try:
+        with urlopen(req, timeout=60) as resp:
+            text = resp.read().decode("utf-8", "replace")
+    except HTTPError as exc:
+        if exc.code in {403, 429, 503}:
+            raise AccessBlockedError(f"HTTP {exc.code} while fetching {url}") from exc
+        raise
+    if re.search(r"\b(?:captcha|cloudflare|access denied|temporarily blocked|too many requests)\b", text, re.I):
+        raise AccessBlockedError(f"Possible captcha/WAF/block page while fetching {url}")
     polite_pause(float(os.environ.get("MIRACLESUIT_REQUEST_DELAY_SECONDS", DEFAULT_REQUEST_DELAY_SECONDS)))
     return text
 
@@ -109,7 +122,9 @@ def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: Op
             return payload
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
+            if exc.code in {403, 429, 503}:
+                raise AccessBlockedError(f"HTTP {exc.code} while fetching {query_url}") from exc
+            if exc.code not in {500, 502, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
@@ -309,6 +324,8 @@ def row_for(review: Dict[str, object], product: Dict[str, object], image_url: st
         "created_at_display": "",
         "id": f"{review_id}-{index}" if review_id else f"{hash(image_url)}-{index}",
         "original_url_display": image_url,
+        "image_source_type": "customer_review_image",
+        "image_source_detail": "Yotpo product-level review image",
         "product_page_url_display": product_url,
         "monetized_product_url_display": "",
         "height_raw": height_raw,
@@ -385,6 +402,8 @@ def scrape(limit_products: Optional[int] = None, limit_pages_per_product: Option
                     break
                 try:
                     payload = fetch_json(yotpo_url(pid), {"per_page": REVIEWS_PER_PAGE, "page": page}, product_url_for(product))
+                except AccessBlockedError:
+                    raise
                 except Exception as exc:  # noqa: BLE001
                     errors.append({"product_url": product_url_for(product), "page": page, "error": str(exc)})
                     break
@@ -427,7 +446,7 @@ def scrape(limit_products: Optional[int] = None, limit_pages_per_product: Option
         "review_pages_scanned": sum(int(item["review_pages_scanned"]) for item in summaries),
         "product_review_count_hint": sum(int(item["review_count_hint"]) for item in summaries),
         "products_with_review_rows": sum(1 for item in summaries if int(item["rows"]) > 0), "product_summaries": summaries,
-        "errors": errors, "access_policy": "public_product_and_review_pages_only; no_auth_bypass; no_captcha_bypass; restricted_or_unavailable_pages_are_skipped; polite_retries; request_delay_seconds=" + str(request_delay_seconds),
+        "errors": errors, "access_policy": "public_product_and_review_pages_only; no_auth_bypass; no_captcha_bypass; stop_immediately_on_429_captcha_or_waf; polite_retries_for_transient_5xx_only; request_delay_seconds=" + str(request_delay_seconds),
         "measurement_extraction": "deterministic_regex_and_provider_fields_only",
     }
     return deduped, summary
@@ -453,6 +472,8 @@ def enrich(summary: Dict[str, object], rows: Sequence[Dict[str, str]]) -> Dict[s
         "rows_with_product_url": sum(1 for row in rows if row.get("product_page_url_display")),
         "rows_missing_product_url": sum(1 for row in rows if not row.get("product_page_url_display")),
         "rows_with_customer_image": sum(1 for row in rows if row.get("original_url_display")),
+        "rows_with_customer_review_image": sum(1 for row in rows if row.get("original_url_display") and row.get("image_source_type") == "customer_review_image"),
+        "rows_with_catalog_model_image": sum(1 for row in rows if row.get("original_url_display") and row.get("image_source_type") == "catalog_model_image"),
         "rows_with_image_url": sum(1 for row in rows if row.get("original_url_display")),
         "rows_missing_image_url": sum(1 for row in rows if not row.get("original_url_display")),
         "rows_with_user_comment": sum(1 for row in rows if row.get("user_comment")),

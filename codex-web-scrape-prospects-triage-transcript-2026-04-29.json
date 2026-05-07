@@ -1,0 +1,75 @@
+{
+  "title": "Web Scrape Prospects Inventory And Triage Update - 2026-04-29",
+  "transcript_started_at": "2026-04-29T18:15:00-04:00",
+  "transcript_ended_at": "2026-04-29T18:39:13.7664422-04:00",
+  "metadata": {
+    "project": "Friends With Measurements",
+    "purpose": "Record the web scraping prospect inventory, newly supplied scrape sources, StudioSuits scrape result, refreshed triage order, and S3 syncs from this Codex session."
+  },
+  "messages": [
+    {
+      "role": "user",
+      "text": "Asked Codex to make an exhaustive list of all websites already scraped or planned for scraping."
+    },
+    {
+      "role": "assistant",
+      "text": "Created a website scrape inventory spreadsheet and CSV at `FWM_Data/website_scrape_inventory_2026-04-29.xlsx` and `FWM_Data/website_scrape_inventory_2026-04-29.csv`, including website, qualified rows scraped, total rows scraped or imported, scrape status, triage bucket or plan, and notes."
+    },
+    {
+      "role": "user",
+      "text": "Asked Codex to put the list into a spreadsheet that could be uploaded to Drive and to list the qualified rows scraped for each website."
+    },
+    {
+      "role": "assistant",
+      "text": "Generated `FWM_Data/WebLeads/scraping_prospects_updated_2026-04-29.xlsx` and `.csv` as the upload-ready scraping prospect list."
+    },
+    {
+      "role": "user",
+      "text": "Asked what the next site to scrape was and told Codex to get started."
+    },
+    {
+      "role": "assistant",
+      "text": "Selected StudioSuits from the then-current triage order and built `data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_studiosuits_reviews.py`."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran the StudioSuits scrape. The run scanned 975 pages and produced 9,811 output rows from 9,741 reviews, including 170 image rows and 52 measurement mentions, but 0 fully qualified rows. Output was written under `FWM_Data/non-amazon/data/step_1_raw_scraping_data/studiosuits_com/` and synced to S3."
+    },
+    {
+      "role": "user",
+      "text": "Provided a long new list of product URLs and domains under the heading `Scrape These Too` and asked Codex to update the scraping prospect list."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated `FWM_Data/WebLeads/leads.csv` with the new web sources, appending 21 new rows that were not already present, and refreshed `scraping_prospects_updated_2026-04-29.xlsx` and `.csv`. The updated local data was synced to S3."
+    },
+    {
+      "role": "user",
+      "text": "Asked Codex to update the triage order given the new web sources."
+    },
+    {
+      "role": "assistant",
+      "text": "Fast-probed the 21 newly added URLs and wrote `FWM_Data/WebLeads/new_source_fast_probe_2026-04-29.json`. Notable signals included Kasper with 201 image hints and multiple review-provider hints, InstantFigure with Judge.me and 132 image hints, Wildfang with 257 review-count hint and 57 image hints, Wool& with 164 review-count hint and 36 image hints, Petite Studio NYC with 82 image hints, Liverpool with 58 image hints, and SwimOutlet with Okendo and 22 image hints. Express and Cabelas returned 403 and were marked blocked/manual-browser."
+    },
+    {
+      "role": "assistant",
+      "text": "Generated the refreshed triage artifacts at `FWM_Data/WebLeads/scraping_triage_order_updated_2026-04-29.xlsx`, `FWM_Data/WebLeads/scraping_triage_order_updated_2026-04-29.csv`, and `FWM_Data/WebLeads/_lead_runs/20260429T223457Z/lead_triage.csv` plus `.md`."
+    },
+    {
+      "role": "assistant",
+      "text": "Demoted `studiosuits.com` to rank 120 with bucket `defer - scraped zero qualified` because the completed scrape wrote 9,811 rows with 0 qualified rows. The refreshed top triage queue started with `evelynbobbie.com`, `leonisa.com`, `miraclesuit.com`, `hsialife.com`, `shapedly.com`, `under510.com`, `mbmswim.com`, `oliverlogan.com`, `annecole.com`, and the new `kasper.com` source."
+    },
+    {
+      "role": "assistant",
+      "text": "Synced the updated fast probe JSON, triage CSV/XLSX, and run artifacts to S3 using the existing `scripts/sync-data-to-s3.ps1` workflow."
+    },
+    {
+      "role": "user",
+      "text": "Asked Codex to update the transcripts table, make sure S3 is up to date, then mark this chat done."
+    },
+    {
+      "role": "assistant",
+      "text": "Created this focused transcript JSON as the durable project-memory record for the scrape prospect inventory and triage session, because no fresh full Codex desktop transcript export for this exact chat was available in the repo."
+    }
+  ]
+}

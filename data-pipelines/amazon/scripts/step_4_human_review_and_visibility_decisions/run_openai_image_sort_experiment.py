@@ -27,7 +27,7 @@ DEFAULT_DATA_ROOT = (
 )
 DEFAULT_INPUT_DIR = DEFAULT_DATA_ROOT / "manual_chunks"
 DEFAULT_OUTPUT_DIR = DEFAULT_DATA_ROOT / "openai_experiments"
-PROMPT_VERSION = "2026-04-23_v1"
+PROMPT_VERSION = "2026-04-24_v2"
 DEFAULT_MODEL = "gpt-4.1-mini"
 DEFAULT_IMAGE_DETAIL = "low"
 DEFAULT_MAX_OUTPUT_TOKENS = 200
@@ -48,6 +48,7 @@ RESULT_COLUMNS = [
     "openai_reviewed_garment_present",
     "openai_full_reviewed_garment_visible",
     "openai_reviewed_garment_obscured_or_cut_off",
+    "openai_prettiness_marketability_score",
     "openai_reason_summary",
     "openai_confidence",
     "openai_model",
@@ -70,7 +71,6 @@ ALLOWED_REASON_CODES = {
     "MULTIPLE_PEOPLE",
     "TOO_FAR_AWAY",
     "GARMENT_NOT_VISIBLE",
-    "GARMENT_CATEGORY_MISMATCH",
     "GARMENT_OBSCURED",
     "TOO_CROPPED",
     "GARMENT_CUT_OFF",
@@ -79,6 +79,7 @@ ALLOWED_REASON_CODES = {
     "TOO_CLUTTERED",
     "CATALOG_OR_PRODUCT_IMAGE",
     "BACKGROUND_REMOVED_OR_STYLIZED",
+    "IMAGE_OVERLAID_WITH_TEXT_OR_MARKUP",
     "BORDERLINE_VISIBILITY",
     "BORDERLINE_COMPOSITION",
     "INSUFFICIENT_VISUAL_EVIDENCE",
@@ -94,38 +95,52 @@ MODEL_PRICING = {
 
 SYSTEM_PROMPT = """You are reviewing product-review photos for a clothing fit website.
 
-Your task is to decide whether each image is useful for showing how the reviewed garment fits on a real person.
+Your task is to decide whether each image is useful for showing how the garment fits on a real person, and to assign a separate prettiness/marketability score from 1 to 5.
 
-You will be given the reviewed garment category as metadata. Use that category as the target garment.
+You will be given garment-category metadata and other row metadata, but the clothing category is not reliable enough to use as a decision rule.
 
-Do not guess the target garment from the image alone when category metadata is provided.
+Important:
+- Do not reject an image because the provided clothing category appears wrong.
+- Treat clothing_type_id as weak context only, not as a source of truth.
+- Base your decision primarily on the image itself.
+- Assume the photo belongs to the relevant review row.
+- There will not be a case where the photo is showing the wrong item while the category metadata is correct.
+- If the image clearly shows a worn garment on a real person and is useful for understanding fit, do not reject it solely because the metadata label seems mismatched.
 
 Return exactly one decision:
 - APPROVED
 - REJECTED
 - STILL_NEEDS_HUMAN_REVIEW
 
-You must be conservative. If the image is borderline or uncertain, use STILL_NEEDS_HUMAN_REVIEW.
+Be conservative about true uncertainty, but do not be overly strict about minor imperfections.
 
-Approve only when the image is clearly useful for fit evaluation.
+Approve when the image is genuinely useful for fit evaluation, even if it is not perfect.
 
-To approve, the reviewed garment should usually be fully visible for its category and not materially obscured or cut off.
+Do not require a perfectly complete or perfectly framed garment view. A photo can still be approved if:
+- part of the garment is mildly cropped
+- the top or bottom edge is slightly cut off
+- there are minor obstructions
+- the framing is imperfect
+- the image is not polished, as long as fit is still understandable
 
 You must explicitly judge:
-- whether the reviewed garment appears to be the garment shown in the image
-- whether the reviewed garment is fully visible enough for that category
-- whether the reviewed garment is obscured or cut off
 - whether the image successfully renders and is visually inspectable
+- whether a real person is visible
+- whether the worn garment is visible enough to judge fit
+- whether the image is useful for fit evaluation
+- whether the image contains disqualifying overlays or annotations
+- how visually appealing and marketable the image is
 
 Check the image in this order:
 1. Does the image render successfully and show actual photo content?
 2. Is there a person visible?
-3. Is there one clear primary subject?
-4. Does the visible garment match the reviewed garment category?
-5. Is the reviewed garment fully visible enough for its category?
-6. Is the reviewed garment obscured, covered, cropped, or cut off?
-7. Is the image useful for understanding fit, not just color or fabric?
-8. Is the image a real shopper/review photo rather than a catalog or product-only image?
+3. Is there one clear primary subject, or at least a clearly understandable main wearer?
+4. Is a worn garment visible enough to evaluate fit?
+5. Is the garment materially obscured, too cropped, too distant, or too small?
+6. Is the image useful for understanding fit, not just color or fabric?
+7. Is the image a real shopper/review photo rather than a catalog or product-only image?
+8. Does the image contain text, emoji, scribbles, or other overlays that should disqualify it?
+9. How visually appealing and marketable is the image on a 1 to 5 scale?
 
 Reject when the image is clearly not useful, such as:
 - image does not render or cannot be visually inspected
@@ -133,7 +148,6 @@ Reject when the image is clearly not useful, such as:
 - too many people
 - person too far away
 - reviewed garment not visible enough
-- reviewed garment category does not match the garment clearly shown
 - reviewed garment is materially obscured
 - reviewed garment is cut off
 - crop too tight
@@ -142,14 +156,32 @@ Reject when the image is clearly not useful, such as:
 - cluttered
 - catalog/product-only image
 - obvious non-review image
+- the image has added text, emoji, scribbles, markup, stickers, arrows, handwriting, or other overlays drawn on top of the photo that make it unsuitable for the site
 
 We care about whether a shopper can understand garment fit from the image.
+
+For prettiness/marketability, assign a separate whole-number score from 1 to 5:
+- 1 = very unattractive, awkward, heavily flawed, or not marketable
+- 2 = weak visual appeal, poorly composed, unflattering, or low-quality
+- 3 = acceptable and usable, but ordinary
+- 4 = attractive, clear, flattering, and marketable
+- 5 = especially attractive and highly marketable
+
+The prettiness/marketability score must not override the fit-usefulness decision:
+- an unattractive but useful fit photo can still be APPROVED
+- a pretty photo that does not show fit well should not be APPROVED
 
 Return structured JSON only."""
 
 USER_PROMPT_TEMPLATE = """Review this clothing review image.
 
-The reviewed garment category for this row is: {clothing_type_id}
+Important instruction:
+The provided clothing_type_id metadata is not reliable enough to use as a decision rule.
+Do not reject the image because the category label appears wrong.
+Assume this photo belongs to the relevant review row.
+There will not be a case where the photo shows the wrong item while the category metadata is correct.
+
+The recorded clothing_type_id for this row is: {clothing_type_id}
 
 Optional product title hint from URL slug: {product_title_hint}
 
@@ -162,20 +194,22 @@ Also provide:
 - a short reason_code from the allowed list
 - a short explanation
 - a confidence score from 0.00 to 1.00
-- whether the reviewed garment is clearly present in the image
-- whether the full reviewed garment is visible enough for its category
-- whether the reviewed garment is materially obscured or cut off
+- whether a real person is clearly visible
+- whether the worn garment is clearly present in the image
+- whether the garment is visible enough to judge fit
+- whether the garment is materially obscured or cut off
+- a whole-number prettiness_marketability_score from 1 to 5
 
 Evaluate the image using this exact checklist:
 1. Does the image render successfully?
 2. Is there a visible person?
-3. Is there one clear primary subject?
-4. Using the provided clothing_type_id as the target garment category, does the visible garment match that category?
-5. Is the reviewed garment fully visible enough for that category?
-6. Is the reviewed garment obscured by pose, hands, hair, outerwear, furniture, mirror framing, or cropping?
-7. Is the reviewed garment cut off at a critical boundary for that category?
-8. Is the image useful for judging fit, rather than only showing fabric, color, or a small detail?
-9. Is the image clearly a shopper/review image rather than a catalog or product-only image?
+3. Is there a clear main subject, even if the framing is imperfect?
+4. Is the worn garment visible enough to judge fit?
+5. Is the garment too small, too far away, too dark, too cluttered, too obscured, or too cropped for fit evaluation?
+6. Is the image useful for judging fit, rather than only showing fabric, color, or a small detail?
+7. Is the image clearly a shopper/review image rather than a catalog or product-only image?
+8. Does the image contain added text, emoji, scribbles, stickers, arrows, handwriting, or other overlays drawn on top of the image?
+9. Regardless of the approval decision, how pretty and marketable is the image on a 1 to 5 scale?
 
 Allowed reason codes:
 CLEAR_FIT_PHOTO
@@ -184,7 +218,6 @@ NO_PERSON
 MULTIPLE_PEOPLE
 TOO_FAR_AWAY
 GARMENT_NOT_VISIBLE
-GARMENT_CATEGORY_MISMATCH
 GARMENT_OBSCURED
 TOO_CROPPED
 GARMENT_CUT_OFF
@@ -193,6 +226,7 @@ BAD_ANGLE
 TOO_CLUTTERED
 CATALOG_OR_PRODUCT_IMAGE
 BACKGROUND_REMOVED_OR_STYLIZED
+IMAGE_OVERLAID_WITH_TEXT_OR_MARKUP
 BORDERLINE_VISIBILITY
 BORDERLINE_COMPOSITION
 INSUFFICIENT_VISUAL_EVIDENCE
@@ -202,6 +236,14 @@ Use these decision rules:
 - If the image clearly fails, use REJECTED with the best matching specific reason code.
 - If the image clearly passes, use APPROVED with CLEAR_FIT_PHOTO.
 - If the image is borderline, mixed, or lacks enough visual evidence for a confident approve/reject call, use STILL_NEEDS_HUMAN_REVIEW with BORDERLINE_VISIBILITY, BORDERLINE_COMPOSITION, or INSUFFICIENT_VISUAL_EVIDENCE.
+
+Use these interpretation rules:
+- Do not use clothing_type_id mismatch as a rejection reason.
+- Mild cropping is acceptable if fit is still understandable.
+- Minor obstruction is acceptable if fit is still understandable.
+- Imperfect framing is acceptable if the image is still genuinely useful.
+- Reject only when the visual problems materially prevent fit evaluation.
+- Reject if overlays or markup drawn onto the image make it unsuitable for the site.
 
 Optional metadata:
 - clothing_type_id: {clothing_type_id}
@@ -230,6 +272,10 @@ JSON_SCHEMA = {
                 "type": "string",
                 "enum": sorted(TRI_STATE),
             },
+            "person_visible": {
+                "type": "string",
+                "enum": sorted(TRI_STATE),
+            },
             "full_reviewed_garment_visible": {
                 "type": "string",
                 "enum": sorted(TRI_STATE),
@@ -240,15 +286,22 @@ JSON_SCHEMA = {
             },
             "reason_summary": {"type": "string"},
             "confidence": {"type": "number"},
+            "prettiness_marketability_score": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5,
+            },
         },
         "required": [
             "decision",
             "reason_code",
+            "person_visible",
             "reviewed_garment_present",
             "full_reviewed_garment_visible",
             "reviewed_garment_obscured_or_cut_off",
             "reason_summary",
             "confidence",
+            "prettiness_marketability_score",
         ],
     },
     "strict": True,
@@ -504,16 +557,20 @@ def estimate_cost_usd(model: str, input_tokens: int, output_tokens: int) -> floa
 def validate_model_result(result: Dict[str, object]) -> Dict[str, object]:
     decision = str(result.get("decision", "") or "").strip()
     reason_code = str(result.get("reason_code", "") or "").strip()
+    person_visible = str(result.get("person_visible", "") or "").strip()
     garment_present = str(result.get("reviewed_garment_present", "") or "").strip()
     garment_visible = str(result.get("full_reviewed_garment_visible", "") or "").strip()
     garment_obscured = str(result.get("reviewed_garment_obscured_or_cut_off", "") or "").strip()
     reason_summary = str(result.get("reason_summary", "") or "").strip()
     confidence = result.get("confidence")
+    prettiness_marketability_score = result.get("prettiness_marketability_score")
 
     if decision not in ALLOWED_DECISIONS:
         raise ValueError("Invalid decision: {}".format(decision))
     if reason_code not in ALLOWED_REASON_CODES:
         raise ValueError("Invalid reason_code: {}".format(reason_code))
+    if person_visible not in TRI_STATE:
+        raise ValueError("Invalid person_visible: {}".format(person_visible))
     if garment_present not in TRI_STATE:
         raise ValueError("Invalid reviewed_garment_present: {}".format(garment_present))
     if garment_visible not in TRI_STATE:
@@ -524,8 +581,13 @@ def validate_model_result(result: Dict[str, object]) -> Dict[str, object]:
         raise ValueError("Missing reason_summary")
     if not isinstance(confidence, (int, float)):
         raise ValueError("Confidence must be numeric")
+    if not isinstance(prettiness_marketability_score, int) or isinstance(prettiness_marketability_score, bool):
+        raise ValueError("prettiness_marketability_score must be an integer")
+    if prettiness_marketability_score < 1 or prettiness_marketability_score > 5:
+        raise ValueError("prettiness_marketability_score must be between 1 and 5")
     validated = dict(result)
     validated["confidence"] = round(float(confidence), 4)
+    validated["prettiness_marketability_score"] = int(prettiness_marketability_score)
     return validated
 
 
@@ -566,6 +628,7 @@ def classify_one_row(
                 "openai_reviewed_garment_present": "",
                 "openai_full_reviewed_garment_visible": "",
                 "openai_reviewed_garment_obscured_or_cut_off": "",
+                "openai_prettiness_marketability_score": "",
                 "openai_reason_summary": "",
                 "openai_confidence": "",
                 "openai_request_status": "DRY_RUN",
@@ -598,6 +661,7 @@ def classify_one_row(
             "openai_reviewed_garment_present": parsed["reviewed_garment_present"],
             "openai_full_reviewed_garment_visible": parsed["full_reviewed_garment_visible"],
             "openai_reviewed_garment_obscured_or_cut_off": parsed["reviewed_garment_obscured_or_cut_off"],
+            "openai_prettiness_marketability_score": parsed["prettiness_marketability_score"],
             "openai_reason_summary": parsed["reason_summary"],
             "openai_confidence": parsed["confidence"],
             "openai_request_status": "OK",
