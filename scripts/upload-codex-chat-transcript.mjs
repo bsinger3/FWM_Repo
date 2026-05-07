@@ -227,6 +227,14 @@ function buildChatKey({ source, title, fullText }) {
   return `${source}-${titleSlug}-${hash}`;
 }
 
+function displayLocalFilePath(transcriptPathArg, transcriptPath) {
+  const arg = String(transcriptPathArg || "");
+  if (arg.toLowerCase().includes("redacted")) {
+    return arg.replace(/\\/g, "/");
+  }
+  return transcriptPath;
+}
+
 function buildSummaryPrompt({
   title,
   source,
@@ -447,6 +455,7 @@ async function main() {
   const messages = Array.isArray(parsed.messages) ? parsed.messages : [];
   const fullText = flattenMessages(messages);
   const title = parsed.title || path.basename(transcriptPath);
+  const localFilePath = displayLocalFilePath(transcriptPathArg, transcriptPath);
   const now = new Date().toISOString();
   const chatKey = buildChatKey({ source, title, fullText });
   const { transcriptStartedAt, transcriptEndedAt } = await resolveTranscriptTiming(parsed, transcriptPath);
@@ -456,7 +465,7 @@ async function main() {
         title,
         source,
         messageCount: messages.length,
-        localFilePath: transcriptPath,
+        localFilePath,
         transcriptStartedAt,
         transcriptEndedAt,
         fullText,
@@ -492,7 +501,7 @@ async function main() {
       transcript_ended_at: transcriptEndedAt,
     },
     message_count: messages.length,
-    local_file_path: transcriptPath,
+    local_file_path: localFilePath,
     updated_at: now,
   };
 
