@@ -9,18 +9,19 @@ import os
 import re
 import sys
 import time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode, urlparse
+from urllib.parse import quote, urlencode, urljoin, urlparse
 from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parents[4]
 DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "evelynbobbie_com"
-OUTPUT_CSV = OUTPUT_DIR / "evelynbobbie_com_reviews_matching_intake_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "evelynbobbie_com_reviews_matching_intake_schema_summary.json"
+OUTPUT_CSV = OUTPUT_DIR / "evelynbobbie_com_reviews_matching_amazon_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "evelynbobbie_com_reviews_matching_amazon_schema_summary.json"
 
 SITE_ROOT = "https://evelynbobbie.com"
 SOURCE_SITE = f"{SITE_ROOT}/"
@@ -28,11 +29,13 @@ SHOP_DOMAIN = "evelyn-bobbie.myshopify.com"
 PRODUCTS_JSON_URL = f"{SITE_ROOT}/products.json"
 YOTPO_APP_KEY = "vgU7jBMr0iIRREtgyPw6Z6gWm1B8bpSRpdLfGg4h"
 YOTPO_API_ROOT = f"https://api-cdn.yotpo.com/v1/widget/{YOTPO_APP_KEY}"
-YOTPO_V3_API_ROOT = f"https://api-cdn.yotpo.com/v3/storefront"
+YOTPO_V3_API_ROOT = f"https://api-cdn.yotpo.com/v3/storefront/store/{YOTPO_APP_KEY}"
 BRAND = "Evelyn & Bobbie"
 PRODUCTS_PER_PAGE = 250
 REVIEWS_PER_PAGE = 100
-MAX_CONSECUTIVE_NO_IMAGE_PAGES = 5
+LEAD_URLS = [
+    "https://evelynbobbie.com/products/evelyn-wireless-bra",
+]
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
@@ -42,6 +45,8 @@ HEADERS = [
     "created_at_display",
     "id",
     "original_url_display",
+    "image_source_type",
+    "image_source_detail",
     "product_page_url_display",
     "monetized_product_url_display",
     "height_raw",
@@ -121,6 +126,10 @@ WORD_NUMBERS = {
 }
 
 
+class StopScrape(RuntimeError):
+    pass
+
+
 def normalize_whitespace(text: str) -> str:
     return WHITESPACE_RE.sub(" ", text or "").strip()
 
@@ -139,36 +148,51 @@ def repair_mojibake(text: str) -> str:
         return text
 
 
-def fetch_json(
-    url: str,
-    params: Optional[Dict[str, object]] = None,
-    retries: int = 6,
-    referer: Optional[str] = None,
-) -> Dict[str, object]:
+def check_block_body(text: str, url: str) -> None:
+    lowered = text[:5000].lower()
+    block_markers = [
+        "captcha",
+        "cf-challenge",
+        "cloudflare",
+        "datadome",
+        "access denied",
+        "temporarily blocked",
+        "security check",
+        "suspicious",
+    ]
+    if any(marker in lowered for marker in block_markers):
+        raise StopScrape(f"WAF/captcha-like response detected for {url}")
+
+
+def fetch_text(url: str, params: Optional[Dict[str, object]] = None, referer: Optional[str] = None) -> str:
     query_url = f"{url}?{urlencode(params)}" if params else url
-    last_error: Optional[Exception] = None
-    for attempt in range(retries):
-        req = Request(
-            query_url,
-            headers={
-                "User-Agent": USER_AGENT,
-                "Accept": "application/json,text/plain,*/*",
-                "Accept-Language": "en-US,en;q=0.9",
-                "Origin": SITE_ROOT,
-                "Referer": referer or SOURCE_SITE,
-            },
-        )
-        try:
-            with urlopen(req, timeout=60) as resp:
-                return json.load(resp)
-        except HTTPError as exc:
-            last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
-                raise
-        except (URLError, json.JSONDecodeError) as exc:
-            last_error = exc
-        time.sleep(min(2**attempt, 20))
-    raise RuntimeError(f"Failed JSON request for {query_url}: {last_error}")
+    req = Request(
+        query_url,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "application/json,text/html,application/xml,text/plain,*/*",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Origin": SITE_ROOT,
+            "Referer": referer or SOURCE_SITE,
+        },
+    )
+    try:
+        with urlopen(req, timeout=60) as resp:
+            body = resp.read().decode("utf-8", "replace")
+    except HTTPError as exc:
+        if exc.code in {403, 409, 418, 429}:
+            raise StopScrape(f"Stop status {exc.code} for {query_url}") from exc
+        raise
+    check_block_body(body, query_url)
+    return body
+
+
+def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: Optional[str] = None) -> Dict[str, object]:
+    query_url = f"{url}?{urlencode(params)}" if params else url
+    try:
+        return json.loads(fetch_text(url, params=params, referer=referer))
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Failed JSON decode for {query_url}: {exc}") from exc
 
 
 def product_url_for(product: Dict[str, object]) -> str:
@@ -176,7 +200,33 @@ def product_url_for(product: Dict[str, object]) -> str:
     return f"{SITE_ROOT}/products/{quote(handle, safe='/-._~')}" if handle else ""
 
 
-def fetch_products(limit_products: Optional[int] = None) -> List[Dict[str, object]]:
+def skip_reason(product: Dict[str, object]) -> str:
+    haystack = " ".join(
+        normalize_whitespace(str(part or ""))
+        for part in [
+            product.get("title"),
+            product.get("handle"),
+            product.get("product_type"),
+            " ".join(str(tag) for tag in product.get("tags", []) if isinstance(tag, str))
+            if isinstance(product.get("tags"), list)
+            else product.get("tags"),
+        ]
+    ).lower()
+    if "gift card" in haystack:
+        return "out_of_scope_gift_card"
+    if re.search(r"\b(travel bag|wash bag|laundry bag|bag)\b", haystack):
+        return "out_of_scope_accessory"
+    return ""
+
+
+def product_handle_from_url(url: str) -> str:
+    parts = [part for part in urlparse(url).path.split("/") if part]
+    if len(parts) >= 2 and parts[-2] == "products":
+        return parts[-1]
+    return ""
+
+
+def fetch_products_json(limit_products: Optional[int] = None) -> List[Dict[str, object]]:
     products: List[Dict[str, object]] = []
     page = 1
     while True:
@@ -192,6 +242,92 @@ def fetch_products(limit_products: Optional[int] = None) -> List[Dict[str, objec
             break
         page += 1
     return products
+
+
+def discover_sitemap_product_urls() -> List[str]:
+    product_urls: List[str] = []
+    root = fetch_text(urljoin(SITE_ROOT, "/sitemap.xml"))
+    ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    try:
+        tree = ET.fromstring(root)
+    except ET.ParseError:
+        return []
+    sitemap_urls = [html.unescape((node.text or "").strip()) for node in tree.findall(".//sm:loc", ns)]
+    for sitemap_url in sitemap_urls:
+        if "sitemap_products_" not in sitemap_url:
+            continue
+        body = fetch_text(sitemap_url)
+        try:
+            sitemap_tree = ET.fromstring(body)
+        except ET.ParseError:
+            continue
+        for loc in sitemap_tree.findall(".//sm:loc", ns):
+            url = html.unescape((loc.text or "").strip())
+            if "/products/" in url and product_handle_from_url(url) and url not in product_urls:
+                product_urls.append(url)
+    return product_urls
+
+
+def discover_products(limit_products: Optional[int] = None) -> Tuple[List[Dict[str, object]], Dict[str, object]]:
+    products = fetch_products_json(limit_products=None)
+    products_by_handle = {normalize_whitespace(str(product.get("handle") or "")): product for product in products}
+    product_sources: Dict[str, object] = {
+        "shopify_products_json": len(products),
+        "sitemap_products": 0,
+        "lead_urls": len(LEAD_URLS),
+        "duplicates_removed": 0,
+    }
+    for url in discover_sitemap_product_urls():
+        handle = product_handle_from_url(url)
+        if not handle:
+            continue
+        product_sources["sitemap_products"] = int(product_sources["sitemap_products"]) + 1
+        if handle in products_by_handle:
+            product_sources["duplicates_removed"] = int(product_sources["duplicates_removed"]) + 1
+            continue
+        products_by_handle[handle] = {
+            "id": "",
+            "title": handle.replace("-", " ").title(),
+            "handle": handle,
+            "body_html": "",
+            "product_type": "",
+            "tags": [],
+            "variants": [],
+            "_discovered_from_sitemap_only": True,
+        }
+    for url in LEAD_URLS:
+        handle = product_handle_from_url(url)
+        if not handle:
+            continue
+        if handle in products_by_handle:
+            product_sources["duplicates_removed"] = int(product_sources["duplicates_removed"]) + 1
+            continue
+        products_by_handle[handle] = {
+            "id": "",
+            "title": handle.replace("-", " ").title(),
+            "handle": handle,
+            "body_html": "",
+            "product_type": "",
+            "tags": [],
+            "variants": [],
+            "_discovered_from_lead_only": True,
+        }
+    ordered: List[Dict[str, object]] = []
+    seen_handles = set()
+    for product in products:
+        handle = normalize_whitespace(str(product.get("handle") or ""))
+        if handle and handle in products_by_handle and handle not in seen_handles:
+            ordered.append(products_by_handle[handle])
+            seen_handles.add(handle)
+    for handle, product in products_by_handle.items():
+        if handle and handle not in seen_handles:
+            ordered.append(product)
+            seen_handles.add(handle)
+    product_sources["final_products_to_scan"] = len(ordered)
+    if limit_products is not None:
+        product_sources["limited_products_to_scan"] = limit_products
+        ordered = ordered[:limit_products]
+    return ordered, product_sources
 
 
 def cached_products_from_summary(limit_products: Optional[int] = None) -> List[Dict[str, object]]:
@@ -227,18 +363,8 @@ def yotpo_reviews_url(product_id: object) -> str:
     return f"{YOTPO_API_ROOT}/products/{product_id}/reviews.json"
 
 
-def yotpo_v3_reviews_url(product_id: object, page: int, per_page: int = REVIEWS_PER_PAGE) -> str:
-    return (
-        f"{YOTPO_V3_API_ROOT}/store/{YOTPO_APP_KEY}/product/{product_id}/reviews"
-        f"?page={page}&perPage={per_page}&sort=images"
-    )
-
-
-def yotpo_v3_media_url(product_id: object, page: int, per_page: int = REVIEWS_PER_PAGE) -> str:
-    return (
-        f"{YOTPO_V3_API_ROOT}/stores/{YOTPO_APP_KEY}/products/{product_id}/reviewsMedia"
-        f"?page={page}&perPage={per_page}"
-    )
+def yotpo_store_reviews_url() -> str:
+    return f"{YOTPO_V3_API_ROOT}/reviews"
 
 
 def yotpo_response(payload: Dict[str, object]) -> Dict[str, object]:
@@ -246,14 +372,18 @@ def yotpo_response(payload: Dict[str, object]) -> Dict[str, object]:
     return response if isinstance(response, dict) else {}
 
 
-def fetch_product_reviews(product: Dict[str, object], exhaustive: bool) -> Tuple[List[Dict[str, object]], Dict[str, object]]:
+def fetch_product_reviews(
+    product: Dict[str, object],
+    limit_pages: Optional[int],
+    request_delay_seconds: float,
+) -> Tuple[List[Dict[str, object]], Dict[str, object]]:
     product_url = product_url_for(product)
     product_id = product.get("id")
     meta: Dict[str, object] = {
         "product_url": product_url,
         "product_title": product.get("title"),
         "shopify_product_id": product_id,
-        "adapter_used": "yotpo_v3_media_first",
+        "adapter_used": "yotpo_v1_product_level_full_pages" if product_id else "missing-shopify-product-id",
         "review_pages_scanned": 0,
         "review_count_hint": 0,
         "matching_review_images": 0,
@@ -261,59 +391,45 @@ def fetch_product_reviews(product: Dict[str, object], exhaustive: bool) -> Tuple
     }
     reviews: List[Dict[str, object]] = []
     seen_review_ids = set()
-    media_total = 0
-    try:
-        media_payload = fetch_json(yotpo_v3_media_url(product_id, 1), referer=product_url)
-        media_response = media_payload.get("response") if isinstance(media_payload.get("response"), dict) else {}
-        media_pagination = media_response.get("pagination") if isinstance(media_response.get("pagination"), dict) else {}
-        media_total = int(media_pagination.get("total") or 0)
-    except Exception as exc:  # noqa: BLE001
-        meta["errors"].append(f"v3 media count failed: {exc}")
-    if media_total <= 0:
-        try:
-            payload = fetch_json(yotpo_v3_reviews_url(product_id, 1, per_page=1), referer=product_url)
-            pagination = payload.get("pagination") if isinstance(payload.get("pagination"), dict) else {}
-            meta["review_count_hint"] = int(pagination.get("total") or 0)
-            meta["review_pages_scanned"] = 1
-        except Exception as exc:  # noqa: BLE001
-            meta["errors"].append(f"v3 review count failed: {exc}")
+    if not product_id:
+        meta["errors"].append("missing_shopify_product_id_for_yotpo")
         return reviews, meta
     page = 1
     total_pages = 1
-    consecutive_no_image_pages = 0
-    while page <= total_pages and len(reviews) < media_total:
+    while page <= total_pages:
+        if limit_pages is not None and page > limit_pages:
+            meta["limited_after_pages"] = limit_pages
+            break
         try:
-            payload = fetch_json(yotpo_v3_reviews_url(product_id, page), referer=product_url)
-        except Exception as exc:  # noqa: BLE001
+            payload = fetch_json(yotpo_reviews_url(product_id), {"per_page": REVIEWS_PER_PAGE, "page": page}, referer=product_url)
+        except StopScrape:
+            raise
+        except (HTTPError, URLError, RuntimeError) as exc:
             meta["errors"].append(str(exc))
             break
-        pagination = payload.get("pagination") if isinstance(payload.get("pagination"), dict) else {}
+        response = yotpo_response(payload)
+        pagination = response.get("pagination") if isinstance(response.get("pagination"), dict) else {}
         total = int(pagination.get("total") or 0)
-        per_page = int(pagination.get("perPage") or REVIEWS_PER_PAGE)
+        per_page = int(pagination.get("per_page") or REVIEWS_PER_PAGE)
         total_pages = max(1, (total + per_page - 1) // per_page)
         if page == 1:
             meta["review_count_hint"] = total
-        page_reviews = [item for item in payload.get("reviews", []) if isinstance(item, dict)]
+            meta["review_pages_available"] = total_pages
+        page_reviews = [item for item in response.get("reviews", []) if isinstance(item, dict)]
         if not page_reviews:
             break
-        page_image_count = 0
         for review in page_reviews:
             review_id = str(review.get("id") or "")
             if review_id and review_id in seen_review_ids:
                 continue
             seen_review_ids.add(review_id)
-            reviews.append(review)
-            page_image_count += len(review_image_urls(review))
+            if review_image_urls(review):
+                reviews.append(review)
         meta["review_pages_scanned"] = int(meta["review_pages_scanned"]) + 1
-        if page_image_count:
-            consecutive_no_image_pages = 0
-        else:
-            consecutive_no_image_pages += 1
-        if not exhaustive and consecutive_no_image_pages >= MAX_CONSECUTIVE_NO_IMAGE_PAGES:
-            break
         page += 1
+        if request_delay_seconds > 0 and page <= total_pages:
+            time.sleep(request_delay_seconds)
     meta["matching_review_images"] = sum(len(review_image_urls(review)) for review in reviews)
-    meta["public_media_count_hint"] = media_total
     return reviews, meta
 
 
@@ -425,6 +541,20 @@ def extract_size_from_text(text: str) -> str:
     return match.group(1).upper() if match else ""
 
 
+def yotpo_review_value(review: Dict[str, object], snake_key: str, camel_key: str) -> object:
+    return review.get(snake_key) if snake_key in review else review.get(camel_key)
+
+
+def product_variants_text(review: Dict[str, object]) -> Tuple[str, str, str]:
+    variants = review.get("productVariants")
+    if not isinstance(variants, dict):
+        return "", "", ""
+    size = normalize_whitespace(str(variants.get("Size") or variants.get("size") or ""))
+    color = normalize_whitespace(str(variants.get("Color") or variants.get("color") or ""))
+    raw = " / ".join(part for part in [color, size] if part)
+    return color, size, raw
+
+
 def classify_title_product_type(title: str) -> str:
     value = title.lower()
     if "short" in value:
@@ -464,13 +594,20 @@ def parse_review_rows(review: Dict[str, object], product: Dict[str, object], fet
     title = strip_tags(str(review.get("title") or ""))
     body = strip_tags(str(review.get("content") or ""))
     text_pool = normalize_whitespace(" ".join([title, body]))
-    date_created = normalize_whitespace(str(review.get("created_at") or review.get("createdAt") or ""))
+    date_created = normalize_whitespace(str(yotpo_review_value(review, "created_at", "createdAt") or ""))
     review_date = date_created.split("T", 1)[0] if "T" in date_created else date_created
     user = review.get("user") if isinstance(review.get("user"), dict) else {}
     reviewer_name = strip_tags(str(user.get("display_name") or user.get("displayName") or user.get("name") or ""))
     color_display = ""
     size_display = extract_size_from_text(text_pool)
+    variant_color, variant_size, variant_raw = product_variants_text(review)
+    if variant_color:
+        color_display = variant_color
+    if variant_size:
+        size_display = variant_size
     custom_fields = review.get("custom_fields") if isinstance(review.get("custom_fields"), dict) else {}
+    if not custom_fields and isinstance(review.get("customFields"), dict):
+        custom_fields = review.get("customFields")
     if custom_fields:
         fields_blob = json.dumps(custom_fields, ensure_ascii=False)
         size_display = size_display or extract_size_from_text(fields_blob)
@@ -501,6 +638,8 @@ def parse_review_rows(review: Dict[str, object], product: Dict[str, object], fet
                 "created_at_display": "",
                 "id": f"{review_id}-{index}" if review_id else f"{hash(image_url)}-{index}",
                 "original_url_display": image_url,
+                "image_source_type": "customer_review_image",
+                "image_source_detail": "yotpo_review_images_data",
                 "product_page_url_display": product_url,
                 "monetized_product_url_display": "",
                 "height_raw": height_raw,
@@ -544,10 +683,118 @@ def parse_review_rows(review: Dict[str, object], product: Dict[str, object], fet
                 "product_description_raw": product_description,
                 "product_detail_raw": product_detail(product),
                 "product_category_raw": product_category,
-                "product_variant_raw": "",
+                "product_variant_raw": variant_raw,
             }
         )
     return rows
+
+
+def product_from_yotpo_store_item(item: Dict[str, object]) -> Dict[str, object]:
+    domain_key = normalize_whitespace(str(item.get("domainKey") or item.get("domain_key") or ""))
+    name = normalize_whitespace(str(item.get("name") or ""))
+    handle = ""
+    tags = item.get("productTags") or item.get("product_tags") or []
+    if isinstance(tags, list):
+        tags = [tag.get("tag") for tag in tags if isinstance(tag, dict) and tag.get("tag")]
+    return {
+        "id": domain_key,
+        "title": name,
+        "handle": handle,
+        "body_html": "",
+        "product_type": classify_title_product_type(name),
+        "tags": tags,
+        "variants": [],
+        "_discovered_from_yotpo_store_feed": True,
+    }
+
+
+def fetch_store_reviews_v3(
+    products: List[Dict[str, object]],
+    limit_pages: Optional[int],
+    request_delay_seconds: float,
+    fetched_at: str,
+) -> Tuple[List[Dict[str, str]], Dict[str, object], Dict[str, Dict[str, object]]]:
+    products_by_shopify_id = {
+        normalize_whitespace(str(product.get("id") or "")): product
+        for product in products
+        if normalize_whitespace(str(product.get("id") or ""))
+    }
+    yotpo_products: Dict[str, Dict[str, object]] = {}
+    rows: List[Dict[str, str]] = []
+    errors: List[str] = []
+    page = 1
+    total_pages = 1
+    reviews_seen = 0
+    media_reviews_seen = 0
+    product_stats: Dict[str, Dict[str, object]] = {}
+    while page <= total_pages:
+        if limit_pages is not None and page > limit_pages:
+            break
+        try:
+            payload = fetch_json(yotpo_store_reviews_url(), {"perPage": REVIEWS_PER_PAGE, "page": page}, referer=SOURCE_SITE)
+        except StopScrape:
+            raise
+        except (HTTPError, URLError, RuntimeError) as exc:
+            errors.append(str(exc))
+            break
+        pagination = payload.get("pagination") if isinstance(payload.get("pagination"), dict) else {}
+        total = int(pagination.get("total") or 0)
+        per_page = int(pagination.get("perPage") or REVIEWS_PER_PAGE)
+        total_pages = max(1, (total + per_page - 1) // per_page)
+        for item in payload.get("products") or []:
+            if not isinstance(item, dict):
+                continue
+            internal_id = normalize_whitespace(str(item.get("id") or ""))
+            if internal_id:
+                yotpo_products[internal_id] = item
+        page_reviews = [review for review in payload.get("reviews") or [] if isinstance(review, dict)]
+        reviews_seen += len(page_reviews)
+        for review in page_reviews:
+            if not review_image_urls(review):
+                continue
+            media_reviews_seen += 1
+            internal_product_id = normalize_whitespace(str(review.get("product_id") or review.get("productId") or ""))
+            yotpo_product = yotpo_products.get(internal_product_id, {})
+            domain_key = normalize_whitespace(str(yotpo_product.get("domainKey") or yotpo_product.get("domain_key") or ""))
+            product = products_by_shopify_id.get(domain_key)
+            if not product and yotpo_product:
+                product = product_from_yotpo_store_item(yotpo_product)
+            if not product:
+                continue
+            if skip_reason(product):
+                continue
+            review_rows = parse_review_rows(review, product, fetched_at)
+            rows.extend(review_rows)
+            product_url = product_url_for(product) or domain_key
+            stat = product_stats.setdefault(
+                product_url,
+                {
+                    "product_url": product_url,
+                    "product_title": product.get("title"),
+                    "shopify_product_id": domain_key,
+                    "adapter_used": "yotpo_v3_store_feed",
+                    "store_reviews_seen": 0,
+                    "store_media_reviews": 0,
+                    "matching_review_images": 0,
+                    "rows": 0,
+                },
+            )
+            stat["store_reviews_seen"] = int(stat["store_reviews_seen"]) + 1
+            stat["store_media_reviews"] = int(stat["store_media_reviews"]) + 1
+            stat["matching_review_images"] = int(stat["matching_review_images"]) + len(review_rows)
+            stat["rows"] = int(stat["rows"]) + len(review_rows)
+        print(f"[store review page {page}/{total_pages}] reviews={len(page_reviews)} rows={len(rows)}", flush=True)
+        page += 1
+        if request_delay_seconds > 0 and page <= total_pages:
+            time.sleep(request_delay_seconds)
+    return rows, {
+        "store_review_pages_scanned": page - 1,
+        "store_review_pages_available": total_pages,
+        "store_reviews_seen": reviews_seen,
+        "store_media_reviews_seen": media_reviews_seen,
+        "store_errors": errors,
+        "store_exhaustive_review_paging": page > total_pages and not errors and limit_pages is None,
+    }, product_stats
 
 
 def dedupe_rows(rows: Sequence[Dict[str, str]]) -> List[Dict[str, str]]:
@@ -586,15 +833,21 @@ def is_supabase_qualified(row: Dict[str, str]) -> bool:
     return bool(has_product_url(row) and has_measurement(row) and row.get("original_url_display") and row.get("size_display"))
 
 
-def scrape_reviews(limit_products: Optional[int] = None, exhaustive: bool = True) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
+def scrape_reviews(
+    limit_products: Optional[int] = None,
+    limit_pages_per_product: Optional[int] = None,
+    request_delay_seconds: float = 0.0,
+) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
     fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     discovery_method = "shopify_products_json"
     discovery_errors: List[str] = []
     try:
-        products = fetch_products(limit_products=limit_products)
+        products, product_sources = discover_products(limit_products=limit_products)
+        discovery_method = "shopify_products_json_sitemap_and_lead_urls"
     except Exception as exc:  # noqa: BLE001
         discovery_errors.append(str(exc))
         products = cached_products_from_summary(limit_products=limit_products)
+        product_sources = {"cached_previous_summary_product_list": len(products)}
         discovery_method = "cached_previous_summary_product_list"
     if not products:
         raise RuntimeError("No Evelyn Bobbie products discovered from Shopify or cached summary.")
@@ -603,29 +856,40 @@ def scrape_reviews(limit_products: Optional[int] = None, exhaustive: bool = True
     summary: Dict[str, object] = {
         "site": SITE_ROOT,
         "retailer": "evelynbobbie_com",
-        "adapter": "yotpo_product_level",
+        "adapter": "yotpo_product_level_plus_v3_store_feed",
         "yotpo_app_key": YOTPO_APP_KEY,
         "shop_domain": SHOP_DOMAIN,
         "started_at": fetched_at,
         "products_discovered": len(products),
+        "product_sources": product_sources,
         "discovery_method": discovery_method,
         "catalog_discovery_errors": discovery_errors,
         "products_scanned": 0,
-        "exhaustive_review_paging": exhaustive,
+        "products_excluded_from_output": 0,
+        "exhaustive_review_paging": limit_pages_per_product is None,
+        "limit_pages_per_product": limit_pages_per_product,
+        "request_delay_seconds": request_delay_seconds,
         "products_with_review_rows": 0,
         "review_pages_scanned": 0,
         "product_review_count_hint": 0,
-        "access_policy": "public_product_and_review_pages_only; restricted_or_unavailable_pages_are_skipped; polite_retries",
+        "access_policy": "public_product_and_review_pages_only; stop_immediately_on_429_captcha_or_waf_like_response",
         "measurement_extraction": "deterministic_regex_and_provider_fields_only",
         "errors": [],
     }
     for index, product in enumerate(products, start=1):
-        reviews, product_meta = fetch_product_reviews(product, exhaustive=exhaustive)
+        reason = skip_reason(product)
+        reviews, product_meta = fetch_product_reviews(
+            product,
+            limit_pages=limit_pages_per_product,
+            request_delay_seconds=request_delay_seconds,
+        )
         product_rows: List[Dict[str, str]] = []
-        for review in reviews:
-            product_rows.extend(parse_review_rows(review, product, fetched_at))
-        product_summaries.append({**product_meta, "product_index": index, "rows": len(product_rows)})
+        if not reason:
+            for review in reviews:
+                product_rows.extend(parse_review_rows(review, product, fetched_at))
+        product_summaries.append({**product_meta, "product_index": index, "rows": len(product_rows), "skipped_from_output": bool(reason), "skip_reason": reason})
         summary["products_scanned"] = int(summary["products_scanned"]) + 1
+        summary["products_excluded_from_output"] = int(summary["products_excluded_from_output"]) + (1 if reason else 0)
         summary["review_pages_scanned"] = int(summary["review_pages_scanned"]) + int(product_meta.get("review_pages_scanned") or 0)
         summary["product_review_count_hint"] = int(summary["product_review_count_hint"]) + int(product_meta.get("review_count_hint") or 0)
         if product_rows:
@@ -634,12 +898,41 @@ def scrape_reviews(limit_products: Optional[int] = None, exhaustive: bool = True
             summary["errors"].append(product_meta)
         rows.extend(product_rows)
         print(
-            f"[product {index}/{len(products)}] reviews={len(reviews)} rows={len(product_rows)} url={product_meta.get('product_url')}",
+            f"[product {index}/{len(products)}] pages={product_meta.get('review_pages_scanned')} "
+            f"image_reviews={len(reviews)} rows={len(product_rows)} url={product_meta.get('product_url')}",
             flush=True,
         )
+    store_rows, store_meta, store_product_stats = fetch_store_reviews_v3(
+        products,
+        limit_pages=limit_pages_per_product,
+        request_delay_seconds=request_delay_seconds,
+        fetched_at=fetched_at,
+    )
+    rows.extend(store_rows)
+    for product_summary in product_summaries:
+        product_url = normalize_whitespace(str(product_summary.get("product_url") or ""))
+        store_stat = store_product_stats.get(product_url)
+        if not store_stat:
+            continue
+        product_summary["store_reviews_seen"] = store_stat.get("store_reviews_seen", 0)
+        product_summary["store_media_reviews"] = store_stat.get("store_media_reviews", 0)
+        product_summary["store_matching_review_images"] = store_stat.get("matching_review_images", 0)
+        product_summary["store_rows"] = store_stat.get("rows", 0)
+        product_summary["matching_review_images"] = int(product_summary.get("matching_review_images") or 0) + int(store_stat.get("matching_review_images") or 0)
+        product_summary["rows"] = int(product_summary.get("rows") or 0) + int(store_stat.get("rows") or 0)
+    for product_url, store_stat in store_product_stats.items():
+        if any(product_url == normalize_whitespace(str(item.get("product_url") or "")) for item in product_summaries):
+            continue
+        product_summaries.append({**store_stat, "product_index": None, "review_pages_scanned": 0, "review_count_hint": 0, "errors": []})
+    summary["review_pages_scanned"] = int(summary["review_pages_scanned"]) + int(store_meta.get("store_review_pages_scanned") or 0)
+    summary.update(store_meta)
+    if store_meta.get("store_errors"):
+        summary["errors"].append({"scope": "yotpo_v3_store_feed", "errors": store_meta.get("store_errors")})
     summary["product_summaries"] = product_summaries
     summary["finished_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    return dedupe_rows(rows), summary
+    deduped = dedupe_rows(rows)
+    summary["products_with_review_rows"] = len({row.get("product_page_url_display") for row in deduped if row.get("product_page_url_display")})
+    return deduped, summary
 
 
 def write_csv(rows: Sequence[Dict[str, str]], output_csv: Path) -> None:
@@ -699,8 +992,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if "--limit-products" in argv:
         index = argv.index("--limit-products")
         limit_products = int(argv[index + 1])
-    exhaustive = "--quick-photo-scan" not in argv
-    rows, summary = scrape_reviews(limit_products=limit_products, exhaustive=exhaustive)
+    limit_pages_per_product: Optional[int] = None
+    if "--limit-pages-per-product" in argv:
+        index = argv.index("--limit-pages-per-product")
+        limit_pages_per_product = int(argv[index + 1])
+    request_delay_seconds = 0.0
+    if "--request-delay-seconds" in argv:
+        index = argv.index("--request-delay-seconds")
+        request_delay_seconds = float(argv[index + 1])
+    rows, summary = scrape_reviews(
+        limit_products=limit_products,
+        limit_pages_per_product=limit_pages_per_product,
+        request_delay_seconds=request_delay_seconds,
+    )
     rows.sort(
         key=lambda row: (
             row.get("review_date", ""),
