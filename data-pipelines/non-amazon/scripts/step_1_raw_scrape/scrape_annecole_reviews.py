@@ -20,8 +20,8 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[4]
 DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "annecole_com"
-OUTPUT_CSV = OUTPUT_DIR / "annecole_com_reviews_matching_intake_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "annecole_com_reviews_matching_intake_schema_summary.json"
+OUTPUT_CSV = OUTPUT_DIR / "annecole_com_reviews_matching_amazon_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "annecole_com_reviews_matching_amazon_schema_summary.json"
 
 SITE_ROOT = "https://www.annecole.com"
 CANONICAL_ROOT = "https://annecole.com"
@@ -36,7 +36,8 @@ REVIEWS_PER_PAGE = 100
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36"
 
 HEADERS = [
-    "created_at_display", "id", "original_url_display", "product_page_url_display", "monetized_product_url_display",
+    "created_at_display", "id", "original_url_display", "image_source_type", "image_source_detail",
+    "product_page_url_display", "monetized_product_url_display",
     "height_raw", "weight_raw", "user_comment", "date_review_submitted_raw", "height_in_display", "review_date",
     "source_site_display", "status_code", "content_type", "bytes", "width", "height", "hash_md5", "fetched_at",
     "updated_at", "brand", "waist_raw_display", "hips_raw", "age_raw", "waist_in", "hips_in_display",
@@ -60,6 +61,11 @@ SIZE_ORDER_RE = re.compile(
     r"((?:xxs|xs|s|m|l|xl|xxl|2xl|3xl|[0-9]{1,2}|[0-9]{1,2}w)(?:/[0-9]{1,2})?)\b",
     re.I,
 )
+CHALLENGE_RE = re.compile(r"\b(?:captcha|cloudflare|datadome|access denied|attention required|verify you are human|cf-chl)\b", re.I)
+
+
+class StopScrape(RuntimeError):
+    pass
 
 
 def now_iso() -> str:
@@ -75,16 +81,25 @@ def strip_tags(value: object) -> str:
     return norm(html.unescape(TAG_RE.sub(" ", text)))
 
 
+def stop_if_challenge(body: str, url: str) -> None:
+    if CHALLENGE_RE.search(body[:10000]):
+        raise StopScrape(f"Stopping on challenge-like response for {url}")
+
+
 def fetch_text(url: str, retries: int = 5) -> str:
     last_error: Optional[Exception] = None
     for attempt in range(retries):
         req = Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"})
         try:
             with urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8", "replace")
+                body = resp.read().decode("utf-8", "replace")
+                stop_if_challenge(body, url)
+                return body
         except (HTTPError, URLError) as exc:
             last_error = exc
-            if isinstance(exc, HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
+            if isinstance(exc, HTTPError) and exc.code in {403, 429}:
+                raise StopScrape(f"Stopping on HTTP {exc.code} for {url}") from exc
+            if isinstance(exc, HTTPError) and exc.code not in {500, 502, 503, 504}:
                 raise
         time.sleep(min(2 ** attempt, 20))
     raise RuntimeError(f"Failed text request for {url}: {last_error}")
@@ -106,10 +121,14 @@ def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: Op
         )
         try:
             with urlopen(req, timeout=60) as resp:
-                return json.load(resp)
+                body = resp.read().decode("utf-8", "replace")
+                stop_if_challenge(body, query_url)
+                return json.loads(body)
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
+            if exc.code in {403, 429}:
+                raise StopScrape(f"Stopping on HTTP {exc.code} for {query_url}") from exc
+            if exc.code not in {500, 502, 503, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
@@ -343,6 +362,8 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
         "created_at_display": fetched,
         "id": f"{review_id}-{image_index}",
         "original_url_display": image_url,
+        "image_source_type": "customer_review_image",
+        "image_source_detail": "okendo_review_media",
         "product_page_url_display": product_url,
         "monetized_product_url_display": product_url,
         "height_raw": height_raw,
@@ -393,6 +414,22 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
 def is_measurement_row(row: Dict[str, str]) -> bool:
     fields = ["height_in_display", "weight_lbs_display", "bust_in_number_display", "hips_in_display", "waist_in", "inseam_inches_display"]
     return any(norm(row.get(field)) for field in fields)
+
+
+def invalid_numeric_fields(rows: List[Dict[str, str]]) -> Dict[str, int]:
+    fields = [
+        "height_in_display",
+        "weight_lbs_display",
+        "bust_in_number_display",
+        "hips_in_display",
+        "waist_in",
+        "inseam_inches_display",
+        "age_years_display",
+    ]
+    return {
+        field: sum(1 for row in rows if norm(row.get(field)) and not re.fullmatch(r"\d+(?:\.\d+)?", norm(row.get(field))))
+        for field in fields
+    }
 
 
 def dedupe_rows(rows: List[Dict[str, str]]) -> List[Dict[str, str]]:
@@ -494,13 +531,18 @@ def main(argv: List[str]) -> int:
         "rows_with_product_url": rows_with_product_url,
         "rows_with_any_measurement": rows_with_measurement,
         "rows_with_customer_image": rows_with_image,
+        "rows_with_customer_review_image": sum(1 for row in deduped if norm(row.get("original_url_display")) and row.get("image_source_type") == "customer_review_image"),
         "rows_with_customer_ordered_size": rows_with_size,
         "rows_with_size": rows_with_size,
         "rows_supabase_qualified": rows_supabase,
+        "supabase_qualified_rows": rows_supabase,
+        "rows_with_image_and_product_url": rows_with_product_url,
         "output_csv": str(OUTPUT_CSV),
         "summary_json": str(SUMMARY_JSON),
         "started_at": started,
         "finished_at": now_iso(),
+        "invalid_numeric_fields": invalid_numeric_fields(deduped),
+        "access_policy": "public_product_and_review_pages_only; no_auth_bypass; no_captcha_bypass; stop_on_429_captcha_waf",
         "product_summaries": product_summaries,
     }
     SUMMARY_JSON.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")

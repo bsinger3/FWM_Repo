@@ -11,7 +11,7 @@ import re
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urljoin
 from urllib.request import Request, urlopen
@@ -33,6 +33,7 @@ BRAND = "HSIA"
 PRODUCTS_PER_PAGE = 250
 REVIEWS_PER_PAGE = 100
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36"
+CHALLENGE_RE = re.compile(r"\b(?:captcha|cloudflare|datadome|perimeterx|challenge|access denied|blocked)\b", re.I)
 
 HEADERS = [
     "created_at_display", "id", "original_url_display", "product_page_url_display", "monetized_product_url_display",
@@ -54,7 +55,13 @@ WAIST_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*waist\b", 
 HIPS_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*hips?\b", re.I)
 INSEAM_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*inseam\b", re.I)
 AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re.I)
-BRA_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
+BRA_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k)(?:/[a-z]+)?)\b", re.I)
+SIZE_ORDERED_RE = re.compile(r"\b(?:size|ordered|wear(?:ing)?|bought)\s*(?:a|an|the|is|:)?\s*((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k)(?:/[a-z]+)?|xxs|xs|s|m|l|xl|xxl|2xl|3xl|4xl|\d{1,2})\b", re.I)
+APPAREL_SIZE_RE = re.compile(r"^(?:xxs|xs|s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|\d{1,2})$", re.I)
+
+
+class StopScrape(RuntimeError):
+    pass
 
 
 def now_iso() -> str:
@@ -76,10 +83,15 @@ def fetch_text(url: str, retries: int = 5) -> str:
         req = Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"})
         try:
             with urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8", "replace")
+                text = resp.read().decode("utf-8", "replace")
+                if CHALLENGE_RE.search(text[:4000]):
+                    raise StopScrape(f"Challenge-like response while fetching {url}")
+                return text
         except (HTTPError, URLError) as exc:
             last_error = exc
-            if isinstance(exc, HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
+            if isinstance(exc, HTTPError) and exc.code == 429:
+                raise StopScrape(f"HTTP 429 rate limit while fetching {url}") from exc
+            if isinstance(exc, HTTPError) and exc.code not in {500, 502, 503, 504}:
                 raise
         time.sleep(min(2 ** attempt, 20))
     raise RuntimeError(f"Failed text request for {url}: {last_error}")
@@ -101,10 +113,15 @@ def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: Op
         )
         try:
             with urlopen(req, timeout=60) as resp:
-                return json.load(resp)
+                raw = resp.read().decode("utf-8", "replace")
+                if CHALLENGE_RE.search(raw[:4000]):
+                    raise StopScrape(f"Challenge-like response while fetching {query_url}")
+                return json.loads(raw)
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
+            if exc.code == 429:
+                raise StopScrape(f"HTTP 429 rate limit while fetching {query_url}") from exc
+            if exc.code not in {500, 502, 503, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
@@ -159,6 +176,10 @@ def okendo_reviews_url(product_id: object) -> str:
     return f"{OKENDO_API_ROOT}/products/shopify-{product_id}/reviews"
 
 
+def okendo_store_reviews_url() -> str:
+    return f"{OKENDO_API_ROOT}/reviews"
+
+
 def normalize_product_url(value: object, fallback: str) -> str:
     text = norm(value)
     if text.startswith("//"):
@@ -178,7 +199,17 @@ def media_urls(review: Dict[str, object]) -> List[str]:
             continue
         if norm(item.get("type")).lower() not in {"", "image", "photo"}:
             continue
-        url = norm(item.get("fullSizeUrl") or item.get("largeUrl") or item.get("thumbnailUrl"))
+        image_urls = item.get("imageUrls") if isinstance(item.get("imageUrls"), dict) else {}
+        url = norm(
+            item.get("fullSizeUrl")
+            or item.get("largeUrl")
+            or item.get("url")
+            or item.get("thumbnailUrl")
+            or image_urls.get("fullSizeUrl")
+            or image_urls.get("largeUrl")
+            or image_urls.get("originalUrl")
+            or image_urls.get("thumbnailUrl")
+        )
         if url and url not in urls:
             urls.append(url)
     return urls
@@ -224,7 +255,7 @@ def parse_bra(text: str) -> Tuple[str, str]:
         return "", ""
     compact = re.sub(r"\s+", "", match.group(1)).upper()
     band = re.match(r"(\d{2})", compact)
-    cup = re.search(r"[A-Z]+$", compact)
+    cup = re.search(r"[A-Z]+(?:/[A-Z]+)?$", compact)
     return (band.group(1) if band else "", cup.group(0) if cup else "")
 
 
@@ -237,14 +268,87 @@ def parse_variant(variant: object) -> Tuple[str, str, str, str, str]:
     size = ""
     bust = ""
     cup = ""
-    if len(parts) >= 3 and re.fullmatch(r"\d{2}", parts[-2]) and re.fullmatch(r"[A-Za-z]+", parts[-1]):
+    first_bust, first_cup = parse_bra(parts[0] if parts else "")
+    if len(parts) >= 2 and first_bust and first_cup:
+        size = re.sub(r"\s+", "", parts[0]).upper()
+        bust = first_bust
+        cup = first_cup
+        color = parts[-1]
+    elif len(parts) >= 3 and re.fullmatch(r"\d{2}", parts[-2]) and re.fullmatch(r"[A-Za-z]+(?:/[A-Za-z]+)?", parts[-1]):
         bust = parts[-2]
         cup = parts[-1].upper()
         size = f"{bust}{cup}"
+    elif len(parts) >= 2 and APPAREL_SIZE_RE.fullmatch(parts[0]) and not APPAREL_SIZE_RE.fullmatch(parts[-1]):
+        size = parts[0].upper()
+        color = parts[-1]
     elif len(parts) >= 2:
         size = parts[-1]
         bust, cup = parse_bra(size)
     return color, color.lower(), size, bust or "", cup
+
+
+def attr_text(attrs: object) -> Dict[str, str]:
+    out: Dict[str, str] = {}
+    if not isinstance(attrs, list):
+        return out
+    for item in attrs:
+        if not isinstance(item, dict):
+            continue
+        title = norm(item.get("title")).strip().rstrip(":").lower()
+        value = item.get("value")
+        if isinstance(value, list):
+            text = " | ".join(norm(v) for v in value if norm(v))
+        else:
+            text = norm(value)
+        if title and text:
+            out[title] = text
+    return out
+
+
+def attribute_text(review: Dict[str, object]) -> str:
+    parts: List[str] = []
+    for source in (review.get("productAttributes"), review.get("attributesWithRating")):
+        for title, value in attr_text(source).items():
+            parts.append(f"{title}: {value}")
+    reviewer = review.get("reviewer") if isinstance(review.get("reviewer"), dict) else {}
+    for title, value in attr_text(reviewer.get("attributes") if isinstance(reviewer, dict) else None).items():
+        parts.append(f"{title}: {value}")
+    return " ".join(parts)
+
+
+def parse_size(review: Dict[str, object], text: str, variant_size: str) -> str:
+    product_attrs = attr_text(review.get("productAttributes"))
+    for key in ("size ordered", "size purchased", "purchased size", "size"):
+        if product_attrs.get(key):
+            return product_attrs[key]
+    if variant_size:
+        return variant_size
+    match = SIZE_ORDERED_RE.search(text)
+    if not match:
+        return ""
+    return re.sub(r"\s+", "", match.group(1)).upper()
+
+
+def skip_reason(product: Dict[str, object]) -> str:
+    title_type = " ".join([
+        norm(product.get("title")),
+        norm(product.get("product_type")),
+    ]).lower()
+    hay = " ".join([
+        norm(product.get("title")),
+        norm(product.get("product_type")),
+        " ".join(norm(tag) for tag in product.get("tags", []) if isinstance(tag, str)),
+    ]).lower()
+    product_type = norm(product.get("product_type")).lower()
+    if "gift card" in hay or "e-gift" in hay:
+        return "out_of_scope_gift_card"
+    if product_type in {"bra accessories", "accessories"} or re.search(r"\b(accessor(?:y|ies)|extenders?|breast petals?|nipple covers?|concealers?|adhesive|tape|laundry bag)\b", title_type):
+        return "out_of_scope_accessory"
+    if re.search(r"\b(kids|girls|toddler|infant|baby)\b", hay):
+        return "out_of_scope_kids"
+    if re.search(r"\b(mens|men's)\b", hay):
+        return "out_of_scope_mens"
+    return ""
 
 
 def variant_detail(product: Dict[str, object]) -> str:
@@ -317,7 +421,7 @@ def fetch_product_reviews(product: Dict[str, object], limit_pages: Optional[int]
 
 
 def row_for(product: Dict[str, object], review: Dict[str, object], image_url: str, image_index: int) -> Dict[str, str]:
-    text_parts = [norm(review.get("title")), strip_tags(review.get("body"))]
+    text_parts = [norm(review.get("title")), strip_tags(review.get("body")), attribute_text(review)]
     variant_name = norm(review.get("productVariantName"))
     if variant_name:
         text_parts.append(f"Variant: {variant_name}")
@@ -329,14 +433,19 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
     hips_raw, hips = parse_num(HIPS_RE, text, 90)
     inseam_raw, inseam = parse_num(INSEAM_RE, text, 50)
     age_raw, age = parse_age(text)
-    color_display, color_canonical, size_display, bust, cup_from_variant = parse_variant(variant_name)
+    color_display, color_canonical, variant_size, bust, cup_from_variant = parse_variant(variant_name)
+    size_display = parse_size(review, text, variant_size)
     bust_from_text, cup = parse_bra(text)
     if not bust:
         bust = bust_from_text
     if not cup:
         cup = cup_from_variant
+    if not size_display and bust and cup:
+        size_display = f"{bust}{cup}"
 
     product_url = normalize_product_url(review.get("productUrl"), product_url_for(product))
+    if not product_url and norm(review.get("productHandle")):
+        product_url = f"{SITE_ROOT}/products/{quote(norm(review.get('productHandle')), safe='/-._~')}"
     product_title = norm(review.get("productName") or product.get("title"))
     detail = variant_detail(product)
     review_id = norm(review.get("reviewId")) or f"{product.get('id')}-{image_index}"
@@ -392,6 +501,121 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
     }
 
 
+def product_key(product: Dict[str, object]) -> str:
+    return norm(product.get("id")) or norm(product.get("handle")) or product_url_for(product)
+
+
+def context_product_from_review(
+    review: Dict[str, object],
+    products_by_id: Dict[str, Dict[str, object]],
+    products_by_handle: Dict[str, Dict[str, object]],
+) -> Dict[str, object]:
+    product_id = norm(review.get("productId")).removeprefix("shopify-")
+    handle = norm(review.get("productHandle"))
+    product = products_by_id.get(product_id) or products_by_handle.get(handle)
+    if product:
+        return product
+    product_url = normalize_product_url(review.get("productUrl"), "")
+    fallback_handle = handle or product_url.rstrip("/").rsplit("/", 1)[-1]
+    return {
+        "id": product_id,
+        "handle": fallback_handle,
+        "title": norm(review.get("productName")),
+        "product_type": "",
+        "body_html": "",
+        "variants": [],
+        "_from_store_review_only": True,
+    }
+
+
+def fetch_store_reviews(
+    products: List[Dict[str, object]],
+    limit_pages: Optional[int] = None,
+) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
+    products_by_id = {norm(product.get("id")): product for product in products if norm(product.get("id"))}
+    products_by_handle = {norm(product.get("handle")): product for product in products if norm(product.get("handle"))}
+    rows: List[Dict[str, str]] = []
+    errors: List[str] = []
+    product_stats: Dict[str, Dict[str, object]] = {}
+    skipped_media_rows = 0
+    skipped_media_reviews = 0
+    reviews_seen = 0
+    media_reviews_seen = 0
+    pages = 0
+    url = okendo_store_reviews_url()
+    params: Optional[Dict[str, object]] = {"limit": REVIEWS_PER_PAGE}
+    seen_review_ids: Set[str] = set()
+
+    while url:
+        if limit_pages is not None and pages >= limit_pages:
+            break
+        try:
+            payload = fetch_json(url, params=params, referer=SOURCE_SITE)
+        except StopScrape:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            errors.append(str(exc))
+            break
+        params = None
+        page_reviews = [item for item in payload.get("reviews", []) if isinstance(item, dict)]
+        if not page_reviews:
+            break
+        pages += 1
+        reviews_seen += len(page_reviews)
+        for review in page_reviews:
+            review_id = norm(review.get("reviewId"))
+            if review_id and review_id in seen_review_ids:
+                continue
+            if review_id:
+                seen_review_ids.add(review_id)
+            product = context_product_from_review(review, products_by_id, products_by_handle)
+            key = product_key(product)
+            urls = media_urls(review)
+            reason = skip_reason(product)
+            stats = product_stats.setdefault(
+                key,
+                {
+                    "product_id": norm(product.get("id")),
+                    "product_title": norm(product.get("title") or review.get("productName")),
+                    "product_url": product_url_for(product) or normalize_product_url(review.get("productUrl"), ""),
+                    "product_type": norm(product.get("product_type")),
+                    "adapter_used": "okendo_store_level",
+                    "review_count_hint": 0,
+                    "review_pages_scanned": 0,
+                    "matching_review_images": 0,
+                    "rows": 0,
+                    "skipped_from_output": bool(reason),
+                    "skip_reason": reason,
+                    "errors": [],
+                },
+            )
+            stats["review_count_hint"] = int(stats["review_count_hint"]) + 1
+            stats["matching_review_images"] = int(stats["matching_review_images"]) + len(urls)
+            if urls:
+                media_reviews_seen += 1
+            if reason:
+                skipped_media_rows += len(urls)
+                skipped_media_reviews += 1 if urls else 0
+                continue
+            for image_index, image_url in enumerate(urls, start=1):
+                rows.append(row_for(product, review, image_url, image_index))
+                stats["rows"] = int(stats["rows"]) + 1
+        print(f"[review page {pages}] reviews={len(page_reviews)} total_reviews={reviews_seen} rows={len(rows)}", flush=True)
+        next_url = norm(payload.get("nextUrl"))
+        url = urljoin("https://api.okendo.io/v1/", next_url.lstrip("/")) if next_url else ""
+
+    return rows, {
+        "review_pages_scanned": pages,
+        "reviews_seen": reviews_seen,
+        "media_reviews_seen": media_reviews_seen,
+        "skipped_out_of_scope_media_reviews": skipped_media_reviews,
+        "skipped_out_of_scope_media_rows": skipped_media_rows,
+        "product_summaries": product_stats,
+        "errors": errors,
+        "store_feed_complete": not bool(url),
+    }
+
+
 def is_measurement_row(row: Dict[str, str]) -> bool:
     fields = ["height_in_display", "weight_lbs_display", "bust_in_number_display", "hips_in_display", "waist_in", "inseam_inches_display"]
     return any(norm(row.get(field)) for field in fields)
@@ -408,35 +632,112 @@ def main(argv: List[str]) -> int:
     started = now_iso()
     products, product_sources = fetch_products(limit_products=limit_products)
     print(f"Discovered {len(products)} products")
-    rows: List[Dict[str, str]] = []
-    product_summaries: List[Dict[str, object]] = []
-    total_pages = 0
-    total_hint = 0
+    try:
+        store_rows, store_meta = fetch_store_reviews(products, limit_pages=limit_pages)
+    except StopScrape as exc:
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        SUMMARY_JSON.write_text(
+            json.dumps(
+                {
+                    "site": "hsialife.com",
+                    "adapter": "okendo_store_level",
+                    "okendo_store_id": OKENDO_STORE_ID,
+                    "product_sources": product_sources,
+                    "products_discovered": len(products),
+                    "products_scanned": 0,
+                    "rows_written": 0,
+                    "scrape_stopped": True,
+                    "stop_reason": str(exc),
+                    "started_at": started,
+                    "finished_at": now_iso(),
+                },
+                indent=2,
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        print(f"Stopped scrape: {exc}")
+        return 2
 
+    rows: List[Dict[str, str]] = list(store_rows)
+    store_product_stats = store_meta.get("product_summaries") if isinstance(store_meta.get("product_summaries"), dict) else {}
+    products_by_title = {norm(product.get("title")).lower(): product for product in products if norm(product.get("title"))}
+    product_level_stats: Dict[str, Dict[str, object]] = {}
+    product_level_pages = 0
+    product_level_reviews = 0
+    product_level_media = 0
     for idx, product in enumerate(products, start=1):
-        reviews, meta = fetch_product_reviews(product, limit_pages=limit_pages)
-        total_pages += int(meta.get("review_pages_scanned") or 0)
-        total_hint += int(meta.get("review_count_hint") or 0)
+        reason = skip_reason(product)
+        try:
+            reviews, meta = fetch_product_reviews(product, limit_pages=limit_pages)
+        except StopScrape as exc:
+            store_meta.setdefault("errors", [])
+            if isinstance(store_meta["errors"], list):
+                store_meta["errors"].append(str(exc))
+            break
         product_rows = 0
+        image_count = 0
         for review in reviews:
-            for image_index, image_url in enumerate(media_urls(review), start=1):
-                rows.append(row_for(product, review, image_url, image_index))
+            urls = media_urls(review)
+            image_count += len(urls)
+            if reason:
+                continue
+            row_product = products_by_title.get(norm(review.get("productName")).lower(), product)
+            for image_index, image_url in enumerate(urls, start=1):
+                rows.append(row_for(row_product, review, image_url, image_index))
                 product_rows += 1
+        product_level_pages += int(meta.get("review_pages_scanned") or 0)
+        product_level_reviews += int(meta.get("review_count_hint") or 0)
+        product_level_media += image_count
+        product_level_stats[product_key(product)] = {
+            "product_level_review_count_hint": int(meta.get("review_count_hint") or 0),
+            "product_level_review_pages_scanned": int(meta.get("review_pages_scanned") or 0),
+            "product_level_matching_review_images": image_count,
+            "product_level_rows": product_rows,
+            "product_level_errors": meta.get("errors") or [],
+        }
+        if idx % 50 == 0 or idx == len(products):
+            print(f"[product feeds] scanned={idx}/{len(products)} product_rows={sum(int(item.get('product_level_rows') or 0) for item in product_level_stats.values())}", flush=True)
+
+    product_summaries: List[Dict[str, object]] = []
+    for idx, product in enumerate(products, start=1):
+        key = product_key(product)
+        reason = skip_reason(product)
+        stats = dict(store_product_stats.get(key, {}))
+        product_stats = product_level_stats.get(key, {})
         summary = {
             "product_index": idx,
             "product_id": product.get("id"),
             "product_title": product.get("title"),
             "product_url": product_url_for(product),
-            "review_count_hint": meta.get("review_count_hint"),
-            "review_pages_scanned": meta.get("review_pages_scanned"),
-            "matching_review_images": meta.get("matching_review_images"),
-            "rows": product_rows,
-            "errors": meta.get("errors"),
-            "skipped_from_output": False,
-            "skip_reason": "",
+            "product_type": norm(product.get("product_type")),
+            "adapter_used": "okendo_store_level_and_product_level",
+            "review_count_hint": int(product_stats.get("product_level_review_count_hint") or stats.get("review_count_hint") or 0),
+            "store_review_count_hint": int(stats.get("review_count_hint") or 0),
+            "product_level_review_count_hint": int(product_stats.get("product_level_review_count_hint") or 0),
+            "review_pages_scanned": int(product_stats.get("product_level_review_pages_scanned") or 0),
+            "matching_review_images": int(product_stats.get("product_level_matching_review_images") or stats.get("matching_review_images") or 0),
+            "store_matching_review_images": int(stats.get("matching_review_images") or 0),
+            "product_level_matching_review_images": int(product_stats.get("product_level_matching_review_images") or 0),
+            "rows": int(product_stats.get("product_level_rows") or 0) + int(stats.get("rows") or 0),
+            "store_rows": int(stats.get("rows") or 0),
+            "product_level_rows": int(product_stats.get("product_level_rows") or 0),
+            "errors": list(stats.get("errors") or []) + list(product_stats.get("product_level_errors") or []),
+            "skipped_from_output": bool(reason),
+            "skip_reason": reason,
         }
         product_summaries.append(summary)
-        print(f"[{idx}/{len(products)}] {product.get('title')} reviews={summary['review_count_hint']} pages={summary['review_pages_scanned']} rows={product_rows}")
+    catalog_keys = {product_key(product) for product in products}
+    for stats in store_product_stats.values():
+        if not isinstance(stats, dict) or norm(stats.get("product_id")) in catalog_keys:
+            continue
+        if norm(stats.get("product_id")) and norm(stats.get("product_id")) not in catalog_keys:
+            product_summaries.append({
+                "product_index": None,
+                **stats,
+                "review_pages_scanned": 0,
+                "store_review_only": True,
+            })
 
     seen_images = set()
     deduped: List[Dict[str, str]] = []
@@ -467,15 +768,32 @@ def main(argv: List[str]) -> int:
     )
     summary = {
         "site": "hsialife.com",
-        "adapter": "okendo_product_level",
+        "adapter": "okendo_store_level_and_product_level",
         "okendo_store_id": OKENDO_STORE_ID,
-        "product_sources": product_sources,
+        "product_sources": product_sources + [
+            {
+                "source": "okendo_store_reviews",
+                "count": int(store_meta.get("reviews_seen") or 0),
+                "media_reviews": int(store_meta.get("media_reviews_seen") or 0),
+                "complete": bool(store_meta.get("store_feed_complete")),
+            }
+        ],
         "products_discovered": len(products),
         "products_scanned": len(products),
-        "products_excluded_from_output": 0,
+        "products_excluded_from_output": sum(1 for item in product_summaries if item.get("skipped_from_output")),
         "exhaustive_review_paging": limit_pages is None,
-        "review_pages_scanned": total_pages,
-        "product_review_count_hint": total_hint,
+        "review_pages_scanned": int(store_meta.get("review_pages_scanned") or 0) + product_level_pages,
+        "store_review_pages_scanned": int(store_meta.get("review_pages_scanned") or 0),
+        "product_level_review_pages_scanned": product_level_pages,
+        "product_review_count_hint": product_level_reviews,
+        "store_reviews_seen": int(store_meta.get("reviews_seen") or 0),
+        "store_media_reviews_seen": int(store_meta.get("media_reviews_seen") or 0),
+        "product_level_reviews_seen": product_level_reviews,
+        "product_level_media_images_seen": product_level_media,
+        "raw_review_image_occurrences_before_dedupe": len(rows),
+        "skipped_out_of_scope_media_reviews": int(store_meta.get("skipped_out_of_scope_media_reviews") or 0),
+        "skipped_out_of_scope_media_rows": int(store_meta.get("skipped_out_of_scope_media_rows") or 0),
+        "errors": store_meta.get("errors") or [],
         "rows_written": len(deduped),
         "distinct_reviews": len({row["id"].rsplit("-", 1)[0] for row in deduped}),
         "distinct_images": len({row["original_url_display"] for row in deduped}),

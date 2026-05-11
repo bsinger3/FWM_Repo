@@ -10,6 +10,7 @@ import json
 import math
 import os
 import re
+import shutil
 import subprocess
 import time
 import urllib.error
@@ -135,8 +136,9 @@ def fetch_json(url: str, timeout: int = 30, retries: int = 0, delay: float = 0.5
 
 
 def fetch_with_curl(url: str, accept: str, timeout: int = 30) -> tuple[int | None, str, str]:
+    curl_bin = shutil.which("curl.exe") or shutil.which("curl") or "curl"
     cmd = [
-        "curl.exe",
+        curl_bin,
         "-sS",
         "-L",
         url,
@@ -465,7 +467,7 @@ def read_existing_rows(path: Path) -> list[dict[str, Any]]:
 def read_existing_summary(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
-    with path.open("r", encoding="utf-8") as fh:
+    with path.open("r", encoding="utf-8-sig") as fh:
         return json.load(fh)
 
 
@@ -534,6 +536,8 @@ def main() -> int:
     output_dir = root / "non-amazon/data/step_1_raw_scraping_data/petalandpup_com"
     csv_path = output_dir / f"{args.output_prefix}_reviews_matching_intake_schema.csv"
     summary_path = output_dir / f"{args.output_prefix}_reviews_matching_intake_schema_summary.json"
+    standard_csv_path = output_dir / f"{args.output_prefix}_reviews_matching_amazon_schema.csv"
+    standard_summary_path = output_dir / f"{args.output_prefix}_reviews_matching_amazon_schema_summary.json"
     checkpoint_path = output_dir / f"{args.output_prefix}_catalog_pages_checkpoint.jsonl"
     started = utc_now()
 
@@ -596,7 +600,9 @@ def main() -> int:
 
     all_rows = merge_rows(all_rows)
     write_csv(csv_path, all_rows)
+    shutil.copyfile(csv_path, standard_csv_path)
 
+    distinct_product_urls = len({row["product_page_url_display"] for row in all_rows})
     summary = {
         "site": "https://petalandpup.com",
         "retailer": "petalandpup_com",
@@ -605,14 +611,19 @@ def main() -> int:
         "started_at": started,
         "finished_at": utc_now(),
         "products_discovered": products_discovered,
+        "products_scanned": apparel_products_scanned,
         "apparel_products_scanned": apparel_products_scanned,
-        "products_with_review_image_rows": sum(1 for result in product_results if result.get("rows_found")),
-        "output_csv": str(csv_path),
+        "products_with_review_image_rows": distinct_product_urls,
+        "output_csv": str(standard_csv_path),
+        "legacy_output_csv": str(csv_path),
+        "legacy_summary_json": str(summary_path),
         "rows_written": len(all_rows),
         "distinct_reviews": len({row["id"] for row in all_rows}),
         "distinct_images": len({row["original_url_display"] for row in all_rows}),
-        "distinct_products": len({row["product_page_url_display"] for row in all_rows}),
+        "distinct_products": distinct_product_urls,
+        "distinct_product_urls": distinct_product_urls,
         "rows_with_image_url": sum(1 for row in all_rows if row.get("original_url_display")),
+        "rows_with_customer_image": sum(1 for row in all_rows if row.get("original_url_display")),
         "rows_with_customer_review_image": sum(
             1
             for row in all_rows
@@ -623,6 +634,7 @@ def main() -> int:
         ),
         "rows_with_user_comment": sum(1 for row in all_rows if row.get("user_comment")),
         "rows_with_size": sum(1 for row in all_rows if row.get("size_display")),
+        "rows_with_customer_ordered_size": sum(1 for row in all_rows if row.get("size_display")),
         "rows_with_any_measurement": sum(
             1
             for row in all_rows
@@ -660,6 +672,13 @@ def main() -> int:
             )
         ),
         "supabase_qualified_rows": count_qualified(all_rows),
+        "rows_supabase_qualified": count_qualified(all_rows),
+        "review_pages_scanned": len(product_results),
+        "review_pages_scanned_this_run": len(product_results),
+        "review_pages_scanned_note": "For resume runs, this is the number of product review endpoints scanned in the current delta run; historical full-run page totals were not retained in the legacy summary.",
+        "exhaustive_review_paging": not bool(catalog_blocker),
+        "full_catalog_scrape_complete": not bool(catalog_blocker),
+        "access_policy": "public_product_and_review_pages_only; stop_immediately_on_429_captcha_or_waf_like_response",
         "catalog_pages_completed_this_run": pages_completed,
         "catalog_blocker": catalog_blocker,
         "checkpoint_jsonl": str(checkpoint_path) if checkpoint_path.exists() else "",
@@ -673,6 +692,8 @@ def main() -> int:
         ],
     }
     with summary_path.open("w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2, ensure_ascii=False)
+    with standard_summary_path.open("w", encoding="utf-8") as fh:
         json.dump(summary, fh, indent=2, ensure_ascii=False)
     print(json.dumps({k: summary[k] for k in ["rows_written", "products_discovered", "apparel_products_scanned", "rows_with_image_product_size_and_measurement"]}, indent=2))
     return 0

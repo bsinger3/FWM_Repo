@@ -21,8 +21,8 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[4]
 DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "babyboofashion_com"
-OUTPUT_CSV = OUTPUT_DIR / "babyboofashion_com_reviews_matching_intake_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "babyboofashion_com_reviews_matching_intake_schema_summary.json"
+OUTPUT_CSV = OUTPUT_DIR / "babyboofashion_com_reviews_matching_amazon_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "babyboofashion_com_reviews_matching_amazon_schema_summary.json"
 
 SITE_ROOT = "https://www.babyboofashion.com"
 SOURCE_SITE = f"{SITE_ROOT}/"
@@ -34,6 +34,8 @@ BRAND = "Babyboo"
 PRODUCTS_PER_PAGE = 250
 REVIEWS_PER_PAGE = 100
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36"
+BLOCK_STATUS_CODES = {403, 429}
+BLOCK_TEXT_RE = re.compile(r"\b(?:captcha|cloudflare|datadome|access denied|blocked|forbidden|unusual traffic|verify you are human)\b", re.I)
 
 HEADERS = [
     "created_at_display", "id", "original_url_display", "product_page_url_display", "monetized_product_url_display",
@@ -60,6 +62,10 @@ AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re
 SIZE_ORDERED_RE = re.compile(r"\b(?:ordered|bought|purchased|got|wearing|wore|size up and get|in)\s+(?:a\s+|an\s+)?(xxs|xs|s|m|l|xl|xxl|xxxl|[0-9]{1,2})\b", re.I)
 
 
+class BlockedScrapeError(RuntimeError):
+    pass
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -73,16 +79,25 @@ def strip_tags(value: object) -> str:
     return norm(html.unescape(TAG_RE.sub(" ", text)))
 
 
+def detect_blocked_response(status: int, body: str, url: str) -> None:
+    if status in BLOCK_STATUS_CODES or BLOCK_TEXT_RE.search(body[:5000]):
+        raise BlockedScrapeError(f"Blocked response while fetching {url}: status={status}")
+
+
 def fetch_text(url: str, retries: int = 5) -> str:
     last_error: Optional[Exception] = None
     for attempt in range(retries):
         req = Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"})
         try:
             with urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8", "replace")
+                text = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, text, url)
+                return text
         except (HTTPError, URLError) as exc:
             last_error = exc
-            if isinstance(exc, HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
+            if isinstance(exc, HTTPError) and exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {url}: status={exc.code}") from exc
+            if isinstance(exc, HTTPError) and exc.code not in {500, 502, 503, 504}:
                 raise
         time.sleep(min(2 ** attempt, 20))
     raise RuntimeError(f"Failed text request for {url}: {last_error}")
@@ -103,10 +118,14 @@ def fetch_json_url(url: str, referer: Optional[str] = None, retries: int = 5) ->
         )
         try:
             with urlopen(req, timeout=90) as resp:
-                return json.load(resp)
+                raw = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, raw, url)
+                return json.loads(raw)
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
+            if exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {url}: status={exc.code}") from exc
+            if exc.code not in {500, 502, 503, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
@@ -437,13 +456,21 @@ def main() -> None:
 
     started_at = now_iso()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    products, product_sources = fetch_products(args.limit_products)
+    try:
+        products, product_sources = fetch_products(args.limit_products)
+    except BlockedScrapeError as exc:
+        print(f"Stopping on blocked response: {exc}", file=sys.stderr)
+        raise SystemExit(2) from exc
 
     results: List[Dict[str, object]] = []
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
         futures = [pool.submit(scan_product, index, product) for index, product in enumerate(products, start=1)]
         for done, future in enumerate(as_completed(futures), start=1):
-            result = future.result()
+            try:
+                result = future.result()
+            except BlockedScrapeError as exc:
+                print(f"Stopping on blocked response: {exc}", file=sys.stderr)
+                raise SystemExit(2) from exc
             results.append(result)
             if done % 25 == 0 or done == len(futures):
                 print(f"scanned {done}/{len(futures)} products; rows={sum(len(r['rows']) for r in results)}")

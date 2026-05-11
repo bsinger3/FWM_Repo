@@ -220,6 +220,12 @@ def write_store_reviews_checkpoint(checkpoint: Dict[str, object]) -> None:
     STORE_REVIEWS_CHECKPOINT_JSON.write_text(json.dumps(checkpoint, indent=2), encoding="utf-8")
 
 
+def is_product_linked_customer_row(row: Dict[str, str]) -> bool:
+    if row.get("image_source_type") != "customer_review_image":
+        return True
+    return "/products/" in (row.get("product_page_url_display") or "")
+
+
 def product_url_for(product: Dict[str, object]) -> str:
     handle = norm(product.get("handle"))
     return f"{SITE_ROOT}/products/{quote(handle, safe='/-._~')}" if handle else ""
@@ -511,12 +517,16 @@ def fetch_store_reviews(
     products_by_id = {norm(product.get("id")): product for product in products if norm(product.get("id"))}
     products_by_handle = {norm(product.get("handle")): product for product in products if norm(product.get("handle"))}
     checkpoint = load_store_reviews_checkpoint()
-    rows: List[Dict[str, str]] = [row for row in checkpoint.get("rows", []) if isinstance(row, dict)]
+    rows: List[Dict[str, str]] = [
+        row
+        for row in checkpoint.get("rows", [])
+        if isinstance(row, dict) and is_product_linked_customer_row(row)
+    ]
     errors: List[str] = []
     review_count = int(checkpoint.get("reviews_seen") or 0)
     media_review_count = int(checkpoint.get("media_reviews_seen") or 0)
     pages = len(checkpoint.get("pages", [])) if isinstance(checkpoint.get("pages"), list) else 0
-    next_url = norm(checkpoint.get("next_url")) or okendo_store_reviews_url()
+    next_url = "" if checkpoint.get("complete") else (norm(checkpoint.get("next_url")) or okendo_store_reviews_url())
     params: Optional[Dict[str, object]] = None if checkpoint.get("next_url") else {"limit": REVIEWS_PER_PAGE}
     product_stats: Dict[str, Dict[str, object]] = checkpoint.get("product_summaries") if isinstance(checkpoint.get("product_summaries"), dict) else {}
     if rows or pages:

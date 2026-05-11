@@ -20,8 +20,8 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[4]
 DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "kasper_com"
-OUTPUT_CSV = OUTPUT_DIR / "kasper_com_reviews_matching_intake_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "kasper_com_reviews_matching_intake_schema_summary.json"
+OUTPUT_CSV = OUTPUT_DIR / "kasper_com_reviews_matching_amazon_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "kasper_com_reviews_matching_amazon_schema_summary.json"
 
 SITE_ROOT = "https://www.kasper.com"
 SOURCE_SITE = f"{SITE_ROOT}/"
@@ -33,6 +33,9 @@ BRAND = "Kasper"
 PRODUCTS_PER_PAGE = 250
 REVIEWS_PER_PAGE = 50
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36"
+BLOCK_STATUS_CODES = {403, 429}
+BLOCK_TEXT_RE = re.compile(r"\b(?:captcha|cloudflare|datadome|access denied|blocked|forbidden|unusual traffic|verify you are human)\b", re.I)
+COLON_HEIGHT_RE = re.compile(r"^\s*([4-6])\s*:\s*(\d{1,2})\s*$")
 
 HEADERS = [
     "created_at_display", "id", "original_url_display", "product_page_url_display", "monetized_product_url_display",
@@ -57,6 +60,10 @@ AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re
 SIZE_TOKEN_RE = re.compile(r"^(?:00|0|[0-9]{1,2}|[0-9]{1,2}w|xxs|xs|s|m|l|xl|xxl|2xl|3xl|ps|pm|pl|pxl|[0-9]{1,2}p)$", re.I)
 
 
+class BlockedScrapeError(RuntimeError):
+    pass
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -70,16 +77,25 @@ def strip_tags(value: object) -> str:
     return norm(html.unescape(TAG_RE.sub(" ", text)))
 
 
+def detect_blocked_response(status: int, body: str, url: str) -> None:
+    if status in BLOCK_STATUS_CODES or BLOCK_TEXT_RE.search(body[:5000]):
+        raise BlockedScrapeError(f"Blocked response while fetching {url}: status={status}")
+
+
 def fetch_text(url: str, retries: int = 5) -> str:
     last_error: Optional[Exception] = None
     for attempt in range(retries):
         req = Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"})
         try:
             with urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8", "replace")
+                text = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, text, url)
+                return text
         except (HTTPError, URLError) as exc:
             last_error = exc
-            if isinstance(exc, HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
+            if isinstance(exc, HTTPError) and exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {url}: status={exc.code}") from exc
+            if isinstance(exc, HTTPError) and exc.code not in {500, 502, 503, 504}:
                 raise
         time.sleep(min(2 ** attempt, 20))
     raise RuntimeError(f"Failed text request for {url}: {last_error}")
@@ -101,10 +117,14 @@ def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: Op
         req = Request(query_url, headers=headers)
         try:
             with urlopen(req, timeout=60) as resp:
-                return json.load(resp)
+                raw = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, raw, query_url)
+                return json.loads(raw)
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {400, 429, 500, 502, 503, 504}:
+            if exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {query_url}: status={exc.code}") from exc
+            if exc.code not in {400, 500, 502, 503, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
@@ -198,6 +218,12 @@ def parse_num(pattern: re.Pattern[str], text: str, max_value: Optional[float] = 
 
 def parse_height(text: str) -> Tuple[str, Optional[float]]:
     cleaned = text.replace("\u2018", "'").replace("\u2019", "'").replace("\u201d", '"')
+    colon = COLON_HEIGHT_RE.match(cleaned)
+    if colon:
+        feet = int(colon.group(1))
+        inches = int(colon.group(2))
+        if 4 <= feet <= 7 and 0 <= inches <= 11:
+            return cleaned.strip(), feet * 12 + inches
     match = HEIGHT_RE.search(cleaned)
     if not match:
         bare = re.fullmatch(r"\s*([4-6])\s*\??\s*", cleaned)
@@ -429,7 +455,11 @@ def main(argv: List[str]) -> int:
         limit_pages = int(argv[argv.index("--limit-pages-per-product") + 1])
 
     started = now_iso()
-    products, product_sources = fetch_products(limit_products=limit_products)
+    try:
+        products, product_sources = fetch_products(limit_products=limit_products)
+    except BlockedScrapeError as exc:
+        print(f"Stopping on blocked response: {exc}", file=sys.stderr)
+        return 2
     products_by_id = {norm(product.get("id")): product for product in products if norm(product.get("id"))}
     products_by_handle = {norm(product.get("handle")): product for product in products if norm(product.get("handle"))}
     print(f"Discovered {len(products)} products")
@@ -440,7 +470,11 @@ def main(argv: List[str]) -> int:
     products_excluded = 0
 
     for idx, product in enumerate(products, start=1):
-        reviews, meta = fetch_product_reviews(product, limit_pages=limit_pages)
+        try:
+            reviews, meta = fetch_product_reviews(product, limit_pages=limit_pages)
+        except BlockedScrapeError as exc:
+            print(f"Stopping on blocked response: {exc}", file=sys.stderr)
+            return 2
         skip_reason = output_skip_reason(product)
         if skip_reason:
             products_excluded += 1

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import sys
 import time
 from typing import Dict, List, Sequence
@@ -376,6 +377,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     rows = dedupe_rows(rows)
     output_csv, summary_json = output_paths(DOMAIN)
     write_intake_csv(rows, output_csv)
+    standard_csv = output_csv.with_name(f"{output_csv.stem.replace('_matching_intake_schema', '_matching_amazon_schema')}.csv")
+    standard_summary_json = summary_json.with_name(
+        f"{summary_json.stem.replace('_matching_intake_schema_summary', '_matching_amazon_schema_summary')}.json"
+    )
+    shutil.copyfile(output_csv, standard_csv)
     finished_at = utc_now()
     write_summary(
         summary_json,
@@ -407,9 +413,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             "total_public_reviews_reported_by_klaviyo": total_public_reviews,
             "products_excluded_from_output": out_of_scope_count,
             "products_in_current_womens_clothing_scope": in_scope_count,
+            "distinct_product_urls": payload.get("distinct_products", 0),
             "rows_with_distinct_product_url": payload.get("distinct_products", 0),
-            "rows_with_customer_image": payload.get("rows_with_image_url", 0),
+            "rows_with_customer_image": payload.get("rows_with_customer_review_image", 0),
             "rows_supabase_qualified": payload.get("rows_with_image_product_size_and_measurement", 0),
+            "output_csv": str(standard_csv),
+            "legacy_output_csv": str(output_csv),
+            "legacy_summary_json": str(summary_json),
             "scrape_scope_status": "full_catalog_attempted",
             "full_catalog_scrape_complete": True,
             "stopped_for_pressure": stopped_for_pressure,
@@ -421,16 +431,19 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "Liverpool Style uses Klaviyo Reviews; only reviews with public image_uuid media are written as Step 1 rows.",
                 "Catalog/model image rows are written only when public product-page/catalog text exposes model size plus measurements.",
             ],
+            "access_policy": "public_product_and_review_pages_only; stop_immediately_on_429_captcha_or_waf_like_response",
         }
     )
     summary_json.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    standard_summary_json.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     json.loads(summary_json.read_text(encoding="utf-8-sig"))
+    json.loads(standard_summary_json.read_text(encoding="utf-8-sig"))
     print(
         json.dumps(
             {
                 DOMAIN: {
-                    "output_csv": str(output_csv),
-                    "summary_json": str(summary_json),
+                    "output_csv": str(standard_csv),
+                    "summary_json": str(standard_summary_json),
                     "products_discovered": len(products),
                     "products_in_scope": in_scope_count,
                     "products_excluded_from_output": out_of_scope_count,

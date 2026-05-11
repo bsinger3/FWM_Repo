@@ -10,6 +10,32 @@ Read this document before starting every new retailer scrape or refreshing an
 existing scraper. Do not begin coding or running a scrape until product coverage
 has been checked and documented.
 
+## Site Selection Priority
+
+Unless the user explicitly asks to refresh, resume, or revisit a specific
+retailer, prioritize first-time scrapes over already completed retailers.
+Completed claim files in `_claims` are historical notes, not a default work
+queue. Do not choose a site with a completed claim or existing completed output
+just because it appears near the top of a triage list; skip it and pick an
+unclaimed, not-yet-scraped site from the sheet intake or triage candidates.
+
+Before selecting a site for a generic "next scrape" request, run a duplicate
+check for the merchant slug/domain across the repo and data root, including
+scraper scripts, merchant docs, `_claims`, `_active_scrape_claims`, and existing
+output directories. If any prior script, doc, claim, or output exists, treat the
+merchant as already attempted and do not pick it as a first-time scrape unless
+the user names it or the prior record explicitly says to resume/revisit it now.
+Do this check even when the merchant appears under a "new" sheet-intake section;
+sheet recency does not mean scrape novelty.
+
+Only revisit an old retailer when one of these is true:
+
+- The user names that retailer or asks for a refresh/resume.
+- The claim/output clearly says the scrape is incomplete, blocked, partial, or
+  needs revisit.
+- The triage plan explicitly marks the next action as a revisit and no
+  first-time candidates are available or appropriate.
+
 Scrapers must not silently skip products. At the start of each scrape:
 
 - Discover all public product URLs from every reasonable public source for the

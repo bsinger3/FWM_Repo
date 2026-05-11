@@ -20,8 +20,8 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[4]
 DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "oliverlogan_com"
-OUTPUT_CSV = OUTPUT_DIR / "oliverlogan_com_reviews_matching_intake_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "oliverlogan_com_reviews_matching_intake_schema_summary.json"
+OUTPUT_CSV = OUTPUT_DIR / "oliverlogan_com_reviews_matching_amazon_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "oliverlogan_com_reviews_matching_amazon_schema_summary.json"
 
 SITE_ROOT = "https://oliverlogan.com"
 SOURCE_SITE = f"{SITE_ROOT}/"
@@ -36,6 +36,12 @@ USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
 )
+BLOCK_STATUS_CODES = {403, 429}
+BLOCK_TEXT_RE = re.compile(r"\b(?:captcha|cloudflare|datadome|access denied|blocked|forbidden|unusual traffic|verify you are human)\b", re.I)
+
+
+class BlockedScrapeError(RuntimeError):
+    pass
 
 HEADERS = [
     "created_at_display",
@@ -153,6 +159,11 @@ def clean_url(value: str) -> str:
     return urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
 
 
+def detect_blocked_response(status: int, body: str, url: str) -> None:
+    if status in BLOCK_STATUS_CODES or BLOCK_TEXT_RE.search(body[:5000]):
+        raise BlockedScrapeError(f"Blocked response while fetching {url}: status={status}")
+
+
 def fetch_json(
     url: str,
     params: Optional[Dict[str, object]] = None,
@@ -174,10 +185,14 @@ def fetch_json(
         )
         try:
             with urlopen(req, timeout=60) as resp:
-                return json.load(resp)
+                raw = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, raw, query_url)
+                return json.loads(raw)
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
+            if exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {query_url}: status={exc.code}") from exc
+            if exc.code not in {500, 502, 503, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
@@ -199,10 +214,14 @@ def fetch_text(url: str, retries: int = 6) -> str:
         )
         try:
             with urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8", "replace")
+                text = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, text, url)
+                return text
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
+            if exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {url}: status={exc.code}") from exc
+            if exc.code not in {500, 502, 503, 504}:
                 raise
         except URLError as exc:
             last_error = exc
@@ -660,7 +679,7 @@ def enrich_summary(summary: Dict[str, object], rows: Sequence[Dict[str, str]], o
             "distinct_images": len({row.get("original_url_display") for row in rows if row.get("original_url_display")}),
             "distinct_product_urls": len(product_urls),
             "distinct_products": len(product_urls),
-            "rows_with_distinct_product_url": sum(1 for row in rows if has_product_url(row)),
+            "rows_with_distinct_product_url": len(product_urls),
             "rows_with_product_url": sum(1 for row in rows if has_product_url(row)),
             "rows_missing_product_url": sum(1 for row in rows if not has_product_url(row)),
             "rows_with_customer_image": sum(1 for row in rows if row.get("original_url_display")),
@@ -703,10 +722,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         index = argv.index("--limit-pages-per-product")
         limit_pages_per_product = int(argv[index + 1])
 
-    rows, summary = scrape_reviews(
-        limit_products=limit_products,
-        limit_pages_per_product=limit_pages_per_product,
-    )
+    try:
+        rows, summary = scrape_reviews(
+            limit_products=limit_products,
+            limit_pages_per_product=limit_pages_per_product,
+        )
+    except BlockedScrapeError as exc:
+        print(f"Stopping on blocked response: {exc}", file=sys.stderr)
+        return 2
     rows.sort(
         key=lambda row: (
             row.get("review_date", ""),

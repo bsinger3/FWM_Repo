@@ -20,8 +20,8 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[4]
 DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "leonisa_com"
-OUTPUT_CSV = OUTPUT_DIR / "leonisa_com_reviews_matching_intake_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "leonisa_com_reviews_matching_intake_schema_summary.json"
+OUTPUT_CSV = OUTPUT_DIR / "leonisa_com_reviews_matching_amazon_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "leonisa_com_reviews_matching_amazon_schema_summary.json"
 
 SITE_ROOT = "https://www.leonisa.com"
 SOURCE_SITE = f"{SITE_ROOT}/"
@@ -29,9 +29,12 @@ SHOP_DOMAIN = "leonisa-usa.myshopify.com"
 PRODUCTS_JSON_URL = f"{SITE_ROOT}/products.json"
 SITEMAP_URL = f"{SITE_ROOT}/sitemap.xml"
 JUDGEME_WIDGET_URL = "https://api.judge.me/reviews/reviews_for_widget"
+JUDGEME_ALL_REVIEWS_URL = "https://cdn.judge.me/reviews/all_reviews_js_based"
 BRAND = "Leonisa"
 PRODUCTS_PER_PAGE = 250
 REVIEWS_PER_PAGE = 20
+ALL_REVIEWS_PER_PAGE = 100
+REQUEST_DELAY_SECONDS = 0.15
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
@@ -96,18 +99,39 @@ HIPS_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*hips?\b", r
 AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re.I)
 INSEAM_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*inseam\b", re.I)
 BRA_SIZE_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
+BLOCK_STATUS_CODES = {403, 429}
+BLOCK_TEXT_RE = re.compile(r"\b(?:captcha|cloudflare|datadome|access denied|blocked|forbidden|unusual traffic|verify you are human)\b", re.I)
+SHOPPER_IMAGE_RE = re.compile(r"judgeme\.(?:imgix|s3)|judge\.me", re.I)
+REVIEW_SPLIT_RE = re.compile(r"(?=<div class='jdgm-rev\b)")
+
+SIZE_TOKEN = r"(?:\d{1,2}[a-z]{0,3}|xxs|xs|s|m|l|xl|xxl|xxxl|2x|3x|small|medium|large|x-large|xx-large|xxx-large)"
 SIZE_PATTERNS = [
     re.compile(
         r"\b(?:size|sz)\s*(?:up|down|is|was|ordered|bought|got|:)?\s*"
-        r"(\d{2,3}[a-z]{0,3}|xxs|xs|s|m|l|xl|xxl|2x|3x|small|medium|large|x-large|xx-large)\b",
+        rf"({SIZE_TOKEN})\b",
         re.I,
     ),
     re.compile(
         r"\b(?:ordered|bought|got|purchased|wear(?:ing)?)\s+(?:a|an|the)?\s*"
-        r"(?:size\s*)?(\d{2,3}[a-z]{0,3}|xxs|xs|s|m|l|xl|xxl|2x|3x|small|medium|large)\b",
+        rf"(?:size\s*)?({SIZE_TOKEN})\b",
+        re.I,
+    ),
+    re.compile(
+        rf"\b(?:ped[ií]|compr[eé]|orden[eé]|us[eé])\s+(?:una|la|un|el)?\s*(?:talla\s*)?({SIZE_TOKEN})\b",
+        re.I,
+    ),
+    re.compile(
+        rf"\b(?:talla)\s+({SIZE_TOKEN})\b(?=[^.?!]{{0,80}}\b(?:ped[ií]|compr[eé]|orden[eé]))",
         re.I,
     ),
 ]
+HEIGHT_CM_RE = re.compile(r"\b(?:mido|height|estatura)\s*:?\s*(1[.,]\d{2}|[1-2]\d{2})\s*(?:m|cm|centimeters?|centimetros|centímetros)\b", re.I)
+WEIGHT_KG_RE = re.compile(r"\b(?:peso|weight)\s*:?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:kg|kilos?|kilograms?)\b", re.I)
+SPANISH_WEIGHT_LBS_RE = re.compile(r"\b(?:peso)\s*:?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:lbs?|libras?)\b", re.I)
+
+
+class BlockedScrapeError(RuntimeError):
+    pass
 
 
 def normalize_whitespace(text: str) -> str:
@@ -137,14 +161,26 @@ def clean_url(value: str) -> str:
     return urlunsplit((parts.scheme, parts.netloc, parts.path, "", parts.fragment))
 
 
+def detect_blocked_response(status: int, body: str, url: str) -> None:
+    if status in BLOCK_STATUS_CODES or BLOCK_TEXT_RE.search(body[:5000]):
+        raise BlockedScrapeError(f"Blocked response while fetching {url}: status={status}")
+
+
 def fetch_text(url: str, retries: int = 4) -> str:
     last_error: Optional[Exception] = None
     for attempt in range(retries):
         req = Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"})
         try:
             with urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8", "replace")
-        except (HTTPError, URLError) as exc:
+                text = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, text, url)
+                return text
+        except HTTPError as exc:
+            if exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {url}: status={exc.code}") from exc
+            last_error = exc
+            time.sleep(min(2**attempt, 10))
+        except URLError as exc:
             last_error = exc
             time.sleep(min(2**attempt, 10))
     raise RuntimeError(f"Failed text request for {url}: {last_error}")
@@ -166,13 +202,18 @@ def fetch_json(url: str, params: Optional[Dict[str, object]] = None, retries: in
         )
         try:
             with urlopen(req, timeout=60) as resp:
-                return json.load(resp)
+                raw = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, raw, query_url)
+                return json.loads(raw)
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
+            if exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {query_url}: status={exc.code}") from exc
+            if exc.code not in {500, 502, 503, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
+        time.sleep(REQUEST_DELAY_SECONDS)
         time.sleep(min(2**attempt, 20))
     raise RuntimeError(f"Failed JSON request for {query_url}: {last_error}")
 
@@ -352,12 +393,17 @@ def maybe_number_text(value: Optional[float]) -> str:
 
 def parse_height_inches(text: str) -> Tuple[str, Optional[float]]:
     match = HEIGHT_RE.search(text)
-    if not match:
-        return "", None
-    feet = int(match.group(1))
-    inches = int(match.group(2) or 0)
-    if 4 <= feet <= 7 and 0 <= inches <= 11:
-        return normalize_whitespace(match.group(0)), feet * 12 + inches
+    if match:
+        feet = int(match.group(1))
+        inches = int(match.group(2) or 0)
+        if 4 <= feet <= 7 and 0 <= inches <= 11:
+            return normalize_whitespace(match.group(0)), feet * 12 + inches
+    metric_match = HEIGHT_CM_RE.search(text)
+    if metric_match:
+        raw_value = metric_match.group(1).replace(",", ".")
+        cm = float(raw_value) * 100 if "." in raw_value else float(raw_value)
+        if 120 <= cm <= 220:
+            return normalize_whitespace(metric_match.group(0)), round(cm / 2.54, 1)
     return "", None
 
 
@@ -369,6 +415,18 @@ def parse_numeric(pattern: re.Pattern[str], text: str, max_value: Optional[float
     if max_value is not None and value > max_value:
         return "", None
     return normalize_whitespace(match.group(0)), value
+
+
+def parse_weight_lbs(text: str) -> Tuple[str, Optional[float], str]:
+    for pattern, factor in [(WEIGHT_RE, 1.0), (SPANISH_WEIGHT_LBS_RE, 1.0), (WEIGHT_KG_RE, 2.2046226218)]:
+        match = pattern.search(text)
+        if not match:
+            continue
+        value = float(match.group(1).replace(",", "."))
+        pounds = value * factor
+        if 50 <= pounds <= 500:
+            return normalize_whitespace(match.group(0)), pounds, "converted_from_kg" if factor != 1.0 else ""
+    return "", None, ""
 
 
 def parse_age(text: str) -> Tuple[str, str]:
@@ -390,7 +448,16 @@ def extract_bra_size(text: str) -> Tuple[str, str]:
 
 def normalize_size(value: str) -> str:
     cleaned = normalize_whitespace(value)
-    mapping = {"s": "small", "m": "medium", "l": "large", "xl": "x-large", "xxl": "xx-large", "2x": "xx-large", "3x": "xxx-large"}
+    mapping = {
+        "s": "small",
+        "m": "medium",
+        "l": "large",
+        "xl": "x-large",
+        "xxl": "xx-large",
+        "xxxl": "xxx-large",
+        "2x": "xx-large",
+        "3x": "xxx-large",
+    }
     return mapping.get(cleaned.lower(), cleaned)
 
 
@@ -398,7 +465,7 @@ def valid_size_candidate(value: str, match_text: str) -> bool:
     cleaned = value.lower().rstrip("prt")
     if cleaned.isdigit():
         numeric = int(cleaned)
-        if numeric < 0 or numeric > 60:
+        if numeric < 6 or numeric > 60:
             return False
     return not re.search(r"\b(?:lb|lbs|pounds?|years?|age|waist|hips?|inseam|height)\b", match_text, re.I)
 
@@ -475,6 +542,13 @@ def classify_clothing_type(product: Dict[str, object], title: str) -> str:
     return normalize_whitespace(str(product.get("product_type") or "")).lower()
 
 
+def out_of_scope_product(product: Dict[str, object], title: str) -> Tuple[bool, str]:
+    value = f"{title} {product.get('product_type') or ''}".lower()
+    if any(term in value for term in ["men's", "mens", "masculin", "boxer", "trunk"]):
+        return True, "mens_or_masculine_product"
+    return False, ""
+
+
 def split_color_from_variant(variant: str) -> Tuple[str, str]:
     parts = [normalize_whitespace(part) for part in variant.split("/") if normalize_whitespace(part)]
     color = parts[0] if parts else ""
@@ -485,23 +559,26 @@ def build_search_fts(parts: Iterable[str]) -> str:
     return normalize_whitespace(" ".join(part for part in parts if part))
 
 
-def parse_review_rows(review: Dict[str, object], product: Dict[str, object], fetched_at: str) -> List[Dict[str, str]]:
-    picture_urls = customer_picture_urls(review)
-    if not picture_urls:
-        return []
-    review_id = normalize_whitespace(str(review.get("uuid") or review.get("id") or ""))
-    timestamp = normalize_whitespace(str(review.get("created_at") or ""))
+def row_from_review_fields(
+    *,
+    review_id: str,
+    picture_url: str,
+    picture_index: int,
+    product_url: str,
+    product_title: str,
+    product: Dict[str, object],
+    fetched_at: str,
+    timestamp: str,
+    reviewer_name: str,
+    title: str,
+    body: str,
+    cf_text: str,
+    variant: str,
+) -> Dict[str, str]:
     review_date = timestamp.split("T", 1)[0].split(" ", 1)[0] if timestamp else ""
-    reviewer_name = strip_tags(str(review.get("reviewer_name") or ""))
-    title = strip_tags(str(review.get("title") or ""))
-    body = strip_tags(str(review.get("body") or review.get("body_html") or ""))
-    cf_text = strip_tags(cf_answers_text(review))
-    product_title = strip_tags(str(review.get("product_title") or product.get("title") or ""))
-    product_url = clean_url(str(review.get("product_url_with_utm") or review.get("product_url") or "")) or product_url_for(product)
-    variant = normalize_whitespace(str(review.get("product_variant_title") or ""))
     text_pool = normalize_whitespace(" ".join([title, body, cf_text]))
     height_raw, height_in = parse_height_inches(text_pool)
-    weight_raw, weight_lbs = parse_numeric(WEIGHT_RE, text_pool)
+    weight_raw, weight_lbs, weight_issue = parse_weight_lbs(text_pool)
     waist_raw, waist_in = parse_numeric(WAIST_RE, text_pool, max_value=60)
     hips_raw, hips_in = parse_numeric(HIPS_RE, text_pool, max_value=80)
     age_raw, age_years = parse_age(text_pool)
@@ -513,60 +590,231 @@ def parse_review_rows(review: Dict[str, object], product: Dict[str, object], fet
     product_description = strip_tags(str(product.get("body_html") or ""))
     product_detail = normalize_whitespace(" | ".join(variant_titles(product)))
 
+    return {
+        "created_at_display": "",
+        "id": f"{review_id}-{picture_index}" if review_id else f"{hash(picture_url)}-{picture_index}",
+        "original_url_display": picture_url,
+        "product_page_url_display": product_url,
+        "monetized_product_url_display": "",
+        "height_raw": height_raw,
+        "weight_raw": weight_raw,
+        "user_comment": text_pool,
+        "date_review_submitted_raw": timestamp,
+        "height_in_display": maybe_number_text(height_in),
+        "review_date": review_date,
+        "source_site_display": SOURCE_SITE,
+        "status_code": "200",
+        "content_type": "",
+        "bytes": "",
+        "width": "",
+        "height": "",
+        "hash_md5": "",
+        "fetched_at": fetched_at,
+        "updated_at": fetched_at,
+        "brand": BRAND,
+        "waist_raw_display": waist_raw,
+        "hips_raw": hips_raw,
+        "age_raw": age_raw,
+        "waist_in": maybe_number_text(waist_in),
+        "hips_in_display": maybe_number_text(hips_in),
+        "age_years_display": age_years,
+        "search_fts": build_search_fts([BRAND, product_title, product_description, title, body, cf_text, variant]),
+        "weight_display_display": maybe_number_text(weight_lbs),
+        "weight_raw_needs_correction": "",
+        "clothing_type_id": clothing_type,
+        "reviewer_profile_url": "",
+        "reviewer_name_raw": reviewer_name,
+        "inseam_inches_display": maybe_number_text(inseam_in),
+        "color_canonical": color_canonical,
+        "color_display": color_display,
+        "size_display": size_display,
+        "bust_in_number_display": bust_in,
+        "cupsize_display": cupsize,
+        "weight_lbs_display": maybe_number_text(weight_lbs),
+        "weight_lbs_raw_issue": weight_issue,
+        "product_title_raw": product_title,
+        "product_subtitle_raw": "",
+        "product_description_raw": product_description,
+        "product_detail_raw": product_detail,
+        "product_category_raw": normalize_whitespace(str(product.get("product_type") or "")),
+        "product_variant_raw": variant,
+    }
+
+
+def parse_review_rows(review: Dict[str, object], product: Dict[str, object], fetched_at: str) -> List[Dict[str, str]]:
+    picture_urls = customer_picture_urls(review)
+    if not picture_urls:
+        return []
+    review_id = normalize_whitespace(str(review.get("uuid") or review.get("id") or ""))
+    timestamp = normalize_whitespace(str(review.get("created_at") or ""))
+    reviewer_name = strip_tags(str(review.get("reviewer_name") or ""))
+    title = strip_tags(str(review.get("title") or ""))
+    body = strip_tags(str(review.get("body") or review.get("body_html") or ""))
+    cf_text = strip_tags(cf_answers_text(review))
+    product_title = strip_tags(str(review.get("product_title") or product.get("title") or ""))
+    product_url = clean_url(str(review.get("product_url_with_utm") or review.get("product_url") or "")) or product_url_for(product)
+    variant = normalize_whitespace(str(review.get("product_variant_title") or ""))
+
     rows: List[Dict[str, str]] = []
     for index, picture_url in enumerate(picture_urls, start=1):
         rows.append(
-            {
-                "created_at_display": "",
-                "id": f"{review_id}-{index}" if review_id else f"{hash(picture_url)}-{index}",
-                "original_url_display": picture_url,
-                "product_page_url_display": product_url,
-                "monetized_product_url_display": "",
-                "height_raw": height_raw,
-                "weight_raw": weight_raw,
-                "user_comment": text_pool,
-                "date_review_submitted_raw": timestamp,
-                "height_in_display": maybe_number_text(height_in),
-                "review_date": review_date,
-                "source_site_display": SOURCE_SITE,
-                "status_code": "200",
-                "content_type": "",
-                "bytes": "",
-                "width": "",
-                "height": "",
-                "hash_md5": "",
-                "fetched_at": fetched_at,
-                "updated_at": fetched_at,
-                "brand": BRAND,
-                "waist_raw_display": waist_raw,
-                "hips_raw": hips_raw,
-                "age_raw": age_raw,
-                "waist_in": maybe_number_text(waist_in),
-                "hips_in_display": maybe_number_text(hips_in),
-                "age_years_display": age_years,
-                "search_fts": build_search_fts([BRAND, product_title, product_description, title, body, cf_text, variant]),
-                "weight_display_display": maybe_number_text(weight_lbs),
-                "weight_raw_needs_correction": "",
-                "clothing_type_id": clothing_type,
-                "reviewer_profile_url": "",
-                "reviewer_name_raw": reviewer_name,
-                "inseam_inches_display": maybe_number_text(inseam_in),
-                "color_canonical": color_canonical,
-                "color_display": color_display,
-                "size_display": size_display,
-                "bust_in_number_display": bust_in,
-                "cupsize_display": cupsize,
-                "weight_lbs_display": maybe_number_text(weight_lbs),
-                "weight_lbs_raw_issue": "",
-                "product_title_raw": product_title,
-                "product_subtitle_raw": "",
-                "product_description_raw": product_description,
-                "product_detail_raw": product_detail,
-                "product_category_raw": normalize_whitespace(str(product.get("product_type") or "")),
-                "product_variant_raw": variant,
-            }
+            row_from_review_fields(
+                review_id=review_id,
+                picture_url=picture_url,
+                picture_index=index,
+                product_url=product_url,
+                product_title=product_title,
+                product=product,
+                fetched_at=fetched_at,
+                timestamp=timestamp,
+                reviewer_name=reviewer_name,
+                title=title,
+                body=body,
+                cf_text=cf_text,
+                variant=variant,
+            )
         )
     return rows
+
+
+def attr_value(fragment: str, name: str) -> str:
+    match = re.search(rf"\b{name}=(['\"])(.*?)\1", fragment, flags=re.I | re.S)
+    return html.unescape(match.group(2)) if match else ""
+
+
+def first_match_text(pattern: str, fragment: str) -> str:
+    match = re.search(pattern, fragment, flags=re.I | re.S)
+    return strip_tags(match.group(1)) if match else ""
+
+
+def extract_cf_answers_from_html(fragment: str) -> str:
+    answers: List[str] = []
+    for block in re.findall(r"<div class='jdgm-rev__cf-ans'[\s\S]*?(?=<div class='jdgm-rev__cf-ans'|<b class='jdgm-rev__title'|<div class='jdgm-rev__body'|$)", fragment):
+        title = first_match_text(r"<b class='jdgm-rev__cf-ans__title'[^>]*>([\s\S]*?)</b>", block)
+        value = first_match_text(r"<span class='jdgm-rev__cf-ans__value'[^>]*>([\s\S]*?)</span>", block)
+        if not value:
+            pointer = attr_value(block, "style")
+            if pointer:
+                slider = re.search(r"left:\s*(\d{1,3})%", pointer)
+                lower = first_match_text(r"<span class='jdgm-rev__slider-first'[^>]*>([\s\S]*?)</span>", block)
+                upper = first_match_text(r"<span class='jdgm-rev__slider-last'[^>]*>([\s\S]*?)</span>", block)
+                if slider:
+                    value = f"{slider.group(1)} {lower} {upper}".strip()
+        if title or value:
+            answers.append(normalize_whitespace(f"{title} {value}"))
+    return normalize_whitespace(" ".join(answers))
+
+
+def customer_picture_urls_from_html(fragment: str) -> List[str]:
+    urls: List[str] = []
+    for link in re.findall(r"<a\b[^>]*class=['\"][^'\"]*jdgm-rev__pic-link[^'\"]*['\"][^>]*>", fragment, flags=re.I | re.S):
+        if "jdgm-rev__product-picture" in link:
+            continue
+        url = attr_value(link, "href") or attr_value(link, "data-mfp-src")
+        url = normalize_whitespace(url)
+        if url and SHOPPER_IMAGE_RE.search(url) and url not in urls:
+            urls.append(url)
+    return urls
+
+
+def parse_store_media_html_rows(html_text: str, products_by_url: Dict[str, Dict[str, object]], fetched_at: str) -> List[Dict[str, str]]:
+    rows: List[Dict[str, str]] = []
+    for fragment in [part for part in REVIEW_SPLIT_RE.split(html_text) if part.startswith("<div class='jdgm-rev")]:
+        picture_urls = customer_picture_urls_from_html(fragment)
+        if not picture_urls:
+            continue
+        review_id = attr_value(fragment, "data-review-id")
+        timestamp = attr_value(fragment, "data-content")
+        if timestamp:
+            timestamp = timestamp.replace(" UTC", "Z").replace(" ", "T", 1)
+        reviewer_name = first_match_text(r"<span class='jdgm-rev__author'[^>]*>([\s\S]*?)</span>", fragment)
+        title = first_match_text(r"<b class='jdgm-rev__title'[^>]*>([\s\S]*?)</b>", fragment)
+        body = first_match_text(r"<div class='jdgm-rev__body'[^>]*>([\s\S]*?)</div>", fragment)
+        cf_text = extract_cf_answers_from_html(fragment)
+        product_link = re.search(r"<a\b[^>]*class=['\"][^'\"]*jdgm-rev__prod-link[^'\"]*['\"][^>]*>([\s\S]*?)</a>", fragment, flags=re.I | re.S)
+        product_title = strip_tags(product_link.group(1)) if product_link else ""
+        product_url = ""
+        if product_link:
+            product_url = clean_url(attr_value(product_link.group(0), "href").split("#", 1)[0])
+        if not product_url or product_url.rstrip("/") == SOURCE_SITE.rstrip("/"):
+            continue
+        product = products_by_url.get(product_url) or {
+            "id": "",
+            "handle": product_url.rstrip("/").rsplit("/", 1)[-1],
+            "url": product_url,
+            "title": product_title,
+            "product_type": "",
+            "body_html": "",
+            "variants": [],
+        }
+        skipped, _reason = out_of_scope_product(product, product_title)
+        if skipped:
+            continue
+        for index, picture_url in enumerate(picture_urls, start=1):
+            rows.append(
+                row_from_review_fields(
+                    review_id=review_id,
+                    picture_url=picture_url,
+                    picture_index=index,
+                    product_url=product_url,
+                    product_title=product_title or strip_tags(str(product.get("title") or "")),
+                    product=product,
+                    fetched_at=fetched_at,
+                    timestamp=timestamp,
+                    reviewer_name=reviewer_name,
+                    title=title,
+                    body=body,
+                    cf_text=cf_text,
+                    variant="",
+                )
+            )
+    return rows
+
+
+def all_reviews_params(page: int) -> Dict[str, object]:
+    return {
+        "url": SHOP_DOMAIN,
+        "shop_domain": SHOP_DOMAIN,
+        "platform": "shopify",
+        "per_page": ALL_REVIEWS_PER_PAGE,
+        "page": page,
+        "review_type": "all-reviews",
+        "sort_by": "with_media",
+    }
+
+
+def scrape_store_media_rows(
+    products_by_url: Dict[str, Dict[str, object]],
+    fetched_at: str,
+    limit_pages: Optional[int] = None,
+) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
+    rows: List[Dict[str, str]] = []
+    page_summaries: List[Dict[str, object]] = []
+    page = 1
+    while True:
+        if limit_pages is not None and page > limit_pages:
+            break
+        payload = fetch_json(JUDGEME_ALL_REVIEWS_URL, all_reviews_params(page), referer=SOURCE_SITE)
+        html_text = str(payload.get("html") or "")
+        if not html_text.strip():
+            page_summaries.append({"page": page, "html_reviews": 0, "rows": 0, "stop_reason": "empty_html"})
+            break
+        page_rows = parse_store_media_html_rows(html_text, products_by_url, fetched_at)
+        rows.extend(page_rows)
+        page_summaries.append(
+            {
+                "page": page,
+                "html_review_markers": html_text.count("data-review-id="),
+                "raw_picture_links": html_text.count("jdgm-rev__pic-link"),
+                "rows": len(page_rows),
+                "number_of_product_reviews": payload.get("number_of_product_reviews"),
+                "number_of_shop_reviews": payload.get("number_of_shop_reviews"),
+            }
+        )
+        print(f"[store-media page {page}] rows={len(page_rows)} raw_picture_links={html_text.count('jdgm-rev__pic-link')}", flush=True)
+        page += 1
+        time.sleep(REQUEST_DELAY_SECONDS)
+    return rows, {"pages": page_summaries, "pages_scanned": len(page_summaries)}
 
 
 def dedupe_rows(rows: Sequence[Dict[str, str]]) -> List[Dict[str, str]]:
@@ -605,15 +853,20 @@ def is_supabase_qualified(row: Dict[str, str]) -> bool:
     return bool(has_product_url(row) and has_measurement(row) and row.get("original_url_display") and row.get("size_display"))
 
 
-def scrape_reviews(limit_products: Optional[int] = None, limit_pages_per_product: Optional[int] = None) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
+def scrape_reviews(
+    limit_products: Optional[int] = None,
+    limit_pages_per_product: Optional[int] = None,
+    limit_store_media_pages: Optional[int] = None,
+) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
     fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     products, product_sources = discover_products(limit_products=limit_products)
+    products_by_url = {product_url_for(product): product for product in products if product_url_for(product)}
     rows: List[Dict[str, str]] = []
     product_summaries: List[Dict[str, object]] = []
     summary: Dict[str, object] = {
         "site": SITE_ROOT,
         "retailer": "leonisa_com",
-        "adapter": "judge_me_reviews_for_widget_product_level",
+        "adapter": "judge_me_product_level_plus_all_reviews_media",
         "shop_domain": SHOP_DOMAIN,
         "started_at": fetched_at,
         "product_sources": product_sources,
@@ -622,10 +875,14 @@ def scrape_reviews(limit_products: Optional[int] = None, limit_pages_per_product
         "products_excluded_from_output": 0,
         "products_with_review_rows": 0,
         "review_pages_scanned": 0,
+        "store_media_review_pages_scanned": 0,
         "product_review_count_hint": 0,
-        "exhaustive_review_paging": limit_pages_per_product is None,
+        "exhaustive_review_paging": False,
+        "exhaustive_media_paging": limit_pages_per_product is None and limit_store_media_pages is None,
+        "review_paging_note": "Exhausted product-level with_pictures pages and the store all-reviews with_media endpoint; did not crawl every non-media text review page because the scrape target is review-image rows.",
         "access_policy": "public_product_and_review_pages_only; restricted_or_unavailable_pages_are_skipped; polite_retries",
         "measurement_extraction": "deterministic_regex_and_provider_fields_only",
+        "store_media_endpoint": JUDGEME_ALL_REVIEWS_URL,
         "errors": [],
     }
 
@@ -636,6 +893,7 @@ def scrape_reviews(limit_products: Optional[int] = None, limit_pages_per_product
         pages_scanned = 0
         review_count_hint = 0
         errors: List[str] = []
+        skipped_from_output, skip_reason = out_of_scope_product(product, str(product.get("title") or ""))
         if product_id:
             page = 1
             while True:
@@ -653,12 +911,14 @@ def scrape_reviews(limit_products: Optional[int] = None, limit_pages_per_product
                 pages_scanned += 1
                 for review in reviews:
                     if isinstance(review, dict):
-                        product_rows.extend(parse_review_rows(review, product, fetched_at))
+                        if not skipped_from_output:
+                            product_rows.extend(parse_review_rows(review, product, fetched_at))
                 pagination = payload.get("pagination")
                 total_pages = int(pagination.get("total_pages") or 0) if isinstance(pagination, dict) else 0
                 if total_pages and page >= total_pages:
                     break
                 page += 1
+                time.sleep(REQUEST_DELAY_SECONDS)
         else:
             errors.append("missing_product_id_from_products_json")
 
@@ -674,8 +934,8 @@ def scrape_reviews(limit_products: Optional[int] = None, limit_pages_per_product
                 "review_count_hint": review_count_hint,
                 "matching_review_images": len(product_rows),
                 "rows": len(product_rows),
-                "skipped_from_output": False,
-                "skip_reason": "",
+                "skipped_from_output": skipped_from_output,
+                "skip_reason": skip_reason,
                 "errors": errors,
             }
         )
@@ -684,10 +944,19 @@ def scrape_reviews(limit_products: Optional[int] = None, limit_pages_per_product
         summary["product_review_count_hint"] = int(summary["product_review_count_hint"]) + review_count_hint
         if product_rows:
             summary["products_with_review_rows"] = int(summary["products_with_review_rows"]) + 1
+        if skipped_from_output:
+            summary["products_excluded_from_output"] = int(summary["products_excluded_from_output"]) + 1
         if errors:
             summary["errors"].append({"product_url": product_url, "errors": errors})
         rows.extend(product_rows)
         print(f"[product {index}/{len(products)}] reviews={review_count_hint} pages={pages_scanned} rows={len(product_rows)} url={product_url}", flush=True)
+        time.sleep(REQUEST_DELAY_SECONDS)
+
+    store_rows, store_media_summary = scrape_store_media_rows(products_by_url, fetched_at, limit_pages=limit_store_media_pages)
+    rows.extend(store_rows)
+    summary["store_media_review_pages_scanned"] = store_media_summary["pages_scanned"]
+    summary["store_media_page_summaries"] = store_media_summary["pages"]
+    summary["store_media_rows_before_dedupe"] = len(store_rows)
 
     summary["product_summaries"] = product_summaries
     summary["finished_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -718,7 +987,7 @@ def enrich_summary(summary: Dict[str, object], rows: Sequence[Dict[str, str]], o
             "distinct_images": len({re.sub(r"[?&]w=\d+", "", row.get("original_url_display", "")) for row in rows if row.get("original_url_display")}),
             "distinct_product_urls": len(product_urls),
             "distinct_products": len(product_urls),
-            "rows_with_distinct_product_url": sum(1 for row in rows if has_product_url(row)),
+            "rows_with_distinct_product_url": len(product_urls),
             "rows_with_product_url": sum(1 for row in rows if has_product_url(row)),
             "rows_missing_product_url": sum(1 for row in rows if not has_product_url(row)),
             "rows_with_customer_image": sum(1 for row in rows if row.get("original_url_display")),
@@ -754,8 +1023,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if "--limit-pages-per-product" in argv:
         index = argv.index("--limit-pages-per-product")
         limit_pages_per_product = int(argv[index + 1])
+    limit_store_media_pages: Optional[int] = None
+    if "--limit-store-media-pages" in argv:
+        index = argv.index("--limit-store-media-pages")
+        limit_store_media_pages = int(argv[index + 1])
 
-    rows, summary = scrape_reviews(limit_products=limit_products, limit_pages_per_product=limit_pages_per_product)
+    try:
+        rows, summary = scrape_reviews(
+            limit_products=limit_products,
+            limit_pages_per_product=limit_pages_per_product,
+            limit_store_media_pages=limit_store_media_pages,
+        )
+    except BlockedScrapeError as exc:
+        print(f"Stopping on blocked response: {exc}", file=sys.stderr)
+        return 2
     rows.sort(
         key=lambda row: (
             row.get("review_date", ""),

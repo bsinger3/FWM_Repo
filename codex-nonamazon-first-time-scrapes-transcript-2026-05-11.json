@@ -1,0 +1,48 @@
+{
+  "title": "Non-Amazon First-Time Scrapes And Sync",
+  "source": "codex",
+  "transcript_started_at": "2026-05-11T13:00:00-04:00",
+  "transcript_ended_at": "2026-05-11T17:45:00-04:00",
+  "messages": [
+    {
+      "role": "user",
+      "text": "Requested repeated next-site non-Amazon scrape work, with explicit instruction not to scrape sites already attempted before."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated scrape selection documentation so generic next-scrape work prioritizes first-time sites and requires duplicate checks across scripts, docs, claims, active claims, and output directories."
+    },
+    {
+      "role": "assistant",
+      "text": "Completed stackathletics_com first-time scrape. Added scrape_stackathletics_reviews.py, merchant doc, data-root outputs, and finished claim. Final metrics: 27 rows, 9 distinct product URLs, 27 customer-image rows, 6 rows with ordered size, 8 rows with measurements, 3 Supabase-qualified rows, 54 products discovered/scanned, 83 review pages scanned, exhaustive."
+    },
+    {
+      "role": "assistant",
+      "text": "Attempted saintandsofia_com and ripleyrader_com as first-time catalog-model scrapes. Both were stopped immediately on HTTP 429 behavior and marked for revisit with claims/docs rather than increasing request pressure."
+    },
+    {
+      "role": "assistant",
+      "text": "Completed svahausa_com first-time scrape from public Shopify products.json. Public Yotpo probe did not expose usable customer-review media, so output is catalog-model rows only. Final metrics: 465 rows, 465 distinct product URLs, 0 customer-image rows, 465 catalog-model-image rows, 465 ordered-size rows, 465 measurement rows, 0 strict Supabase-qualified rows, 465 catalog-model qualified rows, 1018 products discovered/scanned, 0 review pages, exhaustive for public Shopify catalog."
+    },
+    {
+      "role": "assistant",
+      "text": "Completed ever_pretty_com first-time scrape from public Shopify sitemap and public Judge.me all_reviews_js_based media feed. Final metrics: 1444 rows, 251 distinct product URLs, 1444 customer-image rows, 442 ordered-size rows, 833 measurement rows, 430 Supabase-qualified rows, 749 products discovered/scanned, 63 non-empty review pages, exhaustive for public sitemap plus Judge.me media feed."
+    },
+    {
+      "role": "assistant",
+      "text": "Completed ladyblacktie_com first-time scrape from public Shopify sitemap and public Judge.me all_reviews_js_based media feed. The run used only public endpoints, no auth/session cookies, no captcha or WAF bypass, and stopped at the empty review page. Final metrics: 250 rows, 133 distinct product URLs, 250 customer-image rows, 0 ordered-size rows, 64 measurement rows, 0 Supabase-qualified rows, 2884 products discovered/scanned, 9 non-empty review pages, exhaustive for public sitemap plus Judge.me media feed."
+    },
+    {
+      "role": "assistant",
+      "text": "Output files were written under /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/ for stackathletics_com, svahausa_com, ever_pretty_com, and ladyblacktie_com. Merchant docs and scripts were written under /Users/briannasinger/Projects/FWM_Repo/data-pipelines/non-amazon/."
+    },
+    {
+      "role": "user",
+      "text": "Asked to update the remote git, S3, and the transcripts table."
+    },
+    {
+      "role": "assistant",
+      "text": "Prepared to commit and push repo scrape/docs changes, sync FWM_Data to S3 using the repo helper, and upload this focused transcript to the dev Supabase codex_chat_transcripts table."
+    }
+  ]
+}

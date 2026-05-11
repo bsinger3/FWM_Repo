@@ -21,8 +21,8 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[4]
 DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "shapedly_com"
-OUTPUT_CSV = OUTPUT_DIR / "shapedly_com_reviews_matching_intake_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "shapedly_com_reviews_matching_intake_schema_summary.json"
+OUTPUT_CSV = OUTPUT_DIR / "shapedly_com_reviews_matching_amazon_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "shapedly_com_reviews_matching_amazon_schema_summary.json"
 
 SITE_ROOT = "https://shapedly.com"
 SOURCE_SITE = f"{SITE_ROOT}/"
@@ -36,7 +36,8 @@ REVIEWS_PER_PAGE = 250
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/135.0.0.0 Safari/537.36"
 
 HEADERS = [
-    "created_at_display", "id", "original_url_display", "product_page_url_display", "monetized_product_url_display",
+    "created_at_display", "id", "original_url_display", "image_source_type", "image_source_detail",
+    "product_page_url_display", "monetized_product_url_display",
     "height_raw", "weight_raw", "user_comment", "date_review_submitted_raw", "height_in_display", "review_date",
     "source_site_display", "status_code", "content_type", "bytes", "width", "height", "hash_md5", "fetched_at",
     "updated_at", "brand", "waist_raw_display", "hips_raw", "age_raw", "waist_in", "hips_in_display",
@@ -50,12 +51,47 @@ HEADERS = [
 TAG_RE = re.compile(r"<[^>]+>")
 WS_RE = re.compile(r"\s+")
 HEIGHT_RE = re.compile(r"\b([4-6])\s*(?:ft|feet|foot|['\u2019])\s*(\d{1,2})?\s*(?:in|inches|[\"\u201d])?", re.I)
+HEIGHT_DOUBLE_QUOTE_RE = re.compile(r"\b([4-6])\s*[\"\u201c\u201d]\s*(\d{1,2})\b", re.I)
 WEIGHT_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:lbs?|pounds?|#)\b", re.I)
+WEIGHT_NEAR_HEIGHT_RE = re.compile(
+    r"\b(?:i\s*(?:am|['\u2019]?m)|weight(?:\s+is)?|weigh(?:ing)?)\s+"
+    r"(?:about|around|approximately|approx\.?)?\s*(\d{2,3}(?:\.\d+)?)"
+    r"(?:\s*[-\u2013]\s*\d{2,3}(?:\.\d+)?)?\s*(?:,|and)?\s+"
+    r"(?:[4-6]\s*(?:ft|feet|foot|['\u2019\"\u201c\u201d]))",
+    re.I,
+)
 WAIST_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*waist\b", re.I)
 HIPS_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*hips?\b", re.I)
 INSEAM_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*inseam\b", re.I)
 AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re.I)
 BRA_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
+CHALLENGE_RE = re.compile(r"\b(?:captcha|cloudflare|datadome|access denied|attention required|verify you are human)\b", re.I)
+SIZE_TOKEN_RE = (
+    r"(?:"
+    r"extra\s+small|extra\s+large|"
+    r"(?:x{1,5}|[1-5])\s*(?:s|l|x)|"
+    r"x{1,5}s?|x{1,5}l?|"
+    r"small|medium|large|"
+    r"[sml]|"
+    r"(?:[0-2]?\d)"
+    r")"
+)
+ORDERED_SIZE_PATTERNS = [
+    re.compile(
+        rf"\b(?:order(?:ed)?|purchased|bought|got|chose|selected)\s+"
+        rf"(?:this|it|one|the|a|an)?\s*(?:in\s+)?(?:a|an)?\s*"
+        rf"(?:size\s+)?(?P<size>{SIZE_TOKEN_RE})\b",
+        re.I,
+    ),
+    re.compile(rf"\bwent\s+with\s+(?:a|an)?\s*(?:size\s+)?(?P<size>{SIZE_TOKEN_RE})\b", re.I),
+    re.compile(rf"\bsized?\s+(?:up|down)\s+to\s+(?:a|an)?\s*(?:size\s+)?(?P<size>{SIZE_TOKEN_RE})\b", re.I),
+    re.compile(rf"\bin\s+size\s+(?P<size>{SIZE_TOKEN_RE})\b", re.I),
+    re.compile(rf"\bsize\s+(?P<size>{SIZE_TOKEN_RE})\b", re.I),
+]
+
+
+class StopScrape(RuntimeError):
+    pass
 
 
 def now_iso() -> str:
@@ -71,16 +107,25 @@ def strip_tags(value: object) -> str:
     return norm(html.unescape(TAG_RE.sub(" ", text)))
 
 
+def stop_if_challenge(body: str, url: str) -> None:
+    if CHALLENGE_RE.search(body[:5000]):
+        raise StopScrape(f"Stopping on challenge-like response for {url}")
+
+
 def fetch_text(url: str, retries: int = 5) -> str:
     last_error: Optional[Exception] = None
     for attempt in range(retries):
         req = Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"})
         try:
             with urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8", "replace")
+                body = resp.read().decode("utf-8", "replace")
+                stop_if_challenge(body, url)
+                return body
         except (HTTPError, URLError) as exc:
             last_error = exc
-            if isinstance(exc, HTTPError) and exc.code not in {429, 500, 502, 503, 504}:
+            if isinstance(exc, HTTPError) and exc.code in {403, 429}:
+                raise StopScrape(f"Stopping on HTTP {exc.code} for {url}") from exc
+            if isinstance(exc, HTTPError) and exc.code not in {500, 502, 503, 504}:
                 raise
         time.sleep(min(2 ** attempt, 20))
     raise RuntimeError(f"Failed text request for {url}: {last_error}")
@@ -102,10 +147,14 @@ def fetch_json(url: str, params: Optional[Dict[str, object]] = None, referer: Op
         )
         try:
             with urlopen(req, timeout=60) as resp:
-                return json.load(resp)
+                body = resp.read().decode("utf-8", "replace")
+                stop_if_challenge(body, query_url)
+                return json.loads(body)
         except HTTPError as exc:
             last_error = exc
-            if exc.code not in {429, 500, 502, 503, 504}:
+            if exc.code in {403, 429}:
+                raise StopScrape(f"Stopping on HTTP {exc.code} for {query_url}") from exc
+            if exc.code not in {500, 502, 503, 504}:
                 raise
         except (URLError, json.JSONDecodeError) as exc:
             last_error = exc
@@ -183,6 +232,32 @@ def photo_urls(review: Dict[str, object]) -> List[str]:
     return list(dict.fromkeys(urls))
 
 
+def cf_answer_text(review: Dict[str, object]) -> str:
+    answers = review.get("cf_answers")
+    if not isinstance(answers, list):
+        return ""
+    parts: List[str] = []
+    for answer in answers:
+        if isinstance(answer, dict):
+            label = norm(answer.get("label") or answer.get("name") or answer.get("question"))
+            value = norm(answer.get("value") or answer.get("answer") or answer.get("content"))
+            if label and value:
+                parts.append(f"{label}: {value}")
+            elif value:
+                parts.append(value)
+        else:
+            value = norm(answer)
+            if value:
+                parts.append(value)
+    return " | ".join(parts)
+
+
+def review_text(review: Dict[str, object]) -> str:
+    body = strip_tags(review.get("review"))
+    extra = cf_answer_text(review)
+    return " | ".join(part for part in [body, extra] if part)
+
+
 def fetch_product_reviews(product: Dict[str, object], limit_pages: Optional[int] = None) -> Tuple[List[Dict[str, object]], Dict[str, object]]:
     product_url = product_url_for(product)
     meta: Dict[str, object] = {
@@ -218,6 +293,8 @@ def fetch_product_reviews(product: Dict[str, object], limit_pages: Optional[int]
         }
         try:
             payload = fetch_json(LAI_API_ROOT, params=params, referer=product_url)
+        except StopScrape:
+            raise
         except Exception as exc:  # noqa: BLE001
             meta["errors"].append(str(exc))
             break
@@ -257,7 +334,26 @@ def parse_num(pattern: re.Pattern[str], text: str, max_value: Optional[float] = 
     return norm(match.group(0)), value
 
 
+def parse_weight(text: str) -> Tuple[str, Optional[float], str]:
+    raw, value = parse_num(WEIGHT_RE, text, 500)
+    if raw:
+        return raw, value, ""
+    match = WEIGHT_NEAR_HEIGHT_RE.search(text)
+    if not match:
+        return "", None, ""
+    value = float(match.group(1))
+    if 80 <= value <= 500:
+        return norm(match.group(1)), value, "missing_explicit_lb_unit_near_height"
+    return "", None, ""
+
+
 def parse_height(text: str) -> Tuple[str, Optional[float]]:
+    compact_match = HEIGHT_DOUBLE_QUOTE_RE.search(text)
+    if compact_match:
+        feet = int(compact_match.group(1))
+        inches = int(compact_match.group(2))
+        if 4 <= feet <= 7 and 0 <= inches <= 11:
+            return norm(compact_match.group(0)), feet * 12 + inches
     match = HEIGHT_RE.search(text)
     if not match:
         return "", None
@@ -281,6 +377,39 @@ def parse_bra(text: str) -> Tuple[str, str]:
     band = re.match(r"(\d{2})", compact)
     cup = re.search(r"[A-Z]+$", compact)
     return (band.group(1) if band else "", cup.group(0) if cup else "")
+
+
+def normalize_size(value: str) -> str:
+    cleaned = norm(value).lower().replace("-", " ")
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    aliases = {
+        "extra small": "XS",
+        "small": "S",
+        "medium": "M",
+        "large": "L",
+        "extra large": "XL",
+    }
+    if cleaned in aliases:
+        return aliases[cleaned]
+    compact = cleaned.replace(" ", "").upper()
+    compact = re.sub(r"^([1-5])X$", r"\1X", compact)
+    compact = compact.replace("XXXXXL", "5XL").replace("XXXXL", "4XL").replace("XXXL", "3XL").replace("XXL", "2XL")
+    return compact
+
+
+def parse_ordered_size(text: str) -> str:
+    if not text:
+        return ""
+    for pattern in ORDERED_SIZE_PATTERNS:
+        for match in pattern.finditer(text):
+            start, end = match.span()
+            context = text[max(0, start - 24):min(len(text), end + 24)].lower()
+            if re.search(r"\b(?:bra|cup)\s+size\b|\bsize\s+(?:up|down|smaller|larger)\b|\bmy\s+size\b", context):
+                continue
+            size = normalize_size(match.group("size"))
+            if size:
+                return size
+    return ""
 
 
 def variant_detail(product: Dict[str, object]) -> str:
@@ -324,14 +453,15 @@ def output_skip_reason(product: Dict[str, object]) -> str:
 
 
 def row_for(product: Dict[str, object], review: Dict[str, object], image_url: str, image_index: int) -> Dict[str, str]:
-    text = strip_tags(review.get("review"))
+    text = review_text(review)
     height_raw, height_in = parse_height(text)
-    weight_raw, weight = parse_num(WEIGHT_RE, text, 500)
+    weight_raw, weight, weight_issue = parse_weight(text)
     waist_raw, waist = parse_num(WAIST_RE, text, 80)
     hips_raw, hips = parse_num(HIPS_RE, text, 90)
     inseam_raw, inseam = parse_num(INSEAM_RE, text, 50)
     age_raw, age = parse_age(text)
     bust, cup = parse_bra(text)
+    ordered_size = parse_ordered_size(text)
     product_url = product_url_for(product)
     review_id = norm(review.get("review_id") or review.get("id") or f"{product.get('id')}-{image_index}")
     fetched = now_iso()
@@ -339,6 +469,8 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
         "created_at_display": fetched,
         "id": f"{review_id}-{image_index}",
         "original_url_display": image_url,
+        "image_source_type": "customer_review_image",
+        "image_source_detail": "lai_review_photo",
         "product_page_url_display": product_url,
         "monetized_product_url_display": product_url,
         "height_raw": height_raw,
@@ -365,14 +497,14 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
         "age_years_display": age,
         "search_fts": text,
         "weight_display_display": maybe_num(weight),
-        "weight_raw_needs_correction": "",
+        "weight_raw_needs_correction": weight_issue,
         "clothing_type_id": classify(product),
         "reviewer_profile_url": "",
         "reviewer_name_raw": norm(review.get("author")),
         "inseam_inches_display": maybe_num(inseam),
         "color_canonical": "",
         "color_display": "",
-        "size_display": "",
+        "size_display": ordered_size,
         "bust_in_number_display": bust,
         "cupsize_display": cup,
         "weight_lbs_display": maybe_num(weight),
@@ -388,6 +520,22 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
 
 def is_measurement_row(row: Dict[str, str]) -> bool:
     return any(norm(row.get(field)) for field in ["height_in_display", "weight_lbs_display", "bust_in_number_display", "hips_in_display", "waist_in", "inseam_inches_display"])
+
+
+def invalid_numeric_fields(rows: List[Dict[str, str]]) -> Dict[str, int]:
+    numeric_fields = [
+        "height_in_display",
+        "weight_lbs_display",
+        "bust_in_number_display",
+        "hips_in_display",
+        "waist_in",
+        "inseam_inches_display",
+        "age_years_display",
+    ]
+    return {
+        field: sum(1 for row in rows if norm(row.get(field)) and not re.fullmatch(r"\d+(?:\.\d+)?", norm(row.get(field))))
+        for field in numeric_fields
+    }
 
 
 def main(argv: List[str]) -> int:
@@ -479,13 +627,18 @@ def main(argv: List[str]) -> int:
         "rows_with_product_url": rows_with_product_url,
         "rows_with_any_measurement": rows_with_measurement,
         "rows_with_customer_image": rows_with_image,
+        "rows_with_customer_review_image": sum(1 for row in deduped if norm(row.get("original_url_display")) and row.get("image_source_type") == "customer_review_image"),
         "rows_with_customer_ordered_size": rows_with_size,
         "rows_with_size": rows_with_size,
         "rows_supabase_qualified": rows_supabase,
+        "supabase_qualified_rows": rows_supabase,
+        "rows_with_image_and_product_url": rows_with_product_url,
         "output_csv": str(OUTPUT_CSV),
         "summary_json": str(SUMMARY_JSON),
         "started_at": started,
         "finished_at": now_iso(),
+        "invalid_numeric_fields": invalid_numeric_fields(deduped),
+        "access_policy": "public_product_and_review_pages_only; no_auth_bypass; no_captcha_bypass; stop_on_429_captcha_waf",
         "product_summaries": product_summaries,
     }
     SUMMARY_JSON.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -19,8 +19,8 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[4]
 DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "superfithero_com"
-OUTPUT_CSV = OUTPUT_DIR / "superfithero_com_reviews_matching_intake_schema.csv"
-SUMMARY_JSON = OUTPUT_DIR / "superfithero_com_reviews_matching_intake_schema_summary.json"
+OUTPUT_CSV = OUTPUT_DIR / "superfithero_com_reviews_matching_amazon_schema.csv"
+SUMMARY_JSON = OUTPUT_DIR / "superfithero_com_reviews_matching_amazon_schema_summary.json"
 
 SITE_ROOT = "https://superfithero.com"
 SOURCE_SITE = f"{SITE_ROOT}/"
@@ -34,6 +34,11 @@ REVIEWS_PER_PAGE = 20
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+)
+BLOCK_STATUS_CODES = {403, 429}
+BLOCK_TEXT_RE = re.compile(
+    r"\b(?:captcha|cloudflare|datadome|access denied|blocked|forbidden|unusual traffic|verify you are human)\b",
+    re.I,
 )
 
 HEADERS = [
@@ -103,6 +108,10 @@ SIZE_ORDER_RE = re.compile(
 )
 
 
+class BlockedScrapeError(RuntimeError):
+    pass
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -114,6 +123,11 @@ def normalize_whitespace(text: object) -> str:
 def strip_tags(value: object) -> str:
     text = re.sub(r"</p\s*>|<br\s*/?>|</li\s*>", " ", str(value or ""), flags=re.I)
     return normalize_whitespace(html.unescape(TAG_RE.sub(" ", text)))
+
+
+def detect_blocked_response(status: int, body: str, url: str) -> None:
+    if status in BLOCK_STATUS_CODES or BLOCK_TEXT_RE.search(body[:5000]):
+        raise BlockedScrapeError(f"Blocked response while fetching {url}: status={status}")
 
 
 def fetch_text(url: str, retries: int = 5, referer: str = SOURCE_SITE) -> str:
@@ -130,10 +144,14 @@ def fetch_text(url: str, retries: int = 5, referer: str = SOURCE_SITE) -> str:
         )
         try:
             with urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8", "replace")
+                text = resp.read().decode("utf-8", "replace")
+                detect_blocked_response(resp.status, text, url)
+                return text
         except (HTTPError, URLError) as exc:
             last_error = exc
-            if isinstance(exc, HTTPError) and exc.code not in {408, 429, 500, 502, 503, 504}:
+            if isinstance(exc, HTTPError) and exc.code in BLOCK_STATUS_CODES:
+                raise BlockedScrapeError(f"Blocked response while fetching {url}: status={exc.code}") from exc
+            if isinstance(exc, HTTPError) and exc.code not in {408, 500, 502, 503, 504}:
                 raise
         time.sleep(min(2**attempt, 20))
     raise RuntimeError(f"Failed text request for {url}: {last_error}")
@@ -674,7 +692,7 @@ def enrich_summary(summary: Dict[str, object], rows: Sequence[Dict[str, str]], o
             "distinct_images": len({row.get("original_url_display") for row in rows if row.get("original_url_display")}),
             "distinct_product_urls": len(product_urls),
             "distinct_products": len(product_urls),
-            "rows_with_distinct_product_url": sum(1 for row in rows if has_product_url(row)),
+            "rows_with_distinct_product_url": len(product_urls),
             "rows_with_product_url": sum(1 for row in rows if has_product_url(row)),
             "rows_missing_product_url": sum(1 for row in rows if not has_product_url(row)),
             "rows_with_customer_image": sum(1 for row in rows if row.get("original_url_display")),
@@ -707,7 +725,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         idx = argv.index("--limit-pages-per-product")
         limit_pages_per_product = int(argv[idx + 1])
 
-    rows, summary = scrape_reviews(limit_products=limit_products, limit_pages_per_product=limit_pages_per_product)
+    try:
+        rows, summary = scrape_reviews(limit_products=limit_products, limit_pages_per_product=limit_pages_per_product)
+    except BlockedScrapeError as exc:
+        print(f"Stopping on blocked response: {exc}", file=sys.stderr)
+        return 2
     summary = enrich_summary(summary, rows, OUTPUT_CSV)
     write_csv(rows, OUTPUT_CSV)
     SUMMARY_JSON.parent.mkdir(parents=True, exist_ok=True)
