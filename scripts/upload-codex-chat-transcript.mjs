@@ -60,8 +60,21 @@ function flattenMessages(messages) {
     .join("\n\n---\n\n");
 }
 
-async function uploadTranscriptRow({ supabaseUrl, serviceRoleKey, row }) {
-  const endpoint = `${supabaseUrl}/rest/v1/codex_chat_transcripts?on_conflict=chat_key`;
+function parseOption(args, name, defaultValue = null) {
+  const prefix = `--${name}=`;
+  const match = args.find((arg) => arg.startsWith(prefix));
+  return match ? match.slice(prefix.length) : defaultValue;
+}
+
+function assertSafeTableName(tableName) {
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)) {
+    throw new Error(`Unsafe Supabase table name: ${tableName}`);
+  }
+}
+
+async function uploadTranscriptRow({ supabaseUrl, serviceRoleKey, row, tableName }) {
+  assertSafeTableName(tableName);
+  const endpoint = `${supabaseUrl}/rest/v1/${tableName}?on_conflict=chat_key`;
   const headers = {
     apikey: serviceRoleKey,
     Authorization: `Bearer ${serviceRoleKey}`,
@@ -445,7 +458,11 @@ async function main() {
 
   const args = process.argv.slice(2);
   const skipOpenAiSummary = args.includes("--skip-openai-summary");
-  const positionalArgs = args.filter((arg) => arg !== "--skip-openai-summary");
+  const tableName = parseOption(args, "table", "codex_chat_transcripts");
+  const positionalArgs = args.filter((arg) => (
+    arg !== "--skip-openai-summary" &&
+    !arg.startsWith("--table=")
+  ));
   const transcriptPathArg = positionalArgs[0] || "codex-chat-transcript.json";
   const transcriptPath = path.resolve(process.cwd(), transcriptPathArg);
   const source = positionalArgs[1] || "codex";
@@ -507,7 +524,7 @@ async function main() {
 
   const supabaseUrl = requiredEnv("SUPABASE_URL");
   const serviceRoleKey = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
-  const response = await uploadTranscriptRow({ supabaseUrl, serviceRoleKey, row });
+  const response = await uploadTranscriptRow({ supabaseUrl, serviceRoleKey, row, tableName });
 
   const result = await response.json();
   const saved = Array.isArray(result) ? result[0] : result;
@@ -515,6 +532,7 @@ async function main() {
     JSON.stringify(
       {
         ok: true,
+        table: tableName,
         chat_key: saved?.chat_key ?? chatKey,
         message_count: row.message_count,
         title,

@@ -4,6 +4,7 @@
   "scripts": {
     "playwright:install": "node scripts/run-playwright.mjs install chromium",
     "sync:codex-chat": "node scripts/upload-codex-chat-transcript.mjs codex-chat-transcript.json",
+    "sync:applypilot-chat": "node scripts/upload-codex-chat-transcript.mjs ../ApplyPilot/codex-chat-transcript.json applypilot --table=applypilot_codex_chat_transcripts",
     "watch:codex-chat": "node scripts/watch-codex-chat-transcript.mjs codex-chat-transcript.json",
     "test:e2e": "node scripts/run-playwright.mjs test",
     "test:precommit": "node scripts/run-playwright.mjs test"
