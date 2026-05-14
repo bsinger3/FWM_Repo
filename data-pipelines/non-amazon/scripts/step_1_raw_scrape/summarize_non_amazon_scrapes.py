@@ -177,7 +177,7 @@ def is_bra_product_row(row: Dict[str, str]) -> bool:
 
 
 def has_customer_bra_size(row: Dict[str, str]) -> bool:
-    band = get_value(row, ["bust_in_number_display", "bra_band", "band_size"])
+    band = get_value(row, ["bra_band_in_display", "bust_in_number_display", "bra_band", "band_size"])
     cup = get_value(row, ["cupsize_display", "cup_size"])
     size = get_value(row, ["size_display", "size", "reviewed size", "size ordered"])
     return bool((band and cup) or BRA_SIZE_RE.search(size))

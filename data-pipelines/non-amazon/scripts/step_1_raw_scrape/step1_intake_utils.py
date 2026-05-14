@@ -70,6 +70,8 @@ INTAKE_HEADERS = [
     "color_canonical",
     "color_display",
     "size_display",
+    "bust_in_display",
+    "bra_band_in_display",
     "bust_in_number_display",
     "cupsize_display",
     "weight_lbs_display",
@@ -95,37 +97,69 @@ SCRAPE_ACCESS_POLICY = (
 
 BRA_SIZE_RE = re.compile(
     r"\b(28|30|32|34|36|38|40|42|44|46|48|50|52|54)\s*"
-    r"(AAA|AA|A|B|C|D|DD|DD/?E|DDD|DDD/?F|F|G|H|I|J|K)\b",
+    r"(?::\s*|\s*)"
+    r"(AAA|AA|A|B|C|D|DD|DD/?E|DDD|DDD/?F|F|G|H|I|J|K)(?:\s*[-/]\s*(?:AAA|AA|A|B|C|D|DD|DDD|F|G|H|I|J|K))?\b",
+    re.I,
+)
+CUP_SIZE_RE = re.compile(
+    r"\b(AAA|AA|A|B|C|D|DD|DD/?E|DDD|DDD/?F|F|G|H|I|J|K)\s*(?:cup|cups?)\b|"
+    r"\b(?:cup\s*(?:size)?|cups?)\s*(?:is|are|:|：)?\s*(AAA|AA|A|B|C|D|DD|DD/?E|DDD|DDD/?F|F|G|H|I|J|K)\b",
     re.I,
 )
 HEIGHT_RE = re.compile(
     r"(?:(?:i\s*(?:am|'m)|im|i’m|i am|height)\s*:?\s*)?"
-    r"(\d)\s*(?:ft|feet|foot|['’])\s*(\d{1,2})?\s*(?:in|inches|[\"”])?",
+    r"(\d)\s*(?:ft|feet|foot|['’])\s*(\d{1,2}(?:\.\d+)?)?\s*(?:in|inches|[\"”])?",
     re.I,
 )
 WEIGHT_RE = re.compile(
-    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:lbs?|pounds?)\b|"
-    r"\b(?:weigh(?:t|s|ed|ing)?|weight)\s*(?:is|:)?\s*(\d{2,3}(?:\.\d+)?)\b",
+    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:ish)?\s*(?:lbs?|pounds?|#)\b|"
+    r"\b(?:weigh(?:t|s|ed|ing)?|weight)\s*(?:is|:|：)?\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{2,3}(?:\.\d+)?)\s*(?:ish)?\b",
+    re.I,
+)
+WEIGHT_KG_RE = re.compile(
+    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:kg|kilograms?)\b|"
+    r"\b(?:weigh(?:t|s|ed|ing)?|weight)\s*(?:is|:|：)?\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{2,3}(?:\.\d+)?)\s*(?:kg|kilograms?)\b",
     re.I,
 )
 WAIST_RE = re.compile(
-    r"\bwaist\s*(?:is|:)?\s*(\d{2,3}(?:\.\d+)?)\b|"
-    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ch(?:es)?)?)\s*waist\b",
+    r"\bwaist\s*(?:is|=|:|：|-)?\s*(?:a\s+|an\s+)?(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b",
     re.I,
 )
 HIPS_RE = re.compile(
-    r"\bhips?\s*(?:are|is|:)?\s*(\d{2,3}(?:\.\d+)?)\b|"
-    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ch(?:es)?)?)\s*hips?\b",
+    r"\b(?:hips?|hip\s*/\s*butt|hip\/butt)\s*(?:are|is|=|:|：|-)?\s*(?:a\s+|an\s+)?(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b",
     re.I,
 )
 BUST_RE = re.compile(
-    r"\b(?:bust|chest)\s*(?:is|:)?\s*(\d{2,3}(?:\.\d+)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b|"
-    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ch(?:es)?)?)?\s*(?:bust|chest)\b",
+    r"(?<!under\s)\b(?:bust|chest)\s*(?:is|=|:|：|-)?\s*(?:a\s+|an\s+)?(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b",
     re.I,
 )
+UNDERBUST_RE = re.compile(
+    r"\b(?:under\s*bust|underbust|under\s*band|band\s*(?:size)?|rib\s*cage|ribcage)\s*"
+    r"(?:is|=|:|：|-)?\s*(?:a\s+|an\s+)?(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b",
+    re.I,
+)
+BUST_CM_RE = re.compile(r"\b(?:bust|chest)\s*(?:is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
+HEIGHT_CM_RE = re.compile(
+    r"\bheight\s*(?:is|=|:|：|-)?\s*(\d{3}(?:\.\d+)?)\s*cm\b|"
+    r"\b(\d{3}(?:\.\d+)?)\s*cm\s*(?:tall|height)\b|"
+    r"\b(?:i\s*(?:am|'m)|im|i’m)\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{3}(?:\.\d+)?)\s*cm\b",
+    re.I,
+)
+WAIST_CM_RE = re.compile(r"\bwaist\s*(?:is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
+HIPS_CM_RE = re.compile(r"\b(?:hips?|hip\s*/\s*butt|hip\/butt)\s*(?:are|is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
+INSEAM_CM_RE = re.compile(r"\binseam\s*(?:is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
 AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re.I)
-INSEAM_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ch(?:es)?)?)\s*inseam\b", re.I)
-MEASUREMENT_TRIPLE_RE = re.compile(r"\b(\d{2,3})\s*[-/x]\s*(\d{2,3})\s*[-/x]\s*(\d{2,3})\b", re.I)
+INSEAM_RE = re.compile(
+    r"\binseam\s*(?:is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\b|"
+    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ch(?:es)?)?)\s*inseam\b",
+    re.I,
+)
+MEASUREMENT_TRIPLE_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*[-/x]\s*(\d{2,3}(?:\.\d+)?)\s*[-/x]\s*(\d{2,3}(?:\.\d+)?)\b", re.I)
+MEASUREMENT_TRIPLE_CONTEXT_RE = re.compile(
+    r"\b(?:measurements?|stats?|my\s+stats|body\s+measurements?|dimensions?|"
+    r"bust\s*[-/]\s*waist\s*[-/]\s*hips?|bwh)\b",
+    re.I,
+)
 
 GENERIC_SIZE_RE = re.compile(
     r"\b("
@@ -147,6 +181,8 @@ MEASUREMENT_FIELDS = [
     "hips_in_display",
     "age_years_display",
     "inseam_inches_display",
+    "bust_in_display",
+    "bra_band_in_display",
     "bust_in_number_display",
     "cupsize_display",
     "weight_lbs_display",
@@ -634,22 +670,37 @@ def numeric_text(value: Optional[float]) -> str:
     return str(int(value)) if value == int(value) else f"{value:.2f}".rstrip("0").rstrip(".")
 
 
+def parse_number_text(value_text: str) -> float:
+    value = normalize_whitespace(value_text)
+    half_match = re.fullmatch(r"(\d{1,3}(?:\.\d+)?)\s+1/2", value)
+    if half_match:
+        return float(half_match.group(1)) + 0.5
+    return float(value)
+
+
 def parse_height(text: str) -> Tuple[str, str]:
     match = HEIGHT_RE.search(text)
-    if not match:
-        return "", ""
-    feet = int(match.group(1))
-    inches = int(match.group(2) or 0)
-    return normalize_whitespace(match.group(0)), str(feet * 12 + inches)
+    if match:
+        feet = int(match.group(1))
+        inches = parse_number_text(match.group(2) or "0")
+        following = text[match.end() : match.end() + 24]
+        if re.match(r"\s*(?:-|to|–|—)\s*\d\s*(?:ft|feet|foot|['’])", following, re.I):
+            return normalize_whitespace(match.group(0)), ""
+        return normalize_whitespace(match.group(0)), numeric_text(feet * 12 + inches)
+    match = HEIGHT_CM_RE.search(text)
+    if match:
+        value_text = next((group for group in match.groups() if group), "")
+        return normalize_whitespace(match.group(0)), numeric_text(float(value_text) / 2.54)
+    return "", ""
 
 
 def parse_numeric(pattern: re.Pattern[str], text: str, max_value: Optional[float] = None) -> Tuple[str, str]:
     match = pattern.search(text)
     if not match:
         return "", ""
-    value_text = match.group(1) or (match.group(2) if len(match.groups()) > 1 else "")
+    value_text = next((group for group in match.groups() if group), "")
     try:
-        value = float(value_text)
+        value = parse_number_text(value_text)
     except ValueError:
         return normalize_whitespace(match.group(0)), value_text
     if max_value is not None and value > max_value:
@@ -657,32 +708,107 @@ def parse_numeric(pattern: re.Pattern[str], text: str, max_value: Optional[float
     return normalize_whitespace(match.group(0)), numeric_text(value)
 
 
+def parse_weight(text: str) -> Tuple[str, str]:
+    for pattern, multiplier in ((WEIGHT_RE, 1.0), (WEIGHT_KG_RE, 2.2046226218)):
+        match = pattern.search(text)
+        if not match:
+            continue
+        value_text = next((group for group in match.groups() if group), "")
+        try:
+            value = parse_number_text(value_text)
+        except ValueError:
+            return normalize_whitespace(match.group(0)), value_text
+        prefix = text[max(0, match.start() - 28) : match.start()].lower()
+        if re.search(r"\b(?:gain(?:ed|ing)?|gained|lost|los(?:t|ing)|down|up)\s*$", prefix):
+            continue
+        pounds = value * multiplier
+        if not (50 <= pounds <= 700):
+            continue
+        return normalize_whitespace(match.group(0)), numeric_text(pounds)
+    return "", ""
+
+
+def is_weight_change_value(text: str, value: str) -> bool:
+    try:
+        numeric_value = float(str(value).strip())
+    except ValueError:
+        return False
+    if numeric_value >= 50:
+        return False
+    pattern = re.compile(
+        rf"\b(?:gain(?:ed|ing)?|gained|lost|los(?:t|ing)|down|up)\s+"
+        rf"{re.escape(numeric_text(numeric_value))}(?:\.0+)?\s*(?:lbs?|pounds?|#)\b",
+        re.I,
+    )
+    return bool(pattern.search(text))
+
+
+def parse_metric_numeric(pattern: re.Pattern[str], text: str, max_inches: Optional[float] = None) -> Tuple[str, str]:
+    match = pattern.search(text)
+    if not match:
+        return "", ""
+    value_text = next((group for group in match.groups() if group), "")
+    try:
+        inches = float(value_text) / 2.54
+    except ValueError:
+        return normalize_whitespace(match.group(0)), value_text
+    if max_inches is not None and inches > max_inches:
+        return normalize_whitespace(match.group(0)), ""
+    return normalize_whitespace(match.group(0)), numeric_text(inches)
+
+
+def plausible_bust_waist_hips(values: Sequence[str], text: str, match: re.Match[str]) -> bool:
+    try:
+        bust, waist, hips = [float(value) for value in values]
+    except ValueError:
+        return False
+    if not (25 <= bust <= 80 and 20 <= waist <= 80 and 25 <= hips <= 90):
+        return False
+    context = f"{text[max(0, match.start() - 60):match.start()]} {text[match.end():match.end() + 60]}"
+    return bool(MEASUREMENT_TRIPLE_CONTEXT_RE.search(context))
+
+
 def extract_measurements(text: str, size_hint: str = "") -> Dict[str, str]:
     height_raw, height_in = parse_height(text)
-    weight_raw, weight_lbs = parse_numeric(WEIGHT_RE, text)
+    weight_raw, weight_lbs = parse_weight(text)
     waist_raw, waist_in = parse_numeric(WAIST_RE, text, max_value=80)
     hips_raw, hips_in = parse_numeric(HIPS_RE, text, max_value=90)
     age_raw, age_years = parse_numeric(AGE_RE, text, max_value=99)
     _, inseam_in = parse_numeric(INSEAM_RE, text, max_value=50)
     bust_raw, bust_in = parse_numeric(BUST_RE, text, max_value=80)
+    _underbust_raw, underbust_in = parse_numeric(UNDERBUST_RE, text, max_value=60)
+    if not waist_in:
+        waist_raw, waist_in = parse_metric_numeric(WAIST_CM_RE, text, max_inches=80)
+    if not hips_in:
+        hips_raw, hips_in = parse_metric_numeric(HIPS_CM_RE, text, max_inches=90)
+    if not inseam_in:
+        _, inseam_in = parse_metric_numeric(INSEAM_CM_RE, text, max_inches=50)
+    if not bust_in:
+        bust_raw, bust_in = parse_metric_numeric(BUST_CM_RE, text, max_inches=80)
     triple = MEASUREMENT_TRIPLE_RE.search(text)
-    if triple:
+    if triple and plausible_bust_waist_hips(triple.groups(), text, triple):
         if not bust_in:
             bust_raw = triple.group(1)
-            bust_in = triple.group(1)
+            bust_in = numeric_text(float(triple.group(1)))
         if not waist_in:
             waist_raw = triple.group(2)
-            waist_in = triple.group(2)
+            waist_in = numeric_text(float(triple.group(2)))
         if not hips_in:
             hips_raw = triple.group(3)
-            hips_in = triple.group(3)
+            hips_in = numeric_text(float(triple.group(3)))
     cup_size = ""
+    bra_band_in = underbust_in
     for source in (size_hint, text):
         match = BRA_SIZE_RE.search(source or "")
         if match:
-            bust_in = bust_in or match.group(1)
+            bra_band_in = bra_band_in or match.group(1)
             cup_size = normalize_bra_size(match.group(2))
             break
+    if not cup_size:
+        match = CUP_SIZE_RE.search(text)
+        if match:
+            cup_size = normalize_bra_size(next(group for group in match.groups() if group))
+    legacy_bust_in = bust_in or (bra_band_in if cup_size else "")
     return {
         "height_raw": height_raw,
         "height_in_display": height_in,
@@ -696,7 +822,9 @@ def extract_measurements(text: str, size_hint: str = "") -> Dict[str, str]:
         "age_raw": age_raw,
         "age_years_display": age_years,
         "inseam_inches_display": inseam_in,
-        "bust_in_number_display": bust_in,
+        "bust_in_display": bust_in,
+        "bra_band_in_display": bra_band_in,
+        "bust_in_number_display": legacy_bust_in,
         "cupsize_display": cup_size,
     }
 
@@ -862,7 +990,15 @@ def write_intake_csv(rows: Iterable[Dict[str, str]], output_csv: Path) -> None:
 
 
 def validate_rows(rows: Sequence[Dict[str, str]]) -> Dict[str, object]:
-    numeric_fields = ["height_in_display", "waist_in", "hips_in_display", "inseam_inches_display", "bust_in_number_display"]
+    numeric_fields = [
+        "height_in_display",
+        "waist_in",
+        "hips_in_display",
+        "inseam_inches_display",
+        "bust_in_display",
+        "bra_band_in_display",
+        "bust_in_number_display",
+    ]
     invalid_numeric = {
         field: sum(1 for row in rows if row.get(field) and not re.fullmatch(r"\d+(?:\.\d+)?", str(row[field])))
         for field in numeric_fields
@@ -896,7 +1032,7 @@ def validate_rows(rows: Sequence[Dict[str, str]]) -> Dict[str, object]:
         "rows_for_bra_products_with_customer_bra_size": sum(
             1
             for row in bra_rows
-            if (row.get("bust_in_number_display") and row.get("cupsize_display"))
+            if ((row.get("bra_band_in_display") or row.get("bust_in_number_display")) and row.get("cupsize_display"))
             or BRA_SIZE_RE.search(row.get("size_display", ""))
         ),
         "rows_with_image_and_product_url": sum(
