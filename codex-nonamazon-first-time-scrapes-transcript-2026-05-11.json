@@ -2,7 +2,7 @@
   "title": "Non-Amazon First-Time Scrapes And Sync",
   "source": "codex",
   "transcript_started_at": "2026-05-11T13:00:00-04:00",
-  "transcript_ended_at": "2026-05-11T17:45:00-04:00",
+  "transcript_ended_at": "2026-05-14T00:00:00-04:00",
   "messages": [
     {
       "role": "user",
@@ -43,6 +43,26 @@
     {
       "role": "assistant",
       "text": "Prepared to commit and push repo scrape/docs changes, sync FWM_Data to S3 using the repo helper, and upload this focused transcript to the dev Supabase codex_chat_transcripts table."
+    },
+    {
+      "role": "user",
+      "text": "Asked for additional next-site scrapes, choosing based on triage and avoiding sites that had already been scraped before."
+    },
+    {
+      "role": "assistant",
+      "text": "Completed scottevest_com as a first-time scrape. Added scrape_scottevest_reviews.py, merchant doc, data-root outputs, and finished claim. Final metrics: 207 rows, 27 distinct product URLs, 207 rows with product URL, 199 rows with measurements, 207 customer-image rows, 167 rows with ordered size, and 163 Supabase-qualified rows. The run scanned 71 products, targeted 32 products, excluded 39 products, scanned 135 review pages, and completed without 403, 429, CAPTCHA, WAF, or challenge behavior."
+    },
+    {
+      "role": "assistant",
+      "text": "Completed wearfigs_com as the next first-time triage scrape. Added scrape_wearfigs_reviews.py and wearfigs_scrape_2026-05-11.md, wrote CSV and summary outputs under /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/wearfigs_com/, and moved the active claim to historical claims. The adapter used public sitemap product pages plus public FIGS GraphQL pictured-review data, preserving customer image rows and deterministic reviewer size/profile fields without inventing measurements. Final metrics: 917 rows, 83 distinct product URLs, 917 rows with product URL, 770 rows with measurements, 917 customer-image rows, 881 rows with ordered size, and 769 Supabase-qualified rows. The full run scanned 387 unique product handles, targeted 185 women clothing products, scanned 89 review pages, and completed without 403, 429, CAPTCHA, WAF, or challenge behavior."
+    },
+    {
+      "role": "user",
+      "text": "Asked to update the remote git, S3, and the transcripts table."
+    },
+    {
+      "role": "assistant",
+      "text": "Verified main was already current with origin/main for the scrape code/docs, synced /Users/briannasinger/Projects/FWM_Data to s3://fwm-scraping-data-briannasinger using the available default AWS profile, verified the S3 sync with a quiet dry run, and uploaded this focused transcript to the Supabase codex_chat_transcripts table."
     }
   ]
 }
