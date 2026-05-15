@@ -31,6 +31,10 @@ Completed/revisit claim notes, not the default first-time queue:
 7. `swimoutlet_com`: checkpointed partial resume reached 2,090 Okendo store-review pages / 209,000 reviews and wrote 611 final deduped rows; feed still has `nextUrl`, continue later only in store-feed-only chunks if needed.
 8. `miraclesuit_com`: completed 2026-05-06 sitewide rerun with fixed Yotpo size parser and 1.5s delay. Output matched corrected prior counts: 44 rows and 8 qualified rows.
 9. `liverpoolstyle_com`: completed refreshed full public Shopify/Klaviyo run on 2026-05-11; output still has 12 customer-image rows and 2 qualified rows, with updated catalog coverage of 665 products.
+10. `barse_com`: repeat public Shopify/Judge.me confirmation completed on 2026-05-14 after older non-`.claim` notes had already marked it out of scope. Output has 0 rows. The public catalog had 1,676 products, almost entirely jewelry, and public Judge.me media probes exposed no customer review image rows.
+11. `curvykate_com`: completed full public catalog product-page scrape on 2026-05-14. Scanned all 278 public Shopify products/product pages, 173 Feefo parent SKUs, and 174 Feefo review pages. Output has 33,446 Feefo text-review rows joined to all public Shopify product-gallery images, 0 customer review image rows. Feefo media-gallery endpoint checked across all parent SKUs and returned no public customer media.
+12. `unboundmerino_com`: completed full public catalog product-page scrape on 2026-05-14. Scanned all 152 public Shopify products/product pages and 509 Okendo review pages. Output has 1,412 Okendo review rows joined to catalog product/variant images, 1,296 rows with ordered size, 145 rows with parsed measurements, and 0 customer review image rows.
+13. `byltbasics_com`: completed full public sitemap product-page scrape on 2026-05-14. Scanned all 666 public product pages and 1,416 Okendo review pages. Output has 48,736 Okendo review rows joined to catalog product/variant images, 9,045 rows with ordered size, 10,248 rows with parsed measurements, and 0 customer review image rows.
 
 Claim files live in:
 
@@ -89,6 +93,15 @@ Claim files live in:
 - Comparison: rerun matched the corrected 2026-05-05 output on key counts.
 - Image source mix: 44 `customer_review_image` rows and 0 `catalog_model_image` rows.
 - Implementation note: `scrape_miraclesuit_reviews.py` now extracts size from Yotpo `custom_fields` when present and explicit text phrases such as `Size 10`, writes `image_source_type`, and stops immediately on 429/captcha/WAF-like responses.
+
+### jennikayne_com
+
+- Status: first-time full public Shopify/Yotpo scrape stopped on 2026-05-14 after `HTTP 503` at product 545 of 1,100.
+- Current output: partial only, not a completed full-catalog scrape. It has 185 customer-image rows from 544 scanned product pages and 949 Yotpo review pages.
+- Revisit plan:
+  - Wait for a later cool-down window before retrying.
+  - Resume from the unscanned tail rather than restarting the full catalog.
+  - Keep public pages/endpoints only; no auth bypass, captcha bypass, WAF bypass, or aggressive retries.
 
 ## Next Candidates
 
@@ -216,3 +229,6 @@ New entries marked not scrapable / no useful scrape in the sheet:
 - `swimoutlet_com`: active claim now blocked by 429; wait for cool-down/resume plan.
 - `andieswim_com`: active claim now blocked by 429; wait for cool-down or store-feed-only revisit.
 - `breakoutbras_com`: recent run exists from 2026-05-05 with 147 rows and 73 qualified rows; summarize/report before considering any rerun.
+- `barse_com`: completed 2026-05-14 with no public review-image rows and no apparel/model-fit signal; skip unless a new public media source appears.
+- `us_princesspolly_com`: deferred on 2026-05-14 because the public Shopify catalog has 15,843 products and about 13,375 live apparel products. Do not treat the removed 3-product smoke as a scrape dataset; only revisit with an explicit large-crawl plan.
+- `kimesranch_com`: blocked on 2026-05-14 when public `products.json` returned an HTTP 403 verification response during deeper probe; skip until a later cool-down or a different public source is identified.
