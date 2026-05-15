@@ -643,7 +643,37 @@ def normalize_generic_size(value: str) -> str:
     return mapping.get(size, size)
 
 
+ORDERED_SIZE_VALUE_RE = r"(?:US\s*)?\d{1,2}W?|xxs|xs|s|m|l|xl|xxl|xxxl|[2-6]x|[2-6]xl"
+
+
+def normalize_ordered_size(value: str) -> str:
+    clean = normalize_whitespace(value)
+    clean = re.sub(r"^us\s*", "US", clean, flags=re.I)
+    if re.fullmatch(r"(?:US)?\d{1,2}W?", clean, re.I):
+        return clean.upper()
+    return normalize_generic_size(clean)
+
+
+def extract_ordered_size(text: str) -> str:
+    for pattern in [
+        rf"\b(?:ordered|ordereda|bought|purchased|got|wearing|picked|chose|choose)\s+(?:the\s+)?(?:a\s+)?(?:us\s*)?size\s+({ORDERED_SIZE_VALUE_RE})\b",
+        rf"\b(?:ordered|ordereda|bought|purchased|got|picked|chose)\s+(?:the|a|an)\s+({ORDERED_SIZE_VALUE_RE})\b",
+        rf"\b(?:i\s*(?:am|'m)|im|i’m|she\s*(?:is|'s)|she’s|he\s*(?:is|'s)|he’s)\s+wearing\s+(?:a\s+)?(?:us\s*)?size\s+({ORDERED_SIZE_VALUE_RE})\b",
+        rf"\bwearing\s+(?:a\s+)?(?:us\s*)?size\s+({ORDERED_SIZE_VALUE_RE})\b",
+    ]:
+        match = re.search(pattern, text, re.I)
+        if match:
+            value = normalize_whitespace(next((group for group in match.groups() if group), ""))
+            if not value:
+                continue
+            return normalize_ordered_size(value)
+    return ""
+
+
 def extract_size(text: str) -> str:
+    ordered_size = extract_ordered_size(text)
+    if ordered_size:
+        return ordered_size
     for pattern in [
         r"\b(?:ordered|bought|purchased|got|wearing|wear|picked|chose|choose)\s+(?:the\s+)?(?:a\s+)?size\s+([a-z0-9\-/ .]+?)(?:[.,;]|$)",
         r"\bsize\s+([a-z0-9\-/ .]+?)(?:\s+(?:fits?|was|is)|[.,;]|$)",
@@ -651,13 +681,18 @@ def extract_size(text: str) -> str:
         match = re.search(pattern, text, re.I)
         if match:
             value = normalize_whitespace(match.group(1))
+            if re.search(r"\b(?:guide|chart|recommendation|recommendations|true\s+to\s+size|size\s+up|size\s+down)\b", value, re.I):
+                continue
+            value = re.sub(r"^us\s*", "US", value, flags=re.I)
+            if re.fullmatch(r"(?:US)?\d{1,2}W?|xxs|xs|s|m|l|xl|xxl|xxxl|[2-6]x|[2-6]xl", value, re.I):
+                return normalize_ordered_size(value)
             bra = BRA_SIZE_RE.search(value)
             if bra:
                 return normalize_bra_size(bra.group(0))
             generic = GENERIC_SIZE_RE.search(value)
             if generic:
                 return normalize_generic_size(generic.group(1))
-            return value
+            continue
     bra = BRA_SIZE_RE.search(text)
     if bra:
         return normalize_bra_size(bra.group(0))
@@ -902,7 +937,10 @@ def build_search_fts(parts: Iterable[str]) -> str:
 
 def build_intake_row(context: ProductContext, review: ReviewImage, fetched_at: str) -> Dict[str, str]:
     comment = normalize_whitespace(" ".join(part for part in [review.review_title, review.review_body] if part))
-    size_display = normalize_whitespace(review.size_raw) or extract_size(comment)
+    raw_size = normalize_whitespace(review.size_raw)
+    if raw_size.lower() in {"unknown", "n/a", "na", "none", "null"}:
+        raw_size = ""
+    size_display = raw_size or extract_size(comment)
     if BRA_SIZE_RE.search(size_display):
         size_display = normalize_bra_size(size_display)
     measurements = extract_measurements(comment, size_display)
