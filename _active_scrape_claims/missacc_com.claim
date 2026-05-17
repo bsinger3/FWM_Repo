@@ -1,0 +1,31 @@
+site: missacc.com
+retailer: missacc_com
+claimed_by: Codex
+started_at: 2026-05-17T16:25:22Z
+source: user-requested first-time non-Amazon source for FWM
+pre_scrape_rules_read: /Users/briannasinger/Projects/FWM_Repo/new-scrape-rules.md
+duplicate_check: no existing missacc_com local output directory, scraper script, or claim found under FWM_Repo/FWM_Data
+prior_reference: /Users/briannasinger/Projects/FWM_Repo/data-pipelines/non-amazon/docs/scrape_triage_plan.md:195 mentions missacc_com as a bridesmaid dress target
+scope: scrape every public missacc.com product; extract actual customer review records, shopper images, review text, rating/date, reviewer, ordered size/body/measurement comments, product metadata, and product URLs; stop on 429/captcha/WAF/auth challenge
+completed_at: 2026-05-17T18:19:55Z
+status: completed
+script: /Users/briannasinger/Projects/FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_missacc_reviews.py
+output_csv: /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/missacc_com/missacc_com_reviews_matching_amazon_schema.csv
+review_records_jsonl: /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/missacc_com/missacc_com_review_records.jsonl
+summary_json: /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/missacc_com/missacc_com_reviews_matching_amazon_schema_summary.json
+catalog_snapshot_json: /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/missacc_com/missacc_com_public_catalog_snapshot.json
+products_discovered: 10318
+products_scanned: 10318
+review_pages_scanned: 21106
+media_pages_scanned: 19
+review_records_written: 69086
+rows_written: 11501
+distinct_reviews: 68914
+distinct_images: 11393
+distinct_product_urls: 1668
+rows_with_customer_review_image: 11501
+rows_with_any_measurement: 117
+rows_with_size: 2786
+rows_supabase_qualified: 63
+stop_reason: none
+guardrails: public sitemap/product pages and anonymous Nuxt review endpoints only; no 429/captcha/WAF/auth challenge encountered
