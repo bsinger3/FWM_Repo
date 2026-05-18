@@ -1,9 +1,9 @@
 {
   "title": "Missacc Non-Amazon Scrape - 2026-05-17",
   "generated_on": "2026-05-17",
-  "generated_at": "2026-05-17T14:20:00-04:00",
+  "generated_at": "2026-05-18T15:53:37Z",
   "transcript_started_at": "2026-05-17T12:25:22-04:00",
-  "transcript_ended_at": "2026-05-17T14:20:00-04:00",
+  "transcript_ended_at": "2026-05-18T15:53:37Z",
   "timezone": "America/New_York",
   "metadata": {
     "source": "focused_handoff_transcript",
@@ -42,7 +42,7 @@
   "next_steps": [
     "Use the Missacc amazon-schema CSV as the Step 1 raw image-row output.",
     "Use the JSONL when actual text-only review records or review audit context are needed.",
-    "Keep unrelated worktree changes from other scrape threads separate from this Missacc commit."
+    "Remote Git, S3, and codex_chat_transcripts have been updated for this Missacc scrape."
   ],
   "messages": [
     {
@@ -100,6 +100,18 @@
     {
       "role": "assistant",
       "text": "Prepared this focused transcript for upload to the Supabase codex_chat_transcripts table, planned to sync the Missacc output data to S3, and planned to commit/push only the Missacc-scoped repo changes while avoiding unrelated dirty worktree files from other active scrape threads."
+    },
+    {
+      "role": "assistant",
+      "text": "Confirmed remote Git is current: local HEAD and origin/main both resolve to 79a919895de6f5098604b3120f7ce1e3abcfcd8b, whose subject is Update Missacc scrape completion timestamp. A direct git push reported Everything up-to-date, though the sandbox could not refresh the local origin/main ref lock."
+    },
+    {
+      "role": "assistant",
+      "text": "Synced /Users/briannasinger/Projects/FWM_Data to s3://fwm-scraping-data-briannasinger using the default AWS profile available on this Mac. Verified the S3 Missacc prefix contains the catalog snapshot, review_records JSONL, amazon-schema CSV, summary JSON, and legacy intake-schema files. The sync uploaded the completed Missacc claim to the S3 _claims prefix."
+    },
+    {
+      "role": "assistant",
+      "text": "Uploaded this transcript to Supabase table codex_chat_transcripts. First upload succeeded with chat_key codex-missacc-non-amazon-scrape-2026-05-17-756c532a9d7609e8 and message_count 14; the transcript was then refreshed to include the completed git/S3/transcripts update."
     }
   ]
 }
