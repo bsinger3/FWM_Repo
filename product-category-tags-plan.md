@@ -40,8 +40,39 @@ The migration creates:
 - `staging.normalize_product_url(raw_url text)`
 - `staging.category_from_product_signal(normalized_product_page_url text, observed_clothing_type_ids text[])`
 - `staging.refresh_product_category_staging()`
+- `staging.sync_product_category_staging_from_images()`
 
 `staging.refresh_product_category_staging()` can be rerun to rebuild staging product-page data from existing links in `public.images`. It uses `product_page_url_display` first and falls back to `monetized_product_url_display` when needed. Category assignment is based on URL slug signals plus existing `clothing_type_id` values as fallback evidence.
+
+For routine updates, use `staging.sync_product_category_staging_from_images()` instead of the full refresh. It reads all normalized product links from `public.images`, upserts `staging.product_pages`, updates `staging.product_page_image_sources`, and updates auto-classified tag links while preserving product pages that have already been manually reviewed.
+
+Standard procedure after every `public.images` load/update:
+
+```sql
+select *
+from staging.sync_product_category_staging_from_images();
+```
+
+Then review the returned `auto_review_products` count. If it is non-zero, inspect only the newly/automatically flagged rows:
+
+```sql
+select
+  id,
+  normalized_product_page_url,
+  product_title_raw,
+  brand,
+  mother_category_id,
+  product_category_raw,
+  observed_clothing_type_ids,
+  category_confidence,
+  category_evidence
+from staging.product_pages
+where (category_confidence = 'low' or needs_manual_review)
+  and not (coalesce(raw_metadata, '{}'::jsonb) ? 'manual_reviewed_at')
+order by updated_at desc;
+```
+
+Use `staging.refresh_product_category_staging()` only when deliberately rebuilding staging from scratch, because it truncates the staging product-page tables.
 
 Quality notes from the first staging QA pass:
 
