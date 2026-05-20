@@ -111,7 +111,7 @@ After the five queued claim files above:
 - `89thandmadison_com`: completed full public Shopify catalog scrape on 2026-05-06; output has 789 catalog-model rows from 949 scanned products.
 - `victoriassecret_com`: completed 2026-05-06 over the local 140-product `VSprodLinks` catalog. Output has 1,177 rows: 1,029 customer review image rows and 148 catalog model image rows.
 - `urbanoutfitters_com`: partial product-page scrape completed 2026-05-06 over the local `UO_BigImages.xlsx` `prodLinks` catalog. The public review API probe returned a DataDome interstitial, and product-page scraping stopped at the first HTTP 403 per guardrail. Output has 158 catalog-model rows from SSR product state before the stop.
-- `freepeople_com`: Bazaarvoice target from two sheet URLs; medium difficulty, likely adapter/API inspection.
+- `freepeople_com`: blocked on 2026-05-20. A single safe homepage probe returned HTTP 403 with DataDome/captcha-delivery challenge behavior, so no Bazaarvoice endpoint scrape was attempted. Output is a zero-row blocked summary.
 - `oddbirdco_com`: lower priority follow-up. It already has a recent full-catalog-attempted run with 68 rows and 14 qualified rows, so inspect before rerunning.
 
 ## Sheet Intake Added 2026-05-06
