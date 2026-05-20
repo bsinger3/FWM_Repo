@@ -1,0 +1,1561 @@
+-- Apply completed product category manual-review decisions from:
+-- /Users/briannasinger/Projects/FWM/FWM_Data/_reports/product_category_manual_review_completed_2026-05-20.csv
+--
+-- Decision semantics:
+--   1 = proposed new product-page category is correct
+--   0 = old_observed_clothing_type_ids is correct
+--   product not available = mark linked images as dead_link reports
+
+with decisions (
+  product_page_id,
+  manual_decision,
+  mother_category_id,
+  product_category_raw,
+  tag_ids,
+  category_evidence,
+  category_confidence,
+  needs_manual_review
+) as (
+  values
+  (
+  'b2eeea0e-c00b-4faa-bdea-3b7cde71b320'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '01bda79a-5d38-40c3-be20-eb102200a79f'::uuid,
+  '0',
+  'tops',
+  'shirt',
+  array['shirt', 'tops']::text[],
+  'manual review: old observed category accepted (shirt)',
+  'high',
+  false
+),
+(
+  '3fb75f3b-bb87-4f20-a59f-9f0bb9ec1dd9'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '39b1355e-0406-4fd0-9cb1-e07eda30a173'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '7558822e-c55f-4ca2-8a81-c0b347b6aba5'::uuid,
+  '0',
+  'jumpsuits-rompers',
+  'jumpsuit',
+  array['jumpsuit']::text[],
+  'manual review: old observed category accepted (jumpsuit)',
+  'high',
+  false
+),
+(
+  '0069f409-5dd1-4473-81e0-b4b054de50c0'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '73c4caed-e14b-4d6b-91f4-d87055c18122'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '2b1b9492-d5c7-49a7-bdaa-f2e9d5a2e2b0'::uuid,
+  '0',
+  'tops',
+  'shirt',
+  array['shirt', 'tops']::text[],
+  'manual review: old observed category accepted (shirt)',
+  'high',
+  false
+),
+(
+  '663ff85c-dce7-48cf-9126-7cf5fa1f8a7d'::uuid,
+  '0',
+  'tops',
+  'shirt',
+  array['shirt', 'tops']::text[],
+  'manual review: old observed category accepted (shirt)',
+  'high',
+  false
+),
+(
+  'a94755c6-147e-4cbc-bda6-d987f22c475f'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'b5b10837-0b9a-49de-a57b-5b3afd605367'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'c6873180-c543-4a46-8f75-fc025e75e14d'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '59a099f5-18a4-489c-b36a-9b7f8b9c4781'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '48f1c5ce-411e-446d-b905-687a18d2133b'::uuid,
+  '0',
+  'tops',
+  'shirt',
+  array['shirt', 'tops']::text[],
+  'manual review: old observed category accepted (shirt)',
+  'high',
+  false
+),
+(
+  '0a11a6ce-a040-4c4e-9177-9c1732dc5540'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '68f21768-c55b-43be-be91-fa469d344d9a'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '5027cade-95a4-432a-adc2-e7ec40069943'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '7ce2f254-af19-4ebb-ae50-0072a86f6bd6'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '175ac11d-722e-4928-91ad-98a641a12fef'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '02a0225e-9746-4ad3-acdc-a46257d2a15c'::uuid,
+  '0',
+  'tops',
+  'shirt',
+  array['shirt', 'tops']::text[],
+  'manual review: old observed category accepted (shirt)',
+  'high',
+  false
+),
+(
+  '6ed57176-bf48-44fb-b414-663b38d1d073'::uuid,
+  '0',
+  'tops',
+  'vest',
+  array['vest', 'tops']::text[],
+  'manual review: old observed category accepted (vest)',
+  'high',
+  false
+),
+(
+  '5c64b2fa-1010-42cd-ab78-2b3404097d62'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '0bc388cf-e205-4918-8947-32f2d984bd9b'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '3bd29092-5434-41ff-82db-9a7380936977'::uuid,
+  '0',
+  'tops',
+  'blouse',
+  array['blouse', 'tops']::text[],
+  'manual review: old observed category accepted (blouse)',
+  'high',
+  false
+),
+(
+  '245d4839-a0a9-4acc-bda0-035b238463eb'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '6a2f08cd-4503-46c4-ac26-4649f4020e66'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '5d859c9e-b3d7-46fd-bd00-c64ef0f0d63d'::uuid,
+  '0',
+  'tops',
+  'shirt',
+  array['shirt', 'tops']::text[],
+  'manual review: old observed category accepted (shirt)',
+  'high',
+  false
+),
+(
+  'dd217d3c-c5f1-49fb-9856-e468e2d8bf53'::uuid,
+  '0',
+  'jumpsuits-rompers',
+  'jumpsuit',
+  array['jumpsuit']::text[],
+  'manual review: old observed category accepted (jumpsuit)',
+  'high',
+  false
+),
+(
+  '407eea61-71f0-4425-bcaa-f9cd5f9e9179'::uuid,
+  '0',
+  'jumpsuits-rompers',
+  'jumpsuit',
+  array['jumpsuit']::text[],
+  'manual review: old observed category accepted (jumpsuit)',
+  'high',
+  false
+),
+(
+  '4776cae1-095c-48e0-a563-bf943538c8ee'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '97a78fee-54ed-4b37-9d11-1a64d43f3aa5'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '57585511-a036-4e20-8b03-3a0532c600cf'::uuid,
+  '0',
+  'tops',
+  'blouse',
+  array['blouse', 'tops']::text[],
+  'manual review: old observed category accepted (blouse)',
+  'high',
+  false
+),
+(
+  '8ab2212a-b4c4-40f8-ae98-d462ab68589c'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  'e53e87fc-9ca2-4250-8009-abd20dbd0e23'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '24d798c5-20b3-492c-8791-68c1fe10627b'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '9fd1e807-7240-4d14-8767-45190c30d349'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '07ae723f-4ae9-45e8-ac86-25d1d454a9d6'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  'ca66684b-9097-49ec-9dc5-c413482cbddc'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '294f4ded-5dc5-489f-91a6-13e61b6d4ba6'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'a5a7537c-d03d-4048-8eaa-581d15f17ce1'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '64ad1199-538f-42df-bf9b-fc9c44419374'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '8c3f6d9c-de28-4753-a658-b27d52edeb7d'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '4b1421b5-fe3b-46c3-beee-550deb75bb4e'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'e97f9245-3dd7-4833-af28-01438db55d3a'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '1faae1c8-6fd9-4ea2-9554-1b244b3f1941'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'b043e12d-6222-4019-be99-90a6598d6352'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '5c3b1cd0-9bb2-441d-9e89-2ba05c97cbae'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '66e35e0e-fbce-4191-83db-90297c4577bb'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '192b972f-acd9-424c-a728-bdb742367223'::uuid,
+  '0',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: old observed category accepted (dress)',
+  'high',
+  false
+),
+(
+  '55db7f41-342d-4efa-9e21-0388cffd89f6'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '196e5c86-e1f3-4c4f-8298-2b2301b60909'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '8a5af276-afac-486e-8bc8-d43668ee2d82'::uuid,
+  '0',
+  'tops',
+  'blouse',
+  array['blouse', 'tops']::text[],
+  'manual review: old observed category accepted (blouse)',
+  'high',
+  false
+),
+(
+  'b68c4f49-fdeb-4c63-a7c6-31b4eec65ae3'::uuid,
+  '1',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: proposed category accepted',
+  'high',
+  false
+),
+(
+  '19d1ad7d-8416-4997-81ea-2882bab64fa9'::uuid,
+  '0',
+  'tops',
+  'tank',
+  array['tank', 'tops']::text[],
+  'manual review: old observed category accepted (tank)',
+  'high',
+  false
+),
+(
+  'b6776fa3-0f2e-4668-9f8b-9c42b9ed40fe'::uuid,
+  '0',
+  'jumpsuits-rompers',
+  'jumpsuit',
+  array['jumpsuit']::text[],
+  'manual review: old observed category accepted (jumpsuit)',
+  'high',
+  false
+),
+(
+  'fc97e2a6-0af3-4b8f-9508-7daa2c468136'::uuid,
+  '1',
+  'dresses',
+  'dress',
+  array['dress', 'dresses']::text[],
+  'manual review: proposed category accepted',
+  'high',
+  false
+),
+(
+  '9cd2b2e9-5e26-413e-95c3-48169ed490ac'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '56a8b55b-8b73-406a-b15d-fc9c9ba8cbf2'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'e5fe1974-f4f4-4198-8ecd-5393aa6f3931'::uuid,
+  '1',
+  'intimates',
+  'bra',
+  array['bra']::text[],
+  'manual review: proposed category accepted',
+  'high',
+  false
+),
+(
+  '2873fdd0-85cd-43c2-b327-ba3752cfaa39'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '88d5d4e1-5acb-4413-b73c-1b95648c828f'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'b325fb72-afc1-49a6-a7aa-54e22d24b727'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '4457f249-da26-40eb-b47a-bcf881d03d4b'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '17e0a8e2-a261-4ca4-a46f-806770f66639'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  '122f1904-e4f6-4d2c-81c7-22f6d4eb1b6a'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'e0abdd4e-ab44-44ba-adbe-2d87e55476f0'::uuid,
+  '0',
+  'tops',
+  'top',
+  array['top', 'tops']::text[],
+  'manual review: old observed category accepted (top)',
+  'high',
+  false
+),
+(
+  'b4d34977-11af-4db2-b33e-b2ef081b1d9b'::uuid,
+  '0',
+  'tops',
+  'shirt',
+  array['shirt', 'tops']::text[],
+  'manual review: old observed category accepted (shirt)',
+  'high',
+  false
+),
+(
+  '6f4914ea-4f44-41fc-89a9-09cef6cb1716'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '21bdbe81-0618-402c-bbef-df83fda4410a'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '2144e7b3-b448-4213-b8c7-24fed0e912aa'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '96a64ce7-ff2b-4a6d-af3d-7941cafcfdc9'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '1b106d98-8183-4645-b499-7210450ce1e7'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '9847ec48-3903-4d15-911f-77f175a6f35d'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '98cd4c58-6602-4d99-b00a-c13bd5283c88'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '9e361681-35c6-4dfe-bd94-79306e3cb104'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '1afbfb02-56b7-4f57-8505-7bbff51b4e00'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  'dcd9f044-1727-4be1-9752-a85cfd235ec3'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '40e7c937-c8fa-435c-91f7-3363c52f8e44'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '4c97782a-24e8-4016-965f-5c18d2dc05c0'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '3e50892d-c8cd-4c53-b530-de77f973ad0b'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '508a0e0c-6f90-4a74-b5da-b698e31cf736'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '528dd1ba-7e2f-4c9b-896b-d9b852795356'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '3d429c6e-9480-46bb-8789-5e7fc589f122'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '3a4c81bf-6618-4a34-a24d-9808cf1a83cb'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '399764d8-cc98-4dd9-b2d7-c29411d65f22'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '36038bfc-1821-4748-a838-0b1b3ac07256'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '6130df2a-4315-4485-a287-98d72dcfd265'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '62995c2f-d4a8-4396-bd82-78dfc0c7b149'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '3587b89c-8e5f-488c-b909-376fdf6e4fa7'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '341d4380-3b45-4a87-8818-07e94adba8e5'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '30fb96b2-c1d7-48e3-8067-e024d2a8d776'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '66f9d00e-4efc-42be-902c-79fb80967f54'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '6bce866b-ae67-4bd2-9191-3538308a49bb'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '6d5f5b50-dfff-4a33-8ef0-34ac30b55345'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '2722e094-2e32-4bbc-a8fd-92a2204dd55d'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '002b53de-e857-4852-9837-9e1b33729719'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '14442589-8d80-4416-b0df-a65bdd40667c'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  'b7e7d033-4eca-4cab-b380-3019956e4f53'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  'bcb6efda-4e4a-4977-aba7-2e944ba14f86'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '10a22515-4603-437d-9e68-da6632d9501a'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  'cad772e0-ca21-4840-8ba1-d8d31cb53c84'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  'd6ef8e60-ef97-455a-9d04-9d60cdc6f5ad'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '0e6c91a6-1791-44e8-abf8-0bbe4d72e642'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  'e5fbc8f2-cbf6-4343-8336-a67ca75aa85f'::uuid,
+  '0',
+  'bottoms',
+  'jeans',
+  array['jeans', 'bottoms']::text[],
+  'manual review: old observed category accepted (jeans)',
+  'high',
+  false
+),
+(
+  '42197025-17b9-48cd-b906-d04ec6ce0522'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '4ddb445e-a607-4367-8db7-c6b980050b4b'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  'd07c03ed-73c9-410c-a089-2940a2b2e8a7'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '094e8eb0-ddcd-44d4-a35e-219387e5fadd'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '6a1155cf-189f-4fbd-a034-e32cec3a811a'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '5d430ded-5f6b-4b00-b8ec-479b3af2ae98'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '012631d4-05d8-4959-adb2-71feaf738675'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '6f7d52b8-4c5c-4c21-9cfa-667cd37a4ba9'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '24734193-9be8-4d41-b7c5-c0057dfe777f'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '3c99caf1-fda4-446b-9936-1d081cbd20e8'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '1fe5dd31-aa11-460d-a2de-7a7757e8d6e9'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '6bf3a603-a684-4932-a83d-dc90cdd1e375'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '2ed4809f-b50e-41de-87b3-57b9405082fc'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  'd91beb48-5c75-4d11-a893-e38924069c3d'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  'fc6da0cb-9b74-4346-8909-a97302727c0f'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  'f1d5da3f-f885-4dbf-9582-4aaa4868b4d5'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '24114b14-0cdc-43cc-998e-a8b729647c99'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '95bc19be-ae7a-4f60-aa11-33697b8ff0c5'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+),
+(
+  '7b743f8c-5a9a-4669-b5e5-5c8069f2be89'::uuid,
+  'product no longer available.',
+  'source-review',
+  'archived-product-page-needs-review',
+  array['archived-product-page-needs-review']::text[],
+  'manual review: product URL led to unavailable/no-product page',
+  'low',
+  true
+)
+)
+update staging.product_pages pp
+set
+  mother_category_id = d.mother_category_id,
+  product_category_raw = d.product_category_raw,
+  category_evidence = d.category_evidence,
+  category_confidence = d.category_confidence,
+  needs_manual_review = d.needs_manual_review,
+  raw_metadata = coalesce(pp.raw_metadata, '{}'::jsonb) || jsonb_build_object(
+    'manual_review_decision', d.manual_decision,
+    'manual_reviewed_at', now()
+  ),
+  updated_at = now()
+from decisions d
+where pp.id = d.product_page_id;
+
+with decisions (product_page_id, tag_ids) as (
+  values
+  ('b2eeea0e-c00b-4faa-bdea-3b7cde71b320'::uuid, array['dress', 'dresses']::text[]),
+  ('01bda79a-5d38-40c3-be20-eb102200a79f'::uuid, array['shirt', 'tops']::text[]),
+  ('3fb75f3b-bb87-4f20-a59f-9f0bb9ec1dd9'::uuid, array['top', 'tops']::text[]),
+  ('39b1355e-0406-4fd0-9cb1-e07eda30a173'::uuid, array['dress', 'dresses']::text[]),
+  ('7558822e-c55f-4ca2-8a81-c0b347b6aba5'::uuid, array['jumpsuit']::text[]),
+  ('0069f409-5dd1-4473-81e0-b4b054de50c0'::uuid, array['top', 'tops']::text[]),
+  ('73c4caed-e14b-4d6b-91f4-d87055c18122'::uuid, array['top', 'tops']::text[]),
+  ('2b1b9492-d5c7-49a7-bdaa-f2e9d5a2e2b0'::uuid, array['shirt', 'tops']::text[]),
+  ('663ff85c-dce7-48cf-9126-7cf5fa1f8a7d'::uuid, array['shirt', 'tops']::text[]),
+  ('a94755c6-147e-4cbc-bda6-d987f22c475f'::uuid, array['top', 'tops']::text[]),
+  ('b5b10837-0b9a-49de-a57b-5b3afd605367'::uuid, array['top', 'tops']::text[]),
+  ('c6873180-c543-4a46-8f75-fc025e75e14d'::uuid, array['dress', 'dresses']::text[]),
+  ('59a099f5-18a4-489c-b36a-9b7f8b9c4781'::uuid, array['dress', 'dresses']::text[]),
+  ('48f1c5ce-411e-446d-b905-687a18d2133b'::uuid, array['shirt', 'tops']::text[]),
+  ('0a11a6ce-a040-4c4e-9177-9c1732dc5540'::uuid, array['top', 'tops']::text[]),
+  ('68f21768-c55b-43be-be91-fa469d344d9a'::uuid, array['top', 'tops']::text[]),
+  ('5027cade-95a4-432a-adc2-e7ec40069943'::uuid, array['top', 'tops']::text[]),
+  ('7ce2f254-af19-4ebb-ae50-0072a86f6bd6'::uuid, array['top', 'tops']::text[]),
+  ('175ac11d-722e-4928-91ad-98a641a12fef'::uuid, array['top', 'tops']::text[]),
+  ('02a0225e-9746-4ad3-acdc-a46257d2a15c'::uuid, array['shirt', 'tops']::text[]),
+  ('6ed57176-bf48-44fb-b414-663b38d1d073'::uuid, array['vest', 'tops']::text[]),
+  ('5c64b2fa-1010-42cd-ab78-2b3404097d62'::uuid, array['top', 'tops']::text[]),
+  ('0bc388cf-e205-4918-8947-32f2d984bd9b'::uuid, array['top', 'tops']::text[]),
+  ('3bd29092-5434-41ff-82db-9a7380936977'::uuid, array['blouse', 'tops']::text[]),
+  ('245d4839-a0a9-4acc-bda0-035b238463eb'::uuid, array['dress', 'dresses']::text[]),
+  ('6a2f08cd-4503-46c4-ac26-4649f4020e66'::uuid, array['dress', 'dresses']::text[]),
+  ('5d859c9e-b3d7-46fd-bd00-c64ef0f0d63d'::uuid, array['shirt', 'tops']::text[]),
+  ('dd217d3c-c5f1-49fb-9856-e468e2d8bf53'::uuid, array['jumpsuit']::text[]),
+  ('407eea61-71f0-4425-bcaa-f9cd5f9e9179'::uuid, array['jumpsuit']::text[]),
+  ('4776cae1-095c-48e0-a563-bf943538c8ee'::uuid, array['top', 'tops']::text[]),
+  ('97a78fee-54ed-4b37-9d11-1a64d43f3aa5'::uuid, array['dress', 'dresses']::text[]),
+  ('57585511-a036-4e20-8b03-3a0532c600cf'::uuid, array['blouse', 'tops']::text[]),
+  ('8ab2212a-b4c4-40f8-ae98-d462ab68589c'::uuid, array['dress', 'dresses']::text[]),
+  ('e53e87fc-9ca2-4250-8009-abd20dbd0e23'::uuid, array['top', 'tops']::text[]),
+  ('24d798c5-20b3-492c-8791-68c1fe10627b'::uuid, array['dress', 'dresses']::text[]),
+  ('9fd1e807-7240-4d14-8767-45190c30d349'::uuid, array['dress', 'dresses']::text[]),
+  ('07ae723f-4ae9-45e8-ac86-25d1d454a9d6'::uuid, array['dress', 'dresses']::text[]),
+  ('ca66684b-9097-49ec-9dc5-c413482cbddc'::uuid, array['dress', 'dresses']::text[]),
+  ('294f4ded-5dc5-489f-91a6-13e61b6d4ba6'::uuid, array['top', 'tops']::text[]),
+  ('a5a7537c-d03d-4048-8eaa-581d15f17ce1'::uuid, array['top', 'tops']::text[]),
+  ('64ad1199-538f-42df-bf9b-fc9c44419374'::uuid, array['dress', 'dresses']::text[]),
+  ('8c3f6d9c-de28-4753-a658-b27d52edeb7d'::uuid, array['dress', 'dresses']::text[]),
+  ('4b1421b5-fe3b-46c3-beee-550deb75bb4e'::uuid, array['top', 'tops']::text[]),
+  ('e97f9245-3dd7-4833-af28-01438db55d3a'::uuid, array['top', 'tops']::text[]),
+  ('1faae1c8-6fd9-4ea2-9554-1b244b3f1941'::uuid, array['top', 'tops']::text[]),
+  ('b043e12d-6222-4019-be99-90a6598d6352'::uuid, array['top', 'tops']::text[]),
+  ('5c3b1cd0-9bb2-441d-9e89-2ba05c97cbae'::uuid, array['dress', 'dresses']::text[]),
+  ('66e35e0e-fbce-4191-83db-90297c4577bb'::uuid, array['dress', 'dresses']::text[]),
+  ('192b972f-acd9-424c-a728-bdb742367223'::uuid, array['dress', 'dresses']::text[]),
+  ('55db7f41-342d-4efa-9e21-0388cffd89f6'::uuid, array['top', 'tops']::text[]),
+  ('196e5c86-e1f3-4c4f-8298-2b2301b60909'::uuid, array['top', 'tops']::text[]),
+  ('8a5af276-afac-486e-8bc8-d43668ee2d82'::uuid, array['blouse', 'tops']::text[]),
+  ('b68c4f49-fdeb-4c63-a7c6-31b4eec65ae3'::uuid, array['jeans', 'bottoms']::text[]),
+  ('19d1ad7d-8416-4997-81ea-2882bab64fa9'::uuid, array['tank', 'tops']::text[]),
+  ('b6776fa3-0f2e-4668-9f8b-9c42b9ed40fe'::uuid, array['jumpsuit']::text[]),
+  ('fc97e2a6-0af3-4b8f-9508-7daa2c468136'::uuid, array['dress', 'dresses']::text[]),
+  ('9cd2b2e9-5e26-413e-95c3-48169ed490ac'::uuid, array['top', 'tops']::text[]),
+  ('56a8b55b-8b73-406a-b15d-fc9c9ba8cbf2'::uuid, array['top', 'tops']::text[]),
+  ('e5fe1974-f4f4-4198-8ecd-5393aa6f3931'::uuid, array['bra']::text[]),
+  ('2873fdd0-85cd-43c2-b327-ba3752cfaa39'::uuid, array['top', 'tops']::text[]),
+  ('88d5d4e1-5acb-4413-b73c-1b95648c828f'::uuid, array['top', 'tops']::text[]),
+  ('b325fb72-afc1-49a6-a7aa-54e22d24b727'::uuid, array['top', 'tops']::text[]),
+  ('4457f249-da26-40eb-b47a-bcf881d03d4b'::uuid, array['top', 'tops']::text[]),
+  ('17e0a8e2-a261-4ca4-a46f-806770f66639'::uuid, array['top', 'tops']::text[]),
+  ('122f1904-e4f6-4d2c-81c7-22f6d4eb1b6a'::uuid, array['top', 'tops']::text[]),
+  ('e0abdd4e-ab44-44ba-adbe-2d87e55476f0'::uuid, array['top', 'tops']::text[]),
+  ('b4d34977-11af-4db2-b33e-b2ef081b1d9b'::uuid, array['shirt', 'tops']::text[]),
+  ('6f4914ea-4f44-41fc-89a9-09cef6cb1716'::uuid, array['jeans', 'bottoms']::text[]),
+  ('21bdbe81-0618-402c-bbef-df83fda4410a'::uuid, array['jeans', 'bottoms']::text[]),
+  ('2144e7b3-b448-4213-b8c7-24fed0e912aa'::uuid, array['jeans', 'bottoms']::text[]),
+  ('96a64ce7-ff2b-4a6d-af3d-7941cafcfdc9'::uuid, array['jeans', 'bottoms']::text[]),
+  ('1b106d98-8183-4645-b499-7210450ce1e7'::uuid, array['jeans', 'bottoms']::text[]),
+  ('9847ec48-3903-4d15-911f-77f175a6f35d'::uuid, array['jeans', 'bottoms']::text[]),
+  ('98cd4c58-6602-4d99-b00a-c13bd5283c88'::uuid, array['jeans', 'bottoms']::text[]),
+  ('9e361681-35c6-4dfe-bd94-79306e3cb104'::uuid, array['jeans', 'bottoms']::text[]),
+  ('1afbfb02-56b7-4f57-8505-7bbff51b4e00'::uuid, array['jeans', 'bottoms']::text[]),
+  ('dcd9f044-1727-4be1-9752-a85cfd235ec3'::uuid, array['jeans', 'bottoms']::text[]),
+  ('40e7c937-c8fa-435c-91f7-3363c52f8e44'::uuid, array['jeans', 'bottoms']::text[]),
+  ('4c97782a-24e8-4016-965f-5c18d2dc05c0'::uuid, array['jeans', 'bottoms']::text[]),
+  ('3e50892d-c8cd-4c53-b530-de77f973ad0b'::uuid, array['jeans', 'bottoms']::text[]),
+  ('508a0e0c-6f90-4a74-b5da-b698e31cf736'::uuid, array['jeans', 'bottoms']::text[]),
+  ('528dd1ba-7e2f-4c9b-896b-d9b852795356'::uuid, array['jeans', 'bottoms']::text[]),
+  ('3d429c6e-9480-46bb-8789-5e7fc589f122'::uuid, array['jeans', 'bottoms']::text[]),
+  ('3a4c81bf-6618-4a34-a24d-9808cf1a83cb'::uuid, array['jeans', 'bottoms']::text[]),
+  ('399764d8-cc98-4dd9-b2d7-c29411d65f22'::uuid, array['jeans', 'bottoms']::text[]),
+  ('36038bfc-1821-4748-a838-0b1b3ac07256'::uuid, array['jeans', 'bottoms']::text[]),
+  ('6130df2a-4315-4485-a287-98d72dcfd265'::uuid, array['jeans', 'bottoms']::text[]),
+  ('62995c2f-d4a8-4396-bd82-78dfc0c7b149'::uuid, array['jeans', 'bottoms']::text[]),
+  ('3587b89c-8e5f-488c-b909-376fdf6e4fa7'::uuid, array['jeans', 'bottoms']::text[]),
+  ('341d4380-3b45-4a87-8818-07e94adba8e5'::uuid, array['jeans', 'bottoms']::text[]),
+  ('30fb96b2-c1d7-48e3-8067-e024d2a8d776'::uuid, array['jeans', 'bottoms']::text[]),
+  ('66f9d00e-4efc-42be-902c-79fb80967f54'::uuid, array['jeans', 'bottoms']::text[]),
+  ('6bce866b-ae67-4bd2-9191-3538308a49bb'::uuid, array['jeans', 'bottoms']::text[]),
+  ('6d5f5b50-dfff-4a33-8ef0-34ac30b55345'::uuid, array['jeans', 'bottoms']::text[]),
+  ('2722e094-2e32-4bbc-a8fd-92a2204dd55d'::uuid, array['jeans', 'bottoms']::text[]),
+  ('002b53de-e857-4852-9837-9e1b33729719'::uuid, array['jeans', 'bottoms']::text[]),
+  ('14442589-8d80-4416-b0df-a65bdd40667c'::uuid, array['jeans', 'bottoms']::text[]),
+  ('b7e7d033-4eca-4cab-b380-3019956e4f53'::uuid, array['jeans', 'bottoms']::text[]),
+  ('bcb6efda-4e4a-4977-aba7-2e944ba14f86'::uuid, array['jeans', 'bottoms']::text[]),
+  ('10a22515-4603-437d-9e68-da6632d9501a'::uuid, array['jeans', 'bottoms']::text[]),
+  ('cad772e0-ca21-4840-8ba1-d8d31cb53c84'::uuid, array['jeans', 'bottoms']::text[]),
+  ('d6ef8e60-ef97-455a-9d04-9d60cdc6f5ad'::uuid, array['jeans', 'bottoms']::text[]),
+  ('0e6c91a6-1791-44e8-abf8-0bbe4d72e642'::uuid, array['jeans', 'bottoms']::text[]),
+  ('e5fbc8f2-cbf6-4343-8336-a67ca75aa85f'::uuid, array['jeans', 'bottoms']::text[]),
+  ('42197025-17b9-48cd-b906-d04ec6ce0522'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('4ddb445e-a607-4367-8db7-c6b980050b4b'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('d07c03ed-73c9-410c-a089-2940a2b2e8a7'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('094e8eb0-ddcd-44d4-a35e-219387e5fadd'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('6a1155cf-189f-4fbd-a034-e32cec3a811a'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('5d430ded-5f6b-4b00-b8ec-479b3af2ae98'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('012631d4-05d8-4959-adb2-71feaf738675'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('6f7d52b8-4c5c-4c21-9cfa-667cd37a4ba9'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('24734193-9be8-4d41-b7c5-c0057dfe777f'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('3c99caf1-fda4-446b-9936-1d081cbd20e8'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('1fe5dd31-aa11-460d-a2de-7a7757e8d6e9'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('6bf3a603-a684-4932-a83d-dc90cdd1e375'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('2ed4809f-b50e-41de-87b3-57b9405082fc'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('d91beb48-5c75-4d11-a893-e38924069c3d'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('fc6da0cb-9b74-4346-8909-a97302727c0f'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('f1d5da3f-f885-4dbf-9582-4aaa4868b4d5'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('24114b14-0cdc-43cc-998e-a8b729647c99'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('95bc19be-ae7a-4f60-aa11-33697b8ff0c5'::uuid, array['archived-product-page-needs-review']::text[]),
+  ('7b743f8c-5a9a-4669-b5e5-5c8069f2be89'::uuid, array['archived-product-page-needs-review']::text[])
+)
+delete from staging.product_page_clothing_type_tags pct
+using decisions d
+where pct.product_page_id = d.product_page_id;
+
+with decisions (product_page_id, tag_ids, evidence) as (
+  values
+  ('b2eeea0e-c00b-4faa-bdea-3b7cde71b320'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('01bda79a-5d38-40c3-be20-eb102200a79f'::uuid, array['shirt', 'tops']::text[], 'manual review: old observed category accepted (shirt)'),
+  ('3fb75f3b-bb87-4f20-a59f-9f0bb9ec1dd9'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('39b1355e-0406-4fd0-9cb1-e07eda30a173'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('7558822e-c55f-4ca2-8a81-c0b347b6aba5'::uuid, array['jumpsuit']::text[], 'manual review: old observed category accepted (jumpsuit)'),
+  ('0069f409-5dd1-4473-81e0-b4b054de50c0'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('73c4caed-e14b-4d6b-91f4-d87055c18122'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('2b1b9492-d5c7-49a7-bdaa-f2e9d5a2e2b0'::uuid, array['shirt', 'tops']::text[], 'manual review: old observed category accepted (shirt)'),
+  ('663ff85c-dce7-48cf-9126-7cf5fa1f8a7d'::uuid, array['shirt', 'tops']::text[], 'manual review: old observed category accepted (shirt)'),
+  ('a94755c6-147e-4cbc-bda6-d987f22c475f'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('b5b10837-0b9a-49de-a57b-5b3afd605367'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('c6873180-c543-4a46-8f75-fc025e75e14d'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('59a099f5-18a4-489c-b36a-9b7f8b9c4781'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('48f1c5ce-411e-446d-b905-687a18d2133b'::uuid, array['shirt', 'tops']::text[], 'manual review: old observed category accepted (shirt)'),
+  ('0a11a6ce-a040-4c4e-9177-9c1732dc5540'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('68f21768-c55b-43be-be91-fa469d344d9a'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('5027cade-95a4-432a-adc2-e7ec40069943'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('7ce2f254-af19-4ebb-ae50-0072a86f6bd6'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('175ac11d-722e-4928-91ad-98a641a12fef'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('02a0225e-9746-4ad3-acdc-a46257d2a15c'::uuid, array['shirt', 'tops']::text[], 'manual review: old observed category accepted (shirt)'),
+  ('6ed57176-bf48-44fb-b414-663b38d1d073'::uuid, array['vest', 'tops']::text[], 'manual review: old observed category accepted (vest)'),
+  ('5c64b2fa-1010-42cd-ab78-2b3404097d62'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('0bc388cf-e205-4918-8947-32f2d984bd9b'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('3bd29092-5434-41ff-82db-9a7380936977'::uuid, array['blouse', 'tops']::text[], 'manual review: old observed category accepted (blouse)'),
+  ('245d4839-a0a9-4acc-bda0-035b238463eb'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('6a2f08cd-4503-46c4-ac26-4649f4020e66'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('5d859c9e-b3d7-46fd-bd00-c64ef0f0d63d'::uuid, array['shirt', 'tops']::text[], 'manual review: old observed category accepted (shirt)'),
+  ('dd217d3c-c5f1-49fb-9856-e468e2d8bf53'::uuid, array['jumpsuit']::text[], 'manual review: old observed category accepted (jumpsuit)'),
+  ('407eea61-71f0-4425-bcaa-f9cd5f9e9179'::uuid, array['jumpsuit']::text[], 'manual review: old observed category accepted (jumpsuit)'),
+  ('4776cae1-095c-48e0-a563-bf943538c8ee'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('97a78fee-54ed-4b37-9d11-1a64d43f3aa5'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('57585511-a036-4e20-8b03-3a0532c600cf'::uuid, array['blouse', 'tops']::text[], 'manual review: old observed category accepted (blouse)'),
+  ('8ab2212a-b4c4-40f8-ae98-d462ab68589c'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('e53e87fc-9ca2-4250-8009-abd20dbd0e23'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('24d798c5-20b3-492c-8791-68c1fe10627b'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('9fd1e807-7240-4d14-8767-45190c30d349'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('07ae723f-4ae9-45e8-ac86-25d1d454a9d6'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('ca66684b-9097-49ec-9dc5-c413482cbddc'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('294f4ded-5dc5-489f-91a6-13e61b6d4ba6'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('a5a7537c-d03d-4048-8eaa-581d15f17ce1'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('64ad1199-538f-42df-bf9b-fc9c44419374'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('8c3f6d9c-de28-4753-a658-b27d52edeb7d'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('4b1421b5-fe3b-46c3-beee-550deb75bb4e'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('e97f9245-3dd7-4833-af28-01438db55d3a'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('1faae1c8-6fd9-4ea2-9554-1b244b3f1941'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('b043e12d-6222-4019-be99-90a6598d6352'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('5c3b1cd0-9bb2-441d-9e89-2ba05c97cbae'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('66e35e0e-fbce-4191-83db-90297c4577bb'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('192b972f-acd9-424c-a728-bdb742367223'::uuid, array['dress', 'dresses']::text[], 'manual review: old observed category accepted (dress)'),
+  ('55db7f41-342d-4efa-9e21-0388cffd89f6'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('196e5c86-e1f3-4c4f-8298-2b2301b60909'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('8a5af276-afac-486e-8bc8-d43668ee2d82'::uuid, array['blouse', 'tops']::text[], 'manual review: old observed category accepted (blouse)'),
+  ('b68c4f49-fdeb-4c63-a7c6-31b4eec65ae3'::uuid, array['jeans', 'bottoms']::text[], 'manual review: proposed category accepted'),
+  ('19d1ad7d-8416-4997-81ea-2882bab64fa9'::uuid, array['tank', 'tops']::text[], 'manual review: old observed category accepted (tank)'),
+  ('b6776fa3-0f2e-4668-9f8b-9c42b9ed40fe'::uuid, array['jumpsuit']::text[], 'manual review: old observed category accepted (jumpsuit)'),
+  ('fc97e2a6-0af3-4b8f-9508-7daa2c468136'::uuid, array['dress', 'dresses']::text[], 'manual review: proposed category accepted'),
+  ('9cd2b2e9-5e26-413e-95c3-48169ed490ac'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('56a8b55b-8b73-406a-b15d-fc9c9ba8cbf2'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('e5fe1974-f4f4-4198-8ecd-5393aa6f3931'::uuid, array['bra']::text[], 'manual review: proposed category accepted'),
+  ('2873fdd0-85cd-43c2-b327-ba3752cfaa39'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('88d5d4e1-5acb-4413-b73c-1b95648c828f'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('b325fb72-afc1-49a6-a7aa-54e22d24b727'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('4457f249-da26-40eb-b47a-bcf881d03d4b'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('17e0a8e2-a261-4ca4-a46f-806770f66639'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('122f1904-e4f6-4d2c-81c7-22f6d4eb1b6a'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('e0abdd4e-ab44-44ba-adbe-2d87e55476f0'::uuid, array['top', 'tops']::text[], 'manual review: old observed category accepted (top)'),
+  ('b4d34977-11af-4db2-b33e-b2ef081b1d9b'::uuid, array['shirt', 'tops']::text[], 'manual review: old observed category accepted (shirt)'),
+  ('6f4914ea-4f44-41fc-89a9-09cef6cb1716'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('21bdbe81-0618-402c-bbef-df83fda4410a'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('2144e7b3-b448-4213-b8c7-24fed0e912aa'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('96a64ce7-ff2b-4a6d-af3d-7941cafcfdc9'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('1b106d98-8183-4645-b499-7210450ce1e7'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('9847ec48-3903-4d15-911f-77f175a6f35d'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('98cd4c58-6602-4d99-b00a-c13bd5283c88'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('9e361681-35c6-4dfe-bd94-79306e3cb104'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('1afbfb02-56b7-4f57-8505-7bbff51b4e00'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('dcd9f044-1727-4be1-9752-a85cfd235ec3'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('40e7c937-c8fa-435c-91f7-3363c52f8e44'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('4c97782a-24e8-4016-965f-5c18d2dc05c0'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('3e50892d-c8cd-4c53-b530-de77f973ad0b'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('508a0e0c-6f90-4a74-b5da-b698e31cf736'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('528dd1ba-7e2f-4c9b-896b-d9b852795356'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('3d429c6e-9480-46bb-8789-5e7fc589f122'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('3a4c81bf-6618-4a34-a24d-9808cf1a83cb'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('399764d8-cc98-4dd9-b2d7-c29411d65f22'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('36038bfc-1821-4748-a838-0b1b3ac07256'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('6130df2a-4315-4485-a287-98d72dcfd265'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('62995c2f-d4a8-4396-bd82-78dfc0c7b149'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('3587b89c-8e5f-488c-b909-376fdf6e4fa7'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('341d4380-3b45-4a87-8818-07e94adba8e5'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('30fb96b2-c1d7-48e3-8067-e024d2a8d776'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('66f9d00e-4efc-42be-902c-79fb80967f54'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('6bce866b-ae67-4bd2-9191-3538308a49bb'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('6d5f5b50-dfff-4a33-8ef0-34ac30b55345'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('2722e094-2e32-4bbc-a8fd-92a2204dd55d'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('002b53de-e857-4852-9837-9e1b33729719'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('14442589-8d80-4416-b0df-a65bdd40667c'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('b7e7d033-4eca-4cab-b380-3019956e4f53'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('bcb6efda-4e4a-4977-aba7-2e944ba14f86'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('10a22515-4603-437d-9e68-da6632d9501a'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('cad772e0-ca21-4840-8ba1-d8d31cb53c84'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('d6ef8e60-ef97-455a-9d04-9d60cdc6f5ad'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('0e6c91a6-1791-44e8-abf8-0bbe4d72e642'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('e5fbc8f2-cbf6-4343-8336-a67ca75aa85f'::uuid, array['jeans', 'bottoms']::text[], 'manual review: old observed category accepted (jeans)'),
+  ('42197025-17b9-48cd-b906-d04ec6ce0522'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('4ddb445e-a607-4367-8db7-c6b980050b4b'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('d07c03ed-73c9-410c-a089-2940a2b2e8a7'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('094e8eb0-ddcd-44d4-a35e-219387e5fadd'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('6a1155cf-189f-4fbd-a034-e32cec3a811a'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('5d430ded-5f6b-4b00-b8ec-479b3af2ae98'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('012631d4-05d8-4959-adb2-71feaf738675'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('6f7d52b8-4c5c-4c21-9cfa-667cd37a4ba9'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('24734193-9be8-4d41-b7c5-c0057dfe777f'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('3c99caf1-fda4-446b-9936-1d081cbd20e8'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('1fe5dd31-aa11-460d-a2de-7a7757e8d6e9'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('6bf3a603-a684-4932-a83d-dc90cdd1e375'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('2ed4809f-b50e-41de-87b3-57b9405082fc'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('d91beb48-5c75-4d11-a893-e38924069c3d'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('fc6da0cb-9b74-4346-8909-a97302727c0f'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('f1d5da3f-f885-4dbf-9582-4aaa4868b4d5'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('24114b14-0cdc-43cc-998e-a8b729647c99'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('95bc19be-ae7a-4f60-aa11-33697b8ff0c5'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page'),
+  ('7b743f8c-5a9a-4669-b5e5-5c8069f2be89'::uuid, array['archived-product-page-needs-review']::text[], 'manual review: product URL led to unavailable/no-product page')
+)
+insert into staging.product_page_clothing_type_tags (
+  product_page_id,
+  clothing_type_id,
+  evidence
+)
+select
+  d.product_page_id,
+  tag_id,
+  d.evidence
+from decisions d
+cross join lateral unnest(d.tag_ids) as tag_id
+join staging.clothing_type_tags ct on ct.id = tag_id
+on conflict (product_page_id, clothing_type_id) do update set
+  evidence = excluded.evidence;
+
+with unavailable_products as (
+  select unnest(array['42197025-17b9-48cd-b906-d04ec6ce0522'::uuid, '4ddb445e-a607-4367-8db7-c6b980050b4b'::uuid, 'd07c03ed-73c9-410c-a089-2940a2b2e8a7'::uuid, '094e8eb0-ddcd-44d4-a35e-219387e5fadd'::uuid, '6a1155cf-189f-4fbd-a034-e32cec3a811a'::uuid, '5d430ded-5f6b-4b00-b8ec-479b3af2ae98'::uuid, '012631d4-05d8-4959-adb2-71feaf738675'::uuid, '6f7d52b8-4c5c-4c21-9cfa-667cd37a4ba9'::uuid, '24734193-9be8-4d41-b7c5-c0057dfe777f'::uuid, '3c99caf1-fda4-446b-9936-1d081cbd20e8'::uuid, '1fe5dd31-aa11-460d-a2de-7a7757e8d6e9'::uuid, '6bf3a603-a684-4932-a83d-dc90cdd1e375'::uuid, '2ed4809f-b50e-41de-87b3-57b9405082fc'::uuid, 'd91beb48-5c75-4d11-a893-e38924069c3d'::uuid, 'fc6da0cb-9b74-4346-8909-a97302727c0f'::uuid, 'f1d5da3f-f885-4dbf-9582-4aaa4868b4d5'::uuid, '24114b14-0cdc-43cc-998e-a8b729647c99'::uuid, '95bc19be-ae7a-4f60-aa11-33697b8ff0c5'::uuid, '7b743f8c-5a9a-4669-b5e5-5c8069f2be89'::uuid]) as product_page_id
+),
+images_to_report as (
+  select distinct pis.image_id
+  from staging.product_page_image_sources pis
+  join unavailable_products up on up.product_page_id = pis.product_page_id
+)
+insert into public.image_reports (
+  image_id,
+  reason,
+  anon_id
+)
+select
+  image_id,
+  'dead_link'::public.image_report_reason,
+  'manual_product_category_review_2026_05_20'
+from images_to_report itr
+where not exists (
+  select 1
+  from public.image_reports existing
+  where existing.image_id = itr.image_id
+    and existing.reason = 'dead_link'::public.image_report_reason
+    and existing.anon_id = 'manual_product_category_review_2026_05_20'
+);

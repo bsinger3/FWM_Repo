@@ -15,6 +15,41 @@ For example:
 
 This is a planning document only. Do not implement this while other active pipeline or schema work is in flight.
 
+## Current Staging Implementation
+
+As of 2026-05-20, the first implementation step is intentionally backend-only:
+
+- New objects live in the private `staging` schema, not in the live frontend query path.
+- The website still uses `public.images`, `public.clothing_types`, and the existing `public.match_by_measurements` RPC.
+- No frontend UI or search behavior changes are part of this staging step.
+- No foreign key has been added from `public.images` to the staging product tables yet.
+
+Migration:
+
+```text
+supabase/migrations/20260520000000_add_product_category_staging.sql
+```
+
+The migration creates:
+
+- `staging.clothing_mother_categories`
+- `staging.clothing_type_tags`
+- `staging.product_pages`
+- `staging.product_page_clothing_type_tags`
+- `staging.product_page_image_sources`
+- `staging.normalize_product_url(raw_url text)`
+- `staging.category_from_product_signal(normalized_product_page_url text, observed_clothing_type_ids text[])`
+- `staging.refresh_product_category_staging()`
+
+`staging.refresh_product_category_staging()` can be rerun to rebuild staging product-page data from existing links in `public.images`. It uses `product_page_url_display` first and falls back to `monetized_product_url_display` when needed. Category assignment is based on URL slug signals plus existing `clothing_type_id` values as fallback evidence.
+
+Quality notes from the first staging QA pass:
+
+- Do not use `other` as a clothing category. If a product signal reveals a real garment type, add the missing category/tag instead.
+- Product pages that are unavailable or cannot be identified should be staged under `source-review`, not `other`.
+- `source-review` is not a frontend category and should not be exposed in the future clothing search UI.
+- `product_title_raw`, `brand`, and `product_category_raw` should be populated whenever possible from existing image rows, URL slugs, or fetched product-page metadata.
+
 ## Recommended Category Model
 
 Use one mother category for the UI and multiple tags for search matching.
@@ -252,9 +287,51 @@ During migration, support both:
 
 After the frontend is migrated, rename the UI label from `Clothing Type` to `Category`.
 
-## Frontend Change
+## Frontend Search UX Direction
 
-The frontend dropdown should show mother categories, not every granular clothing tag:
+Preferred future experience: a hybrid combo box that supports both browsing and typing.
+
+Do not implement this UI as part of the initial category/tag migration. The migration should only make the data model and search API compatible with this later frontend direction.
+
+The combo box should behave like:
+
+- When the user clicks into the field, show common mother categories and popular clothing types.
+- When the user types, autocomplete against canonical clothing tags and aliases.
+- Group suggestions by mother category so the list feels organized instead of like one long database dropdown.
+- Let a selected mother category match all child product tags, while a selected granular tag narrows the result set.
+- Send canonical category/tag IDs to the search API, not raw typed text.
+
+Example grouped suggestions for `dress`:
+
+```text
+Dresses
+  Dress
+  Maxi dress
+  Formal dress
+  Gown
+
+Sets
+  Dress set
+```
+
+Example grouped suggestions for `jea`:
+
+```text
+Bottoms
+  Jeans
+  Wide-leg jeans
+  Denim pants
+```
+
+To support this later UX, the taxonomy should include frontend-friendly metadata:
+
+- `display_label`
+- `frontend_sort_order`
+- `is_frontend_filter`
+- optional `search_boost` or popularity ranking
+- aliases/synonyms, either as a column or separate alias table
+
+The initial frontend migration can still be simpler: show mother categories only, using:
 
 ```sql
 select id, label, sort_order
@@ -263,6 +340,14 @@ order by sort_order;
 ```
 
 When the user selects `bottoms`, results should include products tagged with `jeans`, `pants`, `trousers`, `shorts`, `skirts`, and `leggings`.
+
+Once the combo box is built, its API/view should return both mother categories and clothing tags in one shape:
+
+```text
+result_type, id, display_label, mother_category_id, mother_category_label, aliases, sort_order, search_boost
+```
+
+The frontend can then render grouped typeahead suggestions without hard-coding taxonomy structure.
 
 ## Rollout Plan
 
@@ -274,9 +359,10 @@ When the user selects `bottoms`, results should include products tagged with `je
 6. Add Supabase migration for product pages, mother categories, and product tag mappings.
 7. Backfill Supabase product pages and tag mappings.
 8. Update `match_by_measurements` to filter by mother category or tag.
-9. Update the frontend dropdown to use mother categories.
+9. Update the frontend dropdown to use mother categories as the initial simple UI.
 10. Keep `images.clothing_type_id` for one release.
 11. Stop writing or relying on `images.clothing_type_id` after the new search path is stable.
+12. Later, replace the simple dropdown with the grouped hybrid combo box/typeahead.
 
 ## Validation
 
@@ -289,4 +375,3 @@ Before cutover:
 - Confirm bras/intimates do not disappear from search.
 - Confirm legacy `in_clothing_type_id` behavior still works during the transition.
 - Confirm generated data changes have been synced to S3.
-
