@@ -6,6 +6,7 @@ import gzip
 import http.cookiejar
 import hashlib
 import json
+import os
 import re
 import time
 from datetime import datetime, timezone
@@ -34,7 +35,7 @@ PRODUCT_SITEMAP = f"{SITE_ROOT}/marketing_documents/sitemap/dress_missacc_us_sit
 REVIEW_LIST_ENDPOINT = f"{SITE_ROOT}/rest/v1/review/list"
 REVIEW_IMAGES_ENDPOINT = f"{SITE_ROOT}/rest/v1/review/images"
 
-DATA_ROOT = Path(__import__("os").environ.get("FWM_DATA_DIR", "/Users/briannasinger/Projects/FWM_Data"))
+DATA_ROOT = Path(os.environ["FWM_DATA_DIR"]).expanduser() if os.environ.get("FWM_DATA_DIR") else Path(__file__).resolve().parents[4].parent / "FWM_Data"
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / RETAILER
 OUTPUT_CSV = OUTPUT_DIR / f"{RETAILER}_reviews_matching_amazon_schema.csv"
 SUMMARY_JSON = OUTPUT_DIR / f"{RETAILER}_reviews_matching_amazon_schema_summary.json"

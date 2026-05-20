@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
@@ -11,8 +12,8 @@ from typing import Dict, Iterable, List, Optional, Tuple
 from step1_intake_utils import MEASUREMENT_FIELDS, extract_ordered_size
 
 
-PROJECTS_ROOT = Path("/Users/briannasinger/Projects")
-FWM_DATA_ROOT = PROJECTS_ROOT / "FWM_Data"
+REPO_ROOT = Path(__file__).resolve().parents[4]
+FWM_DATA_ROOT = Path(os.environ["FWM_DATA_DIR"]).expanduser() if os.environ.get("FWM_DATA_DIR") else REPO_ROOT.parent / "FWM_Data"
 NON_AMAZON_STEP1_ROOT = FWM_DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data"
 AMAZON_STEP1_ROOT = FWM_DATA_ROOT / "amazon" / "data" / "step_1_raw_scraping_data"
 

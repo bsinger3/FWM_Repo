@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 from pathlib import Path
 import sys
 from typing import Dict, Iterable, List, Sequence, Tuple
@@ -16,6 +17,12 @@ if str(NON_AMAZON_UTILS) not in sys.path:
     sys.path.insert(0, str(NON_AMAZON_UTILS))
 
 from step1_intake_utils import BUST_RE, extract_measurements, is_weight_change_value  # noqa: E402
+
+
+def default_data_root() -> Path:
+    if os.environ.get("FWM_DATA_DIR"):
+        return Path(os.environ["FWM_DATA_DIR"]).expanduser() / "amazon" / "data"
+    return REPO_ROOT.parent / "FWM_Data" / "amazon" / "data"
 
 
 DISPLAY_MEASUREMENT_FIELDS: Sequence[str] = (
@@ -239,7 +246,7 @@ def main() -> None:
     parser.add_argument(
         "--root",
         type=Path,
-        default=Path("/Users/briannasinger/Projects/FWM_Data/amazon/data"),
+        default=default_data_root(),
         help="Amazon data root to scan for active structured CSVs.",
     )
     parser.add_argument("--dry-run", action="store_true", help="Report changes without rewriting CSVs.")

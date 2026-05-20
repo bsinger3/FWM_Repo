@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -32,8 +33,9 @@ SITE_ROOT = "https://www.urbanoutfitters.com"
 DOMAIN = "urbanoutfitters.com"
 RETAILER = "urbanoutfitters_com"
 OUTPUT_RETAILER = "urban_outfitters"
+DATA_ROOT = Path(os.environ["FWM_DATA_DIR"]).expanduser() if os.environ.get("FWM_DATA_DIR") else Path(__file__).resolve().parents[4].parent / "FWM_Data"
 DEFAULT_WORKBOOK = (
-    Path(r"C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data")
+    DATA_ROOT
     / "non-amazon"
     / "data"
     / "step_1_raw_scraping_data"

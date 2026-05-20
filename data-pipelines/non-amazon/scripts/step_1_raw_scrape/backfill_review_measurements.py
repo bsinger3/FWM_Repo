@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 from pathlib import Path
 import sys
 from typing import Dict, Iterable, List, Sequence, Tuple
@@ -13,6 +14,12 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from step1_intake_utils import BUST_RE, MEASUREMENT_FIELDS, extract_measurements, is_weight_change_value, validate_rows  # noqa: E402
+
+
+def default_data_root() -> Path:
+    if os.environ.get("FWM_DATA_DIR"):
+        return Path(os.environ["FWM_DATA_DIR"]).expanduser() / "non-amazon" / "data" / "step_1_raw_scraping_data"
+    return SCRIPT_DIR.parents[3].parent / "FWM_Data" / "non-amazon" / "data" / "step_1_raw_scraping_data"
 
 
 MEASUREMENT_UPDATE_PAIRS: Sequence[Tuple[str, str]] = (
@@ -175,7 +182,7 @@ def main() -> None:
     parser.add_argument(
         "--root",
         type=Path,
-        default=Path("/Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data"),
+        default=default_data_root(),
         help="Root containing retailer review CSV outputs.",
     )
     parser.add_argument("--dry-run", action="store_true", help="Report additions without rewriting CSVs.")

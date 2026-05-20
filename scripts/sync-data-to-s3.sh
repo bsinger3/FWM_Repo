@@ -16,7 +16,8 @@ if [[ -f "${ENV_FILE}" ]]; then
   set +a
 fi
 
-FWM_DATA_DIR="${FWM_DATA_DIR:-/Users/briannasinger/Projects/FWM_Data}"
+DEFAULT_FWM_DATA_DIR="$(cd "${ROOT_DIR}/.." && pwd)/FWM_Data"
+FWM_DATA_DIR="${FWM_DATA_DIR:-${DEFAULT_FWM_DATA_DIR}}"
 FWM_S3_BUCKET="${FWM_S3_BUCKET:-}"
 FWM_AWS_PROFILE="${FWM_AWS_PROFILE:-fwm}"
 

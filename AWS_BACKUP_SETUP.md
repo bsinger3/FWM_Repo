@@ -1,11 +1,13 @@
 # AWS Backup Setup
 
-This document records the current S3 backup setup for `FWM_Data` on this Windows machine.
+This document records the current S3 backup setup for `FWM_Data` on the Mac and Windows machines.
 
 ## Current Setup
 
-- Repo path: `C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo`
-- Data path: `C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data`
+- Mac repo path: `/Users/briannasinger/Projects/FWM/FWM_Repo`
+- Mac data path: `/Users/briannasinger/Projects/FWM/FWM_Data`
+- Windows repo path: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo`
+- Windows data path: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data`
 - S3 bucket: `s3://fwm-scraping-data-briannasinger`
 - AWS CLI profile: `fwm`
 - AWS region: `us-east-1`
@@ -15,17 +17,19 @@ This document records the current S3 backup setup for `FWM_Data` on this Windows
 The repo-local `.env` is expected to contain:
 
 ```text
-FWM_DATA_DIR=C:/Users/bsing/OneDrive/Documents/Projects/FWM_Data
+FWM_DATA_DIR=C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Data
 FWM_S3_BUCKET=s3://fwm-scraping-data-briannasinger
 FWM_AWS_PROFILE=fwm
 ```
+
+On Mac, set `FWM_DATA_DIR=/Users/briannasinger/Projects/FWM/FWM_Data`.
 
 ## Scripts
 
 The backup workflow now has two sync helpers:
 
-- Windows PowerShell: [scripts/sync-data-to-s3.ps1](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\scripts\sync-data-to-s3.ps1)
-- Bash: [scripts/sync-data-to-s3.sh](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\scripts\sync-data-to-s3.sh)
+- Windows PowerShell: `scripts/sync-data-to-s3.ps1`
+- Bash: `scripts/sync-data-to-s3.sh`
 
 Both scripts now default to the dedicated AWS profile `fwm`.
 
@@ -88,7 +92,7 @@ The script reads `.env`, uses the `fwm` profile, and syncs `FWM_Data` to the S3 
 ## Restore Command
 
 ```powershell
-aws --profile fwm s3 sync s3://fwm-scraping-data-briannasinger C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data --exclude ".DS_Store"
+aws --profile fwm s3 sync s3://fwm-scraping-data-briannasinger C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data --exclude ".DS_Store"
 ```
 
 ## What Changed In This Round

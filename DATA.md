@@ -22,7 +22,8 @@ This repo should stay small enough to push to GitHub. Keep source code, docs, sc
 Use this sibling directory for local scraping work:
 
 ```text
-C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data
+Mac:     /Users/briannasinger/Projects/FWM/FWM_Data
+Windows: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data
 ```
 
 Recommended layout:
@@ -49,9 +50,15 @@ all four requirements for Supabase insertion.
 Copy `.env.example` to `.env`, then set these values:
 
 ```text
-FWM_DATA_DIR=C:/Users/bsing/OneDrive/Documents/Projects/FWM_Data
+FWM_DATA_DIR=C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Data
 FWM_S3_BUCKET=s3://fwm-scraping-data-briannasinger
 FWM_AWS_PROFILE=fwm
+```
+
+On Mac, use:
+
+```text
+FWM_DATA_DIR=/Users/briannasinger/Projects/FWM/FWM_Data
 ```
 
 Use the dedicated AWS CLI profile `fwm`. On this Windows machine, `fwm` is configured with access keys for the IAM user `codex-sync`, not root login credentials.
@@ -83,7 +90,7 @@ scripts/sync-data-to-s3.sh
 Restore with:
 
 ```powershell
-aws --profile fwm s3 sync s3://fwm-scraping-data-briannasinger C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data --exclude ".DS_Store"
+aws --profile fwm s3 sync s3://fwm-scraping-data-briannasinger C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data --exclude ".DS_Store"
 ```
 
 Use a private bucket. Do not put scraped data in a public bucket unless you have deliberately reviewed the privacy and licensing implications.

@@ -2,6 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $rootDir = Split-Path -Parent $PSScriptRoot
 $envFile = Join-Path $rootDir ".env"
+$defaultFwmDataDir = Join-Path (Split-Path -Parent $rootDir) "FWM_Data"
 
 if (-not (Get-Command aws -ErrorAction SilentlyContinue)) {
     throw "AWS CLI is not installed. Install it first, then run this script again."
@@ -20,7 +21,7 @@ if (Test-Path $envFile) {
     }
 }
 
-$fwmDataDir = if ($env:FWM_DATA_DIR) { $env:FWM_DATA_DIR } else { "C:/Users/bsing/OneDrive/Documents/Projects/FWM_Data" }
+$fwmDataDir = if ($env:FWM_DATA_DIR) { $env:FWM_DATA_DIR } else { $defaultFwmDataDir }
 $fwmS3Bucket = $env:FWM_S3_BUCKET
 $fwmAwsProfile = if ($env:FWM_AWS_PROFILE) { $env:FWM_AWS_PROFILE } else { "fwm" }
 

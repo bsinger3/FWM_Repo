@@ -8,9 +8,9 @@ Download the full `FWM_Data` directory from the private S3 bucket to the local m
 
 ## Local Paths
 
-- Repo: `C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo`
-- Data directory target: `C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data`
-- Existing raw output path inside data dir: `C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data\raw\apify`
+- Repo: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo`
+- Data directory target: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data`
+- Existing raw output path inside data dir: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\raw\apify`
 
 ## S3 Bucket
 
@@ -60,7 +60,7 @@ Use this exact command to restore `FWM_Data` from S3:
 ```powershell
 & 'C:\Program Files\Amazon\AWSCLIV2\aws.exe' --profile fwm s3 sync `
   's3://fwm-scraping-data-briannasinger' `
-  'C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data' `
+  'C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data' `
   --exclude '.DS_Store'
 ```
 
@@ -68,7 +68,7 @@ Use this exact command to restore `FWM_Data` from S3:
 
 After a successful restore:
 
-- `C:\Users\bsing\OneDrive\Documents\Projects\FWM_Data` should contain the backed-up project data
+- `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data` should contain the backed-up project data
 - existing subfolders like `raw\apify` should be present or updated
 
 ## Repo Context
@@ -77,16 +77,16 @@ The repo was synced to GitHub `origin/main` and the extra temporary clone was de
 
 Only one repo folder should exist:
 
-- `C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo`
+- `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo`
 
 ## Useful Related Files
 
-- [DATA.md](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\DATA.md)
-- [AWS_BACKUP_SETUP.md](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\AWS_BACKUP_SETUP.md)
-- [README.md](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\README.md)
-- [scripts/sync-data-to-s3.ps1](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\scripts\sync-data-to-s3.ps1)
-- [scripts/sync-data-to-s3.sh](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\scripts\sync-data-to-s3.sh)
-- [scripts/create-private-s3-bucket.sh](C:\Users\bsing\OneDrive\Documents\Projects\FWM_Repo\scripts\create-private-s3-bucket.sh)
+- [DATA.md](DATA.md)
+- [AWS_BACKUP_SETUP.md](AWS_BACKUP_SETUP.md)
+- [README.md](README.md)
+- [scripts/sync-data-to-s3.ps1](scripts/sync-data-to-s3.ps1)
+- [scripts/sync-data-to-s3.sh](scripts/sync-data-to-s3.sh)
+- [scripts/create-private-s3-bucket.sh](scripts/create-private-s3-bucket.sh)
 
 ## Known Note
 

@@ -6,6 +6,7 @@ import csv
 import hashlib
 import html
 import json
+import os
 import re
 import subprocess
 import time
@@ -17,7 +18,7 @@ from urllib.parse import unquote
 from step1_intake_utils import INTAKE_HEADERS
 
 
-DATA_ROOT = Path(__import__("os").environ.get("FWM_DATA_DIR", "/Users/briannasinger/Projects/FWM_Data"))
+DATA_ROOT = Path(os.environ["FWM_DATA_DIR"]).expanduser() if os.environ.get("FWM_DATA_DIR") else Path(__file__).resolve().parents[4].parent / "FWM_Data"
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "prana_com"
 OUTPUT_CSV = OUTPUT_DIR / "prana_com_reviews_matching_amazon_schema.csv"
 SUMMARY_JSON = OUTPUT_DIR / "prana_com_reviews_matching_amazon_schema_summary.json"

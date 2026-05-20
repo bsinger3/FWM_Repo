@@ -7,6 +7,11 @@ Recommended split:
 - Repo code and automation live in `FWM_Repo`
 - Generated datasets and exports live in the sibling `FWM_Data` folder
 
+Current local parent layouts:
+
+- Mac: `/Users/briannasinger/Projects/FWM/`
+- Windows: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\`
+
 The starter script in this folder writes to:
 
 - `../FWM_Data/raw/apify/`

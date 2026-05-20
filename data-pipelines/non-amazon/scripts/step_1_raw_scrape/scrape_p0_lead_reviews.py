@@ -5,6 +5,7 @@ import argparse
 import csv
 import html
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -46,7 +47,11 @@ skip pages that are restricted or unavailable; only collect public review data.
 
 
 DEFAULT_TRIAGE_CSV = (
-    Path("/Users/briannasinger/Projects/FWM_Data")
+    (
+        Path(os.environ["FWM_DATA_DIR"]).expanduser()
+        if os.environ.get("FWM_DATA_DIR")
+        else Path(__file__).resolve().parents[4].parent / "FWM_Data"
+    )
     / "WebLeads"
     / "_lead_runs"
     / "20260424T203030Z"
