@@ -1,0 +1,58 @@
+{
+  "title": "Bare Necessities Prior Scrape Verification",
+  "source": "codex",
+  "transcript_started_at": "2026-05-20T17:20:00Z",
+  "transcript_ended_at": "2026-05-20T17:26:00Z",
+  "metadata": {
+    "project": "FWM non-Amazon review-image scraping",
+    "purpose": "Record the Bare Necessities artifact verification, no-rescrape decision, S3 sync, git wrap-up, and transcript upload.",
+    "workspace": "/Users/briannasinger/Projects/FWM/FWM_Repo",
+    "data_root": "/Users/briannasinger/Projects/FWM/FWM_Data"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "text": "Asked to check Bare Necessities before doing anything else, inspect the prior claim, output directory, and non-Amazon scrape summary, and avoid rescraping if the prior completed scrape was already valid. Known prior status to verify: completed bounded full/rescue Bare Necessities scrape on 2026-05-05; products_scanned=1000; output rows=19; qualified rows=9; public Yotpo aggregate/product endpoints."
+    },
+    {
+      "role": "assistant",
+      "text": "Inspected /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/_claims/barenecessities_com.txt, the Bare Necessities output directory, and /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/reports/non_amazon_merchant_scrape_summary.csv before considering any scrape work."
+    },
+    {
+      "role": "assistant",
+      "text": "Verified the completed claim exists and says: completed bounded full/rescue Bare Necessities scrape on 2026-05-05; products_scanned=1000; output rows=19; qualified rows=9; public Yotpo aggregate/product endpoints."
+    },
+    {
+      "role": "assistant",
+      "text": "Verified the Bare Necessities output directory contains barenecessities_com_reviews_matching_intake_schema.csv and barenecessities_com_reviews_matching_intake_schema_summary.json. The CSV is readable and has 19 data rows. The summary JSON is readable and reports rows_written=19, supabase_qualified_rows=9, products_scanned=1000, product_pages_scanned=1000, full_catalog_scrape_complete=true, aggregate_feed_used=true, and errors=[]."
+    },
+    {
+      "role": "assistant",
+      "text": "Verified the non-Amazon merchant scrape summary contains the Bare Necessities row with rows_scraped=19, rows_with_image_product_and_measurement=9, products_discovered=1000, product_pages_scanned=1000, full_catalog_scrape_complete=True, aggregate_feed_used=True, and latest_fetched_or_finished_at=2026-05-05T19:43:38Z."
+    },
+    {
+      "role": "assistant",
+      "text": "Decided not to rescrape. There was no active claim, no missing/corrupt/incomplete artifact, and no obvious need for a new adapter because the prior public Yotpo aggregate/product endpoint scrape completed cleanly and produced qualified rows. Noted one harmless artifact oddity: the summary JSON's output_csv field contains a Windows path from the originating environment, while the local report points to the valid local CSV path."
+    },
+    {
+      "role": "user",
+      "text": "Asked to update remote git, S3, and the transcripts table."
+    },
+    {
+      "role": "assistant",
+      "text": "Prepared this focused transcript for upload to the Supabase codex_chat_transcripts table, planned to sync /Users/briannasinger/Projects/FWM/FWM_Data to the configured S3 bucket, and planned to commit/push only this Bare Necessities verification transcript while leaving unrelated dirty worktree changes untouched."
+    }
+  ],
+  "changed_files": [
+    "codex-barenecessities-verification-2026-05-20.json"
+  ],
+  "data_outputs": [
+    "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/barenecessities_com/barenecessities_com_reviews_matching_intake_schema.csv",
+    "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/barenecessities_com/barenecessities_com_reviews_matching_intake_schema_summary.json",
+    "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/reports/non_amazon_merchant_scrape_summary.csv"
+  ],
+  "blockers": [],
+  "next_steps": [
+    "No Bare Necessities scrape follow-up is needed unless the existing artifact is later found missing, corrupt, incomplete, or stale for a newly defined requirement."
+  ]
+}
