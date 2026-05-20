@@ -18,7 +18,7 @@ Last updated: 2026-05-11 America/New_York
 
 ## Active / Claimed
 
-User confirmed on 2026-05-06 that there are no other active Codex threads. Old active claim files from completed/skipped May 5 work were cleared from `_active_scrape_claims`; completed notes remain in `_claims` where present.
+User confirmed on 2026-05-17 that there are no active scrapes happening right now. Old active claim files were cleared from both `_active_scrape_claims` directories; completed, blocked, and historical notes remain in `_claims` where present.
 
 Completed/revisit claim notes, not the default first-time queue:
 
