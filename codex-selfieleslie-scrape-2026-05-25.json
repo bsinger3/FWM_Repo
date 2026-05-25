@@ -1,0 +1,73 @@
+{
+  "title": "Selfie Leslie first-time scrape",
+  "source": "codex_desktop_focused_handoff_transcript",
+  "transcript_started_at": "2026-05-25T00:00:00-04:00",
+  "transcript_ended_at": "2026-05-25T23:59:00-04:00",
+  "metadata": {
+    "source": "focused_handoff_transcript",
+    "reason": "Desktop thread full transcript export was not available; this file captures the Selfie Leslie scrape request, implementation, outputs, verification, and storage/git/transcript handoff for durable project memory.",
+    "workspace": "/Users/briannasinger/Projects/FWM",
+    "retailer": "selfieleslie_com"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "text": "Asked whether there was already a scrape for Selfie Leslie."
+    },
+    {
+      "role": "assistant",
+      "text": "Searched the workspace for selfieleslie, selfie-leslie, selfie_leslie, and Selfie Leslie across existing non-Amazon raw scrape output folders, scrape inventories, WebLeads, non-Amazon docs/reports/transcripts, and active/claimed scrape markers. Found no existing Selfie Leslie scrape; only incidental review text and reviewer names containing selfie or Leslie."
+    },
+    {
+      "role": "user",
+      "text": "Requested a scrape of Selfie Leslie."
+    },
+    {
+      "role": "assistant",
+      "text": "Read the new scrape rules and non-Amazon scrape triage plan. Created active claim FWM_Data/non-amazon/data/step_1_raw_scraping_data/_active_scrape_claims/selfieleslie_com.claim before starting. Probed https://www.selfieleslie.com and found it is a Shopify site exposing products.json, product sitemaps, and Yotpo reviews with app key Inmz3p1Af2S6wKVjL5q5zBZ2V4J6Vc8npQvu5trG. Product pages include Yotpo app blocks and public Yotpo review JSON exposes structured custom fields for Size, Height, Weight, Fit, review media, reviewer name, product ids, and review dates."
+    },
+    {
+      "role": "assistant",
+      "text": "Added FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_selfieleslie_reviews.py. The scraper discovers products from public Shopify products.json and sitemap product URLs, records the products.json boundary, scans the public Yotpo aggregate reviews endpoint with sort=images through every reported page, emits one row per customer review image, preserves Yotpo custom size/height/weight fields deterministically, writes standard Step 1 intake CSV and summary JSON, and uses public endpoints only."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran a capped smoke scrape over the first two Yotpo review pages. It wrote 30 rows and 26 Supabase-qualified rows, confirming that image, size, height, weight, product URL, and CSV schema handling were working."
+    },
+    {
+      "role": "assistant",
+      "text": "Ran the full Selfie Leslie scrape. Public Shopify products.json loaded through page 60 and returned a 403 boundary at page 61; the scraper documented that boundary and continued with sitemap discovery plus public Yotpo aggregate review paging. It scanned all 175 reported Yotpo pages. Media rows appeared through page 28; pages 29 through 175 were scanned and returned zero retained customer-image rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Final output CSV: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/selfieleslie_com/selfieleslie_com_reviews_matching_intake_schema.csv. Summary JSON: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/selfieleslie_com/selfieleslie_com_reviews_matching_intake_schema_summary.json."
+    },
+    {
+      "role": "assistant",
+      "text": "Final counts: products_discovered=19212, products_scanned=19212, products_excluded_from_output=13179, review_pages_scanned=175, reviews_reported_by_yotpo=17467, rows_written=655, distinct_reviews=496, distinct_images=655, rows_with_distinct_product_url=297, rows_with_any_measurement=451, rows_with_customer_image=655, rows_with_customer_ordered_size=135, rows_supabase_qualified=124, exhaustive_review_paging=true."
+    },
+    {
+      "role": "assistant",
+      "text": "Verified the CSV has 655 rows and 51 headers. Sample rows had Yotpo review original image URLs, canonical Selfie Leslie product URLs, ordered sizes, height, and weight where present. Ran python3 -m py_compile on the scraper successfully. Verified the generated summary has rows_written=655, rows_supabase_qualified=124, and review_pages_scanned=175."
+    },
+    {
+      "role": "assistant",
+      "text": "Moved the active claim to completed claim FWM_Data/non-amazon/data/step_1_raw_scraping_data/_claims/selfieleslie_com_2026-05-25_completed.claim and deleted the active claim. Added scrape documentation at FWM_Repo/data-pipelines/non-amazon/docs/selfieleslie_scrape_2026-05-25.md."
+    },
+    {
+      "role": "user",
+      "text": "Approved the result and asked to update the remote git, S3, and the transcripts table."
+    },
+    {
+      "role": "assistant",
+      "text": "Prepared this focused transcript for upload to the Supabase codex_chat_transcripts table, planned to sync /Users/briannasinger/Projects/FWM/FWM_Data to s3://fwm-scraping-data-briannasinger using the project helper, and planned to commit/push only the Selfie Leslie scraper, scrape note, and transcript while leaving unrelated dirty worktree changes untouched."
+    }
+  ],
+  "artifacts": {
+    "scraper": "/Users/briannasinger/Projects/FWM/FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_selfieleslie_reviews.py",
+    "scrape_note": "/Users/briannasinger/Projects/FWM/FWM_Repo/data-pipelines/non-amazon/docs/selfieleslie_scrape_2026-05-25.md",
+    "output_csv": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/selfieleslie_com/selfieleslie_com_reviews_matching_intake_schema.csv",
+    "summary_json": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/selfieleslie_com/selfieleslie_com_reviews_matching_intake_schema_summary.json",
+    "completed_claim": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/_claims/selfieleslie_com_2026-05-25_completed.claim"
+  }
+}
