@@ -4,6 +4,8 @@ Source report: `/Users/briannasinger/Downloads/ab96212b-a1fd-48f3-adb6-76cbac7a5
 
 Working triage tracker: `data-pipelines/non-amazon/docs/sovrn_commerce_apparel_triage_tracker.csv`
 
+Full triage report: `data-pipelines/non-amazon/docs/sovrn_commerce_full_triage_report.md`
+
 Original generated candidate queue: `/Users/briannasinger/Documents/Codex/2026-05-26/files-mentioned-by-the-user-ab96212b/sovereign-commerce-apparel-triage-candidates.csv`
 
 ## What The Report Contains
@@ -44,12 +46,19 @@ Use these statuses in the scraping triage plan:
 - `P3 needs_category_confirmation`: fashion, boutique, or women's signal exists, but product category evidence is not strong enough yet.
 - `P4 exclude_accessory_or_low_size_importance`: accessory-only or low-fit-importance signal. Keep for audit, but do not scrape unless scope changes.
 
-The generated candidate CSV currently has:
+The generated candidate CSV originally had:
 
 - `P1`: 79 high-confidence merchants, including 7 marketplace/category-level checks.
 - `P2`: 540 keyword-matched fit-apparel candidates.
 - `P3`: 92 category-confirmation candidates.
 - `P4`: 301 accessory or low-size-importance exclusions.
+
+After the full 2026-05-27 triage pass and footwear-only cleanup, the working tracker has:
+
+- `P1`: 79 checked merchants.
+- `P2`: 360 checked merchants.
+- `P3`: 92 checked merchants.
+- `P4`: 481 checked exclusions, including footwear-only merchants that are now out of scope.
 
 ## Verification Workflow
 
@@ -151,6 +160,18 @@ Suggested values:
 
 Implementation output should be a completed triage tracker first, not raw review scrape output. Confirmed merchants can then be promoted into the normal non-Amazon scrape queue with claims, scripts, raw review rows, and summary JSONs.
 
+## Current Status
+
+The full Sovrn merchant triage is complete as of 2026-05-27:
+
+- 1,012 of 1,012 merchants checked.
+- 43 merchants marked `triage_candidate`.
+- 7 broad marketplaces marked `marketplace_requires_category_level_review`.
+- 481 rows marked `excluded_or_low_size_importance`, including footwear-only merchants.
+- 477 rows have shipping country evidence; 535 remain unknown or not applicable.
+
+Do not begin normal scraping from this report until the 43 candidates are reviewed for false positives and ranked for implementation.
+
 ## First Calibration Batch
 
 Use the `calibration_batch_order` column in the working tracker for the first manual or semi-automated pass:
@@ -179,4 +200,4 @@ This batch intentionally skips broad marketplaces and footwear-first merchants s
 
 ## Immediate Next Queue
 
-Begin with broad category-level checks for Amazon, Walmart, eBay, Target, Etsy, Temu, and AliExpress, then high-confidence `P1` merchants such as Alo Yoga, Anthropologie, ASOS, Athleta, Banana Republic, Bloomingdale's, Chico's, Everlane, Express Clothing, Free People, H&M, J.Crew, Lane Bryant, LOFT, lululemon, Madewell, Nordstrom, Old Navy, PrettyLittleThing, Princess Polly, Quince, Revolve, Saks, SHEIN, Shopbop, SKIMS, Spanx, Torrid, Uniqlo, Under Armour, Venus, Vuori, and White House Black Market.
+Review the 43 `triage_candidate` rows in the completed tracker, remove false positives, then rank the survivors by review-photo quality, shipping geo coverage, anti-bot risk, and implementation effort. Broad marketplaces such as Amazon, Walmart, eBay, Target, Etsy, Temu, and AliExpress remain category-level manual-review items rather than normal scrape targets.

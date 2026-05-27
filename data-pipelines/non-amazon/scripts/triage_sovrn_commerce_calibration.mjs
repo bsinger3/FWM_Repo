@@ -19,6 +19,10 @@ const DEFAULT_OUTPUT = path.join(
   repoRoot,
   "data-pipelines/non-amazon/docs/sovrn_commerce_calibration_results.csv",
 );
+const DEFAULT_ALL_OUTPUT = path.join(
+  repoRoot,
+  "data-pipelines/non-amazon/docs/sovrn_commerce_full_tracker_triage_results.csv",
+);
 
 const CATEGORY_TERMS = [
   "women",
@@ -47,7 +51,16 @@ const OUT_OF_SCOPE_TERMS = [
   "jewelry",
   "handbag",
   "bags",
+  "backpack",
+  "backpacks",
   "accessories",
+  "sunglasses",
+  "eyewear",
+  "vitamin",
+  "vitamins",
+  "supplement",
+  "supplements",
+  "health-&-wellness",
 ];
 
 const PRODUCT_URL_PATTERNS = [
@@ -157,8 +170,14 @@ function parseArgs() {
   return {
     tracker: args.get("--tracker") || DEFAULT_TRACKER,
     calibration: args.get("--calibration") || DEFAULT_CALIBRATION,
-    output: args.get("--output") || DEFAULT_OUTPUT,
+    output: args.get("--output") || (args.get("--mode") === "all" ? DEFAULT_ALL_OUTPUT : DEFAULT_OUTPUT),
+    mode: args.get("--mode") || "calibration",
+    resume: args.get("--resume") !== "false",
     limit: args.has("--limit") ? Number(args.get("--limit")) : Infinity,
+    concurrency: args.has("--concurrency") ? Math.max(1, Number(args.get("--concurrency"))) : 3,
+    onlyPriority: args.get("--only-priority") || "",
+    onlyBucket: args.get("--only-bucket") || "",
+    onlyFootwearExclusion: args.get("--only-footwear-exclusion") === "true",
     headed: args.get("--headed") === "true",
   };
 }
@@ -510,6 +529,16 @@ async function inspectMerchant(context, record) {
     else result.scrape_feasibility = "category_confirmed_review_unknown";
   }
 
+  if (result.scrape_feasibility === "triage_candidate") {
+    result.next_action = "hold_until_full_sovrn_triage_complete";
+  } else if (result.scrape_feasibility === "blocked_or_needs_manual_review") {
+    result.next_action = "merchant_specific_manual_review";
+  } else if (result.scrape_feasibility === "needs_manual_category_confirmation") {
+    result.next_action = "manual_category_confirmation";
+  } else if (result.scrape_feasibility === "category_confirmed_review_unknown") {
+    result.next_action = "manual_review_provider_confirmation";
+  }
+
   result.product_url_geo_inheritance =
     result.shipping_geo_status === "known_country_list" || result.shipping_geo_status === "market_specific_url"
       ? "merchant_level_ok"
@@ -528,47 +557,200 @@ function mergeRows(trackerRecords, completedRows) {
   });
 }
 
+function rowKey(row) {
+  return `${row.merchant_group_id}::${row.merchant_group}`;
+}
+
+function isAlreadyChecked(row) {
+  return Boolean(row.checked_at && row.scrape_feasibility);
+}
+
+function markNoWebDecision(record) {
+  const checkedAt = new Date().toISOString();
+  return {
+    ...record,
+    checked_at: checkedAt,
+    size_importance: "no",
+    size_basis: record.reason || "Excluded or low-size-importance row from candidate generation.",
+    reviews_present: "unknown",
+    photo_reviews: "unknown",
+    review_provider: "not_checked",
+    ships_to_country_codes: "",
+    shipping_geo_status: "unknown",
+    shipping_geo_evidence_url: "",
+    shipping_geo_evidence_basis: "not_checked_excluded",
+    primary_market_country: "",
+    product_url_geo_inheritance: "unknown",
+    scrape_feasibility: "excluded_or_low_size_importance",
+    anti_bot_or_login_notes: "",
+    next_action: "no_action_unless_promoted",
+  };
+}
+
+function isFootwearOnlyMerchant(record) {
+  const merchant = (record.merchant_group || "").toLowerCase();
+  const domains = (record.primary_domains || "").toLowerCase();
+  const text = `${merchant} ${domains}`;
+  const hasFootwear =
+    /\b(shoe|shoes|footwear|sandal|sandals|sneaker|sneakers)\b/i.test(text) ||
+    /\b(high heels|heels)\b/i.test(text) ||
+    (/\bboot|boots\b/i.test(text) && !/^boots( kitchen appliances| photo)?$/i.test(record.merchant_group || ""));
+  const hasApparel =
+    /\b(apparel|clothing|clothes|dress|dresses|jeans|denim|lingerie|bra|bras|swim|swimwear|activewear|yoga|maternity|intimates)\b/i.test(
+      text,
+    );
+  return hasFootwear && !hasApparel;
+}
+
+function markFootwearOutOfScope(record) {
+  return markNoWebDecision({
+    ...record,
+    triage_bucket: "exclude_accessory_or_low_size_importance",
+    priority: "P4",
+    reason: "Footwear-only merchant; shoes and footwear are out of scope for the current shopping workflow.",
+  });
+}
+
+function markMarketplaceDecision(record) {
+  const primaryUrl = choosePrimaryUrl(record);
+  const domainCountries = inferCountryCodesFromDomains(record.primary_domains || "");
+  return {
+    ...record,
+    checked_at: new Date().toISOString(),
+    category_evidence_url: "",
+    sample_pdp_urls: "",
+    size_importance: "unknown",
+    size_basis: "Broad marketplace requires category-level apparel/PDP verification.",
+    reviews_present: "unknown",
+    photo_reviews: "unknown",
+    review_provider: "category_level_not_checked",
+    review_photo_evidence: "",
+    ships_to_country_codes: domainCountries.join("|"),
+    shipping_geo_status: domainCountries.length > 1 ? "known_country_list" : domainCountries.length === 1 ? "market_specific_url" : "unknown",
+    shipping_geo_evidence_url: primaryUrl,
+    shipping_geo_evidence_basis: domainCountries.length ? "storefront_locale" : "manual_note",
+    primary_market_country: primaryMarketFromUrl(primaryUrl),
+    product_url_geo_inheritance: domainCountries.length ? "merchant_level_ok" : "unknown",
+    scrape_feasibility: "marketplace_requires_category_level_review",
+    anti_bot_or_login_notes: "",
+    next_action: "manual_marketplace_category_selection",
+  };
+}
+
+function selectRows(options, calibration, tracker) {
+  if (options.mode === "calibration") {
+    return calibration.records
+      .filter((row) => row.calibration_batch_order)
+      .filter((row) => !options.resume || !isAlreadyChecked(row))
+      .sort((a, b) => Number(a.calibration_batch_order) - Number(b.calibration_batch_order))
+      .slice(0, options.limit);
+  }
+
+  if (options.mode !== "all") {
+    throw new Error(`Unsupported --mode ${options.mode}. Use calibration or all.`);
+  }
+
+  return tracker.records
+    .filter((row) => !options.resume || !isAlreadyChecked(row))
+    .filter((row) => !options.onlyPriority || row.priority === options.onlyPriority)
+    .filter((row) => !options.onlyBucket || row.triage_bucket === options.onlyBucket)
+    .filter((row) => !options.onlyFootwearExclusion || isFootwearOnlyMerchant(row))
+    .sort((a, b) => {
+      const priorityOrder = { P1: 1, P2: 2, P3: 3, P4: 4 };
+      const left = priorityOrder[a.priority] || 9;
+      const right = priorityOrder[b.priority] || 9;
+      if (left !== right) return left - right;
+      return (a.merchant_group || "").localeCompare(b.merchant_group || "");
+    })
+    .slice(0, options.limit);
+}
+
+async function processRows(context, rows, options) {
+  let nextIndex = 0;
+  const completed = [];
+  async function worker(workerId) {
+    while (nextIndex < rows.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      const row = rows[index];
+      const label = row.calibration_batch_order || `${index + 1}/${rows.length}`;
+      console.log(`triage ${label}. ${row.merchant_group}`);
+      let inspected;
+      if (row.triage_bucket === "exclude_accessory_or_low_size_importance" || row.priority === "P4") {
+        inspected = markNoWebDecision(row);
+      } else if (isFootwearOnlyMerchant(row)) {
+        inspected = markFootwearOutOfScope(row);
+      } else if (row.triage_bucket === "marketplace_category_level_check") {
+        inspected = markMarketplaceDecision(row);
+      } else {
+        inspected = await inspectMerchant(context, row);
+      }
+      completed.push(inspected);
+      console.log(
+        `  ${inspected.scrape_feasibility}; category=${inspected.category_evidence_url || "unknown"}; reviews=${inspected.reviews_present}/${inspected.photo_reviews}; shipping=${inspected.ships_to_country_codes || "unknown"}; worker=${workerId}`,
+      );
+    }
+  }
+  const workers = Array.from({ length: Math.min(options.concurrency, rows.length) }, (_, index) => worker(index + 1));
+  await Promise.all(workers);
+  return completed.sort((a, b) => rows.findIndex((row) => rowKey(row) === rowKey(a)) - rows.findIndex((row) => rowKey(row) === rowKey(b)));
+}
+
 async function main() {
   const options = parseArgs();
   const calibrationText = fs.readFileSync(options.calibration, "utf8");
   const trackerText = fs.readFileSync(options.tracker, "utf8");
   const calibration = parseCsv(calibrationText);
   const tracker = parseCsv(trackerText);
-  const rows = calibration.records
-    .filter((row) => row.calibration_batch_order)
-    .sort((a, b) => Number(a.calibration_batch_order) - Number(b.calibration_batch_order))
-    .slice(0, options.limit);
+  const rows = selectRows(options, calibration, tracker);
 
-  const browser = await chromium.launch({
-    headless: !options.headed,
-  });
-  const context = await browser.newContext({
-    userAgent:
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
-    viewport: { width: 1440, height: 1100 },
-  });
-
-  const completed = [];
-  for (const row of rows) {
-    console.log(`triage ${row.calibration_batch_order}. ${row.merchant_group}`);
-    const inspected = await inspectMerchant(context, row);
-    completed.push(inspected);
-    console.log(
-      `  ${inspected.scrape_feasibility}; category=${inspected.category_evidence_url || "unknown"}; reviews=${inspected.reviews_present}/${inspected.photo_reviews}; shipping=${inspected.ships_to_country_codes || "unknown"}`,
-    );
+  if (!rows.length) {
+    console.log(`No rows to triage for mode=${options.mode} resume=${options.resume}.`);
+    return;
   }
 
-  await context.close();
-  await browser.close();
+  let completed;
+  const needsBrowser = rows.some(
+    (row) =>
+      row.triage_bucket !== "exclude_accessory_or_low_size_importance" &&
+      row.triage_bucket !== "marketplace_category_level_check" &&
+      !isFootwearOnlyMerchant(row) &&
+      row.priority !== "P4",
+  );
+  if (needsBrowser) {
+    const browser = await chromium.launch({
+      headless: !options.headed,
+    });
+    const context = await browser.newContext({
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      viewport: { width: 1440, height: 1100 },
+    });
 
-  writeCsv(options.output, calibration.headers, completed);
+    completed = await processRows(context, rows, options);
+
+    await context.close();
+    await browser.close();
+  } else {
+    completed = rows.map((row) =>
+      row.triage_bucket === "marketplace_category_level_check"
+        ? markMarketplaceDecision(row)
+        : isFootwearOnlyMerchant(row)
+          ? markFootwearOutOfScope(row)
+          : markNoWebDecision(row),
+    );
+    console.log(`marked ${completed.length} no-browser triage rows`);
+  }
+
   const merged = mergeRows(tracker.records, completed);
   const mergedCalibration = mergeRows(calibration.records, completed);
+  const outputRows = options.mode === "all" ? merged.filter(isAlreadyChecked) : completed;
+  writeCsv(options.output, tracker.headers, outputRows);
   writeCsv(options.tracker, tracker.headers, merged);
-  writeCsv(options.calibration, calibration.headers, mergedCalibration);
+  if (options.mode === "calibration") writeCsv(options.calibration, calibration.headers, mergedCalibration);
   console.log(`wrote ${options.output}`);
   console.log(`updated ${options.tracker}`);
-  console.log(`updated ${options.calibration}`);
+  if (options.mode === "calibration") console.log(`updated ${options.calibration}`);
 }
 
 main().catch((error) => {
