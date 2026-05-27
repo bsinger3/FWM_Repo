@@ -128,10 +128,19 @@ Completion summary:
 - 1,012 of 1,012 Sovrn merchants checked.
 - 43 rows reached `triage_candidate`.
 - 19 are first-pass scrape candidates after obvious false-positive cleanup.
-- 15 need manual review before queueing.
+- 15 manual-review rows were reviewed by the user from the Google Sheet export.
+- 1 manual-review row was approved as a category-specific scrape candidate.
+- 2 manual-review rows were approved as existing-scraper refreshes.
+- 12 manual-review rows were rejected as do-not-queue.
 - 9 are false positives and should not be scraped.
 - 7 broad marketplaces remain category-level manual-review items, not normal first-pass scrape targets.
 - Shoes and footwear remain out of scope.
+
+User-approved Sovrn items from manual review:
+
+- `nordstromrack_com`: customer photos are present. Scrape the women's section only; do not run a whole-site scrape. User-provided sample PDP: `https://www.nordstromrack.com/s/calvin-klein-scuba-crepe-fit-flare-dress/7881634?origin=category-personalizedsort&breadcrumb=Home%2FWomen%2FClothing%2FDresses&color=419`.
+- `whitehouseblackmarket_com`: picture reviews are present. Refresh the existing scraper/report rather than creating a new scraper.
+- `quince_com`: picture reviews are present. Refresh the existing scraper rather than creating a new scraper.
 
 Use these first-pass Sovrn candidates after checking claim/output history for each domain:
 
@@ -155,20 +164,18 @@ Use these first-pass Sovrn candidates after checking claim/output history for ea
 - `wildsecretslingerie_com_au`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `AU|NZ|US`; category evidence needs manual product confirmation.
 - `wildsecretslingerie_co_nz`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `AU|NZ|US`; category evidence needs manual product confirmation.
 
-Manual-review Sovrn candidates before queueing:
+Sovrn manual-review rows rejected by user:
 
-- `boohoo_com`, `boohooman_com`: Sovrn found Bazaarvoice/photo-review signals, but the older sheet intake said `boohoo_com` could not find reviews. Reconcile the conflict before assigning.
-- `chicos_com`, `chicosofftherack_com`: Sovrn found Bazaarvoice/review signals, but older sheet intake marked `chicos_com` not scrapable. Reconcile and verify domain-specific PDPs before assigning.
-- `nordstromrack_com`: needs a category-specific plan; do not treat as a whole-site scrape.
-- `quince_com`: existing scraper exists; review prior implementation/output before assigning a new run.
-- `whitehouseblackmarket_com`: existing scraper and 2026-05-11 report exist; inspect before considering a refresh.
-- `mugsyjeans_com`: Okendo/photo-review signal, but sampled PDP was a gift card; manually pick clean apparel PDPs first.
-- `getlambs_com` / `havnwear_com`: merchant/domain mismatch in Sovrn evidence; verify before queueing.
-- `clothesoutdoor_com`: photo-review signal but category evidence is broad/hot-sale; manually verify apparel PDP quality.
-- `senseng_apparel_com`: Judge.me/Loox signal, but sampled PDPs include kids/mommy-and-me items; manually pick adult women's products first.
-- `puma_com`: regional `ae.puma.com` evidence; choose target country/storefront deliberately.
-- `shopbop_com`: retailer/marketplace-like catalog; needs category-specific product selection.
-- `nau_com`: category evidence was not clean enough; manually verify PDP/review source.
+- `boohoo_com`, `boohoo_com_no`: no reviews available.
+- `boohooman_com`: out of scope; no women's clothing.
+- `mugsyjeans_com`: out of scope; no women's clothing.
+- `getlambs_com` / `havnwear_com`: only one non-hat product; skip.
+- `chicos_com`, `chicosofftherack_com`: no picture reviews.
+- `clothesoutdoor_com`: website is broken.
+- `senseng_apparel_com`: not enough products to be worth scraping.
+- `puma_com`: no reviews.
+- `shopbop_com`: no reviews.
+- `nau_com`: all items listed as not for sale.
 
 Sovrn false positives to avoid:
 
