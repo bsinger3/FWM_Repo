@@ -20,8 +20,7 @@ from urllib.request import Request, urlopen
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-PROJECTS_ROOT = REPO_ROOT.parent
-DATA_ROOT = PROJECTS_ROOT / "FWM_Data"
+DATA_ROOT = REPO_ROOT / "FWM_Data"
 DEFAULT_LEADS_CSV = DATA_ROOT / "WebLeads" / "leads.csv"
 DEFAULT_OUTPUT_ROOT = DATA_ROOT / "WebLeads" / "_lead_runs"
 LOCAL_DATA_ROOT = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data"

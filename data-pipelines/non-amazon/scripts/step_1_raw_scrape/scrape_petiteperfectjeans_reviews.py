@@ -51,7 +51,7 @@ USER_AGENT = (
 )
 
 ROOT = Path(__file__).resolve().parents[4]
-DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
+DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / RETAILER
 OUTPUT_CSV = OUTPUT_DIR / f"{RETAILER}_reviews_matching_amazon_schema.csv"
 SUMMARY_JSON = OUTPUT_DIR / f"{RETAILER}_reviews_matching_amazon_schema_summary.json"

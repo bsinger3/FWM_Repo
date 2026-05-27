@@ -25,7 +25,7 @@ from step1_intake_utils import (
 
 
 ROOT = Path(__file__).resolve().parents[4]
-DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
+DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT / "FWM_Data"))
 RETAILER = "bloomingdales_aqua"
 SOURCE_SITE = "https://www.bloomingdales.com/"
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / RETAILER

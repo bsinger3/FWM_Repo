@@ -53,7 +53,7 @@ WOMENS_PRODUCT_RE = re.compile(
 MENS_PRODUCT_RE = re.compile(r"\b(?:for men|men'?s?|boxers?|boxer\s*briefs?)\b", re.I)
 
 ROOT = Path(__file__).resolve().parents[4]
-DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
+DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT / "FWM_Data"))
 OUTPUT_CSV, SUMMARY_JSON = output_paths(RETAILER)
 
 

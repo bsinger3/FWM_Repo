@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Sequence
@@ -14,7 +13,9 @@ from urllib.request import Request, urlopen
 from step1_intake_utils import INTAKE_HEADERS
 
 
-DATA_ROOT = Path(os.environ["FWM_DATA_DIR"]).expanduser() if os.environ.get("FWM_DATA_DIR") else Path(__file__).resolve().parents[4].parent / "FWM_Data"
+DATA_ROOT = Path(
+    __import__("os").environ.get("FWM_DATA_DIR", Path(__file__).resolve().parents[4] / "FWM_Data")
+)
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "karenmillen_com"
 OUTPUT_CSV = OUTPUT_DIR / "karenmillen_com_reviews_matching_amazon_schema.csv"
 SUMMARY_JSON = OUTPUT_DIR / "karenmillen_com_reviews_matching_amazon_schema_summary.json"

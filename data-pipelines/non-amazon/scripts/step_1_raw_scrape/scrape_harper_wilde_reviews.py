@@ -22,7 +22,7 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[4]
-DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
+DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "harper_wilde"
 OUTPUT_CSV = OUTPUT_DIR / "harper_wilde_reviews_matching_intake_schema.csv"
 SUMMARY_JSON = OUTPUT_DIR / "harper_wilde_reviews_matching_intake_schema_summary.json"

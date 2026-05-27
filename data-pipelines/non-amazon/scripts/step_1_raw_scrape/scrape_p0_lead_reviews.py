@@ -5,7 +5,6 @@ import argparse
 import csv
 import html
 import json
-import os
 import re
 import sys
 from pathlib import Path
@@ -47,11 +46,7 @@ skip pages that are restricted or unavailable; only collect public review data.
 
 
 DEFAULT_TRIAGE_CSV = (
-    (
-        Path(os.environ["FWM_DATA_DIR"]).expanduser()
-        if os.environ.get("FWM_DATA_DIR")
-        else Path(__file__).resolve().parents[4].parent / "FWM_Data"
-    )
+    Path(__file__).resolve().parents[4] / "FWM_Data"
     / "WebLeads"
     / "_lead_runs"
     / "20260424T203030Z"
@@ -1121,7 +1116,6 @@ def scrape_domain(
     *,
     only_seed_products: bool = False,
     include_yotpo_product_pass: bool = True,
-    judgeme_aggregate_only: bool = False,
 ) -> Tuple[List[Dict[str, str]], Dict[str, object]]:
     started_at = utc_now()
     site_root = f"https://{domain}"
@@ -1181,51 +1175,6 @@ def scrape_domain(
     errors: List[str] = []
     adapter_names = set()
     fetched_at = utc_now()
-
-    if judgeme_aggregate_only:
-        if not seed_urls:
-            raise RuntimeError(f"{domain}: Judge.me aggregate-only mode requires at least one seed URL")
-        seed_context = hydrate_shopify_context(extract_product_context(seed_urls[0]))
-        if not seed_context.provider_hints or "judge" not in seed_context.provider_hints.lower():
-            seed_context.provider_hints = "; ".join(unique([seed_context.provider_hints, "Judge.me"]))
-        product_count = len(discover_shopify_product_urls(site_root, seed_urls)) if not only_seed_products else seed_url_count
-        discovery_method = "shopify_products_json_and_product_sitemaps"
-        catalog_discovery_attempted = not only_seed_products
-        adapter = JudgeMeAdapter()
-        reviews = adapter._all_reviews(seed_context)
-        rows = dedupe_rows([build_intake_row(seed_context, review, fetched_at) for review in reviews if review.image_url])
-        output_csv, summary_json = output_paths(domain)
-        write_intake_csv(rows, output_csv)
-        product_summaries.append(
-            {
-                "product_url": seed_context.url,
-                "product_title": seed_context.title,
-                "provider_hints": seed_context.provider_hints,
-                "adapter_used": "judgeme-aggregate-only",
-                "matching_review_images": len(rows),
-                "product_index": 1,
-                "note": (
-                    "Public Judge.me aggregate media feed used deliberately; exhaustive product-level "
-                    "fallback skipped because prior diagnostics showed duplicate aggregate rows and "
-                    "long zero-row product probes."
-                ),
-            }
-        )
-        write_summary(
-            summary_json,
-            site=site_root,
-            retailer=domain,
-            rows=rows,
-            output_csv=output_csv,
-            started_at=started_at,
-            finished_at=utc_now(),
-            products_scanned=product_count,
-            adapter="judgeme-aggregate-only",
-            product_summaries=product_summaries,
-            errors=errors,
-        )
-        enrich_summary(summary_json, product_count, aggregate_used=True)
-        return rows, {"output_csv": str(output_csv), "summary_json": str(summary_json), "rows": len(rows), "errors": errors}
 
     if domain in {"retro-stage.com", "www.retro-stage.com"} and product_urls:
         try:
@@ -1442,11 +1391,6 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         action="store_true",
         help="Skip the default public product-specific Yotpo endpoint pass after aggregate scraping.",
     )
-    parser.add_argument(
-        "--judgeme-aggregate-only",
-        action="store_true",
-        help="Use only the public Judge.me aggregate media feed and skip exhaustive product-level fallback.",
-    )
     return parser.parse_args(argv)
 
 
@@ -1477,7 +1421,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 seed_urls,
                 only_seed_products=args.only_seed_products,
                 include_yotpo_product_pass=not args.skip_yotpo_product_pass,
-                judgeme_aggregate_only=args.judgeme_aggregate_only,
             )
             overall[domain] = summary
         except Exception as exc:

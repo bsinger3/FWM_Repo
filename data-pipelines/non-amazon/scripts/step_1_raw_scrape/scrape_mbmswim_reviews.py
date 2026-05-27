@@ -20,7 +20,7 @@ from bs4 import BeautifulSoup
 
 
 ROOT = Path(__file__).resolve().parents[4]
-DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT.parent / "FWM_Data"))
+DATA_ROOT = Path(os.environ.get("FWM_DATA_DIR", ROOT / "FWM_Data"))
 OUTPUT_DIR = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data" / "mbmswim_com"
 OUTPUT_CSV = OUTPUT_DIR / "mbmswim_com_reviews_matching_intake_schema.csv"
 SUMMARY_JSON = OUTPUT_DIR / "mbmswim_com_reviews_matching_intake_schema_summary.json"

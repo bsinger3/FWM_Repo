@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import re
 import time
 from pathlib import Path
@@ -32,9 +31,8 @@ from step1_intake_utils import (
 SITE_ROOT = "https://www.victoriassecret.com"
 DOMAIN = "victoriassecret.com"
 RETAILER = "victoriassecret_com"
-DATA_ROOT = Path(os.environ["FWM_DATA_DIR"]).expanduser() if os.environ.get("FWM_DATA_DIR") else Path(__file__).resolve().parents[4].parent / "FWM_Data"
 DEFAULT_WORKBOOK = (
-    DATA_ROOT
+    Path(__file__).resolve().parents[4] / "FWM_Data"
     / "non-amazon"
     / "data"
     / "step_1_raw_scraping_data"

@@ -10,9 +10,9 @@ from http.cookiejar import CookieJar
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
-DATA_ROOT = Path(os.environ["FWM_DATA_DIR"]).expanduser() if os.environ.get("FWM_DATA_DIR") else REPO_ROOT.parent / "FWM_Data"
-ROOT = DATA_ROOT / "non-amazon" / "data" / "step_1_raw_scraping_data"
+ROOT = Path(
+    "/Users/briannasinger/Projects/FWM/data-pipelines/non-amazon/data/step_1_raw_scraping_data"
+)
 
 
 DOWNLOADS = [

@@ -98,7 +98,7 @@ def data_root() -> Path:
     cwd_candidate = Path.cwd() / "FWM_Data"
     if cwd_candidate.exists():
         return cwd_candidate
-    return Path.cwd().parent / "FWM_Data"
+    return Path(__file__).resolve().parents[4] / "FWM_Data"
 
 
 def utc_now() -> str:

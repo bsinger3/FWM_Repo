@@ -9,11 +9,8 @@ import hashlib
 import json
 import math
 import re
-import shutil
 import subprocess
 import time
-import urllib.error
-import urllib.request
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -129,7 +126,7 @@ def data_root() -> Path:
     cwd_candidate = Path.cwd() / "FWM_Data"
     if cwd_candidate.exists():
         return cwd_candidate
-    return Path.cwd().parent / "FWM_Data"
+    return Path(__file__).resolve().parents[4] / "FWM_Data"
 
 
 def utc_now() -> str:
@@ -143,8 +140,7 @@ def fetch_html(url: str, timeout: int = 30) -> tuple[int | None, str]:
         "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language: en-US,en;q=0.9",
     ]
-    curl_bin = shutil.which("curl.exe") or shutil.which("curl") or "curl"
-    cmd = [curl_bin, "-sS", "-L", url, "--max-time", str(timeout), "-w", "\n__HTTP_STATUS__:%{http_code}"]
+    cmd = ["curl.exe", "-sS", "-L", url, "--max-time", str(timeout), "-w", "\n__HTTP_STATUS__:%{http_code}"]
     for header in headers:
         cmd.extend(["-H", header])
     proc = subprocess.run(
@@ -402,14 +398,6 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow({column: row.get(column, "") for column in CSV_COLUMNS})
 
 
-def row_unique_key(row: dict[str, Any]) -> str:
-    product_url = str(row.get("product_page_url_display") or "")
-    image_url = str(row.get("original_url_display") or "")
-    if product_url and image_url:
-        return f"{product_url}|{image_url}"
-    return str(row.get("id") or "")
-
-
 def title_from_url(url: str) -> str:
     match = re.search(r"/products/([^/]+)/\d+\.html", url)
     if not match:
@@ -573,7 +561,6 @@ def main() -> int:
     parser.add_argument("--page-size", type=int, default=40)
     parser.add_argument("--delay", type=float, default=0.15)
     parser.add_argument("--skip-live", action="store_true", help="Only convert workbook review-photo sheets.")
-    parser.add_argument("--live-only", action="store_true", help="Do not merge workbook review-photo rows into the output.")
     args = parser.parse_args()
 
     root = data_root()
@@ -599,11 +586,11 @@ def main() -> int:
 
     unique_rows: OrderedDict[str, dict[str, Any]] = OrderedDict()
     for row in all_rows:
-        unique_rows[row_unique_key(row)] = row
+        unique_rows[str(row["id"])] = row
     live_rows = len(unique_rows)
-    workbook_rows = [] if args.live_only else rows_from_review_workbook(workbook)
+    workbook_rows = rows_from_review_workbook(workbook)
     for row in workbook_rows:
-        unique_rows.setdefault(row_unique_key(row), row)
+        unique_rows.setdefault(str(row["id"]), row)
     all_rows = list(unique_rows.values())
     used_workbook_rows = bool(workbook_rows)
     write_csv(csv_path, all_rows)
@@ -617,9 +604,7 @@ def main() -> int:
         "site": "lulus.com",
         "retailer": "lulus_com",
         "status": (
-            "completed_live_only"
-            if args.live_only
-            else "completed_from_workbook_review_sheets"
+            "completed_from_workbook_review_sheets"
             if args.skip_live or (used_workbook_rows and not live_rows)
             else "completed_from_live_and_workbook_review_sheets"
             if used_workbook_rows
