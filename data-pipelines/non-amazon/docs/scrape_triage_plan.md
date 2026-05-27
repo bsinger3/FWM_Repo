@@ -142,27 +142,30 @@ User-approved Sovrn items from manual review:
 - `whitehouseblackmarket_com`: picture reviews are present. Refresh the existing scraper/report rather than creating a new scraper.
 - `quince_com`: picture reviews are present. Refresh the existing scraper rather than creating a new scraper.
 
-Use these first-pass Sovrn candidates after checking claim/output history for each domain:
+Use this payout-prioritized Sovrn scrape order after checking claim/output history for each domain. Ranking uses estimated commission per click where Sovrn provided conversion rate, commission rate, and AOV; rows without enough data are ordered after the known-payout rows by CPA/CPC availability and triage quality.
 
-- `prettylittlething_com`: Bazaarvoice; `photo_reviews=yes`; known shipping geos `AU|CA|FR|GB|IE|US`; category evidence is swim/bikini tops.
-- `prettylittlething_com_au`: Bazaarvoice; `photo_reviews=yes`; known shipping geos `AU|CA|FR|GB|IE|US`; category evidence is women's tops/shirts.
-- `spanx_com`: Yotpo; `photo_reviews=yes`; known shipping geos `CA|GB|US`; category evidence is jeans.
-- `abrandjeans_com`: Okendo; `photo_reviews=yes`; market-specific `US`; category evidence is women's new arrivals.
-- `yogademocracy_com`: Yotpo; `photo_reviews=yes`; market-specific `US`; category evidence is tops.
-- `lascana_com`: Yotpo; `photo_reviews=yes`; known shipping geos `DE|US`; category evidence is dresses.
-- `spinnakerboutique_com`: Loox; `photo_reviews=yes`; market-specific `US`; category evidence is women's jeans.
-- `foxylingerie_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence is swimsuit tops.
-- `luxefashionclothing_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence is women's swim/beachwear.
-- `rollasjeans_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence is women's tops.
-- `clothingshoponline_com`: Yotpo/Loox signal; `photo_reviews=unknown_sample_too_small`; market-specific `US`; category evidence is women's basics.
-- `synergyclothing_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence is women's collection.
-- `tbdress_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence exists, but verify category/PDP quality before a broad crawl.
-- `lingerie_co_uk`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; market-specific `GB`; category evidence is nightwear.
-- `nojeans_co`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `AU|CA|DE|ES|FR|GB|IT|NZ|US`; category evidence exists.
-- `seven7jeans_com`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `CA|US`; category evidence is dresses.
-- `redrat_co_nz`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; shipping unknown; category evidence is women's apparel.
-- `wildsecretslingerie_com_au`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `AU|NZ|US`; category evidence needs manual product confirmation.
-- `wildsecretslingerie_co_nz`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `AU|NZ|US`; category evidence needs manual product confirmation.
+1. `prettylittlething_com`: CPA+CPC; est. commission/click `$0.39`; conversion `11.81%`; commission `4.36%`; AOV `$75.73`; Bazaarvoice; `photo_reviews=yes`; shipping `AU|CA|FR|GB|IE|US`.
+2. `nordstromrack_com`: CPA+CPC; est. commission/click `$0.25`; conversion `5.57%`; commission `3.45%`; AOV `$128.12`; customer photos present; scrape women's section only.
+3. `spanx_com`: CPA+CPC; est. commission/click `$0.14`; conversion `2.97%`; commission `3.05%`; AOV `$155.25`; Yotpo; `photo_reviews=yes`; shipping `CA|GB|US`.
+4. `clothingshoponline_com`: CPA+CPC; est. commission/click `$0.14`; conversion `4.17%`; commission `5.71%`; AOV `$59.55`; Yotpo/Loox signal; `photo_reviews=unknown_sample_too_small`; shipping `US`.
+5. `whitehouseblackmarket_com`: refresh existing scraper; CPA+CPC; est. commission/click `$0.07`; conversion `7.0%`; commission `1.05%`; AOV `$89.02`; Bazaarvoice; picture reviews present.
+6. `quince_com`: refresh existing scraper; CPA+CPC; est. commission/click `$0.07`; conversion `1.61%`; commission `3.0%`; AOV `$154.36`; Yotpo; picture reviews present.
+7. `prettylittlething_com_au`: CPA; est. commission/click `$0.04`; conversion `1.6%`; commission `6.0%`; AOV `$43.61`; Bazaarvoice; `photo_reviews=yes`; shipping `AU|CA|FR|GB|IE|US`.
+8. `yogademocracy_com`: CPA+CPC, payout fields not populated; Yotpo; `photo_reviews=yes`; shipping `US`.
+9. `spinnakerboutique_com`: CPA+CPC; conversion `3.17%`, commission/AOV not populated; Loox; `photo_reviews=yes`; shipping `US`.
+10. `luxefashionclothing_com`: CPA, payout fields not populated; provider unknown; `photo_reviews=yes`; shipping `US`.
+11. `nojeans_co`: CPA+CPC, payout fields not populated; provider unknown; `photo_reviews=unknown_sample_too_small`; shipping `AU|CA|DE|ES|FR|GB|IT|NZ|US`.
+12. `seven7jeans_com`: CPA+CPC, payout fields not populated; provider unknown; `photo_reviews=unknown_sample_too_small`; shipping `CA|US`.
+13. `redrat_co_nz`: CPA+CPC, payout fields not populated; provider unknown; `photo_reviews=unknown_sample_too_small`; shipping unknown.
+14. `wildsecretslingerie_com_au`: CPA+CPC, payout fields not populated; provider unknown; `photo_reviews=unknown_sample_too_small`; shipping `AU|NZ|US`.
+15. `wildsecretslingerie_co_nz`: CPA, payout fields not populated; provider unknown; `photo_reviews=unknown_sample_too_small`; shipping `AU|NZ|US`.
+16. `abrandjeans_com`: CPC, CPC amount not populated; Okendo; `photo_reviews=yes`; shipping `US`.
+17. `lascana_com`: CPC, CPC amount not populated; Yotpo; `photo_reviews=yes`; shipping `DE|US`.
+18. `foxylingerie_com`: CPC, CPC amount not populated; provider unknown; `photo_reviews=yes`; shipping `US`.
+19. `rollasjeans_com`: CPC, CPC amount not populated; provider unknown; `photo_reviews=yes`; shipping `US`.
+20. `synergyclothing_com`: CPC, CPC amount not populated; provider unknown; `photo_reviews=yes`; shipping `US`.
+21. `tbdress_com`: CPC, CPC amount not populated; provider unknown; `photo_reviews=yes`; shipping `US`.
+22. `lingerie_co_uk`: CPC, CPC amount not populated; provider unknown; `photo_reviews=unknown_sample_too_small`; shipping `GB`.
 
 Sovrn manual-review rows rejected by user:
 
