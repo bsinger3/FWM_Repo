@@ -1,6 +1,6 @@
 # Non-Amazon Scrape Triage Plan
 
-Last updated: 2026-05-11 America/New_York
+Last updated: 2026-05-27 America/New_York
 
 ## Coordination Rules
 
@@ -11,6 +11,7 @@ Last updated: 2026-05-11 America/New_York
 - Do not start a site already listed as active or claimed unless the claim is stale and the user confirms it is safe to take over.
 - Default to first-time scrapes. Completed claim files in `_claims` are historical notes, not active queue items. Do not choose a completed retailer for another run unless the user explicitly asks for a refresh/resume, the prior result is marked blocked/partial/incomplete, or the triage plan clearly says it needs revisit.
 - When picking "the next" scrape, skip completed retailers and choose an unclaimed site with no completed output/claim from the sheet intake or `Next Candidates` lists before considering any old refresh.
+- The completed Sovrn Commerce triage is now part of this scrape triage. Use `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv` for the sortable Sovrn candidate list, and check the full tracker before promoting a Sovrn merchant into implementation.
 - Before assigning "next," search the repo and data root for the merchant domain/slug across scripts, docs, `_claims`, `_active_scrape_claims`, and output directories. Any hit means the site is already attempted and is not eligible as a first-time scrape unless the user explicitly names it or asks for a revisit/resume.
 - If a site returns `429`, captcha, auth wall, WAF challenge, or suspicious-request behavior, stop retrying and mark it for revisit instead of increasing request pressure.
 - Do not reject a site just because it lacks customer-photo reviews. Some useful sites expose catalog model images plus model height/size/measurements. For those, scrape the model image and model measurements, and mark rows with `image_source_type=catalog_model_image` instead of treating the image as a customer review image.
@@ -113,6 +114,73 @@ After the five queued claim files above:
 - `urbanoutfitters_com`: partial product-page scrape completed 2026-05-06 over the local `UO_BigImages.xlsx` `prodLinks` catalog. The public review API probe returned a DataDome interstitial, and product-page scraping stopped at the first HTTP 403 per guardrail. Output has 158 catalog-model rows from SSR product state before the stop.
 - `freepeople_com`: blocked on 2026-05-20. A single safe homepage probe returned HTTP 403 with DataDome/captcha-delivery challenge behavior, so no Bazaarvoice endpoint scrape was attempted. Output is a zero-row blocked summary.
 - `oddbirdco_com`: lower priority follow-up. It already has a recent full-catalog-attempted run with 68 rows and 14 qualified rows, so inspect before rerunning.
+
+## Sovrn Commerce Triage Added 2026-05-27
+
+Source files:
+
+- Full tracker: `data-pipelines/non-amazon/docs/sovrn_commerce_apparel_triage_tracker.csv`
+- Sortable scrape-candidate list: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Full triage report: `data-pipelines/non-amazon/docs/sovrn_commerce_full_triage_report.md`
+
+Completion summary:
+
+- 1,012 of 1,012 Sovrn merchants checked.
+- 43 rows reached `triage_candidate`.
+- 19 are first-pass scrape candidates after obvious false-positive cleanup.
+- 15 need manual review before queueing.
+- 9 are false positives and should not be scraped.
+- 7 broad marketplaces remain category-level manual-review items, not normal first-pass scrape targets.
+- Shoes and footwear remain out of scope.
+
+Use these first-pass Sovrn candidates after checking claim/output history for each domain:
+
+- `prettylittlething_com`: Bazaarvoice; `photo_reviews=yes`; known shipping geos `AU|CA|FR|GB|IE|US`; category evidence is swim/bikini tops.
+- `prettylittlething_com_au`: Bazaarvoice; `photo_reviews=yes`; known shipping geos `AU|CA|FR|GB|IE|US`; category evidence is women's tops/shirts.
+- `spanx_com`: Yotpo; `photo_reviews=yes`; known shipping geos `CA|GB|US`; category evidence is jeans.
+- `abrandjeans_com`: Okendo; `photo_reviews=yes`; market-specific `US`; category evidence is women's new arrivals.
+- `yogademocracy_com`: Yotpo; `photo_reviews=yes`; market-specific `US`; category evidence is tops.
+- `lascana_com`: Yotpo; `photo_reviews=yes`; known shipping geos `DE|US`; category evidence is dresses.
+- `spinnakerboutique_com`: Loox; `photo_reviews=yes`; market-specific `US`; category evidence is women's jeans.
+- `foxylingerie_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence is swimsuit tops.
+- `luxefashionclothing_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence is women's swim/beachwear.
+- `rollasjeans_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence is women's tops.
+- `clothingshoponline_com`: Yotpo/Loox signal; `photo_reviews=unknown_sample_too_small`; market-specific `US`; category evidence is women's basics.
+- `synergyclothing_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence is women's collection.
+- `tbdress_com`: provider unknown from triage, but `photo_reviews=yes`; market-specific `US`; category evidence exists, but verify category/PDP quality before a broad crawl.
+- `lingerie_co_uk`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; market-specific `GB`; category evidence is nightwear.
+- `nojeans_co`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `AU|CA|DE|ES|FR|GB|IT|NZ|US`; category evidence exists.
+- `seven7jeans_com`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `CA|US`; category evidence is dresses.
+- `redrat_co_nz`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; shipping unknown; category evidence is women's apparel.
+- `wildsecretslingerie_com_au`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `AU|NZ|US`; category evidence needs manual product confirmation.
+- `wildsecretslingerie_co_nz`: provider unknown from triage; `photo_reviews=unknown_sample_too_small`; known shipping geos `AU|NZ|US`; category evidence needs manual product confirmation.
+
+Manual-review Sovrn candidates before queueing:
+
+- `boohoo_com`, `boohooman_com`: Sovrn found Bazaarvoice/photo-review signals, but the older sheet intake said `boohoo_com` could not find reviews. Reconcile the conflict before assigning.
+- `chicos_com`, `chicosofftherack_com`: Sovrn found Bazaarvoice/review signals, but older sheet intake marked `chicos_com` not scrapable. Reconcile and verify domain-specific PDPs before assigning.
+- `nordstromrack_com`: needs a category-specific plan; do not treat as a whole-site scrape.
+- `quince_com`: existing scraper exists; review prior implementation/output before assigning a new run.
+- `whitehouseblackmarket_com`: existing scraper and 2026-05-11 report exist; inspect before considering a refresh.
+- `mugsyjeans_com`: Okendo/photo-review signal, but sampled PDP was a gift card; manually pick clean apparel PDPs first.
+- `getlambs_com` / `havnwear_com`: merchant/domain mismatch in Sovrn evidence; verify before queueing.
+- `clothesoutdoor_com`: photo-review signal but category evidence is broad/hot-sale; manually verify apparel PDP quality.
+- `senseng_apparel_com`: Judge.me/Loox signal, but sampled PDPs include kids/mommy-and-me items; manually pick adult women's products first.
+- `puma_com`: regional `ae.puma.com` evidence; choose target country/storefront deliberately.
+- `shopbop_com`: retailer/marketplace-like catalog; needs category-specific product selection.
+- `nau_com`: category evidence was not clean enough; manually verify PDP/review source.
+
+Sovrn false positives to avoid:
+
+- `iloveantix_com`: accessory/board-product false positive.
+- `evolveclothing_com`: men's category/cookie URL false positive.
+- `jeans_meile_de`: men's category false positive.
+- `petiterevery_com`: kids category false positive.
+- `rococlothing_co_uk`: kids category false positive.
+- `boutique_dmc_fr` / `dmc_com`: yarn/craft-products false positive.
+- `ventilateurs_plafond_com`: ceiling-fan false positive.
+- `gillettevenus_com`: razor/personal-care false positive.
+- `nuawoman_com`: wellness/content false positive.
 
 ## Sheet Intake Added 2026-05-06
 
