@@ -23,6 +23,7 @@ As of 2026-05-20, the first implementation step is intentionally backend-only:
 - The website still uses `public.images`, `public.clothing_types`, and the existing `public.match_by_measurements` RPC.
 - No frontend UI or search behavior changes are part of this staging step.
 - No foreign key has been added from `public.images` to the staging product tables yet.
+- Shipping countries/geos are not currently tracked on `staging.product_pages` or `public.images`.
 
 Migration:
 
@@ -73,6 +74,54 @@ order by updated_at desc;
 ```
 
 Use `staging.refresh_product_category_staging()` only when deliberately rebuilding staging from scratch, because it truncates the staging product-page tables.
+
+## Product Category Classification Procedure
+
+Going forward, product categories should be generated from product-level evidence, not only from old image-level `clothing_type_id` values or URL slug matching.
+
+For each normalized product URL in `staging.product_pages`:
+
+1. Fetch the product page.
+2. Extract the catalog/product photo URL from product-page metadata, preferring `og:image`, `twitter:image`, structured product JSON-LD image fields, or retailer-specific product image metadata.
+3. Use the product title/name plus the catalog photo as the primary classification evidence.
+4. Send both the catalog photo and the product title/name to a multimodal LLM.
+5. Ask the LLM to return structured output only:
+
+```json
+{
+  "mother_category_id": "tops",
+  "product_category_raw": "blouse",
+  "tag_ids": ["blouse", "tops"],
+  "confidence": "high",
+  "evidence": "Catalog photo shows a blouse; product title includes blouse.",
+  "needs_manual_review": false
+}
+```
+
+Classifier rules:
+
+- The LLM must choose only taxonomy IDs that exist in `staging.clothing_mother_categories` and `staging.clothing_type_tags`, unless it explicitly flags that a new tag is needed.
+- Tag suggestions must agree with the selected mother category. Do not mix unrelated tags such as `dress` and `jeans`.
+- `other` should not be emitted as a garment category. If the product is a real garment and the taxonomy is missing the right category, create or propose a descriptive tag.
+- If the catalog photo is unavailable, blocked, or clearly not a product image, fall back to product title/name and URL evidence, lower confidence, and set `needs_manual_review = true`.
+- If the product page is unavailable or redirects to a no-product page, classify it as `source-review` and do not assign a frontend garment category.
+- LLM outputs should be written to staging metadata and approval fields only. They should not affect the live frontend until the approval workbook has been reviewed and a production cutover migration is explicitly approved.
+
+Recommended staging metadata fields for the LLM classifier:
+
+- `catalog_photo_url`
+- `catalog_photo_fetched_at`
+- `catalog_photo_fetch_status`
+- `llm_model`
+- `llm_classified_at`
+- `llm_mother_category_id`
+- `llm_product_category_raw`
+- `llm_tag_ids`
+- `llm_confidence`
+- `llm_evidence`
+- `llm_needs_manual_review`
+
+The approval workbook should include the catalog photo and at least one reviewer/customer photo side by side so the reviewer can validate that the product URL, catalog photo, product name, category, and tags all agree.
 
 Quality notes from the first staging QA pass:
 
@@ -129,7 +178,11 @@ Recommended tables:
 
 - `public.product_pages`
   - one row per normalized product URL
-  - stores source site, brand, product title, product category, raw metadata, mother category, confidence, evidence, and manual-review status
+  - stores source site, brand, product title, product category, raw metadata, mother category, confidence, evidence, manual-review status, and shipping/geo summary fields
+
+- `public.product_page_shipping_geos`
+  - many-to-many join table
+  - connects one product page to one or more country/market codes when shipping or storefront availability has been verified
 
 - `public.product_page_clothing_type_tags`
   - many-to-many join table
@@ -141,6 +194,51 @@ Recommended tables:
   - can also keep a denormalized `mother_category_id` for simpler filtering
 
 Keep the current `images.clothing_type_id` during migration for backwards compatibility, but stop treating it as the canonical category field once the new structure is live.
+
+## Product Shipping Geo Tracking
+
+Track product shipping/availability at the product URL level, not the review/image row level. One product can be visible in several country storefronts, and a single review image can be reused across locales.
+
+Recommended fields on `public.product_pages`:
+
+- `primary_market_country`: best-known storefront country for the normalized URL, using ISO 3166-1 alpha-2 codes such as `US`, `CA`, `GB`, or `AU`.
+- `shipping_geo_status`: one of `unknown`, `ships_to_known_countries`, `does_not_ship_to_target_country`, `market_specific_url`, `needs_manual_review`.
+- `shipping_geo_evidence`: short text note with the evidence source.
+- `shipping_geo_checked_at`: timestamp for the last check.
+
+Recommended table for normalized country/market coverage:
+
+```sql
+create table public.product_page_shipping_geos (
+  product_page_id uuid references public.product_pages(id) on delete cascade,
+  country_code text not null,
+  availability_status text not null
+    check (availability_status in (
+      'ships_to',
+      'does_not_ship_to',
+      'available_in_market',
+      'not_available_in_market',
+      'unknown'
+    )),
+  evidence_url text,
+  evidence_source text,
+  checked_at timestamptz not null default now(),
+  notes text,
+  primary key (product_page_id, country_code)
+);
+```
+
+Use `country_code` for the shopper destination or storefront market, not reviewer location. Reviewer location is a different concept and should stay separate if collected later.
+
+Evidence should be gathered conservatively:
+
+1. Merchant-level affiliate or Sovrn report geos when available.
+2. Storefront locale/domain, such as `.com`, `.ca`, `.co.uk`, `/en-us`, or `/en-au`.
+3. Public shipping policy pages when they clearly list destination countries.
+4. Product page or cart UI only when it can be checked without login, checkout automation, address entry, or bypassing anti-bot systems.
+5. Manual review notes for ambiguous cases.
+
+Do not treat a country storefront URL as proof that every product ships to that country unless the product page is available in that storefront or the shipping policy clearly covers it. For international domains, group products under the same merchant only when the site structure and review provider are shared, but keep country availability rows separate.
 
 ## 1. Get Category Information From Product URLs
 
@@ -268,7 +366,33 @@ create table public.product_pages (
   category_confidence text,
   category_evidence text,
   needs_manual_review boolean not null default false,
+  primary_market_country text,
+  shipping_geo_status text not null default 'unknown',
+  shipping_geo_evidence text,
+  shipping_geo_checked_at timestamptz,
   classified_at timestamptz not null default now()
+);
+```
+
+Add product shipping geos:
+
+```sql
+create table public.product_page_shipping_geos (
+  product_page_id uuid references public.product_pages(id) on delete cascade,
+  country_code text not null,
+  availability_status text not null
+    check (availability_status in (
+      'ships_to',
+      'does_not_ship_to',
+      'available_in_market',
+      'not_available_in_market',
+      'unknown'
+    )),
+  evidence_url text,
+  evidence_source text,
+  checked_at timestamptz not null default now(),
+  notes text,
+  primary key (product_page_id, country_code)
 );
 ```
 
@@ -385,15 +509,19 @@ The frontend can then render grouped typeahead suggestions without hard-coding t
 1. Agree on the mother category list and tag taxonomy.
 2. Add a taxonomy config file in the repo.
 3. Add product URL normalization and product metadata enrichment.
-4. Generate a product enrichment file from existing `FWM_Data`.
-5. Review low-confidence products manually.
-6. Add Supabase migration for product pages, mother categories, and product tag mappings.
-7. Backfill Supabase product pages and tag mappings.
-8. Update `match_by_measurements` to filter by mother category or tag.
-9. Update the frontend dropdown to use mother categories as the initial simple UI.
-10. Keep `images.clothing_type_id` for one release.
-11. Stop writing or relying on `images.clothing_type_id` after the new search path is stable.
-12. Later, replace the simple dropdown with the grouped hybrid combo box/typeahead.
+4. Fetch catalog photos from product URLs and run catalog-photo-plus-title LLM category classification into staging.
+5. Generate a product enrichment/approval workbook from staging.
+6. Review low-confidence products and LLM-proposed new tags manually.
+7. Add Supabase migration for product pages, mother categories, and product tag mappings.
+8. Add shipping geo fields and `product_page_shipping_geos`, initially defaulting unknown.
+9. Backfill Supabase product pages and tag mappings.
+10. Backfill product shipping geos from merchant-level report data, storefront locale, public shipping-policy evidence, and manual review where needed.
+11. Update `match_by_measurements` to filter by mother category or tag.
+12. Decide whether frontend search should filter by shopper country/ship-to country; do not expose shipping filters until enough product URLs have verified geo data.
+13. Update the frontend dropdown to use mother categories as the initial simple UI.
+14. Keep `images.clothing_type_id` for one release.
+15. Stop writing or relying on `images.clothing_type_id` after the new search path is stable.
+16. Later, replace the simple dropdown with the grouped hybrid combo box/typeahead.
 
 ## Validation
 
@@ -401,8 +529,13 @@ Before cutover:
 
 - Count rows with blank `mother_category_id`.
 - Count products with zero tags.
+- Count rows where LLM tag IDs do not belong to the selected mother category.
+- Count rows where catalog photo extraction failed and verify they are either manually reviewed or explicitly low confidence.
 - Sample at least 25 products per mother category.
 - Confirm `jeans` appears under both `jeans` tag matching and `bottoms` category matching.
 - Confirm bras/intimates do not disappear from search.
 - Confirm legacy `in_clothing_type_id` behavior still works during the transition.
+- Count product pages with `shipping_geo_status = 'unknown'`.
+- For any future ship-to filter, confirm products without verified shipping data are handled intentionally rather than silently excluded.
+- Sample at least 25 `product_page_shipping_geos` rows and verify the evidence source supports the country/market value.
 - Confirm generated data changes have been synced to S3.
