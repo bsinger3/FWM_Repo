@@ -43,3 +43,42 @@ Access stayed within public sitemap/product/review resources. No authentication,
 ## Qualification
 
 This is a high-value scrape. The 1,201 Supabase-qualified rows have customer review images, product URLs, deterministic ordered sizes, and at least one deterministic height/weight range field on the same row. Additional rows preserve review text and images for later standardization even when size or measurement context is missing.
+
+## Refresh - 2026-05-27
+
+Refreshed `whitehouseblackmarket_com` as an approved Sovrn existing-scraper refresh. The Sovrn candidate row notes picture reviews present, Bazaarvoice, CPA+CPC, and estimated commission/click `$0.07`.
+
+Adapter changes:
+
+- Removed the forced `curl --http2` flag from Bazaarvoice requests because it exits with code 2 in the current Windows runtime.
+- Added explicit UTF-8 decoding for `curl` subprocess output so Bazaarvoice review text with smart punctuation does not become `charmap` decode errors.
+- Added repeatable `--product-url` for targeted PDP smoke checks against plan/sample URLs.
+- Treat subprocess failures as stop conditions instead of silently producing a misleading zero-row refresh, and mark coverage non-exhaustive when product-level errors remain.
+
+Refresh access stayed within public pages/endpoints: public WHBM product sitemap, public WHBM PDPs for inspection, and public Bazaarvoice BFD review JSON. No authentication, browser bypass, captcha handling, WAF bypass, S3 sync, or private endpoint use was attempted. The final run completed without 429, captcha, WAF, auth-wall, or challenge-marker behavior.
+
+Refreshed outputs:
+
+- CSV: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\whitehouseblackmarket_com\whitehouseblackmarket_com_reviews_matching_amazon_schema.csv`
+- Summary: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\whitehouseblackmarket_com\whitehouseblackmarket_com_reviews_matching_amazon_schema_summary.json`
+
+Refresh metrics:
+
+- Products discovered: 3,603
+- Products scanned: 3,603
+- Products excluded from output: 2,861
+- Review pages scanned: 3,603
+- Exhaustive review paging: true
+- Rows written: 2,205
+- Distinct reviews: 863
+- Distinct images: 1,283
+- Rows with distinct product URL: 742
+- Rows with any measurement: 1,555
+- Rows with customer image: 2,205
+- Rows with catalog model image: 0
+- Rows with customer ordered size: 1,175
+- Supabase-qualified rows: 1,116
+- Coverage exhaustive: true
+- Errors: none
+
+Compared with the 2026-05-11 run, current sitemap coverage is smaller (3,603 products vs. 3,951), and output is slightly smaller (2,205 rows vs. 2,433; 1,116 qualified rows vs. 1,201). The adapter still captures one row per public Bazaarvoice customer review photo and preserves size/height/weight context when present.

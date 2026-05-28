@@ -1,0 +1,26 @@
+site: prettylittlething.com / ie.prettylittlething.com
+retailer: prettylittlething_com
+claimed_by: Codex
+started_at: 2026-05-27T21:35:00Z
+completed_at: 2026-05-27T21:52:05Z
+status: stopped_public_preflight_waf
+source: payout-prioritized Sovrn triage entry
+triage_source: data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv
+merchant: Pretty Little Thing
+provider_hint: Bazaarvoice
+photo_reviews: yes
+shipping_geos: AU|CA|FR|GB|IE|US
+estimated_commission_per_click: $0.39
+script: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\scripts\step_1_raw_scrape\scrape_prettylittlething_reviews.py
+doc: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\docs\prettylittlething_scrape_2026-05-27.md
+output_csv: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\prettylittlething_com\prettylittlething_com_reviews_matching_amazon_schema.csv
+summary_json: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\prettylittlething_com\prettylittlething_com_reviews_matching_amazon_schema_summary.json
+products_discovered: 0
+products_scanned: 0
+review_pages_scanned: 0
+rows_written: 0
+distinct_reviews: 0
+distinct_images: 0
+rows_supabase_qualified: 0
+stop_reason: public category/PDP HTML returned HTTP 200 but included AWS WAF challenge markers edge.sdk.awswaf.com, challenge.js, awswaf
+guardrails: public category/product pages only; no Bazaarvoice endpoint probing, captcha handling, auth flow, WAF workaround, or pressure retry attempted

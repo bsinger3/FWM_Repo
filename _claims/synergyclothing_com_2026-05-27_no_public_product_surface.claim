@@ -1,0 +1,35 @@
+site: synergyclothing.com
+retailer: synergyclothing_com
+claimed_by: Codex
+started_at: 2026-05-28T00:01:57Z
+completed_at: 2026-05-28T00:06:13Z
+status: completed_zero_rows_no_public_product_or_review_surface
+
+triage_source: data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv
+triage_status: sovrn_first_pass_scrape_candidate
+priority: P2
+pricing_model: CPC
+cpc_amount: not_populated
+reviews_present: yes
+photo_reviews: yes
+shipping_countries: US
+provider: unknown
+evidence_url: https://www.synergyclothing.com/category/shop-organic/womens-collection/
+
+duplicate_check: no prior synergyclothing_com claim/output/script/doc found before this attempt
+script: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_synergyclothing_reviews.py
+doc: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Repo/data-pipelines/non-amazon/docs/synergyclothing_scrape_2026-05-27.md
+output_csv: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/synergyclothing_com/synergyclothing_com_reviews_matching_intake_schema.csv
+summary_json: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/synergyclothing_com/synergyclothing_com_reviews_matching_intake_schema_summary.json
+
+result:
+  products_discovered: 0
+  products_scanned: 0
+  review_pages_scanned: 0
+  rows_written: 0
+  rows_with_customer_review_image: 0
+  rows_with_catalog_model_image: 0
+  errors: 0
+
+stop_reason: live seed category is a WordPress/Elementor content category with no public product cards, no category posts, no product/review provider markers, and common commerce paths returned 404
+guardrails: public category/sitemap/WordPress REST pages only; no 429/captcha/WAF/auth block encountered; no private endpoints, auth flow, challenge handling, or pressure retries attempted

@@ -1,0 +1,29 @@
+site: spinnakerboutique.com
+retailer: spinnakerboutique_com
+claimed_by: Codex
+started_at: 2026-05-27T18:36:00-04:00
+completed_at: 2026-05-27T18:47:53-04:00
+status: completed_zero_rows_no_public_loox_source
+source: payout-prioritized Sovrn triage entry
+triage_source: data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv
+merchant: Spinnaker Boutique
+provider_hint: Loox
+photo_reviews: yes
+reviews_present: yes
+shipping_geos: US
+conversion_signal: 3.17%
+commission_aov: not populated in triage
+duplicate_check: no prior spinnakerboutique_com claim/output/script/doc found before this attempt
+script: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\scripts\step_1_raw_scrape\scrape_spinnakerboutique_reviews.py
+doc: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\docs\spinnakerboutique_scrape_2026-05-27.md
+output_csv: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\spinnakerboutique_com\spinnakerboutique_com_reviews_matching_intake_schema.csv
+summary_json: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\spinnakerboutique_com\spinnakerboutique_com_reviews_matching_intake_schema_summary.json
+category_product_links_found: 36
+products_scanned: 20
+review_pages_scanned: 0
+rows_written: 0
+distinct_reviews: 0
+distinct_images: 0
+rows_supabase_qualified: 0
+stop_reason: no public Loox app id, Loox widget HTML, images.loox.io media, loox-review, or loox-photo markers found in seed/category product pages
+guardrails: public category/product pages only; no 429/captcha/WAF/auth block encountered; no private endpoints, auth flow, challenge handling, or pressure retries attempted

@@ -1,0 +1,36 @@
+site: lascana.com
+sovrn_merchant_domain: lascana.at
+retailer: lascana_com
+claimed_by: Codex
+started_at: 2026-05-28T00:12:10Z
+completed_at: 2026-05-28T00:30:39Z
+status: completed_category_bounded_public_yotpo
+source: payout-prioritized Sovrn triage entry
+triage_source: data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv
+triage_status: sovrn_first_pass_scrape_candidate
+priority: P3
+commission_model: CPC
+cpc_amount: not populated in triage
+provider: Yotpo
+photo_reviews: yes
+reviews_present: yes
+shipping_geos: DE|US
+domain_confirmation: Sovrn merchant field is lascana.at; category/sample PDP evidence and public pages confirmed www.lascana.com US storefront as scrape target
+duplicate_check: no prior lascana_com/lascana_at claim/output/script/doc found before this attempt
+script: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\scripts\step_1_raw_scrape\scrape_lascana_reviews.py
+doc: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\docs\lascana_scrape_2026-05-27.md
+output_csv: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\lascana_com\lascana_com_reviews_matching_intake_schema.csv
+summary_json: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\lascana_com\lascana_com_reviews_matching_intake_schema_summary.json
+category_product_links_found: 30
+products_scanned: 30
+review_pages_scanned: 37
+rows_written: 11
+distinct_reviews: 11
+distinct_images: 11
+distinct_products: 6
+rows_with_customer_review_image: 11
+rows_with_any_measurement: 4
+rows_with_customer_ordered_size: 9
+rows_supabase_qualified: 4
+stop_reason: completed_public_yotpo_scan
+guardrails: public category/product pages and public Yotpo widget API only; no 429/captcha/WAF/auth block encountered; syndicated review media globally deduped by review ID and image URL

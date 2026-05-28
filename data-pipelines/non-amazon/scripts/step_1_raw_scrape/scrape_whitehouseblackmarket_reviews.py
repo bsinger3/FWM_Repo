@@ -63,11 +63,16 @@ def norm(value: object) -> str:
 
 
 def request_text(url: str) -> str:
-    output = subprocess.check_output(
-        ["curl", "-L", "-sS", "--max-time", "45", "-w", "\n__FWM_HTTP_STATUS__:%{http_code}", url],
-        text=True,
-        stderr=subprocess.STDOUT,
-    )
+    try:
+        output = subprocess.check_output(
+            ["curl", "-L", "-sS", "--max-time", "45", "-w", "\n__FWM_HTTP_STATUS__:%{http_code}", url],
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise StopScrape(f"curl_failed_exit_{exc.returncode}: {url}: {norm(exc.output)}") from exc
     body, status_text = output.rsplit("\n__FWM_HTTP_STATUS__:", 1)
     status = int(status_text.strip() or "0")
     if status in {403, 408, 409, 429, 503}:
@@ -113,28 +118,32 @@ def classify_product(title: str, product_url: str) -> Tuple[bool, str, str]:
 
 def fetch_bazaarvoice_json(params: Dict[str, object]) -> Dict[str, object]:
     url = f"{BAZAARVOICE_BASE}?{urlencode(params, doseq=True)}"
-    output = subprocess.check_output(
-        [
-            "curl",
-            "--http2",
-            "-sS",
-            "--max-time",
-            "45",
-            "-w",
-            "\n__FWM_HTTP_STATUS__:%{http_code}",
-            url,
-            "-H",
-            f"bv-bfd-token: {BV_BFD_TOKEN}",
-            "-H",
-            f"origin: {SITE_ROOT}",
-            "-H",
-            f"referer: {SITE_ROOT}/",
-            "-H",
-            "accept: */*",
-        ],
-        text=True,
-        stderr=subprocess.STDOUT,
-    )
+    try:
+        output = subprocess.check_output(
+            [
+                "curl",
+                "-sS",
+                "--max-time",
+                "45",
+                "-w",
+                "\n__FWM_HTTP_STATUS__:%{http_code}",
+                url,
+                "-H",
+                f"bv-bfd-token: {BV_BFD_TOKEN}",
+                "-H",
+                f"origin: {SITE_ROOT}",
+                "-H",
+                f"referer: {SITE_ROOT}/",
+                "-H",
+                "accept: */*",
+            ],
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise StopScrape(f"curl_failed_exit_{exc.returncode}: {url}: {norm(exc.output)}") from exc
     body, status_text = output.rsplit("\n__FWM_HTTP_STATUS__:", 1)
     status = int(status_text.strip() or "0")
     if status in {403, 408, 409, 429, 503}:
@@ -370,7 +379,7 @@ def metrics(rows: Sequence[Dict[str, str]]) -> Dict[str, int]:
 
 def run(args: argparse.Namespace) -> Dict[str, object]:
     started_at = utc_now()
-    urls = fetch_product_urls()
+    urls = list(args.product_url) if args.product_url else fetch_product_urls()
     if args.limit_products:
         urls = urls[: args.limit_products]
     rows: List[Dict[str, str]] = []
@@ -412,13 +421,13 @@ def run(args: argparse.Namespace) -> Dict[str, object]:
         "triage_rank": 59,
         "triage_bucket": "build adapter / API inspect",
         "review_platform_provider": "Bazaarvoice",
-        "product_sources": {"sitemap_products_xml": len(urls), "lead_urls": 1},
+        "product_sources": {"sitemap_products_xml": 0 if args.product_url else len(urls), "lead_urls": 1, "cli_product_urls": len(args.product_url)},
         "products_discovered": len(urls),
         "products_scanned": len(product_summaries),
         "products_excluded_from_output": sum(1 for item in product_summaries if item.get("skipped_from_output")),
         "review_pages_scanned": review_pages_scanned,
         "exhaustive_review_paging": not stopped_early,
-        "coverage_exhaustive": not stopped_early and not args.limit_products and len(product_summaries) == len(urls),
+        "coverage_exhaustive": not stopped_early and not errors and not args.limit_products and len(product_summaries) == len(urls),
         "access_policy": "public sitemap and Bazaarvoice BFD review JSON only; stop on 429/captcha/WAF",
         "product_summaries": product_summaries,
         "errors": errors,
@@ -434,6 +443,7 @@ def run(args: argparse.Namespace) -> Dict[str, object]:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Scrape White House Black Market Bazaarvoice customer review photos.")
     parser.add_argument("--limit-products", type=int, default=0)
+    parser.add_argument("--product-url", action="append", default=[], help="Specific WHBM PDP URL to scan; repeatable.")
     parser.add_argument("--request-delay-seconds", type=float, default=0.05)
     args = parser.parse_args(argv)
     run(args)

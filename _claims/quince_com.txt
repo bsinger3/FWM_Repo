@@ -1,0 +1,30 @@
+site: quince.com
+retailer: quince_com
+claimed_by: Codex
+started_at: 2026-05-27T22:18:00Z
+completed_at: 2026-05-27T22:48:28Z
+status: completed_refresh
+source: approved Sovrn refresh existing scraper
+triage_source: data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv
+merchant: Quince
+provider_hint: Yotpo
+picture_reviews: yes
+shipping_geos: US
+estimated_commission_per_click: $0.07
+script: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\scripts\step_1_raw_scrape\scrape_quince_reviews.py
+doc: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\docs\quince_scrape_2026-05-27.md
+output_csv: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\quince_com\quince_com_reviews_matching_intake_schema.csv
+summary_json: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\quince_com\quince_com_reviews_matching_intake_schema_summary.json
+candidate_urls_discovered: 2573
+products_scanned: 2573
+rows_written: 48085
+distinct_reviews: 43357
+distinct_images: 43343
+distinct_products: 771
+rows_with_customer_review_image: 48085
+rows_with_customer_ordered_size: 34689
+rows_with_any_measurement: 8538
+rows_supabase_qualified: 6876
+errors: 0
+stop_reason: none
+guardrails: public sitemap/PDP Next.js data and public Quince review-media API only; no 429/captcha/WAF/auth challenge encountered

@@ -1,0 +1,27 @@
+site: prettylittlething.com.au
+retailer: prettylittlething_com_au
+claimed_by: Codex
+started_at: 2026-05-27T18:05:00-04:00
+completed_at: 2026-05-27T18:30:53-04:00
+status: stopped_public_preflight_waf
+source: payout-prioritized Sovrn triage entry
+triage_source: data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv
+merchant: PrettyLittleThing AU
+provider_hint: Bazaarvoice
+photo_reviews: yes
+shipping_geos: AU|CA|FR|GB|IE|US
+estimated_commission_per_click: $0.04
+duplicate_check: prior prettylittlething_com US/IE stopped-on-WAF attempt exists; no prior prettylittlething_com_au claim/output/script/doc found before this attempt
+script: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\scripts\step_1_raw_scrape\scrape_prettylittlething_au_reviews.py
+doc: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\docs\prettylittlething_au_scrape_2026-05-27.md
+output_csv: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\prettylittlething_com_au\prettylittlething_com_au_reviews_matching_intake_schema.csv
+summary_json: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\prettylittlething_com_au\prettylittlething_com_au_reviews_matching_intake_schema_summary.json
+products_discovered: 0
+products_scanned: 0
+review_pages_scanned: 0
+rows_written: 0
+distinct_reviews: 0
+distinct_images: 0
+rows_supabase_qualified: 0
+stop_reason: public AU category/PDP HTML returned HTTP 200 but included AWS WAF challenge markers edge.sdk.awswaf.com, challenge.js, awswaf
+guardrails: public AU category/product pages only; no Bazaarvoice endpoint probing, captcha handling, auth flow, WAF workaround, or pressure retry attempted

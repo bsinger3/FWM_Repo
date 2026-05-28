@@ -50,6 +50,22 @@ JSON_HEADERS = {
     "Accept": "application/json,text/plain,*/*",
     "Origin": SITE,
 }
+NEXT_BUILD_ID = ""
+STOP_STATUS_CODES = {401, 403, 407, 423, 429, 430, 503}
+BLOCK_MARKERS = [
+    "captcha",
+    "verify you are human",
+    "access denied",
+    "attention required",
+    "cloudflare",
+    "cf-chl",
+    "datadome",
+    "perimeterx",
+    "px-captcha",
+    "akamai",
+    "awswaf",
+    "challenge.js",
+]
 
 EXCLUDED_PATH_PARTS = {
     "account",
@@ -98,14 +114,30 @@ OUT_OF_SCOPE_PRODUCT_RE = re.compile(
 )
 
 
+class StopScrape(RuntimeError):
+    pass
+
+
 def make_session() -> requests.Session:
     session = requests.Session()
     session.headers.update(HEADERS)
     return session
 
 
+def assert_public_response(response: requests.Response, url: str) -> None:
+    if response.status_code in STOP_STATUS_CODES:
+        raise StopScrape(f"stopped_on_http_{response.status_code}: {url}")
+    content_type = response.headers.get("content-type", "")
+    if "text" in content_type or "html" in content_type or "json" in content_type:
+        lower = response.text[:250_000].lower()
+        hits = [marker for marker in BLOCK_MARKERS if marker in lower]
+        if hits:
+            raise StopScrape(f"stopped_on_block_marker_{','.join(hits)}: {url}")
+
+
 def fetch_text(session: requests.Session, url: str, *, timeout: int = 45) -> str:
     response = session.get(url, timeout=timeout)
+    assert_public_response(response, url)
     response.raise_for_status()
     return response.text
 
@@ -116,7 +148,18 @@ def clean_url(url: str) -> str:
 
 def discover_urls(limit: Optional[int] = None) -> List[str]:
     text = fetch_text(make_session(), SITEMAP_URL)
-    urls = [clean_url(match) for match in re.findall(r"<loc>(.*?)</loc>", text, re.I | re.S)]
+    locs = [clean_url(match) for match in re.findall(r"<loc>(.*?)</loc>", text, re.I | re.S)]
+    sitemap_urls = [url for url in locs if re.search(r"/sitemap_[^/]+\.xml$", url)]
+    urls: List[str] = []
+    if sitemap_urls:
+        session = make_session()
+        for sitemap_url in sitemap_urls:
+            if "pdp" not in sitemap_url.lower():
+                continue
+            sitemap_text = fetch_text(session, sitemap_url)
+            urls.extend(clean_url(match) for match in re.findall(r"<loc>(.*?)</loc>", sitemap_text, re.I | re.S))
+    else:
+        urls = locs
     urls = [url for url in urls if is_candidate_url(url)]
     seen = set()
     out: List[str] = []
@@ -143,7 +186,25 @@ def is_candidate_url(url: str) -> bool:
     return True
 
 
-def next_data_url(product_url: str, build_id: str = "38115") -> str:
+def discover_next_build_id(session: requests.Session, sample_product_url: str) -> str:
+    global NEXT_BUILD_ID
+    if NEXT_BUILD_ID:
+        return NEXT_BUILD_ID
+    text = fetch_text(session, sample_product_url)
+    match = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', text, re.S)
+    if match:
+        payload = json.loads(match.group(1))
+        NEXT_BUILD_ID = normalize_whitespace(payload.get("buildId"))
+    if not NEXT_BUILD_ID:
+        match = re.search(r"/_next/static/([^/]+)/_buildManifest\.js", text)
+        if match:
+            NEXT_BUILD_ID = normalize_whitespace(match.group(1))
+    if not NEXT_BUILD_ID:
+        raise StopScrape(f"stopped_unable_to_discover_next_build_id: {sample_product_url}")
+    return NEXT_BUILD_ID
+
+
+def next_data_url(product_url: str, build_id: str) -> str:
     parsed = urlparse(product_url)
     path = parsed.path.strip("/")
     return f"{SITE}/_next/data/{build_id}/{quote(path)}.json?slug={quote(path)}"
@@ -329,9 +390,10 @@ def fetch_review_images(session: requests.Session, product_ids: Sequence[str], r
         }
         headers = {**JSON_HEADERS, "Referer": referer}
         response = session.get(REVIEW_API, headers=headers, params=params, timeout=45)
-        if response.status_code >= 400 and page > 0:
+        if response.status_code >= 400 and response.status_code not in STOP_STATUS_CODES and page > 0:
             pagination_warning = f"stopped_at_page_{page}_status_{response.status_code}"
             break
+        assert_public_response(response, response.url)
         response.raise_for_status()
         payload = response.json()
         pages += 1
@@ -350,7 +412,9 @@ def fetch_review_images(session: requests.Session, product_ids: Sequence[str], r
 
 def fetch_product(session: requests.Session, url: str) -> Tuple[Optional[ProductContext], Optional[Dict[str, object]], str]:
     try:
-        response = session.get(next_data_url(url), timeout=45)
+        build_id = discover_next_build_id(session, url)
+        response = session.get(next_data_url(url, build_id), timeout=45)
+        assert_public_response(response, response.url)
         if response.status_code == 404:
             return None, None, "not-product"
         response.raise_for_status()

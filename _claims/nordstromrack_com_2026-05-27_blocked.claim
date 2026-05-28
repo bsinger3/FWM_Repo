@@ -1,0 +1,27 @@
+site: nordstromrack.com
+retailer: nordstromrack_com
+claimed_by: Codex
+started_at: 2026-05-27T17:41:00-04:00
+finished_at: 2026-05-27T17:55:00-04:00
+status: blocked_waf_challenge_signal
+source: user-approved category-specific Sovrn scrape from updated non-Amazon triage plan
+pre_scrape_rules_read: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\new-scrape-rules.md
+triage_reference: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\docs\scrape_triage_plan.md
+duplicate_check: checked repo/data _active_scrape_claims, _claims, scripts/docs, output directories, and data-root references; no prior nordstromrack_com scrape script/doc/output/claim found
+sample_pdp: https://www.nordstromrack.com/s/calvin-klein-scuba-crepe-fit-flare-dress/7881634?origin=category-personalizedsort&breadcrumb=Home%2FWomen%2FClothing%2FDresses&color=419
+scope: category-specific Sovrn scrape; women's clothing only; no whole-site scrape
+script: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\scripts\step_1_raw_scrape\scrape_nordstromrack_reviews.py
+output_csv: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\nordstromrack_com\nordstromrack_com_reviews_matching_intake_schema.csv
+summary_json: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\nordstromrack_com\nordstromrack_com_reviews_matching_intake_schema_summary.json
+products_discovered: 0
+products_scanned: 0
+review_pages_scanned: 0
+rows_written: 0
+distinct_reviews: 0
+distinct_images: 0
+rows_with_customer_review_image: 0
+rows_with_any_measurement: 0
+rows_with_size: 0
+rows_supabase_qualified: 0
+stop_reason: waf_challenge_signal
+guardrails: public pages/endpoints only; stopped after sample PDP returned HTTP 200 HTML with ISTL/Imperva interstitial markers (`istlWasHere`, `ISTL-RESPONSE`); no auth/captcha/WAF bypass, endpoint guessing, or retry pressure attempted

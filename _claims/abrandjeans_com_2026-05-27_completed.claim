@@ -1,0 +1,32 @@
+site: abrandjeans.com
+retailer: abrandjeans_com
+claimed_by: Codex
+started_at: 2026-05-27T18:55:00-04:00
+completed_at: 2026-05-27T19:49:02-04:00
+status: completed_category_bounded_public_okendo
+source: payout-prioritized Sovrn triage entry
+triage_source: data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv
+merchant: Abrand Jeans
+provider_hint: Okendo
+photo_reviews: yes
+reviews_present: yes
+shipping_geos: US
+commission_model: CPC
+cpc_amount: not populated in triage
+duplicate_check: no prior abrandjeans_com claim/output/script/doc found before this attempt
+script: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\scripts\step_1_raw_scrape\scrape_abrandjeans_reviews.py
+doc: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Repo\data-pipelines\non-amazon\docs\abrandjeans_scrape_2026-05-27.md
+output_csv: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\abrandjeans_com\abrandjeans_com_reviews_matching_intake_schema.csv
+summary_json: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\abrandjeans_com\abrandjeans_com_reviews_matching_intake_schema_summary.json
+category_product_links_found: 69
+products_scanned: 69
+review_pages_scanned: 69
+rows_written: 10
+distinct_reviews: 10
+distinct_images: 10
+rows_with_customer_review_image: 10
+rows_with_any_measurement: 10
+rows_with_customer_ordered_size: 10
+rows_supabase_qualified: 10
+stop_reason: completed_public_okendo_scan
+guardrails: public category/product pages and public Okendo review API only; no 429/captcha/WAF/auth block encountered; thumbnail crops and non-image video media excluded; syndicated review media globally deduped

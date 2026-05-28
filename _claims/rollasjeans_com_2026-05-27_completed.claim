@@ -1,0 +1,30 @@
+retailer: rollasjeans_com
+site: rollasjeans.com
+claimed_at: 2026-05-27T20:00:00-04:00
+completed_at: 2026-05-27T20:13:30-04:00
+status: completed
+source: data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv
+triage_entry: sovrn_first_pass_scrape_candidate
+priority: P2
+merchant: Rolla's Jeans
+commission_model: CPC
+cpc_amount: not populated in triage
+review_provider: unknown_unresolved_custom_nextjs
+reviews_present_triage: yes
+photo_reviews_present_triage: yes
+shipping_geos: US
+category_url: https://rollasjeans.com/collections/womens/clothing/tops
+sample_pdp_urls:
+  - https://rollasjeans.com/products/petal-bloom-blouse
+  - https://rollasjeans.com/products/script-ringer-tee
+  - https://rollasjeans.com/products/classic-ringer-tee-petite-logo-cream
+scope: approved category-specific Sovrn scrape; public pages/endpoints only
+stop_conditions: 429/captcha/WAF/auth behavior
+stop_reason: completed_public_catalog_model_fallback_scan
+blocked: no
+customer_review_media_source_found: no
+catalog_model_fallback_used: yes
+products_scanned: 47
+rows_written: 94
+output_csv: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\rollasjeans_com\rollasjeans_com_reviews_matching_intake_schema.csv
+summary_json: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data\non-amazon\data\step_1_raw_scraping_data\rollasjeans_com\rollasjeans_com_reviews_matching_intake_schema_summary.json
