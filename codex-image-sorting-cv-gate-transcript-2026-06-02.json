@@ -1,0 +1,82 @@
+{
+  "title": "FWM image sorting CV gate and measurement cleanup - 2026-06-02",
+  "source": "codex",
+  "transcript_started_at": "2026-05-21T14:00:00Z",
+  "transcript_ended_at": "2026-06-02T14:30:36Z",
+  "generated_at": "2026-06-02T14:30:36Z",
+  "messages": [
+    {
+      "role": "user",
+      "text": "Asked Codex to research and evaluate computer vision models for sorting clothing review images, build rejection-reason ground truth workflows, run CV experiments, generate Superbase/Supabase image review workbooks, and eventually sort all Superbase-qualified rows into approval, rejection, and needs-human-review buckets."
+    },
+    {
+      "role": "assistant",
+      "text": "Built the CV sorting workflow around YOLO person detection and pose coverage, plus URL repair for low-resolution Amazon image URLs. Created and iterated human-labeling workbooks, ingested labeled files, and tuned rejection routing, especially for no person, person too far, garment/body cut off, multiple people, and clear-pass approvals."
+    },
+    {
+      "role": "user",
+      "text": "Clarified that CV clear passes should go into approval-candidate workbooks even if they came from a prior non-approval bucket, and asked Codex to run the CV gate against all roughly 300,000 Superbase-qualified rows."
+    },
+    {
+      "role": "assistant",
+      "text": "Updated the full CV gate so route_row is authoritative during finalization, removed the conservative CV_CLEAR_BUT_ORIGINAL_REVIEW_CONCERN path, and added stale workbook deletion before rewrites. Ran the full resumable CV gate to completion."
+    },
+    {
+      "role": "assistant",
+      "text": "Final full CV package completed at outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated with 65 checkpoint parts and 324,201 total rows. Route counts: 72,113 approval candidates, 211,918 disapproval candidates, and 40,170 needs human review. Verification found zero APPROVE/CLEAR_PASS rows in needs-human-review workbooks."
+    },
+    {
+      "role": "user",
+      "text": "Asked for histograms of the heights and weights represented in approval candidates."
+    },
+    {
+      "role": "assistant",
+      "text": "Generated approval-candidate height and weight histograms and CSV bin/summary files under outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/analysis."
+    },
+    {
+      "role": "user",
+      "text": "Questioned impossible-looking 48-50 pound people and asked Codex to fix the measurement issue. Also instructed Codex to check review comments for unit context, and specifically verify Petal & Pup on the website instead of assuming low values were kilograms."
+    },
+    {
+      "role": "assistant",
+      "text": "Verified that the chart did not include sub-70-pound weights, but raw approval-candidate workbooks did contain bad low weights. Inspected review comments and found distinct cases: explicit kg values, extracted weight-change text such as lost 40 lbs, child/object weights, and Petal & Pup metric profile fields."
+    },
+    {
+      "role": "assistant",
+      "text": "Checked Petal & Pup directly through the product page and Yotpo widget API. The Yotpo review response for product 8862716919985 exposed custom fields including Height with metric wording such as 152 cm and Weight as free text such as 60. Based on this, Petal & Pup low plain numeric profile weights are treated as metric-style unless explicit lb context is present."
+    },
+    {
+      "role": "assistant",
+      "text": "Patched data-pipelines/amazon/scripts/step_4_human_review_and_visibility_decisions/run_supabase_approval_cv_gate.py with comment-aware measurement normalization. It parses explicit lb/kg values, converts kg to pounds, keeps lb values, clears weight-loss/object/child false positives, and avoids interpreting pregnancy week counts or other leading numbers as weight."
+    },
+    {
+      "role": "assistant",
+      "text": "Regenerated the CV review workbooks from checkpoint CSVs without rerunning the CV model. Final verification across approval-candidate Excel files found 72,113 rows, 50,196 non-null numeric weights, zero numeric weights under 70, and a minimum numeric weight of 70.0. Refreshed approval_candidate_height_weight_histograms.png and the summary/bin CSVs."
+    },
+    {
+      "role": "user",
+      "text": "Asked Codex to update remote git, S3, and the transcripts table."
+    },
+    {
+      "role": "assistant",
+      "text": "Prepared this focused transcript for upload to the Supabase codex_chat_transcripts table, planned to sync the corrected CV package artifacts to S3, and planned to commit/push the CV gate scripts, documentation/context files, generated analysis summaries, and transcript while leaving unrelated generated bulk outputs out of Git unless intentionally staged."
+    }
+  ],
+  "changed_files": [
+    "data-pipelines/amazon/scripts/step_4_human_review_and_visibility_decisions/run_supabase_approval_cv_gate.py",
+    "data-pipelines/amazon/scripts/step_4_human_review_and_visibility_decisions/run_supabase_full_cv_gate.py",
+    "data-pipelines/amazon/scripts/step_4_human_review_and_visibility_decisions/build_supabase_image_review_package.py",
+    "data-pipelines/amazon/scripts/step_4_human_review_and_visibility_decisions/ingest_labeled_supabase_review_workbook.py",
+    "image-approval-context.md",
+    "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/analysis/approval_candidate_height_weight_histograms.png",
+    "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/analysis/approval_candidate_height_weight_summary.csv",
+    "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/analysis/approval_candidate_height_histogram_bins.csv",
+    "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/analysis/approval_candidate_weight_histogram_bins.csv"
+  ],
+  "next_steps": [
+    "Use the approval-candidate workbooks for manual Supabase-ready review.",
+    "When Bri finishes labeled workbooks, ingest human approvals/rejections and update the ready-for-Supabase folder.",
+    "Consider moving measurement normalization earlier in the pipeline so source checkpoint CSVs and downstream upload rows both benefit from the same cleanup.",
+    "Implement canonical review group IDs so images from the same reviewer/item can be capped and grouped consistently."
+  ]
+}

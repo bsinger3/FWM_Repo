@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from urllib.parse import urlsplit, urlunsplit
 
 from csv_output_validation import validate_csv_records
 
@@ -199,27 +200,65 @@ def add_row_identity(rows: Sequence[Dict[str, str]], source_file: Path) -> List[
     return enriched_rows
 
 
+def larger_image_url_candidates(url: str) -> List[str]:
+    candidates = [url]
+    try:
+        parts = urlsplit(url)
+    except Exception:  # noqa: BLE001
+        return candidates
+
+    if "media-amazon.com" not in parts.netloc and "images-amazon.com" not in parts.netloc:
+        return candidates
+
+    path = parts.path
+    filename = path.rsplit("/", 1)[-1]
+    if "._" not in filename:
+        return candidates
+
+    stem, _transform = filename.split("._", 1)
+    extension = ""
+    for candidate_extension in (".jpg", ".jpeg", ".png", ".webp"):
+        if filename.lower().endswith(candidate_extension):
+            extension = filename[-len(candidate_extension) :]
+            break
+    if not extension:
+        return candidates
+
+    canonical_filename = "{}{}".format(stem, extension)
+    canonical_path = path.rsplit("/", 1)[0] + "/" + canonical_filename
+    canonical_url = urlunsplit((parts.scheme, parts.netloc, canonical_path, parts.query, parts.fragment))
+    if canonical_url != url:
+        candidates.insert(0, canonical_url)
+    return list(dict.fromkeys(candidates))
+
+
 def fetch_rgb_image(url: str, timeout: float, session, Image):
     last_error = None
-    for attempt in range(3):
-        try:
-            response = session.get(
-                url,
-                timeout=timeout,
-                headers={
-                    "User-Agent": (
-                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0 Safari/537.36"
-                    )
-                },
-            )
-            response.raise_for_status()
-            return Image.open(BytesIO(response.content)).convert("RGB")
-        except Exception as exc:  # noqa: BLE001
-            last_error = exc
-            if attempt >= 2:
+    downloaded = []
+    for candidate_url in larger_image_url_candidates(url):
+        for attempt in range(3):
+            try:
+                response = session.get(
+                    candidate_url,
+                    timeout=timeout,
+                    headers={
+                        "User-Agent": (
+                            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0 Safari/537.36"
+                        )
+                    },
+                )
+                response.raise_for_status()
+                image = Image.open(BytesIO(response.content)).convert("RGB")
+                downloaded.append(image)
                 break
-            time.sleep(0.5 * (attempt + 1))
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+                if attempt >= 2:
+                    break
+                time.sleep(0.5 * (attempt + 1))
+    if downloaded:
+        return max(downloaded, key=lambda image: image.size[0] * image.size[1])
     raise last_error
 
 

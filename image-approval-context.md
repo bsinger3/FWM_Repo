@@ -71,6 +71,64 @@ Relevant repo sources:
 - `index.html`
 - `privacy.html`
 
+## Image URL Resolution
+
+Before rejecting an image for low resolution, the pipeline should check whether
+the scraped URL is a thumbnail or transformed CDN variant that can be resolved
+to a larger source image.
+
+For Amazon image URLs, remove the size/transform suffix between the image ID
+and extension when it is present.
+
+Example:
+
+- scraped thumbnail: `https://m.media-amazon.com/images/I/71Y8-JW-fNL._SY88.jpg`
+- larger source: `https://m.media-amazon.com/images/I/71Y8-JW-fNL.jpg`
+
+The CV pipeline should attempt the larger candidate first, fall back to the
+scraped URL if needed, and evaluate resolution/quality on the largest valid
+image that loads. When a larger candidate loads successfully and is materially
+higher resolution, the pipeline should persist that larger URL back into the
+image URL field used by later approval/labeling steps, while preserving the raw
+scraped URL in a separate provenance field if needed. Do not label or reject an
+image as `LOW_RESOLUTION` until this URL-upgrade pass has run.
+
+## TODO: Canonical Review Group IDs
+
+Add a canonical review grouping field to all Supabase-qualified image rows so
+the pipeline can cap how many images from the same shopper review are promoted
+or sent for manual review.
+
+The ID does not need to come from the retailer. It can be assigned by our scrape
+or processing pipeline as long as all images submitted by the same person for
+the same item receive the same value.
+
+Add these fields to the review/output pipeline:
+
+- `canonical_review_group_id`: deterministic ID for one shopper review of one
+  product.
+- `canonical_review_group_basis`: short audit string describing which source
+  fields were used to build the group ID.
+
+Use the strongest available grouping signals in this order:
+
+1. Retailer/source review ID, when available.
+2. Source site plus product URL plus reviewer/profile identifier.
+3. Source site plus product URL plus reviewer name plus review date.
+4. Source site plus product URL plus review text/comment plus size and body
+   measurement context.
+5. Source file plus source row number as a last-resort fallback when no review
+   grouping signal is available.
+
+Once this exists, the Supabase approval package builder should be able to:
+
+- Limit approval candidates to a maximum number of images per
+  `canonical_review_group_id`.
+- Prefer the best image in a group using human labels first, then CV decision,
+  then image quality/body coverage, then Sovrn payout priority.
+- Preserve all row-level provenance fields, including `review_row_key`,
+  `source_file`, and `source_row_number`, so grouped decisions remain auditable.
+
 ## User Report Signals
 
 The site lets users report image cards. These report reasons are the clearest

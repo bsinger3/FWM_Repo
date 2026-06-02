@@ -489,6 +489,32 @@ Recommended key:
 - `review_row_key = "{source_file}::{source_row_number}"`
 
 
+## Image URL Resolution Before CV
+
+Before CV enrichment, the image fetch step must try to resolve known thumbnail
+or transformed CDN image URLs to larger source variants. This prevents false
+low-resolution failures when the scraped URL is only a resized version of an
+available larger image.
+
+For Amazon image URLs, remove the transform suffix between the image ID and file
+extension when present.
+
+Example:
+
+- scraped URL: `https://m.media-amazon.com/images/I/71Y8-JW-fNL._SY88.jpg`
+- larger candidate: `https://m.media-amazon.com/images/I/71Y8-JW-fNL.jpg`
+
+The fetcher should:
+
+1. Generate safe larger candidates for known CDN patterns.
+2. Attempt the larger candidate first.
+3. If a larger candidate loads and is materially higher resolution, persist the
+   larger URL for downstream CV, labeling, and publishing fields.
+4. Preserve the raw scraped URL separately for provenance/debugging when
+   needed.
+5. Only evaluate or assign `LOW_RESOLUTION` after the URL-upgrade pass.
+
+
 ## Batch Output Columns
 
 Every processed Step 4 CSV row must receive:
