@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FWM Image Review Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Image Review</h1>
+        <p id="source-summary">Loading review package...</p>
+      </div>
+      <div class="save-panel">
+        <div id="save-status">No unsaved changes</div>
+        <button id="undo-export-btn" type="button">Undo last export</button>
+        <button id="save-btn" class="primary-btn" type="button">Save progress / export decisions</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="toolbar" aria-label="Review controls">
+        <div id="bucket-tabs" class="tabs"></div>
+
+        <label class="control">
+          <span>Part</span>
+          <select id="part-select"></select>
+        </label>
+
+        <label class="control grow">
+          <span>Search</span>
+          <input id="search-input" type="search" placeholder="Row key, source file, comment, product..." />
+        </label>
+
+        <label class="control">
+          <span>Decision</span>
+          <select id="state-filter">
+            <option value="">All</option>
+            <option value="NEUTRAL">Neutral</option>
+            <option value="APPROVE">Approved</option>
+            <option value="DISAPPROVE">Rejected</option>
+            <option value="saved">Saved previously</option>
+            <option value="dirty">Changed this session</option>
+          </select>
+        </label>
+
+        <label class="control">
+          <span>Reason</span>
+          <select id="reason-filter">
+            <option value="">All reasons</option>
+          </select>
+        </label>
+
+        <label class="control">
+          <span>Reject with</span>
+          <select id="reject-reason"></select>
+        </label>
+
+        <div class="control click-mode-control">
+          <span>Click mode</span>
+          <div class="segmented" role="group" aria-label="Click mode">
+            <button id="click-mode-inspect" class="active" type="button" data-click-mode="inspect">Inspect</button>
+            <button id="click-mode-approve" type="button" data-click-mode="approve">Approve</button>
+            <button id="click-mode-reject" type="button" data-click-mode="reject">Reject</button>
+          </div>
+        </div>
+
+        <label class="toggle">
+          <input id="show-reasons" type="checkbox" checked />
+          <span>Show reasons</span>
+        </label>
+
+        <label class="toggle">
+          <input id="hide-saved" type="checkbox" />
+          <span>Hide saved</span>
+        </label>
+
+        <label class="toggle">
+          <input id="hide-duplicates" type="checkbox" />
+          <span>Hide duplicates</span>
+        </label>
+
+        <label class="toggle">
+          <input id="box-mode" type="checkbox" />
+          <span>Box select</span>
+        </label>
+      </section>
+
+      <section class="bulkbar" aria-label="Bulk actions">
+        <span id="visible-count">0 visible</span>
+        <span id="selected-count">0 selected</span>
+        <button id="approve-selected" type="button">Approve selected</button>
+        <button id="reject-selected" type="button">Reject selected</button>
+        <button id="neutral-selected" type="button">Neutral selected</button>
+        <button id="approve-visible-unmarked" type="button">Approve visible unmarked</button>
+        <button id="reject-visible-unmarked" type="button">Reject visible unmarked</button>
+        <button id="clear-selected" type="button">Clear selection</button>
+      </section>
+
+      <section id="legend" class="legend" aria-label="Reason legend"></section>
+
+      <section id="grid-wrap" class="grid-wrap">
+        <div id="loading" class="loading">Loading cards...</div>
+        <div id="grid" class="grid" aria-live="polite"></div>
+        <div id="selection-box" class="selection-box" hidden></div>
+      </section>
+    </main>
+
+    <dialog id="detail-dialog" class="detail-dialog">
+      <form method="dialog">
+        <div class="detail-header">
+          <div>
+            <h2 id="detail-title">Review image</h2>
+            <p id="detail-subtitle"></p>
+          </div>
+          <button class="plain-btn" value="close" type="submit">Close</button>
+        </div>
+      </form>
+      <div class="detail-body">
+        <div class="detail-image-frame">
+          <img id="detail-image" alt="" />
+        </div>
+        <div class="detail-panel">
+          <div class="detail-actions">
+            <button id="detail-approve" type="button">Approve</button>
+            <button id="detail-reject" type="button">Reject</button>
+            <button id="detail-neutral" type="button">Neutral</button>
+          </div>
+          <label class="control full">
+            <span>Rejection reason</span>
+            <select id="detail-reject-reason"></select>
+          </label>
+          <label class="control full">
+            <span>Review comment</span>
+            <textarea id="detail-notes" rows="5" placeholder="Add a free-form approval or rejection note..."></textarea>
+          </label>
+          <div id="detail-meta" class="detail-meta"></div>
+          <div class="detail-actions">
+            <button id="detail-apply" class="primary-btn" type="button">Apply changes</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

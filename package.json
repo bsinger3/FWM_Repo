@@ -2,6 +2,7 @@
   "name": "friends-with-measurements",
   "private": true,
   "scripts": {
+    "image-review": "node tools/image-review-dashboard/server.mjs",
     "playwright:install": "node scripts/run-playwright.mjs install chromium",
     "sync:codex-chat": "node scripts/upload-codex-chat-transcript.mjs codex-chat-transcript.json",
     "sync:applypilot-chat": "node scripts/upload-codex-chat-transcript.mjs ../ApplyPilot/codex-chat-transcript.json applypilot --table=applypilot_codex_chat_transcripts",
@@ -11,5 +12,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
   }
 }
