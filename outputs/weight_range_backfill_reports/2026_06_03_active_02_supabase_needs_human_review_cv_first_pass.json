@@ -1,0 +1,2209 @@
+{
+  "totals": {
+    "files": 405,
+    "skipped_files": 3,
+    "rows": 656615,
+    "rows_updated": 288493,
+    "fields_updated": 556281
+  },
+  "changed_files": [
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0001.csv",
+      "rows": 5000,
+      "rows_updated": 61,
+      "fields_updated": 61,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0002.csv",
+      "rows": 5000,
+      "rows_updated": 60,
+      "fields_updated": 60,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0003.csv",
+      "rows": 5000,
+      "rows_updated": 53,
+      "fields_updated": 53,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0004.csv",
+      "rows": 5000,
+      "rows_updated": 47,
+      "fields_updated": 47,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0005.csv",
+      "rows": 5000,
+      "rows_updated": 52,
+      "fields_updated": 52,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0006.csv",
+      "rows": 5000,
+      "rows_updated": 42,
+      "fields_updated": 42,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0007.csv",
+      "rows": 5000,
+      "rows_updated": 80,
+      "fields_updated": 80,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0008.csv",
+      "rows": 5000,
+      "rows_updated": 79,
+      "fields_updated": 79,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0009.csv",
+      "rows": 5000,
+      "rows_updated": 52,
+      "fields_updated": 52,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0010.csv",
+      "rows": 5000,
+      "rows_updated": 55,
+      "fields_updated": 55,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0011.csv",
+      "rows": 5000,
+      "rows_updated": 41,
+      "fields_updated": 41,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0012.csv",
+      "rows": 5000,
+      "rows_updated": 73,
+      "fields_updated": 73,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0013.csv",
+      "rows": 5000,
+      "rows_updated": 56,
+      "fields_updated": 56,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0014.csv",
+      "rows": 5000,
+      "rows_updated": 48,
+      "fields_updated": 48,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0015.csv",
+      "rows": 5000,
+      "rows_updated": 72,
+      "fields_updated": 72,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0016.csv",
+      "rows": 5000,
+      "rows_updated": 75,
+      "fields_updated": 75,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0017.csv",
+      "rows": 5000,
+      "rows_updated": 39,
+      "fields_updated": 39,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0018.csv",
+      "rows": 5000,
+      "rows_updated": 47,
+      "fields_updated": 47,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0019.csv",
+      "rows": 5000,
+      "rows_updated": 5,
+      "fields_updated": 5,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0020.csv",
+      "rows": 5000,
+      "rows_updated": 3,
+      "fields_updated": 3,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0021.csv",
+      "rows": 5000,
+      "rows_updated": 13,
+      "fields_updated": 13,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0022.csv",
+      "rows": 5000,
+      "rows_updated": 7,
+      "fields_updated": 7,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0023.csv",
+      "rows": 5000,
+      "rows_updated": 14,
+      "fields_updated": 14,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0024.csv",
+      "rows": 5000,
+      "rows_updated": 131,
+      "fields_updated": 131,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0025.csv",
+      "rows": 5000,
+      "rows_updated": 26,
+      "fields_updated": 26,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0026.csv",
+      "rows": 5000,
+      "rows_updated": 65,
+      "fields_updated": 65,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0027.csv",
+      "rows": 5000,
+      "rows_updated": 15,
+      "fields_updated": 15,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0028.csv",
+      "rows": 5000,
+      "rows_updated": 3612,
+      "fields_updated": 3612,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0029.csv",
+      "rows": 5000,
+      "rows_updated": 4012,
+      "fields_updated": 4012,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0030.csv",
+      "rows": 5000,
+      "rows_updated": 3927,
+      "fields_updated": 3927,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0031.csv",
+      "rows": 5000,
+      "rows_updated": 3836,
+      "fields_updated": 3836,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0032.csv",
+      "rows": 5000,
+      "rows_updated": 3981,
+      "fields_updated": 3981,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0033.csv",
+      "rows": 5000,
+      "rows_updated": 4014,
+      "fields_updated": 4014,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0034.csv",
+      "rows": 5000,
+      "rows_updated": 3923,
+      "fields_updated": 3923,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0035.csv",
+      "rows": 5000,
+      "rows_updated": 4127,
+      "fields_updated": 4127,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0036.csv",
+      "rows": 5000,
+      "rows_updated": 4051,
+      "fields_updated": 4051,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0037.csv",
+      "rows": 5000,
+      "rows_updated": 4053,
+      "fields_updated": 4053,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0038.csv",
+      "rows": 5000,
+      "rows_updated": 3924,
+      "fields_updated": 3924,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0039.csv",
+      "rows": 5000,
+      "rows_updated": 4043,
+      "fields_updated": 4043,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0040.csv",
+      "rows": 5000,
+      "rows_updated": 4039,
+      "fields_updated": 4039,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0041.csv",
+      "rows": 5000,
+      "rows_updated": 3936,
+      "fields_updated": 3936,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0042.csv",
+      "rows": 5000,
+      "rows_updated": 3932,
+      "fields_updated": 3932,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0043.csv",
+      "rows": 5000,
+      "rows_updated": 3994,
+      "fields_updated": 3994,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0044.csv",
+      "rows": 5000,
+      "rows_updated": 4101,
+      "fields_updated": 4101,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0045.csv",
+      "rows": 5000,
+      "rows_updated": 3908,
+      "fields_updated": 3908,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0046.csv",
+      "rows": 5000,
+      "rows_updated": 3744,
+      "fields_updated": 3744,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0047.csv",
+      "rows": 5000,
+      "rows_updated": 3999,
+      "fields_updated": 3999,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0048.csv",
+      "rows": 5000,
+      "rows_updated": 3990,
+      "fields_updated": 3990,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0049.csv",
+      "rows": 5000,
+      "rows_updated": 4212,
+      "fields_updated": 4212,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0050.csv",
+      "rows": 5000,
+      "rows_updated": 4139,
+      "fields_updated": 4139,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0051.csv",
+      "rows": 5000,
+      "rows_updated": 4053,
+      "fields_updated": 4053,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0052.csv",
+      "rows": 5000,
+      "rows_updated": 4042,
+      "fields_updated": 4042,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0053.csv",
+      "rows": 5000,
+      "rows_updated": 4026,
+      "fields_updated": 4026,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0054.csv",
+      "rows": 5000,
+      "rows_updated": 3933,
+      "fields_updated": 3933,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0055.csv",
+      "rows": 5000,
+      "rows_updated": 4021,
+      "fields_updated": 4021,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0056.csv",
+      "rows": 5000,
+      "rows_updated": 4095,
+      "fields_updated": 4095,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0057.csv",
+      "rows": 5000,
+      "rows_updated": 4275,
+      "fields_updated": 4275,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0058.csv",
+      "rows": 5000,
+      "rows_updated": 4655,
+      "fields_updated": 4655,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0059.csv",
+      "rows": 5000,
+      "rows_updated": 4587,
+      "fields_updated": 4587,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0060.csv",
+      "rows": 5000,
+      "rows_updated": 4465,
+      "fields_updated": 4465,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0061.csv",
+      "rows": 5000,
+      "rows_updated": 4650,
+      "fields_updated": 4650,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0062.csv",
+      "rows": 5000,
+      "rows_updated": 4611,
+      "fields_updated": 4611,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0063.csv",
+      "rows": 5000,
+      "rows_updated": 4744,
+      "fields_updated": 4744,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0064.csv",
+      "rows": 5000,
+      "rows_updated": 4672,
+      "fields_updated": 4672,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/cv_gate_checkpoint_parts/full_cv_gate_part_0065.csv",
+      "rows": 4201,
+      "rows_updated": 435,
+      "fields_updated": 435,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_approve_candidates_part_001_20260603T035721Z.xlsx",
+      "rows": 1000,
+      "rows_updated": 31,
+      "fields_updated": 73,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_approve_candidates_part_002_20260603T040352Z.xlsx",
+      "rows": 1000,
+      "rows_updated": 22,
+      "fields_updated": 54,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_disapprove_candidates_part_001_20260603T041245Z.xlsx",
+      "rows": 1000,
+      "rows_updated": 30,
+      "fields_updated": 73,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_disapprove_candidates_part_002_20260603T140747Z.xlsx",
+      "rows": 28,
+      "rows_updated": 1,
+      "fields_updated": 3,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_needs_human_review_part_001_20260603T024354Z.xlsx",
+      "rows": 624,
+      "rows_updated": 17,
+      "fields_updated": 41,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_needs_human_review_part_001_20260603T032745Z.xlsx",
+      "rows": 376,
+      "rows_updated": 12,
+      "fields_updated": 30,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_needs_human_review_part_002_20260603T034943Z.xlsx",
+      "rows": 1000,
+      "rows_updated": 20,
+      "fields_updated": 48,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/supabase_image_review_approve_candidates_part_010_labeled.xlsx",
+      "rows": 1000,
+      "rows_updated": 22,
+      "fields_updated": 52,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/supabase_image_review_disapprove_candidates_part_007_labeled (1).xlsx",
+      "rows": 1000,
+      "rows_updated": 17,
+      "fields_updated": 46,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_001.xlsx",
+      "rows": 1000,
+      "rows_updated": 31,
+      "fields_updated": 73,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_002.xlsx",
+      "rows": 1000,
+      "rows_updated": 22,
+      "fields_updated": 54,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_003.xlsx",
+      "rows": 1000,
+      "rows_updated": 26,
+      "fields_updated": 65,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_004.xlsx",
+      "rows": 1000,
+      "rows_updated": 33,
+      "fields_updated": 79,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_005.xlsx",
+      "rows": 1000,
+      "rows_updated": 22,
+      "fields_updated": 59,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_006.xlsx",
+      "rows": 1000,
+      "rows_updated": 14,
+      "fields_updated": 32,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_007.xlsx",
+      "rows": 1000,
+      "rows_updated": 22,
+      "fields_updated": 56,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_008.xlsx",
+      "rows": 1000,
+      "rows_updated": 18,
+      "fields_updated": 41,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_009.xlsx",
+      "rows": 1000,
+      "rows_updated": 13,
+      "fields_updated": 34,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_010.xlsx",
+      "rows": 1000,
+      "rows_updated": 22,
+      "fields_updated": 52,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_012.xlsx",
+      "rows": 1000,
+      "rows_updated": 17,
+      "fields_updated": 44,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_013.xlsx",
+      "rows": 1000,
+      "rows_updated": 25,
+      "fields_updated": 65,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_018.xlsx",
+      "rows": 1000,
+      "rows_updated": 21,
+      "fields_updated": 49,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_019.xlsx",
+      "rows": 1000,
+      "rows_updated": 33,
+      "fields_updated": 77,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_020.xlsx",
+      "rows": 1000,
+      "rows_updated": 29,
+      "fields_updated": 71,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_021.xlsx",
+      "rows": 1000,
+      "rows_updated": 34,
+      "fields_updated": 79,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_022.xlsx",
+      "rows": 1000,
+      "rows_updated": 24,
+      "fields_updated": 56,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_023.xlsx",
+      "rows": 1000,
+      "rows_updated": 21,
+      "fields_updated": 50,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_024.xlsx",
+      "rows": 1000,
+      "rows_updated": 49,
+      "fields_updated": 122,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_025.xlsx",
+      "rows": 1000,
+      "rows_updated": 32,
+      "fields_updated": 79,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_026.xlsx",
+      "rows": 1000,
+      "rows_updated": 33,
+      "fields_updated": 80,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_027.xlsx",
+      "rows": 1000,
+      "rows_updated": 30,
+      "fields_updated": 67,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_028.xlsx",
+      "rows": 1000,
+      "rows_updated": 40,
+      "fields_updated": 103,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_029.xlsx",
+      "rows": 1000,
+      "rows_updated": 29,
+      "fields_updated": 74,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_030.xlsx",
+      "rows": 1000,
+      "rows_updated": 19,
+      "fields_updated": 48,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_031.xlsx",
+      "rows": 1000,
+      "rows_updated": 15,
+      "fields_updated": 36,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_038.xlsx",
+      "rows": 1000,
+      "rows_updated": 4,
+      "fields_updated": 12,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_039.xlsx",
+      "rows": 1000,
+      "rows_updated": 2,
+      "fields_updated": 6,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_040.xlsx",
+      "rows": 1000,
+      "rows_updated": 4,
+      "fields_updated": 12,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_041.xlsx",
+      "rows": 1000,
+      "rows_updated": 5,
+      "fields_updated": 15,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_048.xlsx",
+      "rows": 1000,
+      "rows_updated": 3,
+      "fields_updated": 9,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_049.xlsx",
+      "rows": 1000,
+      "rows_updated": 3,
+      "fields_updated": 9,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_051.xlsx",
+      "rows": 1000,
+      "rows_updated": 846,
+      "fields_updated": 2538,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_052.xlsx",
+      "rows": 1000,
+      "rows_updated": 829,
+      "fields_updated": 2487,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_053.xlsx",
+      "rows": 1000,
+      "rows_updated": 867,
+      "fields_updated": 2601,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_054.xlsx",
+      "rows": 1000,
+      "rows_updated": 873,
+      "fields_updated": 2619,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_055.xlsx",
+      "rows": 1000,
+      "rows_updated": 830,
+      "fields_updated": 2490,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_056.xlsx",
+      "rows": 1000,
+      "rows_updated": 825,
+      "fields_updated": 2475,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_057.xlsx",
+      "rows": 1000,
+      "rows_updated": 852,
+      "fields_updated": 2556,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_058.xlsx",
+      "rows": 1000,
+      "rows_updated": 832,
+      "fields_updated": 2496,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_059.xlsx",
+      "rows": 1000,
+      "rows_updated": 824,
+      "fields_updated": 2472,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_062.xlsx",
+      "rows": 1000,
+      "rows_updated": 839,
+      "fields_updated": 2517,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_063.xlsx",
+      "rows": 1000,
+      "rows_updated": 842,
+      "fields_updated": 2526,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_064.xlsx",
+      "rows": 1000,
+      "rows_updated": 856,
+      "fields_updated": 2568,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_065.xlsx",
+      "rows": 1000,
+      "rows_updated": 861,
+      "fields_updated": 2583,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_066.xlsx",
+      "rows": 1000,
+      "rows_updated": 798,
+      "fields_updated": 2394,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_068.xlsx",
+      "rows": 1000,
+      "rows_updated": 892,
+      "fields_updated": 2675,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_069.xlsx",
+      "rows": 1000,
+      "rows_updated": 910,
+      "fields_updated": 2730,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_070.xlsx",
+      "rows": 1000,
+      "rows_updated": 925,
+      "fields_updated": 2775,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_approve_candidates_part_071.xlsx",
+      "rows": 1000,
+      "rows_updated": 594,
+      "fields_updated": 1782,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_001.xlsx",
+      "rows": 1000,
+      "rows_updated": 30,
+      "fields_updated": 73,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_002.xlsx",
+      "rows": 1000,
+      "rows_updated": 29,
+      "fields_updated": 76,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_003.xlsx",
+      "rows": 1000,
+      "rows_updated": 26,
+      "fields_updated": 65,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_004.xlsx",
+      "rows": 1000,
+      "rows_updated": 17,
+      "fields_updated": 47,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_005.xlsx",
+      "rows": 1000,
+      "rows_updated": 17,
+      "fields_updated": 40,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_006.xlsx",
+      "rows": 1000,
+      "rows_updated": 39,
+      "fields_updated": 96,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_007.xlsx",
+      "rows": 1000,
+      "rows_updated": 17,
+      "fields_updated": 46,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_008.xlsx",
+      "rows": 1000,
+      "rows_updated": 16,
+      "fields_updated": 40,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_010.xlsx",
+      "rows": 1000,
+      "rows_updated": 27,
+      "fields_updated": 71,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_018.xlsx",
+      "rows": 1000,
+      "rows_updated": 35,
+      "fields_updated": 82,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_019.xlsx",
+      "rows": 1000,
+      "rows_updated": 12,
+      "fields_updated": 30,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_020.xlsx",
+      "rows": 1000,
+      "rows_updated": 32,
+      "fields_updated": 76,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_021.xlsx",
+      "rows": 1000,
+      "rows_updated": 20,
+      "fields_updated": 46,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_022.xlsx",
+      "rows": 1000,
+      "rows_updated": 12,
+      "fields_updated": 28,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_023.xlsx",
+      "rows": 1000,
+      "rows_updated": 24,
+      "fields_updated": 57,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_024.xlsx",
+      "rows": 1000,
+      "rows_updated": 30,
+      "fields_updated": 74,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_025.xlsx",
+      "rows": 1000,
+      "rows_updated": 26,
+      "fields_updated": 66,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_026.xlsx",
+      "rows": 1000,
+      "rows_updated": 21,
+      "fields_updated": 51,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_027.xlsx",
+      "rows": 1000,
+      "rows_updated": 21,
+      "fields_updated": 54,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_028.xlsx",
+      "rows": 1000,
+      "rows_updated": 17,
+      "fields_updated": 41,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_029.xlsx",
+      "rows": 1000,
+      "rows_updated": 9,
+      "fields_updated": 22,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_030.xlsx",
+      "rows": 1000,
+      "rows_updated": 31,
+      "fields_updated": 82,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_031.xlsx",
+      "rows": 1000,
+      "rows_updated": 23,
+      "fields_updated": 60,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_032.xlsx",
+      "rows": 1000,
+      "rows_updated": 33,
+      "fields_updated": 82,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_033.xlsx",
+      "rows": 1000,
+      "rows_updated": 44,
+      "fields_updated": 107,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_034.xlsx",
+      "rows": 1000,
+      "rows_updated": 14,
+      "fields_updated": 35,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_035.xlsx",
+      "rows": 1000,
+      "rows_updated": 32,
+      "fields_updated": 76,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_036.xlsx",
+      "rows": 1000,
+      "rows_updated": 8,
+      "fields_updated": 19,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_048.xlsx",
+      "rows": 1000,
+      "rows_updated": 1,
+      "fields_updated": 3,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_049.xlsx",
+      "rows": 1000,
+      "rows_updated": 1,
+      "fields_updated": 3,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_052.xlsx",
+      "rows": 1000,
+      "rows_updated": 3,
+      "fields_updated": 9,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_061.xlsx",
+      "rows": 1000,
+      "rows_updated": 1,
+      "fields_updated": 3,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_062.xlsx",
+      "rows": 1000,
+      "rows_updated": 4,
+      "fields_updated": 12,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_065.xlsx",
+      "rows": 1000,
+      "rows_updated": 767,
+      "fields_updated": 2301,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_066.xlsx",
+      "rows": 1000,
+      "rows_updated": 712,
+      "fields_updated": 2136,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_067.xlsx",
+      "rows": 1000,
+      "rows_updated": 756,
+      "fields_updated": 2268,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_068.xlsx",
+      "rows": 1000,
+      "rows_updated": 754,
+      "fields_updated": 2262,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_069.xlsx",
+      "rows": 1000,
+      "rows_updated": 827,
+      "fields_updated": 2481,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_070.xlsx",
+      "rows": 1000,
+      "rows_updated": 787,
+      "fields_updated": 2361,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_071.xlsx",
+      "rows": 1000,
+      "rows_updated": 786,
+      "fields_updated": 2358,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_072.xlsx",
+      "rows": 1000,
+      "rows_updated": 772,
+      "fields_updated": 2316,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_074.xlsx",
+      "rows": 1000,
+      "rows_updated": 767,
+      "fields_updated": 2301,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_075.xlsx",
+      "rows": 1000,
+      "rows_updated": 783,
+      "fields_updated": 2349,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_076.xlsx",
+      "rows": 1000,
+      "rows_updated": 730,
+      "fields_updated": 2190,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_077.xlsx",
+      "rows": 1000,
+      "rows_updated": 737,
+      "fields_updated": 2211,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_078.xlsx",
+      "rows": 1000,
+      "rows_updated": 773,
+      "fields_updated": 2319,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_079.xlsx",
+      "rows": 1000,
+      "rows_updated": 780,
+      "fields_updated": 2340,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_080.xlsx",
+      "rows": 1000,
+      "rows_updated": 746,
+      "fields_updated": 2238,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_081.xlsx",
+      "rows": 1000,
+      "rows_updated": 796,
+      "fields_updated": 2388,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_082.xlsx",
+      "rows": 1000,
+      "rows_updated": 796,
+      "fields_updated": 2388,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_083.xlsx",
+      "rows": 1000,
+      "rows_updated": 792,
+      "fields_updated": 2376,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_084.xlsx",
+      "rows": 1000,
+      "rows_updated": 775,
+      "fields_updated": 2325,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_085.xlsx",
+      "rows": 1000,
+      "rows_updated": 811,
+      "fields_updated": 2433,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_086.xlsx",
+      "rows": 1000,
+      "rows_updated": 748,
+      "fields_updated": 2244,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_087.xlsx",
+      "rows": 1000,
+      "rows_updated": 765,
+      "fields_updated": 2295,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_088.xlsx",
+      "rows": 1000,
+      "rows_updated": 769,
+      "fields_updated": 2307,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_089.xlsx",
+      "rows": 1000,
+      "rows_updated": 754,
+      "fields_updated": 2262,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_092.xlsx",
+      "rows": 1000,
+      "rows_updated": 804,
+      "fields_updated": 2412,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_093.xlsx",
+      "rows": 1000,
+      "rows_updated": 802,
+      "fields_updated": 2404,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_094.xlsx",
+      "rows": 1000,
+      "rows_updated": 782,
+      "fields_updated": 2346,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_095.xlsx",
+      "rows": 1000,
+      "rows_updated": 809,
+      "fields_updated": 2427,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_096.xlsx",
+      "rows": 1000,
+      "rows_updated": 803,
+      "fields_updated": 2409,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_097.xlsx",
+      "rows": 1000,
+      "rows_updated": 831,
+      "fields_updated": 2493,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_098.xlsx",
+      "rows": 1000,
+      "rows_updated": 817,
+      "fields_updated": 2451,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_099.xlsx",
+      "rows": 1000,
+      "rows_updated": 785,
+      "fields_updated": 2355,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_100.xlsx",
+      "rows": 1000,
+      "rows_updated": 800,
+      "fields_updated": 2400,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_102.xlsx",
+      "rows": 1000,
+      "rows_updated": 814,
+      "fields_updated": 2442,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_103.xlsx",
+      "rows": 1000,
+      "rows_updated": 749,
+      "fields_updated": 2247,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_104.xlsx",
+      "rows": 1000,
+      "rows_updated": 757,
+      "fields_updated": 2271,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_105.xlsx",
+      "rows": 1000,
+      "rows_updated": 772,
+      "fields_updated": 2316,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_106.xlsx",
+      "rows": 1000,
+      "rows_updated": 768,
+      "fields_updated": 2304,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_110.xlsx",
+      "rows": 1000,
+      "rows_updated": 837,
+      "fields_updated": 2511,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_111.xlsx",
+      "rows": 1000,
+      "rows_updated": 768,
+      "fields_updated": 2304,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_113.xlsx",
+      "rows": 1000,
+      "rows_updated": 790,
+      "fields_updated": 2370,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_115.xlsx",
+      "rows": 1000,
+      "rows_updated": 800,
+      "fields_updated": 2400,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_116.xlsx",
+      "rows": 1000,
+      "rows_updated": 766,
+      "fields_updated": 2298,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_117.xlsx",
+      "rows": 1000,
+      "rows_updated": 788,
+      "fields_updated": 2364,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_118.xlsx",
+      "rows": 1000,
+      "rows_updated": 792,
+      "fields_updated": 2376,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_119.xlsx",
+      "rows": 1000,
+      "rows_updated": 793,
+      "fields_updated": 2379,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_120.xlsx",
+      "rows": 1000,
+      "rows_updated": 765,
+      "fields_updated": 2295,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_121.xlsx",
+      "rows": 1000,
+      "rows_updated": 812,
+      "fields_updated": 2436,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_122.xlsx",
+      "rows": 1000,
+      "rows_updated": 757,
+      "fields_updated": 2271,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_123.xlsx",
+      "rows": 1000,
+      "rows_updated": 795,
+      "fields_updated": 2385,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_124.xlsx",
+      "rows": 1000,
+      "rows_updated": 817,
+      "fields_updated": 2451,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_125.xlsx",
+      "rows": 1000,
+      "rows_updated": 803,
+      "fields_updated": 2409,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_126.xlsx",
+      "rows": 1000,
+      "rows_updated": 761,
+      "fields_updated": 2283,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_127.xlsx",
+      "rows": 1000,
+      "rows_updated": 829,
+      "fields_updated": 2487,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_129.xlsx",
+      "rows": 1000,
+      "rows_updated": 834,
+      "fields_updated": 2502,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_131.xlsx",
+      "rows": 1000,
+      "rows_updated": 820,
+      "fields_updated": 2460,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_132.xlsx",
+      "rows": 1000,
+      "rows_updated": 769,
+      "fields_updated": 2307,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_133.xlsx",
+      "rows": 1000,
+      "rows_updated": 798,
+      "fields_updated": 2394,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_134.xlsx",
+      "rows": 1000,
+      "rows_updated": 752,
+      "fields_updated": 2256,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_136.xlsx",
+      "rows": 1000,
+      "rows_updated": 752,
+      "fields_updated": 2256,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_137.xlsx",
+      "rows": 1000,
+      "rows_updated": 741,
+      "fields_updated": 2223,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_138.xlsx",
+      "rows": 1000,
+      "rows_updated": 734,
+      "fields_updated": 2202,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_139.xlsx",
+      "rows": 1000,
+      "rows_updated": 743,
+      "fields_updated": 2229,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_140.xlsx",
+      "rows": 1000,
+      "rows_updated": 782,
+      "fields_updated": 2346,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_141.xlsx",
+      "rows": 1000,
+      "rows_updated": 776,
+      "fields_updated": 2328,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_142.xlsx",
+      "rows": 1000,
+      "rows_updated": 799,
+      "fields_updated": 2397,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_144.xlsx",
+      "rows": 1000,
+      "rows_updated": 785,
+      "fields_updated": 2355,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_145.xlsx",
+      "rows": 1000,
+      "rows_updated": 806,
+      "fields_updated": 2418,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_146.xlsx",
+      "rows": 1000,
+      "rows_updated": 778,
+      "fields_updated": 2334,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_147.xlsx",
+      "rows": 1000,
+      "rows_updated": 825,
+      "fields_updated": 2473,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_148.xlsx",
+      "rows": 1000,
+      "rows_updated": 833,
+      "fields_updated": 2499,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_149.xlsx",
+      "rows": 1000,
+      "rows_updated": 837,
+      "fields_updated": 2511,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_150.xlsx",
+      "rows": 1000,
+      "rows_updated": 830,
+      "fields_updated": 2490,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_151.xlsx",
+      "rows": 1000,
+      "rows_updated": 812,
+      "fields_updated": 2436,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_152.xlsx",
+      "rows": 1000,
+      "rows_updated": 830,
+      "fields_updated": 2490,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_153.xlsx",
+      "rows": 1000,
+      "rows_updated": 836,
+      "fields_updated": 2508,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_154.xlsx",
+      "rows": 1000,
+      "rows_updated": 790,
+      "fields_updated": 2370,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_155.xlsx",
+      "rows": 1000,
+      "rows_updated": 816,
+      "fields_updated": 2446,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_156.xlsx",
+      "rows": 1000,
+      "rows_updated": 768,
+      "fields_updated": 2304,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_157.xlsx",
+      "rows": 1000,
+      "rows_updated": 776,
+      "fields_updated": 2328,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_158.xlsx",
+      "rows": 1000,
+      "rows_updated": 785,
+      "fields_updated": 2355,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_159.xlsx",
+      "rows": 1000,
+      "rows_updated": 849,
+      "fields_updated": 2547,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_160.xlsx",
+      "rows": 1000,
+      "rows_updated": 780,
+      "fields_updated": 2340,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_161.xlsx",
+      "rows": 1000,
+      "rows_updated": 819,
+      "fields_updated": 2457,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_162.xlsx",
+      "rows": 1000,
+      "rows_updated": 777,
+      "fields_updated": 2331,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_163.xlsx",
+      "rows": 1000,
+      "rows_updated": 777,
+      "fields_updated": 2331,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_164.xlsx",
+      "rows": 1000,
+      "rows_updated": 842,
+      "fields_updated": 2526,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_165.xlsx",
+      "rows": 1000,
+      "rows_updated": 817,
+      "fields_updated": 2451,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_166.xlsx",
+      "rows": 1000,
+      "rows_updated": 783,
+      "fields_updated": 2349,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_167.xlsx",
+      "rows": 1000,
+      "rows_updated": 716,
+      "fields_updated": 2148,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_168.xlsx",
+      "rows": 1000,
+      "rows_updated": 779,
+      "fields_updated": 2337,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_169.xlsx",
+      "rows": 1000,
+      "rows_updated": 829,
+      "fields_updated": 2487,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_170.xlsx",
+      "rows": 1000,
+      "rows_updated": 766,
+      "fields_updated": 2298,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_171.xlsx",
+      "rows": 1000,
+      "rows_updated": 802,
+      "fields_updated": 2406,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_172.xlsx",
+      "rows": 1000,
+      "rows_updated": 822,
+      "fields_updated": 2466,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_173.xlsx",
+      "rows": 1000,
+      "rows_updated": 815,
+      "fields_updated": 2444,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_174.xlsx",
+      "rows": 1000,
+      "rows_updated": 816,
+      "fields_updated": 2448,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_179.xlsx",
+      "rows": 1000,
+      "rows_updated": 905,
+      "fields_updated": 2715,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_180.xlsx",
+      "rows": 1000,
+      "rows_updated": 895,
+      "fields_updated": 2685,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_181.xlsx",
+      "rows": 1000,
+      "rows_updated": 922,
+      "fields_updated": 2766,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_182.xlsx",
+      "rows": 1000,
+      "rows_updated": 920,
+      "fields_updated": 2760,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_183.xlsx",
+      "rows": 1000,
+      "rows_updated": 949,
+      "fields_updated": 2847,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_184.xlsx",
+      "rows": 1000,
+      "rows_updated": 945,
+      "fields_updated": 2835,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_185.xlsx",
+      "rows": 1000,
+      "rows_updated": 872,
+      "fields_updated": 2616,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_186.xlsx",
+      "rows": 1000,
+      "rows_updated": 897,
+      "fields_updated": 2691,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_188.xlsx",
+      "rows": 1000,
+      "rows_updated": 930,
+      "fields_updated": 2790,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_189.xlsx",
+      "rows": 1000,
+      "rows_updated": 919,
+      "fields_updated": 2757,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_190.xlsx",
+      "rows": 1000,
+      "rows_updated": 898,
+      "fields_updated": 2694,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_191.xlsx",
+      "rows": 1000,
+      "rows_updated": 866,
+      "fields_updated": 2598,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_192.xlsx",
+      "rows": 1000,
+      "rows_updated": 899,
+      "fields_updated": 2697,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_193.xlsx",
+      "rows": 1000,
+      "rows_updated": 897,
+      "fields_updated": 2691,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_194.xlsx",
+      "rows": 1000,
+      "rows_updated": 930,
+      "fields_updated": 2790,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_195.xlsx",
+      "rows": 1000,
+      "rows_updated": 919,
+      "fields_updated": 2757,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_196.xlsx",
+      "rows": 1000,
+      "rows_updated": 948,
+      "fields_updated": 2844,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_197.xlsx",
+      "rows": 1000,
+      "rows_updated": 928,
+      "fields_updated": 2784,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_198.xlsx",
+      "rows": 1000,
+      "rows_updated": 928,
+      "fields_updated": 2784,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_199.xlsx",
+      "rows": 1000,
+      "rows_updated": 930,
+      "fields_updated": 2790,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_200.xlsx",
+      "rows": 1000,
+      "rows_updated": 938,
+      "fields_updated": 2814,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_201.xlsx",
+      "rows": 1000,
+      "rows_updated": 908,
+      "fields_updated": 2724,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_202.xlsx",
+      "rows": 1000,
+      "rows_updated": 909,
+      "fields_updated": 2727,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_203.xlsx",
+      "rows": 1000,
+      "rows_updated": 945,
+      "fields_updated": 2835,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_204.xlsx",
+      "rows": 1000,
+      "rows_updated": 955,
+      "fields_updated": 2865,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_206.xlsx",
+      "rows": 1000,
+      "rows_updated": 946,
+      "fields_updated": 2838,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_207.xlsx",
+      "rows": 1000,
+      "rows_updated": 956,
+      "fields_updated": 2868,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_208.xlsx",
+      "rows": 1000,
+      "rows_updated": 932,
+      "fields_updated": 2796,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_disapprove_candidates_part_209.xlsx",
+      "rows": 1000,
+      "rows_updated": 924,
+      "fields_updated": 2772,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_001.xlsx",
+      "rows": 1000,
+      "rows_updated": 29,
+      "fields_updated": 71,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_002.xlsx",
+      "rows": 1000,
+      "rows_updated": 20,
+      "fields_updated": 48,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_003.xlsx",
+      "rows": 1000,
+      "rows_updated": 21,
+      "fields_updated": 51,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_007.xlsx",
+      "rows": 1000,
+      "rows_updated": 32,
+      "fields_updated": 77,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_008.xlsx",
+      "rows": 1000,
+      "rows_updated": 28,
+      "fields_updated": 64,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_009.xlsx",
+      "rows": 1000,
+      "rows_updated": 29,
+      "fields_updated": 72,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_010.xlsx",
+      "rows": 1000,
+      "rows_updated": 22,
+      "fields_updated": 54,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_011.xlsx",
+      "rows": 1000,
+      "rows_updated": 29,
+      "fields_updated": 69,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_012.xlsx",
+      "rows": 1000,
+      "rows_updated": 30,
+      "fields_updated": 75,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_013.xlsx",
+      "rows": 1000,
+      "rows_updated": 14,
+      "fields_updated": 36,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_014.xlsx",
+      "rows": 1000,
+      "rows_updated": 23,
+      "fields_updated": 55,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_015.xlsx",
+      "rows": 1000,
+      "rows_updated": 42,
+      "fields_updated": 102,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_016.xlsx",
+      "rows": 1000,
+      "rows_updated": 36,
+      "fields_updated": 82,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_017.xlsx",
+      "rows": 1000,
+      "rows_updated": 31,
+      "fields_updated": 73,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_024.xlsx",
+      "rows": 1000,
+      "rows_updated": 810,
+      "fields_updated": 2430,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_025.xlsx",
+      "rows": 1000,
+      "rows_updated": 830,
+      "fields_updated": 2490,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_026.xlsx",
+      "rows": 1000,
+      "rows_updated": 820,
+      "fields_updated": 2460,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_027.xlsx",
+      "rows": 1000,
+      "rows_updated": 883,
+      "fields_updated": 2649,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_028.xlsx",
+      "rows": 1000,
+      "rows_updated": 815,
+      "fields_updated": 2445,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_029.xlsx",
+      "rows": 1000,
+      "rows_updated": 829,
+      "fields_updated": 2487,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_030.xlsx",
+      "rows": 1000,
+      "rows_updated": 798,
+      "fields_updated": 2394,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_031.xlsx",
+      "rows": 1000,
+      "rows_updated": 795,
+      "fields_updated": 2385,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_032.xlsx",
+      "rows": 1000,
+      "rows_updated": 805,
+      "fields_updated": 2415,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_033.xlsx",
+      "rows": 1000,
+      "rows_updated": 849,
+      "fields_updated": 2547,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_034.xlsx",
+      "rows": 1000,
+      "rows_updated": 836,
+      "fields_updated": 2508,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_035.xlsx",
+      "rows": 1000,
+      "rows_updated": 815,
+      "fields_updated": 2445,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_036.xlsx",
+      "rows": 1000,
+      "rows_updated": 830,
+      "fields_updated": 2490,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_037.xlsx",
+      "rows": 1000,
+      "rows_updated": 812,
+      "fields_updated": 2436,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_038.xlsx",
+      "rows": 1000,
+      "rows_updated": 903,
+      "fields_updated": 2709,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_039.xlsx",
+      "rows": 1000,
+      "rows_updated": 942,
+      "fields_updated": 2826,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/supabase_image_review_needs_human_review_part_040.xlsx",
+      "rows": 1000,
+      "rows_updated": 874,
+      "fields_updated": 2622,
+      "skipped": 0
+    }
+  ]
+}

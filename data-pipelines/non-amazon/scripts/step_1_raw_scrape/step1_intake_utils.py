@@ -98,12 +98,12 @@ SCRAPE_ACCESS_POLICY = (
 BRA_SIZE_RE = re.compile(
     r"\b(28|30|32|34|36|38|40|42|44|46|48|50|52|54)\s*"
     r"(?::\s*|\s*)"
-    r"(AAA|AA|A|B|C|D|DD|DD/?E|DDD|DDD/?F|F|G|H|I|J|K)(?:\s*[-/]\s*(?:AAA|AA|A|B|C|D|DD|DDD|F|G|H|I|J|K))?\b",
+    r"(DDD/?F|DDD/?E|DD/?E|DDD|DD|AAA|AA|A|B|C|D|F|G|H|I|J|K)(?:\s*[-/]\s*(?:DDD|DD|AAA|AA|A|B|C|D|F|G|H|I|J|K))?\b",
     re.I,
 )
 CUP_SIZE_RE = re.compile(
-    r"\b(AAA|AA|A|B|C|D|DD|DD/?E|DDD|DDD/?F|F|G|H|I|J|K)\s*(?:cup|cups?)\b|"
-    r"\b(?:cup\s*(?:size)?|cups?)\s*(?:is|are|:|：)?\s*(AAA|AA|A|B|C|D|DD|DD/?E|DDD|DDD/?F|F|G|H|I|J|K)\b",
+    r"\b(DDD/?F|DDD/?E|DD/?E|DDD|DD|AAA|AA|A|B|C|D|F|G|H|I|J|K)\s*(?:cup|cups?)\b|"
+    r"\b(?:cup\s*(?:size)?|cups?)\s*(?:is|are|:|：)?\s*(DDD/?F|DDD/?E|DD/?E|DDD|DD|AAA|AA|A|B|C|D|F|G|H|I|J|K)\b",
     re.I,
 )
 HEIGHT_RE = re.compile(
@@ -114,6 +114,10 @@ HEIGHT_RE = re.compile(
 WEIGHT_RE = re.compile(
     r"\b(\d{2,3}(?:\.\d+)?)\s*(?:ish)?\s*(?:lbs?|pounds?|#)\b|"
     r"\b(?:weigh(?:t|s|ed|ing)?|weight)\s*(?:is|:|：)?\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{2,3}(?:\.\d+)?)\s*(?:ish)?\b",
+    re.I,
+)
+WEIGHT_RANGE_RE = re.compile(
+    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:-|–|—|to)\s*(\d{2,3}(?:\.\d+)?)\s*(lbs?|pounds?|#)?\b",
     re.I,
 )
 WEIGHT_KG_RE = re.compile(
@@ -744,6 +748,17 @@ def parse_numeric(pattern: re.Pattern[str], text: str, max_value: Optional[float
 
 
 def parse_weight(text: str) -> Tuple[str, str]:
+    range_match = WEIGHT_RANGE_RE.search(text)
+    if range_match:
+        try:
+            low = parse_number_text(range_match.group(1))
+            high = parse_number_text(range_match.group(2))
+        except ValueError:
+            low = high = 0
+        unit = normalize_whitespace(range_match.group(3))
+        context = text[max(0, range_match.start() - 32) : range_match.start()].lower()
+        if (unit or re.search(r"\b(?:weight|weighs?|pounds?|lbs?)\b", context)) and 50 <= low < high <= 700 and high - low <= 150:
+            return f"{numeric_text(low)}-{numeric_text(high)} lb", ""
     for pattern, multiplier in ((WEIGHT_RE, 1.0), (WEIGHT_KG_RE, 2.2046226218)):
         match = pattern.search(text)
         if not match:

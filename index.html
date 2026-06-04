@@ -1336,6 +1336,10 @@
             if (!value) return "";
             const raw = String(value).trim();
             if (!raw || raw.toLowerCase() === "unknown") return "";
+            const range = raw.match(
+              /\b(\d{2,3}(?:\.\d+)?)\s*(?:-|–|—|to)\s*(\d{2,3}(?:\.\d+)?)\s*(?:lbs?|pounds?|#)?\b/i,
+            );
+            if (range) return `${range[1]}-${range[2]} lb`;
             const numeric = Number.parseFloat(raw.replace(/[^0-9.]+/g, ""));
             if (!Number.isFinite(numeric)) return raw;
             const formattedNumber = Number.isInteger(numeric)
@@ -1380,9 +1384,10 @@
             r.weight_display_display &&
             r.weight_display_display.toLowerCase() !== "unknown"
           ) {
-            const parsedRowWeight = Number.parseFloat(
-              String(r.weight_display_display).replace(/[^0-9.]+/g, ""),
-            );
+            const rawRowWeight = String(r.weight_display_display);
+            const parsedRowWeight = /(?:-|–|—|\bto\b)/i.test(rawRowWeight)
+              ? NaN
+              : Number.parseFloat(rawRowWeight.replace(/[^0-9.]+/g, ""));
             const normalizedSearchWeight =
               currentSearchParams?.in_weight !== null &&
               currentSearchParams?.in_weight !== undefined

@@ -1,0 +1,74 @@
+{
+  "totals": {
+    "files": 11,
+    "skipped_files": 0,
+    "rows": 8000,
+    "rows_updated": 157,
+    "fields_updated": 216
+  },
+  "changed_files": [
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_28_batch_001/approved_rows/supabase_approved_rows_part_001.csv",
+      "rows": 696,
+      "rows_updated": 27,
+      "fields_updated": 27,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_28_batch_001/labeled_source/supabase_image_review_approve_candidates_part_001_labeled.csv",
+      "rows": 1000,
+      "rows_updated": 39,
+      "fields_updated": 39,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_28_batch_001/sorter_training_labels/supabase_rejected_rows_part_001_for_sorter_training.csv",
+      "rows": 304,
+      "rows_updated": 12,
+      "fields_updated": 12,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_29_disapprove_part_007/labeled_source/supabase_image_review_disapprove_candidates_part_007_labeled_1.csv",
+      "rows": 1000,
+      "rows_updated": 12,
+      "fields_updated": 12,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_29_disapprove_part_007/sorter_training_labels/supabase_rejected_rows_part_007_for_sorter_training.csv",
+      "rows": 933,
+      "rows_updated": 12,
+      "fields_updated": 12,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_29_part_010/approved_rows/supabase_approved_rows_part_010.csv",
+      "rows": 998,
+      "rows_updated": 8,
+      "fields_updated": 8,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_29_part_010/labeled_source/supabase_image_review_approve_candidates_part_010_labeled.csv",
+      "rows": 1000,
+      "rows_updated": 8,
+      "fields_updated": 8,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_29_disapprove_part_007/labeled_source/supabase_image_review_disapprove_candidates_part_007_labeled (1).xlsx",
+      "rows": 1000,
+      "rows_updated": 17,
+      "fields_updated": 46,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/01_supabase_ready_human_approved/2026_05_29_part_010/labeled_source/supabase_image_review_approve_candidates_part_010_labeled.xlsx",
+      "rows": 1000,
+      "rows_updated": 22,
+      "fields_updated": 52,
+      "skipped": 0
+    }
+  ]
+}

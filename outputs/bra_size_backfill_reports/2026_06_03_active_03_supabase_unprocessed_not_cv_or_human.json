@@ -1,0 +1,172 @@
+{
+  "totals": {
+    "files": 31,
+    "skipped_files": 0,
+    "rows": 154201,
+    "rows_updated": 1391,
+    "fields_updated": 1904
+  },
+  "changed_files": [
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0001.csv",
+      "rows": 5000,
+      "rows_updated": 16,
+      "fields_updated": 16,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0002.csv",
+      "rows": 5000,
+      "rows_updated": 2,
+      "fields_updated": 2,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0003.csv",
+      "rows": 5000,
+      "rows_updated": 13,
+      "fields_updated": 13,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0004.csv",
+      "rows": 5000,
+      "rows_updated": 54,
+      "fields_updated": 54,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0005.csv",
+      "rows": 5000,
+      "rows_updated": 65,
+      "fields_updated": 65,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0006.csv",
+      "rows": 5000,
+      "rows_updated": 60,
+      "fields_updated": 61,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0007.csv",
+      "rows": 5000,
+      "rows_updated": 87,
+      "fields_updated": 87,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0008.csv",
+      "rows": 5000,
+      "rows_updated": 45,
+      "fields_updated": 45,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0009.csv",
+      "rows": 5000,
+      "rows_updated": 26,
+      "fields_updated": 26,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0010.csv",
+      "rows": 5000,
+      "rows_updated": 39,
+      "fields_updated": 39,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0011.csv",
+      "rows": 5000,
+      "rows_updated": 73,
+      "fields_updated": 73,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0012.csv",
+      "rows": 5000,
+      "rows_updated": 10,
+      "fields_updated": 10,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0013.csv",
+      "rows": 5000,
+      "rows_updated": 91,
+      "fields_updated": 91,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0019.csv",
+      "rows": 5000,
+      "rows_updated": 5,
+      "fields_updated": 5,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0021.csv",
+      "rows": 5000,
+      "rows_updated": 45,
+      "fields_updated": 45,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0022.csv",
+      "rows": 5000,
+      "rows_updated": 38,
+      "fields_updated": 38,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0023.csv",
+      "rows": 5000,
+      "rows_updated": 193,
+      "fields_updated": 193,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0024.csv",
+      "rows": 5000,
+      "rows_updated": 1,
+      "fields_updated": 1,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0025.csv",
+      "rows": 5000,
+      "rows_updated": 10,
+      "fields_updated": 10,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0026.csv",
+      "rows": 5000,
+      "rows_updated": 2,
+      "fields_updated": 2,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0028.csv",
+      "rows": 5000,
+      "rows_updated": 1,
+      "fields_updated": 1,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0029.csv",
+      "rows": 5000,
+      "rows_updated": 9,
+      "fields_updated": 9,
+      "skipped": 0
+    },
+    {
+      "path": "outputs/03_supabase_unprocessed_not_cv_or_human/unprocessed_rows_part_0031.csv",
+      "rows": 4201,
+      "rows_updated": 506,
+      "fields_updated": 1018,
+      "skipped": 0
+    }
+  ]
+}

@@ -204,6 +204,8 @@ function formatWeight(value) {
   if (!value) return "";
   const raw = String(value).trim();
   if (!raw || raw.toLowerCase() === "unknown") return "";
+  const range = raw.match(/\b(\d{2,3}(?:\.\d+)?)\s*(?:-|–|—|to)\s*(\d{2,3}(?:\.\d+)?)\s*(?:lbs?|pounds?|#)?\b/i);
+  if (range) return `${range[1]}-${range[2]} lb`;
   const n = Number.parseFloat(raw.replace(/[^0-9.]+/g, ""));
   if (!Number.isFinite(n)) return raw;
   return `${Number.isInteger(n) ? n : n.toFixed(1).replace(/\.0$/, "")} lb`;
