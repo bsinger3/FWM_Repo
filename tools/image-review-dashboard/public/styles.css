@@ -47,6 +47,17 @@ button:disabled {
   cursor: not-allowed;
 }
 
+@media (hover: none) {
+  button:hover {
+    border-color: var(--line);
+  }
+
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 .primary-btn {
   border-color: #111;
   background: #111;
@@ -478,6 +489,274 @@ main {
   }
 
   .detail-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    background: #fff;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  button,
+  .control input,
+  .control select,
+  .control textarea {
+    min-height: 44px;
+  }
+
+  .app-header {
+    gap: 8px;
+    padding: 10px 10px 8px;
+    border-bottom: 1px solid var(--line);
+    background: #fff;
+  }
+
+  .app-header h1 {
+    font-size: 20px;
+  }
+
+  .app-header p {
+    display: -webkit-box;
+    max-height: 34px;
+    overflow: hidden;
+    font-size: 12px;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .save-panel {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 90;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    border-top: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 -8px 24px rgba(31, 41, 51, 0.12);
+    text-align: left;
+  }
+
+  #save-status {
+    grid-column: 1 / -1;
+    min-height: 18px;
+    font-size: 12px;
+  }
+
+  .save-panel button {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  main {
+    padding: 8px 8px 112px;
+  }
+
+  .toolbar,
+  .bulkbar,
+  .legend {
+    gap: 8px;
+    padding: 8px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .tabs,
+  .grow,
+  .click-mode-control {
+    grid-column: 1 / -1;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tab {
+    min-width: 0;
+    padding: 8px 4px;
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .control {
+    min-width: 0;
+  }
+
+  .control span,
+  .toggle span {
+    font-size: 10px;
+  }
+
+  .control input,
+  .control select,
+  .control textarea {
+    padding: 8px;
+  }
+
+  .toggle {
+    min-height: 44px;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  .toggle input {
+    width: 20px;
+    height: 20px;
+  }
+
+  .segmented button {
+    min-height: 44px;
+  }
+
+  .bulkbar {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    background: rgba(255, 255, 255, 0.97);
+  }
+
+  .bulkbar span {
+    align-self: center;
+    font-size: 12px;
+  }
+
+  .bulkbar button {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .legend {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-bottom: 8px;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .legend-item {
+    flex: 0 0 auto;
+    min-height: 34px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .card {
+    border-radius: 7px;
+  }
+
+  .note-chip,
+  .saved-chip {
+    top: 6px;
+    right: 6px;
+    padding: 3px 5px;
+    font-size: 9px;
+  }
+
+  .saved-chip {
+    top: 28px;
+  }
+
+  .card-actions {
+    right: 5px;
+    bottom: 5px;
+    width: 70px;
+    gap: 4px;
+  }
+
+  .card-actions button {
+    min-width: 32px;
+    min-height: 30px;
+    padding: 2px 4px;
+    font-size: 12px;
+  }
+
+  .meta {
+    min-height: 88px;
+    padding: 7px 78px 7px 8px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  .meta-row {
+    gap: 3px 6px;
+  }
+
+  .detail-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .detail-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    align-items: start;
+    padding: 10px;
+    background: #fff;
+  }
+
+  .detail-header h2 {
+    font-size: 17px;
+  }
+
+  .detail-body {
+    gap: 10px;
+    max-height: none;
+    padding: 10px 10px calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .detail-image-frame img {
+    max-height: 54vh;
+  }
+
+  .detail-actions button {
+    flex: 1 1 30%;
+    min-height: 44px;
+  }
+
+  .detail-meta {
+    grid-template-columns: 1fr;
+    gap: 3px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .grid {
     grid-template-columns: 1fr;
   }
 }

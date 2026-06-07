@@ -1,0 +1,637 @@
+:root {
+  --review-image-target: 132px;
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f6f7f8;
+  color: #15191f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+button,
+select,
+input,
+textarea {
+  font: inherit;
+}
+
+button,
+select {
+  min-height: 32px;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 8px;
+  background: rgba(246, 247, 248, 0.96);
+  border-bottom: 1px solid #d9dde3;
+  backdrop-filter: blur(12px);
+}
+
+h1 {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+p {
+  margin: 0;
+}
+
+#bundle-summary,
+#status {
+  color: #53606f;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+#export-btn {
+  border: 0;
+  border-radius: 8px;
+  min-height: 32px;
+  padding: 0 10px;
+  background: #18202a;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 6px 8px;
+  background: white;
+  border-bottom: 1px solid #d9dde3;
+}
+
+.toolbar label,
+.detail-body label {
+  display: grid;
+  gap: 3px;
+  color: #53606f;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.bucket-control {
+  grid-column: auto;
+}
+
+.batch-control {
+  grid-column: auto;
+}
+
+.compact-control {
+  min-width: 0;
+}
+
+.compact-control select {
+  min-width: 0;
+}
+
+.advanced-tools {
+  grid-column: 1 / -1;
+  border: 1px solid #d9dde3;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.advanced-tools summary {
+  min-height: 30px;
+  padding: 6px 8px;
+  color: #53606f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.advanced-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  padding: 0 8px 8px;
+}
+
+.toolbar select,
+.detail-body select,
+.detail-body textarea {
+  width: 100%;
+  border: 1px solid #cbd2dc;
+  border-radius: 8px;
+  padding: 4px 7px;
+  background: white;
+  color: #15191f;
+  font-size: 12px;
+}
+
+.tabs,
+.legend,
+.segmented {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs,
+.segmented,
+.legend,
+.view-mode-control,
+#status {
+  grid-column: 1 / -1;
+}
+
+.mode-swipe .click-mode-control,
+.mode-swipe .advanced-tools,
+.mode-swipe .legend,
+.mode-swipe #status {
+  display: none;
+}
+
+.mode-grid .advanced-tools {
+  display: block;
+}
+
+.tabs button,
+.segmented button,
+.legend button,
+.toolbar > button,
+.advanced-tools button,
+.detail-actions button,
+#detail-save {
+  border: 1px solid #cbd2dc;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #fff;
+  color: #15191f;
+  white-space: nowrap;
+}
+
+.tabs button.active,
+.segmented button.active {
+  border-color: #18202a;
+  background: #18202a;
+  color: #fff;
+}
+
+.segmented button[data-click-mode="approve"].active {
+  border-color: #168a52;
+  background: #168a52;
+}
+
+.segmented button[data-click-mode="reject"].active {
+  border-color: #c5392f;
+  background: #c5392f;
+}
+
+.segmented button {
+  min-height: 32px;
+  padding: 0 7px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+}
+
+main {
+  padding: 6px 8px 72px;
+}
+
+.legend {
+  margin-bottom: 10px;
+  display: none;
+}
+
+.legend button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-size: 12px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--reason-color);
+  flex: 0 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--review-image-target)), var(--review-image-target)));
+  justify-content: center;
+  gap: 8px;
+}
+
+.swipe-view {
+  display: flex;
+  min-height: calc(100dvh - 132px);
+  flex-direction: column;
+  gap: 5px;
+}
+
+.swipe-progress {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  color: #53606f;
+  font-size: 10px;
+}
+
+.swipe-progress strong {
+  color: #15191f;
+  font-size: 12px;
+}
+
+.swipe-deck {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  touch-action: pan-y;
+}
+
+.swipe-card,
+.swipe-empty {
+  width: min(100%, 330px, 78vw);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.18);
+}
+
+.swipe-card {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  transition: transform 160ms ease;
+}
+
+.swipe-card.dragging {
+  transition: none;
+}
+
+.swipe-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: #f3f3f3;
+}
+
+.swipe-card.swiping-approve {
+  border-color: #168a52;
+}
+
+.swipe-card.swiping-reject {
+  border-color: #c5392f;
+}
+
+.swipe-stamp {
+  position: absolute;
+  top: 16px;
+  z-index: 2;
+  border: 3px solid currentColor;
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 20px;
+  font-weight: 900;
+  opacity: 0;
+  text-transform: uppercase;
+}
+
+.approve-stamp {
+  left: 16px;
+  color: #168a52;
+  transform: rotate(-8deg);
+}
+
+.reject-stamp {
+  right: 16px;
+  color: #c5392f;
+  transform: rotate(8deg);
+}
+
+.swiping-approve .approve-stamp,
+.swiping-reject .reject-stamp {
+  opacity: 1;
+}
+
+.swipe-meta {
+  display: grid;
+  gap: 5px;
+  padding: 7px;
+}
+
+.swipe-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  padding: 6px 0 0;
+  background: linear-gradient(rgba(246, 247, 248, 0), #f6f7f8 20%);
+}
+
+.top-jump {
+  position: fixed;
+  right: 10px;
+  bottom: 58px;
+  z-index: 5;
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 12px;
+  background: rgba(24, 32, 42, 0.9);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.22);
+}
+
+.mode-swipe .top-jump {
+  bottom: 54px;
+}
+
+.mode-swipe main {
+  padding-top: 5px;
+}
+
+.mode-swipe .toolbar {
+  position: sticky;
+  top: 44px;
+  z-index: 3;
+  grid-template-columns: minmax(0, 1fr) 84px 96px;
+  align-items: end;
+  gap: 5px;
+  padding: 5px 8px;
+}
+
+.mode-swipe .bucket-control,
+.mode-swipe .batch-control,
+.mode-swipe .view-mode-control {
+  grid-column: auto;
+}
+
+.mode-swipe .view-mode-control {
+  align-self: end;
+}
+
+.mode-swipe .view-mode-control button {
+  flex: 1 0 auto;
+  padding: 0 5px;
+}
+
+.swipe-actions button {
+  min-height: 36px;
+  border: 1px solid #cbd2dc;
+  border-radius: 8px;
+  background: white;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+#swipe-approve {
+  border-color: #168a52;
+  color: #168a52;
+}
+
+#swipe-reject {
+  border-color: #c5392f;
+  color: #c5392f;
+}
+
+.swipe-empty {
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+  padding: 20px;
+  color: #53606f;
+  text-align: center;
+  font-weight: 700;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+
+.card.quick-grid-card {
+  border-radius: 7px;
+}
+
+.card.approved {
+  border-color: #168a52;
+}
+
+.card.rejected {
+  border-color: #c5392f;
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: #f3f3f3;
+}
+
+.missing-image {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  place-items: center;
+  padding: 12px;
+  background: #e8ebef;
+  color: #53606f;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-meta {
+  display: grid;
+  gap: 4px;
+  min-height: 48px;
+  padding: 5px;
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 16px;
+  border-radius: 5px;
+  padding: 1px 4px;
+  background: #eef1f4;
+  color: #26313d;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.reason-pill {
+  color: white;
+  background: var(--reason-color);
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+  padding: 0 5px 5px;
+}
+
+.actions button {
+  min-height: 24px;
+  flex: 1;
+  border: 1px solid #cbd2dc;
+  border-radius: 6px;
+  background: white;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.actions .active.approve {
+  border-color: #168a52;
+  background: #dff6ea;
+}
+
+.actions .active.reject {
+  border-color: #c5392f;
+  background: #ffe7e3;
+}
+
+.dup {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  border-radius: 999px;
+  padding: 3px 6px;
+  background: rgba(15, 23, 42, 0.78);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+dialog {
+  width: min(100vw, 520px);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.close {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  width: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.64);
+  color: white;
+}
+
+#detail-image {
+  display: block;
+  width: 100%;
+  max-height: 58dvh;
+  object-fit: contain;
+  background: #0f172a;
+}
+
+.detail-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.detail-body h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0;
+}
+
+.detail-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+#detail-save {
+  background: #18202a;
+  color: white;
+  font-weight: 700;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 6px 10px;
+  margin: 0;
+  font-size: 12px;
+}
+
+dt {
+  color: #53606f;
+  font-weight: 700;
+}
+
+dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 520px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(var(--review-image-target), var(--review-image-target)));
+  }
+}

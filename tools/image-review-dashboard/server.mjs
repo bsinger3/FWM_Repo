@@ -606,7 +606,8 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
-const server = createServer(async (req, res) => {
+function createImageReviewServer() {
+  return createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
     if (url.pathname === "/api/parts" && req.method === "GET") {
@@ -631,11 +632,25 @@ const server = createServer(async (req, res) => {
   } catch (error) {
     sendError(res, error.message || String(error), 500);
   }
-});
+  });
+}
 
 const port = Number(process.env.PORT || 4173);
-server.listen(port, () => {
-  console.log(`Image review dashboard running at http://localhost:${port}`);
-  console.log(`Source workbooks: ${packageDir}`);
-  console.log(`Return workbooks: ${returnsDir}`);
-});
+const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === __filename;
+
+if (invokedDirectly) {
+  const server = createImageReviewServer();
+  server.listen(port, () => {
+    console.log(`Image review dashboard running at http://localhost:${port}`);
+    console.log(`Source workbooks: ${packageDir}`);
+    console.log(`Return workbooks: ${returnsDir}`);
+  });
+}
+
+export {
+  bucketConfig,
+  createImageReviewServer,
+  listParts,
+  readWorkbookRows,
+  saveDecisions,
+};
