@@ -65,14 +65,6 @@ const el = {
   detailReject: document.getElementById("detail-reject"),
   detailNeutral: document.getElementById("detail-neutral"),
   detailNotes: document.getElementById("detail-notes"),
-  cropFrame: document.getElementById("crop-frame"),
-  cropImage: document.getElementById("crop-image"),
-  cropX: document.getElementById("crop-x"),
-  cropY: document.getElementById("crop-y"),
-  cropZoom: document.getElementById("crop-zoom"),
-  cropRotate: document.getElementById("crop-rotate"),
-  cropReset: document.getElementById("crop-reset"),
-  cropStatus: document.getElementById("crop-status"),
   detailMeta: document.getElementById("detail-meta"),
   detailApply: document.getElementById("detail-apply"),
   topBtn: document.getElementById("top-btn"),
@@ -133,7 +125,6 @@ function buildDecision(row, patch) {
     humanState: patch.humanState ?? current.humanState ?? "NEUTRAL",
     rejectionReason: patch.rejectionReason ?? current.rejectionReason ?? "",
     reviewNotes: patch.reviewNotes ?? current.reviewNotes ?? "",
-    cropAdjustment: patch.cropAdjustment ?? current.cropAdjustment ?? null,
   };
 
   if (next.humanState !== "DISAPPROVE") {
@@ -540,7 +531,6 @@ function escapeHtml(value) {
 
 function renderCard(row) {
   const decision = getRowDecision(row);
-  const crop = normalizeCropAdjustment(decision.cropAdjustment);
   const article = document.createElement("article");
   const selected = state.selected.has(rowDecisionKey(row));
   const stateClass = decision.humanState === "APPROVE" ? "approved" : decision.humanState === "DISAPPROVE" ? "rejected" : "";
@@ -563,11 +553,8 @@ function renderCard(row) {
 
   article.innerHTML = `
     ${decision.reviewNotes ? '<div class="note-chip">Note</div>' : ""}
-    ${crop.hasCropAdjustment ? '<div class="crop-chip">Crop</div>' : ""}
     ${decision.savedDecisionState === "saved" ? '<div class="saved-chip">Saved</div>' : ""}
-    <div class="card-image-frame">
-      <img alt="" loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(imageSrc(row.imageUrl))}" data-original="${escapeHtml(row.imageUrl)}" />
-    </div>
+    <img alt="" loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(imageSrc(row.imageUrl))}" data-original="${escapeHtml(row.imageUrl)}" />
     <div class="meta">
       <div class="meta-row">${summary}</div>
       <div class="meta-row">${cvSummary}</div>
@@ -581,11 +568,9 @@ function renderCard(row) {
   `;
 
   const img = article.querySelector("img");
-  applyCropToImage(img, crop);
   img.addEventListener("error", () => {
     if (img.src !== row.imageUrl && row.imageUrl) {
       img.src = row.imageUrl;
-      applyCropToImage(img, crop);
     } else {
       img.style.display = "none";
     }
@@ -718,8 +703,6 @@ function openDetail(row) {
     if (el.detailImage.src !== row.imageUrl) el.detailImage.src = row.imageUrl;
   };
   el.detailNotes.value = decision.reviewNotes || "";
-  setCropEditorImage(row.imageUrl);
-  setCropEditorValue(decision.cropAdjustment);
   renderDetailMeta(row, decision);
   el.dialog.showModal();
 }
@@ -738,7 +721,6 @@ function renderDetailMeta(row, decision) {
     ["CV reason", shortReason(row.cvReasonCode)],
     ["CV summary", row.cvReasonSummary],
     ["Sorter reasons", row.sorterReasonCodes],
-    ["Crop adjustment", formatCropAdjustment(decision.cropAdjustment)],
     ["Duplicate image count", row.duplicateImageCount > 1 ? row.duplicateImageCount : ""],
     ["User comment", row.display.userComment],
     ["Product URL", row.productUrl],
@@ -755,129 +737,14 @@ function getDetailRow() {
   return state.rows.find((row) => rowDecisionKey(row) === state.detailRowKey);
 }
 
-function saveDetailPatch(patch, options = {}) {
+function saveDetailPatch(patch) {
   const row = getDetailRow();
   if (!row) return;
   setRowDecision(row, {
     ...patch,
     reviewNotes: el.detailNotes.value,
-    cropAdjustment: currentCropAdjustment(),
   });
-  if (options.close) {
-    el.dialog.close();
-    return;
-  }
   openDetail(row);
-}
-
-function defaultCropAdjustment() {
-  return {
-    hasCropAdjustment: false,
-    cropMode: "object-position",
-    cropAspectRatio: "3:4",
-    cropObjectPositionXPct: 50,
-    cropObjectPositionYPct: 50,
-    cropZoom: 1,
-    cropRotationDeg: 0,
-  };
-}
-
-function normalizeCropAdjustment(cropAdjustment) {
-  const crop = cropAdjustment || {};
-  const x = Number(crop.cropObjectPositionXPct ?? crop.x ?? 50);
-  const y = Number(crop.cropObjectPositionYPct ?? crop.y ?? 50);
-  const zoom = Number(crop.cropZoom ?? crop.zoom ?? 1);
-  const rotation = Number(crop.cropRotationDeg ?? crop.rotationDeg ?? 0);
-  return {
-    hasCropAdjustment: Boolean(crop.hasCropAdjustment),
-    cropMode: crop.cropMode || "object-position",
-    cropAspectRatio: crop.cropAspectRatio || "3:4",
-    cropObjectPositionXPct: Number.isFinite(x) ? Math.min(100, Math.max(0, x)) : 50,
-    cropObjectPositionYPct: Number.isFinite(y) ? Math.min(100, Math.max(0, y)) : 50,
-    cropZoom: Number.isFinite(zoom) ? Math.min(1.6, Math.max(1, zoom)) : 1,
-    cropRotationDeg: Number.isFinite(rotation) ? ((Math.round(rotation / 90) * 90) % 360 + 360) % 360 : 0,
-  };
-}
-
-function currentCropAdjustment() {
-  return normalizeCropAdjustment({
-    hasCropAdjustment: el.cropStatus.dataset.adjusted === "true",
-    cropObjectPositionXPct: Number(el.cropX.value),
-    cropObjectPositionYPct: Number(el.cropY.value),
-    cropZoom: Number(el.cropZoom.value),
-    cropRotationDeg: Number(el.cropStatus.dataset.rotationDeg || 0),
-  });
-}
-
-function formatCropAdjustment(cropAdjustment) {
-  const crop = normalizeCropAdjustment(cropAdjustment);
-  if (!crop.hasCropAdjustment) return "";
-  return `${crop.cropAspectRatio} ${crop.cropMode} ${crop.cropObjectPositionXPct}% ${crop.cropObjectPositionYPct}% zoom ${crop.cropZoom.toFixed(2)}x rotate ${crop.cropRotationDeg}deg`;
-}
-
-function applyCropToImage(img, cropAdjustment) {
-  const crop = normalizeCropAdjustment(cropAdjustment);
-  img.style.objectPosition = `${crop.cropObjectPositionXPct}% ${crop.cropObjectPositionYPct}%`;
-  img.style.transform = cropTransform(crop);
-}
-
-function setCropEditorImage(imageUrl) {
-  el.cropImage.src = imageSrc(imageUrl);
-  el.cropImage.onerror = () => {
-    if (el.cropImage.src !== imageUrl) el.cropImage.src = imageUrl;
-  };
-}
-
-function setCropEditorValue(cropAdjustment) {
-  const crop = normalizeCropAdjustment(cropAdjustment);
-  el.cropX.value = String(crop.cropObjectPositionXPct);
-  el.cropY.value = String(crop.cropObjectPositionYPct);
-  el.cropZoom.value = String(crop.cropZoom);
-  el.cropStatus.dataset.rotationDeg = String(crop.cropRotationDeg);
-  el.cropStatus.dataset.adjusted = String(crop.hasCropAdjustment);
-  updateCropPreview();
-}
-
-function updateCropPreview(markAdjusted = false) {
-  if (markAdjusted) el.cropStatus.dataset.adjusted = "true";
-  const x = Number(el.cropX.value);
-  const y = Number(el.cropY.value);
-  const zoom = Number(el.cropZoom.value);
-  const rotation = Number(el.cropStatus.dataset.rotationDeg || 0);
-  el.cropImage.style.objectPosition = `${x}% ${y}%`;
-  el.cropImage.style.transform = cropTransform({
-    cropObjectPositionXPct: x,
-    cropObjectPositionYPct: y,
-    cropZoom: zoom,
-    cropRotationDeg: rotation,
-  });
-  el.cropStatus.textContent =
-    el.cropStatus.dataset.adjusted === "true"
-      ? `Manual crop: ${x}% horizontal, ${y}% vertical, ${zoom.toFixed(2)}x zoom, ${rotation}deg rotation`
-      : "No manual crop saved";
-}
-
-function cropTransform(cropAdjustment) {
-  const crop = normalizeCropAdjustment(cropAdjustment);
-  const maxPanPct = ((crop.cropZoom - 1) / Math.max(crop.cropZoom, 1)) * 50;
-  const translateX = (((50 - crop.cropObjectPositionXPct) / 50) * maxPanPct).toFixed(2);
-  const translateY = (((50 - crop.cropObjectPositionYPct) / 50) * maxPanPct).toFixed(2);
-  return `translate(${translateX}%, ${translateY}%) scale(${crop.cropZoom}) rotate(${crop.cropRotationDeg}deg)`;
-}
-
-function ensurePanHasZoom() {
-  if (Number(el.cropZoom.value) >= 1.18) return;
-  el.cropZoom.value = "1.18";
-}
-
-function resetCropEditor() {
-  setCropEditorValue(defaultCropAdjustment());
-}
-
-function rotateCropEditor() {
-  const current = Number(el.cropStatus.dataset.rotationDeg || 0);
-  el.cropStatus.dataset.rotationDeg = String((current + 90) % 360);
-  updateCropPreview(true);
 }
 
 async function saveProgress() {
@@ -1000,20 +867,7 @@ function bindEvents() {
   el.detailApprove.addEventListener("click", () => saveDetailPatch({ humanState: "APPROVE" }));
   el.detailReject.addEventListener("click", () => saveDetailPatch({ humanState: "DISAPPROVE" }));
   el.detailNeutral.addEventListener("click", () => saveDetailPatch({ humanState: "NEUTRAL" }));
-  el.detailApply.addEventListener("click", () => saveDetailPatch({}, { close: true }));
-  for (const input of [el.cropX, el.cropY, el.cropZoom]) {
-    input.addEventListener("input", () => {
-      if (input !== el.cropZoom) ensurePanHasZoom();
-      updateCropPreview(true);
-    });
-  }
-  el.cropReset.addEventListener("click", () => {
-    resetCropEditor();
-  });
-  el.cropRotate.addEventListener("click", () => {
-    rotateCropEditor();
-  });
-  bindCropDrag();
+  el.detailApply.addEventListener("click", () => saveDetailPatch({}));
   el.topBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
@@ -1026,44 +880,6 @@ function bindEvents() {
     if (event.key.toLowerCase() === "c" && rows[0]) openDetail(rows[0]);
   });
   bindBoxSelect();
-}
-
-function bindCropDrag() {
-  const drag = {
-    active: false,
-    startX: 0,
-    startY: 0,
-    cropX: 50,
-    cropY: 50,
-  };
-
-  el.cropFrame.addEventListener("pointerdown", (event) => {
-    drag.active = true;
-    drag.startX = event.clientX;
-    drag.startY = event.clientY;
-    drag.cropX = Number(el.cropX.value);
-    drag.cropY = Number(el.cropY.value);
-    el.cropFrame.setPointerCapture?.(event.pointerId);
-    event.preventDefault();
-  });
-
-  el.cropFrame.addEventListener("pointermove", (event) => {
-    if (!drag.active) return;
-    const rect = el.cropFrame.getBoundingClientRect();
-    const deltaX = ((event.clientX - drag.startX) / Math.max(rect.width, 1)) * 100;
-    const deltaY = ((event.clientY - drag.startY) / Math.max(rect.height, 1)) * 100;
-    el.cropX.value = String(Math.round(Math.min(100, Math.max(0, drag.cropX - deltaX))));
-    el.cropY.value = String(Math.round(Math.min(100, Math.max(0, drag.cropY - deltaY))));
-    ensurePanHasZoom();
-    updateCropPreview(true);
-    event.preventDefault();
-  });
-
-  for (const eventName of ["pointerup", "pointercancel", "pointerleave"]) {
-    el.cropFrame.addEventListener(eventName, () => {
-      drag.active = false;
-    });
-  }
 }
 
 function bindBoxSelect() {

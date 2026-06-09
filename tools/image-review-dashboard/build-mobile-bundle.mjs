@@ -144,6 +144,13 @@ async function rowWithEmbeddedImage(row, outputDir) {
   };
 }
 
+function jsonForInlineScript(value) {
+  return JSON.stringify(value, null, 2)
+    .replace(/<\//g, "<\\/")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 async function readMobileBundleManifest() {
   if (!existsSync(mobileBundleManifestPath)) {
     return {
@@ -525,7 +532,7 @@ async function main() {
     };
     const standaloneHtml = htmlTemplate
       .replace('<link rel="stylesheet" href="./styles.css" />', `<style>\n${css}\n</style>`)
-      .replace('<script src="./bundle-data.js"></script>', `<script>\nwindow.FWM_MOBILE_BUNDLE = ${JSON.stringify(embeddedBundle, null, 2)};\n</script>`)
+      .replace('<script src="./bundle-data.js"></script>', `<script>\nwindow.FWM_MOBILE_BUNDLE = ${jsonForInlineScript(embeddedBundle)};\n</script>`)
       .replace('<script src="./app.js"></script>', `<script>\n${appJs}\n</script>`);
     await writeFile(path.join(outputDir, "standalone.html"), standaloneHtml, "utf8");
   }

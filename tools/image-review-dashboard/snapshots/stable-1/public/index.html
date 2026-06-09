@@ -124,43 +124,15 @@
             <button id="detail-approve" type="button">Approve</button>
             <button id="detail-reject" type="button">Reject</button>
             <button id="detail-neutral" type="button">Neutral</button>
-            <button id="detail-apply" class="primary-btn" type="button">Apply changes</button>
           </div>
           <label class="control full">
             <span>Review comment</span>
             <textarea id="detail-notes" rows="5" placeholder="Add a free-form approval or rejection note..."></textarea>
           </label>
-          <section class="crop-editor" aria-label="Crop adjustment">
-            <div class="crop-editor-header">
-              <div>
-                <h3>Crop adjustment</h3>
-                <p>Move the image inside this 3:4 frame. This saves crop metadata only.</p>
-              </div>
-              <button id="crop-reset" type="button">Reset crop</button>
-            </div>
-            <div id="crop-frame" class="crop-frame">
-              <img id="crop-image" alt="" draggable="false" />
-            </div>
-            <div class="crop-button-row">
-              <button id="crop-rotate" type="button">Rotate 90</button>
-            </div>
-            <div class="crop-controls">
-              <label class="control">
-                <span>Horizontal</span>
-                <input id="crop-x" type="range" min="0" max="100" step="1" value="50" />
-              </label>
-              <label class="control">
-                <span>Vertical</span>
-                <input id="crop-y" type="range" min="0" max="100" step="1" value="50" />
-              </label>
-              <label class="control">
-                <span>Zoom</span>
-                <input id="crop-zoom" type="range" min="1" max="1.6" step="0.02" value="1" />
-              </label>
-            </div>
-            <div id="crop-status" class="crop-status">No manual crop saved</div>
-          </section>
           <div id="detail-meta" class="detail-meta"></div>
+          <div class="detail-actions">
+            <button id="detail-apply" class="primary-btn" type="button">Apply changes</button>
+          </div>
         </div>
       </div>
     </dialog>

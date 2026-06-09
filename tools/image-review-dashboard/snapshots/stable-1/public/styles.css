@@ -294,24 +294,16 @@ main {
   outline-offset: 2px;
 }
 
-.card-image-frame {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
-  background: #f3f3f3;
-}
-
 .card img {
   display: block;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
-  transform-origin: center;
+  background: #f3f3f3;
 }
 
 .note-chip,
-.saved-chip,
-.crop-chip {
+.saved-chip {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -325,16 +317,6 @@ main {
 
 .saved-chip {
   top: 34px;
-}
-
-.crop-chip {
-  top: 34px;
-  background: rgba(37, 99, 235, 0.9);
-}
-
-.saved-chip + .crop-chip,
-.crop-chip + .saved-chip {
-  top: 60px;
 }
 
 .card-actions {
@@ -485,80 +467,6 @@ main {
   gap: 12px;
 }
 
-.crop-editor {
-  display: grid;
-  gap: 10px;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fafafa;
-}
-
-.crop-editor-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: start;
-}
-
-.crop-editor h3 {
-  margin: 0;
-  font-size: 14px;
-}
-
-.crop-editor p {
-  margin: 2px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.crop-frame {
-  position: relative;
-  width: min(220px, 100%);
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
-  border: 2px solid #111;
-  border-radius: 6px;
-  background: #f3f3f3;
-  cursor: move;
-  touch-action: none;
-}
-
-.crop-frame::after {
-  content: "";
-  position: absolute;
-  inset: 33.333% 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.75);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.75);
-  pointer-events: none;
-}
-
-.crop-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 50%;
-  transform-origin: center;
-  user-select: none;
-}
-
-.crop-button-row {
-  display: flex;
-  gap: 8px;
-}
-
-.crop-controls {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.crop-status {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .detail-actions {
   display: flex;
   flex-wrap: wrap;
@@ -598,10 +506,6 @@ main {
 
   .detail-body {
     grid-template-columns: 1fr;
-  }
-
-  .crop-frame {
-    width: min(260px, 100%);
   }
 }
 

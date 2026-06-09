@@ -20,15 +20,6 @@ const returnsDir =
   process.env.FWM_IMAGE_REVIEW_RETURNS_DIR ||
   path.join(repoRoot, "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns");
 const manifestPath = path.join(returnsDir, "human_labeled_returns_manifest.json");
-const cropReturnHeaders = [
-  "crop_has_adjustment",
-  "crop_mode",
-  "crop_aspect_ratio",
-  "crop_object_position_x_pct",
-  "crop_object_position_y_pct",
-  "crop_zoom",
-  "crop_rotation_deg",
-];
 
 const bucketConfig = {
   approve_candidates: {
@@ -248,7 +239,6 @@ function normalizeDisplayRow(raw, bucket, part, partFile, defaultDecision, saved
   const rejectionReason = savedDecision?.rejection_reason ?? raw.rejection_reason ?? "";
   const reviewNotes = savedDecision?.review_notes ?? raw.review_notes ?? "";
   const humanState = savedDecision ? mapHumanState(productionDecision) : "NEUTRAL";
-  const cropAdjustment = normalizeCropAdjustment(savedDecision || raw);
 
   return {
     bucket,
@@ -266,7 +256,6 @@ function normalizeDisplayRow(raw, bucket, part, partFile, defaultDecision, saved
     productionDecision,
     rejectionReason,
     reviewNotes,
-    cropAdjustment,
     savedDecisionState: savedDecision ? "saved" : "unsaved",
     reviewedAt: savedDecision?.reviewed_at || "",
     cvDecision: raw.cv_decision || "",
@@ -370,33 +359,10 @@ function sanitizeTimestamp(date = new Date()) {
   return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }
 
-function normalizeCropAdjustment(value = {}) {
-  const source = value || {};
-  const raw = source.cropAdjustment || source.crop_adjustment || source;
-  const x = Number(raw.cropObjectPositionXPct ?? raw.crop_object_position_x_pct ?? 50);
-  const y = Number(raw.cropObjectPositionYPct ?? raw.crop_object_position_y_pct ?? 50);
-  const zoom = Number(raw.cropZoom ?? raw.crop_zoom ?? 1);
-  const rotation = Number(raw.cropRotationDeg ?? raw.crop_rotation_deg ?? 0);
-  const hasCropAdjustment =
-    raw.hasCropAdjustment === true ||
-    raw.crop_has_adjustment === true ||
-    String(raw.crop_has_adjustment || "").toLowerCase() === "true";
-  return {
-    hasCropAdjustment,
-    cropMode: raw.cropMode || raw.crop_mode || "object-position",
-    cropAspectRatio: raw.cropAspectRatio || raw.crop_aspect_ratio || "3:4",
-    cropObjectPositionXPct: Number.isFinite(x) ? Math.min(100, Math.max(0, x)) : 50,
-    cropObjectPositionYPct: Number.isFinite(y) ? Math.min(100, Math.max(0, y)) : 50,
-    cropZoom: Number.isFinite(zoom) ? Math.min(1.6, Math.max(1, zoom)) : 1,
-    cropRotationDeg: Number.isFinite(rotation) ? ((Math.round(rotation / 90) * 90) % 360 + 360) % 360 : 0,
-  };
-}
-
 function sanitizeDecision(decision) {
   const humanState = String(decision.humanState || "NEUTRAL").toUpperCase();
   const productionDecision =
     humanState === "APPROVE" ? "APPROVE" : humanState === "DISAPPROVE" ? "DISAPPROVE" : "";
-  const crop = normalizeCropAdjustment(decision.cropAdjustment);
   return {
     bucket: decision.bucket,
     partFile: decision.partFile,
@@ -413,13 +379,6 @@ function sanitizeDecision(decision) {
     production_decision: productionDecision,
     rejection_reason: productionDecision === "DISAPPROVE" ? decision.rejectionReason || "" : "",
     review_notes: decision.reviewNotes || "",
-    crop_has_adjustment: crop.hasCropAdjustment,
-    crop_mode: crop.cropMode,
-    crop_aspect_ratio: crop.cropAspectRatio,
-    crop_object_position_x_pct: crop.cropObjectPositionXPct,
-    crop_object_position_y_pct: crop.cropObjectPositionYPct,
-    crop_zoom: crop.cropZoom,
-    crop_rotation_deg: crop.cropRotationDeg,
   };
 }
 
@@ -441,16 +400,12 @@ async function writeReturnWorkbook(bucket, partFile, decisions, exportStamp) {
   const sourceWorkbook = new ExcelJS.Workbook();
   await sourceWorkbook.xlsx.readFile(sourcePath);
   const sourceSheet = sourceWorkbook.worksheets[0];
-  const sourceHeaders = getHeaders(sourceSheet);
-  const headers = [...sourceHeaders];
-  for (const header of cropReturnHeaders) {
-    if (!headers.includes(header)) headers.push(header);
-  }
+  const headers = getHeaders(sourceSheet);
   const sourceRowsByKey = new Map();
 
   sourceSheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
     if (rowNumber === 1) return;
-    const raw = getRowObject(row, sourceHeaders);
+    const raw = getRowObject(row, headers);
     const rowKey =
       raw.review_row_key ||
       `${raw.source_file || "unknown"}::${raw.source_row_number || rowNumber}`;
@@ -474,13 +429,6 @@ async function writeReturnWorkbook(bucket, partFile, decisions, exportStamp) {
       if (header === "production_decision") return decision.production_decision;
       if (header === "rejection_reason") return decision.rejection_reason;
       if (header === "review_notes") return decision.review_notes;
-      if (header === "crop_has_adjustment") return decision.crop_has_adjustment ? "TRUE" : "";
-      if (header === "crop_mode") return decision.crop_has_adjustment ? decision.crop_mode : "";
-      if (header === "crop_aspect_ratio") return decision.crop_has_adjustment ? decision.crop_aspect_ratio : "";
-      if (header === "crop_object_position_x_pct") return decision.crop_has_adjustment ? decision.crop_object_position_x_pct : "";
-      if (header === "crop_object_position_y_pct") return decision.crop_has_adjustment ? decision.crop_object_position_y_pct : "";
-      if (header === "crop_zoom") return decision.crop_has_adjustment ? decision.crop_zoom : "";
-      if (header === "crop_rotation_deg") return decision.crop_has_adjustment ? decision.crop_rotation_deg : "";
       if (header === "image_preview") {
         const imageUrl = source.raw.image_url_to_use || source.raw.raw_scraped_image_url || "";
         return imageUrl ? { formula: `IF(X${sheet.rowCount + 1}<>"",IMAGE(X${sheet.rowCount + 1}),"")` } : "";
@@ -548,13 +496,6 @@ async function saveDecisions(payload) {
         production_decision: decision.production_decision,
         rejection_reason: decision.rejection_reason,
         review_notes: decision.review_notes,
-        crop_has_adjustment: decision.crop_has_adjustment,
-        crop_mode: decision.crop_mode,
-        crop_aspect_ratio: decision.crop_aspect_ratio,
-        crop_object_position_x_pct: decision.crop_object_position_x_pct,
-        crop_object_position_y_pct: decision.crop_object_position_y_pct,
-        crop_zoom: decision.crop_zoom,
-        crop_rotation_deg: decision.crop_rotation_deg,
         reviewed_at: reviewedAt,
         export_stamp: exportStamp,
       };
@@ -658,7 +599,6 @@ async function undoLastExport() {
       humanState: decision.human_state || "NEUTRAL",
       rejectionReason: decision.rejection_reason || "",
       reviewNotes: decision.review_notes || "",
-      cropAdjustment: normalizeCropAdjustment(decision),
     });
     delete manifest.decisions[key];
   }
@@ -742,7 +682,6 @@ export {
   bucketConfig,
   createImageReviewServer,
   listParts,
-  normalizeCropAdjustment,
   readWorkbookRows,
   saveDecisions,
 };

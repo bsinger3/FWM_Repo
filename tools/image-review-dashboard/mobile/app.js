@@ -14,6 +14,7 @@ const state = {
   suppressTapUntil: 0,
   unsavedLocalChanges: 0,
   legendFilter: "",
+  duplicateGroups: new Map(),
 };
 
 const localSaveBatchSize = 50;
@@ -136,11 +137,21 @@ function duplicateImageKey(row) {
   }
 }
 
+function rebuildDuplicateGroups() {
+  state.duplicateGroups = new Map();
+  for (const row of state.rows) {
+    const key = duplicateImageKey(row);
+    if (!key) continue;
+    if (!state.duplicateGroups.has(key)) state.duplicateGroups.set(key, []);
+    state.duplicateGroups.get(key).push(row);
+  }
+}
+
 function rowsForReviewUnit(row) {
   if (!el.hideDuplicates.checked) return [row];
   const key = duplicateImageKey(row);
   if (!key) return [row];
-  return state.rows.filter((candidate) => duplicateImageKey(candidate) === key);
+  return state.duplicateGroups.get(key) || [row];
 }
 
 function setRowDecision(row, patch) {
@@ -609,8 +620,17 @@ function visibleUnmarkedRows() {
   return filteredRows().filter((row) => getRowDecision(row).humanState === "NEUTRAL");
 }
 
-function applyVisible(patch) {
-  for (const row of visibleUnmarkedRows()) {
+function nextFrame() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+}
+
+async function applyVisible(patch) {
+  const rows = visibleUnmarkedRows();
+  el.status.textContent = `Marking ${rows.length} visible card(s)...`;
+  await nextFrame();
+  for (const row of rows) {
     for (const target of rowsForReviewUnit(row)) {
       state.dirty.set(rowDecisionKey(target), buildDecision(target, patch));
     }
@@ -652,7 +672,8 @@ async function saveDecisionPayload(payload) {
   const filename = `fwm_mobile_review_decisions_${exportedAt.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z")}.json`;
   const blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json" });
 
-  if ("showSaveFilePicker" in window) {
+  const isAndroidChrome = /Android/i.test(navigator.userAgent || "");
+  if (!isAndroidChrome && "showSaveFilePicker" in window) {
     try {
       const handle = await window.showSaveFilePicker({
         suggestedName: filename,
@@ -715,9 +736,15 @@ function bindEvents() {
   });
   el.viewModeGrid.addEventListener("click", () => setViewMode("grid"));
   el.viewModeSwipe.addEventListener("click", () => setViewMode("swipe"));
-  el.approveVisible.addEventListener("click", () => applyVisible({ humanState: "APPROVE" }));
+  el.approveVisible.addEventListener("click", () => {
+    applyVisible({ humanState: "APPROVE" }).catch((error) => {
+      alert(`Could not approve visible cards: ${error.message || error}`);
+    });
+  });
   el.rejectVisible.addEventListener("click", () => {
-    applyVisible({ humanState: "DISAPPROVE", rejectionReason: el.rejectReason.value });
+    applyVisible({ humanState: "DISAPPROVE", rejectionReason: el.rejectReason.value }).catch((error) => {
+      alert(`Could not reject visible cards: ${error.message || error}`);
+    });
   });
   el.swipeApprove.addEventListener("click", () => {
     const row = undecidedSwipeRows()[state.swipeIndex];
@@ -747,6 +774,7 @@ function init() {
     return;
   }
   loadDirty();
+  rebuildDuplicateGroups();
   const imageStatus = bundle.imageStatus || {};
   const offlineStatus = imageStatus.offlineReady
     ? "local"
