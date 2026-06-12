@@ -15,6 +15,9 @@ const state = {
   unsavedLocalChanges: 0,
   legendFilter: "",
   duplicateGroups: new Map(),
+  exportInProgress: false,
+  bulkActionInProgress: false,
+  localSaveAvailable: true,
 };
 
 const localSaveBatchSize = 50;
@@ -70,19 +73,45 @@ function rowDecisionKey(row) {
   return `${row.bucket}::${row.partFile}::${row.rowKey}`;
 }
 
+function compactDecisionForStorage(decision) {
+  return {
+    humanState: decision.humanState || "NEUTRAL",
+    rejectionReason: decision.rejectionReason || "",
+    reviewNotes: decision.reviewNotes || "",
+  };
+}
+
 function loadDirty() {
   try {
     const raw = localStorage.getItem(storageKey);
     if (!raw) return;
-    for (const [key, value] of Object.entries(JSON.parse(raw))) state.dirty.set(key, value);
+    const rowsByKey = new Map(state.rows.map((row) => [rowDecisionKey(row), row]));
+    for (const [key, value] of Object.entries(JSON.parse(raw))) {
+      const row = rowsByKey.get(key);
+      state.dirty.set(key, row ? buildDecision(row, value || {}) : value);
+    }
   } catch (error) {
     console.warn("Could not load phone review progress", error);
   }
 }
 
 function persistDirty() {
-  localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(state.dirty)));
-  state.unsavedLocalChanges = 0;
+  const compactDirty = {};
+  for (const [key, decision] of state.dirty.entries()) {
+    compactDirty[key] = compactDecisionForStorage(decision);
+  }
+  try {
+    localStorage.removeItem(storageKey);
+    localStorage.setItem(storageKey, JSON.stringify(compactDirty));
+    state.unsavedLocalChanges = 0;
+    state.localSaveAvailable = true;
+    return true;
+  } catch (error) {
+    state.unsavedLocalChanges = 0;
+    state.localSaveAvailable = false;
+    console.warn("Could not autosave phone review progress", error);
+    return false;
+  }
 }
 
 function maybePersistDirty() {
@@ -627,16 +656,29 @@ function nextFrame() {
 }
 
 async function applyVisible(patch) {
+  if (state.bulkActionInProgress) return;
+  state.bulkActionInProgress = true;
+  const previousApproveDisabled = el.approveVisible.disabled;
+  const previousRejectDisabled = el.rejectVisible.disabled;
+  el.approveVisible.disabled = true;
+  el.rejectVisible.disabled = true;
   const rows = visibleUnmarkedRows();
   el.status.textContent = `Marking ${rows.length} visible card(s)...`;
-  await nextFrame();
-  for (const row of rows) {
-    for (const target of rowsForReviewUnit(row)) {
-      state.dirty.set(rowDecisionKey(target), buildDecision(target, patch));
+  try {
+    await nextFrame();
+    for (const row of rows) {
+      const targets = [...rowsForReviewUnit(row)];
+      for (const target of targets) {
+        state.dirty.set(rowDecisionKey(target), buildDecision(target, patch));
+      }
     }
+    persistDirty();
+    render();
+  } finally {
+    state.bulkActionInProgress = false;
+    el.approveVisible.disabled = previousApproveDisabled;
+    el.rejectVisible.disabled = previousRejectDisabled;
   }
-  persistDirty();
-  render();
 }
 
 function showUnreviewedOnly() {
@@ -648,22 +690,31 @@ function showUnreviewedOnly() {
 }
 
 async function exportDecisions() {
-  persistDirty();
-  const decisions = Array.from(state.dirty.values());
-  const exportedAt = new Date().toISOString();
-  const payload = {
-    format: "fwm-mobile-image-review-decisions-v1",
-    bundleId: bundle.bundleId,
-    generatedAt: bundle.generatedAt,
-    exportedAt,
-    parts: bundle.parts,
-    decisions,
-  };
+  if (state.exportInProgress) return;
+  state.exportInProgress = true;
+  el.exportBtn.disabled = true;
+  const previousLabel = el.exportBtn.textContent;
+  el.exportBtn.textContent = "Exporting";
   try {
+    persistDirty();
+    const decisions = Array.from(state.dirty.values());
+    const exportedAt = new Date().toISOString();
+    const payload = {
+      format: "fwm-mobile-image-review-decisions-v1",
+      bundleId: bundle.bundleId,
+      generatedAt: bundle.generatedAt,
+      exportedAt,
+      parts: bundle.parts,
+      decisions,
+    };
     const exported = await saveDecisionPayload(payload);
     if (exported) showUnreviewedOnly();
   } catch (error) {
     alert(`Could not export decisions: ${error.message || error}`);
+  } finally {
+    state.exportInProgress = false;
+    el.exportBtn.disabled = false;
+    el.exportBtn.textContent = previousLabel;
   }
 }
 
@@ -702,8 +753,13 @@ async function saveDecisionPayload(payload) {
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  link.style.display = "none";
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => {
+    URL.revokeObjectURL(url);
+    link.remove();
+  }, 30000);
   alert(
     `Downloaded ${payload.decisions.length} decision(s) to ${filename}.\n\nMove it to BrisApps/FWM_Image_Review/returns_to_laptop before copying it back to the Mac.`,
   );

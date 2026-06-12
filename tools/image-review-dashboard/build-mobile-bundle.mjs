@@ -169,8 +169,70 @@ async function readMobileBundleManifest() {
   return manifest;
 }
 
+function decisionKeyFromDecision(decision) {
+  const bucket = decision.bucket || "";
+  const partFile = decision.partFile || decision.part_file || "";
+  const rowKey = decision.rowKey || decision.review_row_key || "";
+  return bucket && partFile && rowKey ? `${bucket}::${partFile}::${rowKey}` : "";
+}
+
+function sourceKeyFromDecision(decision) {
+  const sourceFile = decision.sourceFile || decision.source_file || "";
+  const sourceRowNumber = decision.sourceRowNumber || decision.source_row_number || "";
+  return sourceFile && sourceRowNumber ? `${sourceFile}::${sourceRowNumber}` : "";
+}
+
+async function readReviewedDecisionIndex() {
+  const returnsDir = path.join(reviewRoot, "human_labeled_returns");
+  const index = {
+    byDecisionKey: new Set(),
+    byRowKey: new Set(),
+    bySourceKey: new Set(),
+    fileCount: 0,
+    decisionCount: 0,
+  };
+  const files = (await readdir(returnsDir).catch(() => []))
+    .filter((file) => /^fwm_mobile_review_decisions_.*\.json$/.test(file) || /^human_labeled_delta_.*\.json$/.test(file))
+    .sort();
+
+  for (const file of files) {
+    let parsed;
+    try {
+      parsed = JSON.parse(await readFile(path.join(returnsDir, file), "utf8"));
+    } catch (error) {
+      console.warn(`Could not read reviewed decision file ${file}: ${error.message || error}`);
+      continue;
+    }
+    const decisions = Array.isArray(parsed.decisions) ? parsed.decisions : [];
+    if (!decisions.length) continue;
+    index.fileCount += 1;
+    for (const decision of decisions) {
+      const decisionKey = decisionKeyFromDecision(decision);
+      const rowKey = decision.rowKey || decision.review_row_key || "";
+      const sourceKey = sourceKeyFromDecision(decision);
+      if (decisionKey) index.byDecisionKey.add(decisionKey);
+      if (rowKey) index.byRowKey.add(rowKey);
+      if (sourceKey) index.bySourceKey.add(sourceKey);
+      index.decisionCount += 1;
+    }
+  }
+  return index;
+}
+
 function rowIssueKey(row) {
   return `${row.bucket}::${row.partFile}::${row.rowKey}`;
+}
+
+function sourceIssueKey(row) {
+  return row.source?.sourceFile && row.source?.sourceRowNumber ? `${row.source.sourceFile}::${row.source.sourceRowNumber}` : "";
+}
+
+function hasReviewedDecision(row, reviewedDecisionIndex) {
+  return (
+    reviewedDecisionIndex.byDecisionKey.has(rowIssueKey(row)) ||
+    reviewedDecisionIndex.byRowKey.has(row.rowKey) ||
+    reviewedDecisionIndex.bySourceKey.has(sourceIssueKey(row))
+  );
 }
 
 function normalizeImageUrlForDedupe(value) {
@@ -341,6 +403,7 @@ async function main() {
   const outputDir = path.resolve(getArg("output", defaultOutputDir));
   const parts = await parseParts(getArg("parts", process.env.FWM_MOBILE_REVIEW_PARTS || "needs_human_review:001"));
   const limit = Number(getArg("limit", process.env.FWM_MOBILE_REVIEW_LIMIT || "0"));
+  const totalLimit = Number(getArg("total-limit", process.env.FWM_MOBILE_REVIEW_TOTAL_LIMIT || "0"));
   const batchSize = Number(getArg("batch-size", process.env.FWM_MOBILE_REVIEW_BATCH_SIZE || "0"));
   const skipImages = process.argv.includes("--skip-images");
   const skipStandalone = process.argv.includes("--skip-standalone");
@@ -356,6 +419,7 @@ async function main() {
   const candidateMultiplier = Math.max(1, Number(getArg("candidate-multiplier", process.env.FWM_MOBILE_REVIEW_CANDIDATE_MULTIPLIER || "2")));
   const concurrency = Number(getArg("concurrency", process.env.FWM_MOBILE_REVIEW_IMAGE_CONCURRENCY || "8"));
   const mobileBundleManifest = await readMobileBundleManifest();
+  const reviewedDecisionIndex = await readReviewedDecisionIndex();
 
   await mkdir(outputDir, { recursive: true });
   await mkdir(path.join(outputDir, "images"), { recursive: true });
@@ -370,17 +434,24 @@ async function main() {
   const preSeenReviewSimilarityKeys = new Set();
   let skippedPreDuplicateRowCount = 0;
   for (const item of parts) {
+    const remainingTotalLimit = totalLimit > 0 ? Math.max(totalLimit - rows.length, 0) : 0;
+    if (totalLimit > 0 && remainingTotalLimit <= 0) break;
     const data = await readWorkbookRows(item.bucket, item.part);
     const savedFilteredRows = includeSaved
       ? data.rows
       : data.rows.filter((row) => row.savedDecisionState !== "saved");
-    const reviewRows = includeIssued
+    const reviewedFilteredRows = includeSaved
       ? savedFilteredRows
-      : savedFilteredRows.filter((row) => {
+      : savedFilteredRows.filter((row) => !hasReviewedDecision(row, reviewedDecisionIndex));
+    const reviewRows = includeIssued
+      ? reviewedFilteredRows
+      : reviewedFilteredRows.filter((row) => {
           const issuedImageKey = imageIssueKey(row);
           return !mobileBundleManifest.issuedRows[rowIssueKey(row)] &&
             (!issuedImageKey || !mobileBundleManifest.issuedImageUrls[issuedImageKey]);
         });
+    const skippedReviewedRowCount = savedFilteredRows.length - reviewedFilteredRows.length;
+    const issuedFilteredRowCount = reviewedFilteredRows.length - reviewRows.length;
     const dedupedReviewRows = allowDuplicates
       ? reviewRows
       : reviewRows.filter((row) => {
@@ -396,6 +467,10 @@ async function main() {
           if (similarityKey) preSeenReviewSimilarityKeys.add(similarityKey);
           return true;
         });
+    const selectedRows =
+      totalLimit > 0
+        ? dedupedReviewRows.slice(0, remainingTotalLimit)
+        : dedupedReviewRows;
     includedParts.push({
       bucket: data.bucket,
       label: data.label,
@@ -403,13 +478,15 @@ async function main() {
       filename: data.filename,
       defaultDecision: data.defaultDecision,
       rowCount: data.rows.length,
-      includedRowCount: dedupedReviewRows.length,
+      includedRowCount: selectedRows.length,
+      availableUnsortedRowCount: dedupedReviewRows.length,
       skippedSavedRowCount: data.rows.length - savedFilteredRows.length,
-      skippedIssuedRowCount: savedFilteredRows.length - reviewRows.length,
+      skippedReviewedRowCount,
+      skippedIssuedRowCount: issuedFilteredRowCount,
       skippedPreDuplicateRowCount: reviewRows.length - dedupedReviewRows.length,
     });
     for (const reason of data.rejectionReasons) rejectionReasons.add(reason);
-    rows.push(...(limit > 0 && !allowDuplicates ? dedupedReviewRows.slice(0, limit * candidateMultiplier) : limit > 0 ? dedupedReviewRows.slice(0, limit) : dedupedReviewRows));
+    rows.push(...(limit > 0 && !allowDuplicates ? selectedRows.slice(0, limit * candidateMultiplier) : limit > 0 ? selectedRows.slice(0, limit) : selectedRows));
   }
 
   const downloaded = skipImages
@@ -473,8 +550,12 @@ async function main() {
       imageMaxPixels: optimizeImages ? imageMaxPixels : "",
       imageQuality: optimizeImages ? imageQuality : "",
       candidateMultiplier: limit > 0 && !allowDuplicates ? candidateMultiplier : "",
+      totalLimit: totalLimit > 0 ? totalLimit : "",
       skippedSavedRowCount: includedParts.reduce((total, part) => total + part.skippedSavedRowCount, 0),
+      skippedReviewedRowCount: includedParts.reduce((total, part) => total + part.skippedReviewedRowCount, 0),
       skippedIssuedRowCount: includedParts.reduce((total, part) => total + part.skippedIssuedRowCount, 0),
+      reviewedDecisionFileCount: reviewedDecisionIndex.fileCount,
+      reviewedDecisionCount: reviewedDecisionIndex.decisionCount,
       offlineReady: failedDownloads === 0 && remoteFallbacks === 0,
     },
     rejectionReasons: Array.from(rejectionReasons).sort(),
@@ -571,6 +652,7 @@ async function main() {
     parts: includedParts,
     row_count: bundle.rows.length,
     skipped_saved_row_count: bundle.imageStatus.skippedSavedRowCount,
+    skipped_reviewed_row_count: bundle.imageStatus.skippedReviewedRowCount,
     skipped_issued_row_count: bundle.imageStatus.skippedIssuedRowCount,
   });
   await writeMobileBundleManifest(mobileBundleManifest);
@@ -579,7 +661,9 @@ async function main() {
   console.log(`Rows: ${bundle.rows.length}`);
   console.log(`Parts: ${includedParts.map((part) => `${part.bucket}:${part.part}`).join(", ")}`);
   console.log(`Saved rows skipped: ${bundle.imageStatus.skippedSavedRowCount}`);
+  console.log(`Previously reviewed rows skipped: ${bundle.imageStatus.skippedReviewedRowCount}`);
   console.log(`Previously issued rows skipped: ${bundle.imageStatus.skippedIssuedRowCount}`);
+  console.log(`Reviewed decision files scanned: ${bundle.imageStatus.reviewedDecisionFileCount}`);
   console.log(`Local images: ${bundle.imageStatus.localImageCount}`);
   console.log(`Remote fallback images: ${bundle.imageStatus.remoteFallbackCount}`);
   console.log(`Missing images: ${bundle.imageStatus.missingImageCount}`);
