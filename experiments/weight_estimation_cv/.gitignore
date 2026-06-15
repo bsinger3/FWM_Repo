@@ -1,0 +1,6 @@
+.venv/
+cache/
+data/features/
+models/face_to_bmi_vit/
+models/mefem/
+*.npz

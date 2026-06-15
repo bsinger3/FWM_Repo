@@ -1,0 +1,44 @@
+[
+  {
+    "started_at": "2026-06-10T20:38:27Z",
+    "finished_at": "2026-06-10T20:40:35Z",
+    "domain": "ucalingerie.com",
+    "programme_name": "ucalingerie.com",
+    "provider": "Stamped",
+    "status": "completed",
+    "rows": 0,
+    "errors_count": 0,
+    "output_csv": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/ucalingerie_com/ucalingerie_com_reviews_matching_intake_schema.csv",
+    "summary_json": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/ucalingerie_com/ucalingerie_com_reviews_matching_intake_schema_summary.json",
+    "claim_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/_claims/ucalingerie_com_2026-06-10_awin.claim",
+    "error": ""
+  },
+  {
+    "started_at": "2026-06-10T20:40:35Z",
+    "finished_at": "2026-06-10T20:40:50Z",
+    "domain": "wearproclaim.com",
+    "programme_name": "PROCLAIM",
+    "provider": "Stamped",
+    "status": "completed",
+    "rows": 0,
+    "errors_count": 0,
+    "output_csv": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/wearproclaim_com/wearproclaim_com_reviews_matching_intake_schema.csv",
+    "summary_json": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/wearproclaim_com/wearproclaim_com_reviews_matching_intake_schema_summary.json",
+    "claim_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/_claims/wearproclaim_com_2026-06-10_awin.claim",
+    "error": ""
+  },
+  {
+    "started_at": "2026-06-10T20:40:50Z",
+    "finished_at": "2026-06-10T20:42:02Z",
+    "domain": "swimwearworld.com",
+    "programme_name": "SWORLD Inc",
+    "provider": "Stamped",
+    "status": "completed",
+    "rows": 0,
+    "errors_count": 0,
+    "output_csv": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/swimwearworld_com/swimwearworld_com_reviews_matching_intake_schema.csv",
+    "summary_json": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/swimwearworld_com/swimwearworld_com_reviews_matching_intake_schema_summary.json",
+    "claim_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/_claims/swimwearworld_com_2026-06-10_awin.claim",
+    "error": ""
+  }
+]

@@ -1,5 +1,7 @@
 const bundle = window.FWM_MOBILE_BUNDLE;
 const storageKey = `fwm-mobile-review-${bundle?.storageNamespace || bundle?.bundleId || "unknown"}`;
+const reviewedStorageKey = `${storageKey}-reviewed`;
+const progressHashPrefix = "fwmprogress=";
 
 const state = {
   activeBucket: "all",
@@ -8,6 +10,7 @@ const state = {
   viewMode: "swipe",
   rows: bundle?.rows || [],
   dirty: new Map(),
+  reviewed: new Map(),
   swipeIndex: 0,
   swipeHistory: [],
   swipeDrag: null,
@@ -20,11 +23,13 @@ const state = {
   localSaveAvailable: true,
 };
 
-const localSaveBatchSize = 50;
+const localSaveBatchSize = 1;
 
 const el = {
   summary: document.getElementById("bundle-summary"),
   exportBtn: document.getElementById("export-btn"),
+  importBtn: document.getElementById("import-btn"),
+  importFile: document.getElementById("import-file"),
   bucketSelect: document.getElementById("bucket-select"),
   batchSelect: document.getElementById("batch-select"),
   reasonFilter: document.getElementById("reason-filter"),
@@ -81,32 +86,137 @@ function compactDecisionForStorage(decision) {
   };
 }
 
-function loadDirty() {
+function decisionStateCode(humanState) {
+  if (humanState === "APPROVE") return "A";
+  if (humanState === "DISAPPROVE") return "R";
+  return "N";
+}
+
+function humanStateFromCode(code) {
+  if (code === "A") return "APPROVE";
+  if (code === "R") return "DISAPPROVE";
+  return "NEUTRAL";
+}
+
+function encodeHashJson(value) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(value))));
+}
+
+function decodeHashJson(value) {
+  return JSON.parse(decodeURIComponent(escape(atob(value))));
+}
+
+function rowsByDecisionKey() {
+  return new Map(state.rows.map((row, index) => [rowDecisionKey(row), { row, index }]));
+}
+
+function updateProgressHash() {
+  const rowIndex = rowsByDecisionKey();
+  const progress = [];
+  for (const [key, decision] of state.dirty.entries()) {
+    const item = rowIndex.get(key);
+    if (!item) continue;
+    const compact = compactDecisionForStorage(decision);
+    progress.push([
+      item.index,
+      decisionStateCode(compact.humanState),
+      compact.rejectionReason,
+      compact.reviewNotes,
+    ]);
+  }
+  const url = new URL(window.location.href);
+  if (progress.length) {
+    url.hash = `${progressHashPrefix}${encodeHashJson(progress)}`;
+  } else {
+    url.hash = "";
+  }
   try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return;
+    window.history.replaceState(null, "", url.toString());
+  } catch (error) {
+    console.warn("Could not update URL progress backup", error);
+  }
+}
+
+function loadHashProgress() {
+  const decisions = new Map();
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash.startsWith(progressHashPrefix)) return decisions;
+  try {
+    const progress = decodeHashJson(hash.slice(progressHashPrefix.length));
+    if (!Array.isArray(progress)) return decisions;
+    for (const item of progress) {
+      if (!Array.isArray(item)) continue;
+      const [index, stateCode, rejectionReason = "", reviewNotes = ""] = item;
+      const row = state.rows[index];
+      if (!row) continue;
+      decisions.set(
+        rowDecisionKey(row),
+        buildDecision(row, {
+          humanState: humanStateFromCode(stateCode),
+          rejectionReason,
+          reviewNotes,
+        }),
+      );
+    }
+  } catch (error) {
+    console.warn("Could not load URL progress backup", error);
+  }
+  return decisions;
+}
+
+function loadStoredDecisionMap(key) {
+  const decisions = new Map();
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return decisions;
     const rowsByKey = new Map(state.rows.map((row) => [rowDecisionKey(row), row]));
     for (const [key, value] of Object.entries(JSON.parse(raw))) {
       const row = rowsByKey.get(key);
-      state.dirty.set(key, row ? buildDecision(row, value || {}) : value);
+      decisions.set(key, row ? buildDecision(row, value || {}) : value);
     }
   } catch (error) {
     console.warn("Could not load phone review progress", error);
   }
+  return decisions;
+}
+
+function loadSavedProgress() {
+  state.reviewed = loadStoredDecisionMap(reviewedStorageKey);
+  state.dirty = loadStoredDecisionMap(storageKey);
+  for (const [key, decision] of loadHashProgress().entries()) {
+    state.dirty.set(key, decision);
+  }
+}
+
+function persistDecisionMap(key, decisions) {
+  const compactDecisions = {};
+  for (const [decisionKey, decision] of decisions.entries()) {
+    compactDecisions[decisionKey] = compactDecisionForStorage(decision);
+  }
+  localStorage.removeItem(key);
+  localStorage.setItem(key, JSON.stringify(compactDecisions));
+}
+
+function persistReviewed() {
+  try {
+    persistDecisionMap(reviewedStorageKey, state.reviewed);
+    updateProgressHash();
+    return true;
+  } catch (error) {
+    console.warn("Could not save exported phone review progress", error);
+    return false;
+  }
 }
 
 function persistDirty() {
-  const compactDirty = {};
-  for (const [key, decision] of state.dirty.entries()) {
-    compactDirty[key] = compactDecisionForStorage(decision);
-  }
   try {
-    localStorage.removeItem(storageKey);
-    localStorage.setItem(storageKey, JSON.stringify(compactDirty));
+    persistDecisionMap(storageKey, state.dirty);
+    updateProgressHash();
     state.unsavedLocalChanges = 0;
     state.localSaveAvailable = true;
     return true;
   } catch (error) {
+    updateProgressHash();
     state.unsavedLocalChanges = 0;
     state.localSaveAvailable = false;
     console.warn("Could not autosave phone review progress", error);
@@ -127,6 +237,7 @@ function getRowDecision(row) {
     humanState: "NEUTRAL",
     rejectionReason: "",
     reviewNotes: "",
+    ...(state.reviewed.get(rowDecisionKey(row)) || {}),
     ...(state.dirty.get(rowDecisionKey(row)) || {}),
   };
 }
@@ -689,6 +800,86 @@ function showUnreviewedOnly() {
   render();
 }
 
+function importDecisionPayload(payload) {
+  const decisions = Array.isArray(payload?.decisions) ? payload.decisions : [];
+  if (!decisions.length) {
+    throw new Error("No decisions were found in that JSON file.");
+  }
+  const rowIndex = rowsByDecisionKey();
+  let imported = 0;
+  let ignored = 0;
+  for (const decision of decisions) {
+    const key = decisionKeyFromDecision(decision);
+    const item = key ? rowIndex.get(key) : null;
+    if (!item) {
+      ignored += 1;
+      continue;
+    }
+    state.dirty.set(key, buildDecision(item.row, decision));
+    imported += 1;
+  }
+  persistDirty();
+  showUnreviewedOnly();
+  return { imported, ignored };
+}
+
+async function importProgressFiles(files) {
+  const selectedFiles = Array.from(files || []);
+  if (!selectedFiles.length) return;
+  let imported = 0;
+  let ignored = 0;
+  const failures = [];
+  try {
+    for (const file of selectedFiles) {
+      try {
+        const payload = JSON.parse(await file.text());
+        const result = importDecisionPayload(payload);
+        imported += result.imported;
+        ignored += result.ignored;
+      } catch (error) {
+        failures.push(`${file.name}: ${error.message || error}`);
+      }
+    }
+    const message = `Imported ${imported} decision(s). ${ignored} were for other files/batches.`;
+    alert(failures.length ? `${message}\n\nCould not read:\n${failures.join("\n")}` : message);
+  } finally {
+    el.importFile.value = "";
+  }
+}
+
+function markExportedDecisionsReviewed(decisions) {
+  for (const decision of decisions) {
+    if (!["APPROVE", "DISAPPROVE"].includes(decision.humanState)) continue;
+    const key = decisionKeyFromDecision(decision);
+    if (!key) continue;
+    state.reviewed.set(key, decision);
+  }
+  persistReviewed();
+}
+
+function decisionKeyFromDecision(decision) {
+  const bucket = decision.bucket || "";
+  const partFile = decision.partFile || decision.part_file || "";
+  const rowKey = decision.rowKey || decision.review_row_key || "";
+  return bucket && partFile && rowKey ? `${bucket}::${partFile}::${rowKey}` : "";
+}
+
+function safeFilenamePart(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80);
+}
+
+function currentReviewFileLabel() {
+  const pathLabel = safeFilenamePart(window.location.pathname.split("/").pop());
+  if (pathLabel) return pathLabel;
+  const batch = bundle?.splitBatch?.batchNumber ? `file_${String(bundle.splitBatch.batchNumber).padStart(2, "0")}` : "";
+  return safeFilenamePart(`${bundle?.bundleId || "mobile_review"}_${batch}`);
+}
+
 async function exportDecisions() {
   if (state.exportInProgress) return;
   state.exportInProgress = true;
@@ -708,7 +899,10 @@ async function exportDecisions() {
       decisions,
     };
     const exported = await saveDecisionPayload(payload);
-    if (exported) showUnreviewedOnly();
+    if (exported) {
+      markExportedDecisionsReviewed(decisions);
+      showUnreviewedOnly();
+    }
   } catch (error) {
     alert(`Could not export decisions: ${error.message || error}`);
   } finally {
@@ -720,7 +914,8 @@ async function exportDecisions() {
 
 async function saveDecisionPayload(payload) {
   const exportedAt = payload.exportedAt;
-  const filename = `fwm_mobile_review_decisions_${exportedAt.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z")}.json`;
+  const stamp = exportedAt.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const filename = `fwm_mobile_review_${currentReviewFileLabel()}_${stamp}.json`;
   const blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json" });
 
   const isAndroidChrome = /Android/i.test(navigator.userAgent || "");
@@ -813,6 +1008,12 @@ function bindEvents() {
   el.swipeSkip.addEventListener("click", skipSwipe);
   el.swipeUndo.addEventListener("click", undoSwipe);
   el.exportBtn.addEventListener("click", exportDecisions);
+  el.importBtn.addEventListener("click", () => {
+    el.importFile.click();
+  });
+  el.importFile.addEventListener("change", () => {
+    importProgressFiles(el.importFile.files);
+  });
   el.topBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
@@ -829,7 +1030,7 @@ function init() {
     document.body.textContent = "Mobile bundle data is missing. Rebuild the phone bundle on the Mac.";
     return;
   }
-  loadDirty();
+  loadSavedProgress();
   rebuildDuplicateGroups();
   const imageStatus = bundle.imageStatus || {};
   const offlineStatus = imageStatus.offlineReady
@@ -838,6 +1039,9 @@ function init() {
   const skippedImages = imageStatus.skippedRowCount ? ` | ${imageStatus.skippedRowCount} missing skipped` : "";
   el.summary.textContent = `${state.rows.length} cards | ${offlineStatus}${skippedImages}`;
   fillSelects();
+  if (state.dirty.size > 0 || state.reviewed.size > 0) {
+    el.stateFilter.value = "NEUTRAL";
+  }
   renderBucketSelect();
   renderBatchSelect();
   bindEvents();

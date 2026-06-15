@@ -14,6 +14,11 @@ const toolDir = path.dirname(__filename);
 const repoRoot = path.resolve(toolDir, "../..");
 const mobileSourceDir = path.join(toolDir, "mobile");
 const reviewRoot = path.join(repoRoot, "outputs/02_supabase_needs_human_review_cv_first_pass");
+const defaultPackageDir = path.join(reviewRoot, "partial_170000_rows_cv_gated");
+const archivePackageDir = path.join(reviewRoot, "Archive/partial_170000_rows_cv_gated");
+const packageDir =
+  process.env.FWM_IMAGE_REVIEW_PACKAGE_DIR ||
+  (existsSync(defaultPackageDir) ? defaultPackageDir : archivePackageDir);
 const defaultOutputDir = path.join(
   reviewRoot,
   "mobile_review_bundle",
@@ -39,7 +44,7 @@ async function availablePartNumbers(bucket) {
   };
   const prefix = prefixByBucket[bucket];
   if (!prefix) throw new Error(`Unknown bucket for parts expansion: ${bucket}`);
-  const files = await readdir(path.join(reviewRoot, "partial_170000_rows_cv_gated"));
+  const files = await readdir(packageDir);
   return files
     .map((file) => file.match(new RegExp(`^${prefix}(\\d{3})\\.xlsx$`))?.[1])
     .filter(Boolean)

@@ -1,0 +1,14 @@
+retailer: gooseberryintimates_com
+site: gooseberryintimates.com
+claimed_at: 2026-06-10T18:44:09Z
+completed_at: 2026-06-10T18:44:16Z
+status: completed
+source: Awin advertiser queue
+programme: Gooseberry Intimates Ltd
+provider_hint: Okendo
+why_request: full-bust/lingerie gap; swim/shapewear gap
+scope: public product pages and public review/provider feeds only
+stop_conditions: 429/captcha/WAF/auth challenge
+rows_written: 0
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/gooseberryintimates_com/gooseberryintimates_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/gooseberryintimates_com/gooseberryintimates_com_reviews_matching_intake_schema_summary.json

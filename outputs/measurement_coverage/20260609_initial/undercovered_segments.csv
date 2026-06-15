@@ -1,0 +1,12 @@
+segment,current_rows,pct_of_usable_rows,coverage_read,prospecting_target
+bra band 40+,1455,1.31,Large-band bra rows are thin.,Full-bust and plus lingerie sites.
+very tall height (6'0+),1605,1.45,Very small upper-tail sample.,Tall-focused brands and communities with reviewer measurements.
+hips 48+ in,2073,1.87,High-hip rows are thin.,Curve denim/swim/activewear where reviewers state hip measurements.
+waist 40+ in,2169,1.95,Plus waist measurements are thin.,"Curve denim, shapewear, plus workwear, plus formalwear."
+very high weight (260+ lb),2274,2.05,Very sparse far upper tail.,Dedicated extended plus and inclusive sizing retailers.
+bust 44+ in,2462,2.22,Large bust measurements are thin.,"Full-bust swim, dresses, bras, and bust-friendly apparel."
+tall height (5'10+),4772,4.3,Tails thin out above 5'10.,"Tall-size shops, tall denim, long torso swim/activewear."
+very petite height (<5'0),6558,5.91,Sparse relative to 5'2-5'8 center mass.,"Petite-specialty retailers, short inseam denim, petite formalwear."
+cup DD+,8385,7.55,Full-bust cup data exists but is not broad enough.,Full-bust bra/swim retailers with structured review fields.
+higher weight (200+ lb),9295,8.37,Higher weights are materially under-covered.,"Plus-size, curve, shapewear, extended-size brands with photo reviews."
+low weight (<110 lb),22225,20.02,Thin lower-weight tail.,Petite/XXS brands with explicit reviewer stats.

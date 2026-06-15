@@ -1,0 +1,14 @@
+retailer: montelleintimates_com
+site: montelleintimates.com
+claimed_at: 2026-06-10T20:46:48Z
+completed_at: 2026-06-10T20:48:16Z
+status: completed
+source: Awin advertiser queue
+programme: Montelle Intimates
+provider_hint: Judge.me;Stamped;Yotpo
+why_request: full-bust/lingerie gap
+scope: public product pages and public review/provider feeds only
+stop_conditions: 429/captcha/WAF/auth challenge
+rows_written: 26
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/montelleintimates_com/montelleintimates_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/montelleintimates_com/montelleintimates_com_reviews_matching_intake_schema_summary.json

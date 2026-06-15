@@ -1,0 +1,5 @@
+tier,unique_rows,height_weight_rows,any_body_measurement_rows,usable_for_body_size_prospecting_rows
+cv_gated_all,225947,57860,36325,82072
+human_labeled,37626,21073,14406,28295
+ready_labeled_source,933,532,214,626
+ready_human_approved,67,34,15,43

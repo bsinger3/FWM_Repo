@@ -1,0 +1,19 @@
+{
+  "input": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/eval_sample_with_quality_tags.csv",
+  "attempts": "data/person_crop_attempt_rows_smoke.csv",
+  "attempted_rows": 24,
+  "status_counts": {
+    "ok": 22,
+    "no_person": 2
+  },
+  "by_split": {
+    "test": {
+      "ok": 4,
+      "no_person": 1
+    },
+    "train": {
+      "ok": 18,
+      "no_person": 1
+    }
+  }
+}

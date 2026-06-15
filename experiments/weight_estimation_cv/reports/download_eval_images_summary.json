@@ -1,0 +1,17 @@
+{
+  "rows": 1200,
+  "status_counts": {
+    "failed": 229,
+    "downloaded": 971
+  },
+  "error_counts": {
+    "invalid_url": 20,
+    "http_403": 200,
+    "http_404": 4,
+    "invalid_image_bytes": 3,
+    "http_500": 2
+  },
+  "elapsed_seconds": 88.81,
+  "output": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/eval_sample_with_images.csv",
+  "image_dir": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/cache/images"
+}

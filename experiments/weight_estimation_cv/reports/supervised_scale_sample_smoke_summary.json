@@ -1,0 +1,48 @@
+{
+  "input": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/ground_truth_manifest.csv",
+  "output": "data/supervised_scale_sample_smoke.csv",
+  "rows": 1000,
+  "train_rows": 739,
+  "test_rows": 261,
+  "source_files": 94,
+  "source_groups": 50,
+  "image_hosts": {
+    "m.media-amazon.com": 338,
+    "cdn.shopify.com": 166,
+    "photos-us.bazaarvoice.com": 97,
+    "images-na.ssl-images-amazon.com": 83,
+    "judgeme.imgix.net": 75,
+    "cdn-yotpo-images-production.yotpo.com": 59,
+    "review-images.onequince.com": 37,
+    "media-dynamic.okendo.io": 37,
+    "www.lulus.com": 30,
+    "res.cloudinary.com": 21,
+    "fashionpass.s3-us-west-1.amazonaws.com": 14,
+    "cdn.stamped.io": 12,
+    "www.rotita.com": 9,
+    "images.loox.io": 8,
+    "d1rc46soeuwz3b.cloudfront.net": 8,
+    "static-dress.missacc.com": 3,
+    "cdn1.stamped.io": 3
+  },
+  "weight_bins": {
+    "101-120": 125,
+    "121-140": 125,
+    "141-160": 125,
+    "161-180": 125,
+    "181-210": 125,
+    "211-250": 125,
+    "251-350": 125,
+    "70-100": 125
+  },
+  "weight_lbs": {
+    "min": 70.0,
+    "max": 350.0,
+    "avg": 172.14
+  },
+  "height_in": {
+    "min": 49.0,
+    "max": 79.0,
+    "avg": 64.95
+  }
+}

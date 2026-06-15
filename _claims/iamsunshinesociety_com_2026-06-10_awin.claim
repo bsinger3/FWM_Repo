@@ -1,0 +1,14 @@
+retailer: iamsunshinesociety_com
+site: iamsunshinesociety.com
+claimed_at: 2026-06-10T20:36:19Z
+completed_at: 2026-06-10T20:37:20Z
+status: completed
+source: Awin advertiser queue
+programme: Sunshine Society (US)
+provider_hint: Loox;Judge.me
+why_request: full-bust/lingerie gap
+scope: public product pages and public review/provider feeds only
+stop_conditions: 429/captcha/WAF/auth challenge
+rows_written: 14
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/iamsunshinesociety_com/iamsunshinesociety_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/iamsunshinesociety_com/iamsunshinesociety_com_reviews_matching_intake_schema_summary.json

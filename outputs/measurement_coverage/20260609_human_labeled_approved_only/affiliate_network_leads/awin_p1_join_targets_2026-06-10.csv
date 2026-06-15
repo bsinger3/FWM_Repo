@@ -1,0 +1,120 @@
+join_order,advertiserId,programmeName,normalized_domain,review_providers,final_score,approvalRate,displayUrl
+1,97199,baleaf,baleaf.com,Judge.me,417.3,17.56,https://www.baleaf.com
+2,121918,Self-Adore (US),self-adore.com,Judge.me,395.0,0.00,https://self-adore.com/
+3,125300,Feelingirl US,feelingirl.com,Yotpo,390.0,0.00,https://feelingirl.com/
+4,119467,Sunshine Society (US),iamsunshinesociety.com,Loox;Judge.me,374.2,100.00,https://www.iamsunshinesociety.com/
+5,59047,Zeagoo,zeagoo.com,Judge.me,351.8,100.00,https://zeagoo.com
+6,121338,Isme Swim US,ismeswim.com,Okendo;Loox;Yotpo,337.0,93.06,https://ismeswim.com/
+7,102461,Huha Underwear,hu-ha.com,Yotpo,329.6,100.00,https://hu-ha.com/
+8,123662,Cosabella (US),cosabella.com,Stamped,327.1,55.75,https://cosabella.com/
+9,95059,Shebird,shebirdshop.com,Okendo,322.4,100.00,https://www.shebirdshop.com
+10,118621,Snag Tights US,snagtights.us,Judge.me,320.5,76.72,https://snagtights.us/
+11,118467,SOL SWIM,shopsolswim.com,Judge.me,305.0,0.00,https://www.shopsolswim.com/
+12,67052,Boux Avenue US,bouxavenue.com,Bazaarvoice,305.0,0.00,https://www.bouxavenue.com/us
+13,95495,Meira Active,meiraactive.com,Judge.me,302.6,100.00,https://meiraactive.com
+14,52525,UNTUCKit (US),untuckit.com,Yotpo;Bazaarvoice,302.0,91.97,https://www.untuckit.com/
+15,124076,Runderwear US,runderwear.com,Shopify Product Reviews,298.2,100.00,https://runderwear.com/
+16,96695,Urbody Functional Fashion,urbody.co,Okendo;Loox;Yotpo,295.2,100.00,https://www.urbody.co
+17,92625,Memoi,memoi.com,Bazaarvoice,292.8,99.15,https://memoi.com
+18,35237,AVIANAYA LLC DBA Journelle,journelle.com,Judge.me,292.2,67.07,https://journelle.com
+19,119563,Beldrie,beldrie.com,Yotpo,275.6,100.00,https://beldrie.com/
+20,114120,Moodytiger (US),moodytiger.com,Judge.me,275.0,100.00,https://moodytiger.com
+21,114956,ucalingerie.com,ucalingerie.com,Stamped,275.0,100.00,https://ucalingerie.com
+22,115941,Kinkly,kinkly.com,Judge.me,274.0,82.05,https://kinkly.com/
+23,24543,Le Col US,lecol.cc,Yotpo;Bazaarvoice,270.8,100.00,https://lecol.cc/
+24,67752,Scarlett Gasque (US),scarlettgasque.com,Okendo,270.4,100.00,https://www.scarlettgasque.com/
+25,123418,Johanna Ortiz,johannaortiz.com,Okendo;Loox;Yotpo,270.0,100.00,https://www.johannaortiz.com/
+26,64540,Gonex LLC,gonexsport.com,Loox,267.3,75.70,https://www.gonexsport.com/collections/packing-cubes
+27,26657,Hunkemoller US,hunkemoller.com,Yotpo,265.0,0.00,https://www.hunkemoller.com
+28,118141,Dos Gardenias (US),dosgardenias.com,Okendo;Loox;Yotpo,265.0,100.00,https://www.dosgardenias.com/
+29,91375,CURVEEZ,curveez.com,Judge.me,262.6,73.81,https://curveez.com?utm_source=share-a-sale&utm_medium=affiliate&utm_campaign=text-general
+30,96573,Lusomé,lusome.com,Judge.me,261.8,100.00,https://lusome.com/
+31,33273,Waistdear,waistdear.com,Stamped;Yotpo,260.4,100.00,https://www.waistdear.com/pages/rewards
+32,58479,Hot Octopuss,hotoctopuss.com,Stamped,259.2,48.92,https://hotoctopuss.com/
+33,83739,WALLIEN,wallien.com,Reviews.io,258.6,100.00,https://www.wallien.com/
+34,96909,YIZHI FASHION HK LIMITED,bit.ly,Okendo,256.0,75.91,https://bit.ly/3N4fU94
+35,75734,Dippin Daisys (US),dippindaisys.com,Judge.me,255.6,100.00,https://dippindaisys.com
+36,93617,Sweat and Milk,sweatandmilk.com,Judge.me,255.6,78.92,https://www.sweatandmilk.com
+37,83815,Line in the Sand,lineinthesand.com,Judge.me,255.0,0.00,https://www.lineinthesand.com
+38,95839,LDMA,ldmabrand.com,Okendo,255.0,100.00,https://www.ldmabrand.com
+39,120417,Merino Tech,merino.tech,Judge.me;Okendo;Loox;Yotpo,253.8,100.00,https://merino.tech/
+40,80783,IMS Shop (US),shop.ims.com,Okendo;Loox;Yotpo,250.9,94.44,https://shop.ims.com/
+41,126925,Devon and Lang,devonandlang.com,Judge.me,250.0,0.00,https://devonandlang.com/
+42,95653,Berkley Clothing,berkleyclothing.com,Yotpo,250.0,0.00,https://berkleyclothing.com
+43,22475,WOLACO (US),wolaco.com,Yotpo,248.6,82.78,https://www.wolaco.com/
+44,28357,Anemos Swim (US),anemosswim.com,Okendo;Loox;Yotpo,248.4,100.00,https://anemosswim.com/
+45,15909,Foray Golf,foraygolf.com,Okendo;Loox;Yotpo,247.4,100.00,https://www.foraygolf.com/
+46,101359,Heyjoanie LLC,heyjoanie.com,Judge.me,246.7,33.33,https://www.heyjoanie.com
+47,27830,Boxraw US,boxraw.com,Reviews.io,245.0,0.00,https://boxraw.com/
+48,122918,Forecast Surf (US),forecastsurf.com,Reviews.io;Okendo;Loox;Yotpo,243.0,100.00,https://www.forecastsurf.com/
+49,86407,Left on Friday,leftonfriday.com,Yotpo,242.2,100.00,https://leftonfriday.com/
+50,72301,Hey Honey,hey-honey.com,Judge.me;Okendo;Loox;Yotpo,240.5,79.27,https://www.hey-honey.com/
+51,29465,437 (US),shop437.com,Loox,240.4,100.00,https://shop437.com/
+52,22686,Who Shirt Company (US),whoshirtcompany.com,Okendo;Loox;Yotpo,240.0,0.00,https://whoshirtcompany.com/
+53,98607,Newton's First Clothing,newtonsfirstclothing.com,Judge.me,240.0,100.00,https://newtonsfirstclothing.com
+54,23707,Oner Active Global,us.oneractive.com,Yotpo,240.0,92.84,https://us.oneractive.com/
+55,102335,PLAYALUXE US,playaluxe.com,Loox,240.0,50.00,https://playaluxe.com/
+56,65426,Helen Jon,helenjon.com,Judge.me,239.7,99.53,https://www.helenjon.com
+57,96839,Gatherall,wegatherall.com,Judge.me,237.8,100.00,https://www.wegatherall.com
+58,97073,RaveFix,ravefix.com,Stamped,237.8,100.00,https://www.ravefix.com
+59,118767,Rip-It Sports (US),ripit.com,Bazaarvoice,236.8,40.00,https://www.ripit.com/
+60,32759,Lovability (US),lovabilityinc.com,Stamped;Yotpo,236.7,93.48,https://lovabilityinc.com/
+61,117991,SYS US,stretchyourstory.com,Yotpo,236.5,64.63,https://stretchyourstory.com/
+62,49637,"Ulivary Fashion Co.,Ltd",ulivarylife.com,Judge.me,236.2,100.00,https://ulivarylife.com
+63,84487,Etalon,shopetalon.com,Yotpo,236.2,100.00,https://shopetalon.com/products/etalon-posture-bra
+64,93511,PerfectDD,perfectdd.com,Judge.me,235.4,100.00,https://www.perfectdd.com
+65,124046,La Voie,shoplavoie.com,Judge.me,235.0,0.00,https://www.shoplavoie.com/
+66,23775,Adanola UK,adanola.com,Yotpo;Reviews.io;Okendo;Loox,234.6,69.20,https://adanola.com/
+67,59333,Bloomers Intimates LLC,bloomersintimates.com,Judge.me,234.1,96.72,https://www.bloomersintimates.com/
+68,116537,LimmiFit (US),limmifit.com,Loox,230.0,0.00,https://limmifit.com/
+69,126631,Colorfulkoala Affiliate Program,colorfulkoala.com,Judge.me,230.0,0.00,https://colorfulkoala.com/
+70,126139,FansJerseyHub,fansjerseyhub1.com,Judge.me,230.0,0.00,https://fansjerseyhub1.com/
+71,59661,duoFIT Maternity Activewear,builtlikeamother.com,Judge.me,230.0,0.00,https://builtlikeamother.com
+72,110800,Viren Ltd,viren-apparel.myshopify.com,Yotpo;Reviews.io,230.0,0.00,https://viren-apparel.myshopify.com
+73,123352,Pickleball Bella (US),pickleballbella.com,Stamped,230.0,100.00,https://pickleballbella.com/
+74,97353,JuJu Jams,jujujams.com,Yotpo,230.0,0.00,https://JuJuJams.com
+75,94311,Swimwear Anywhere,beach2ocean.com,Yotpo,230.0,100.00,https://www.beach2ocean.com
+76,44767,onewith,onewithswim.com,Okendo,228.6,100.00,https://onewithswim.com
+77,88993,Montelle Intimates,montelleintimates.com,Judge.me;Stamped;Yotpo,223.9,59.33,https://montelleintimates.com
+78,61177,commando,wearcommando.com,Okendo,223.0,100.00,https://www.wearcommando.com
+79,89213,Belly Bandit,bellybandit.com,Judge.me,222.1,92.40,https://bellybandit.com
+80,93303,Albion Fit,albionfit.com,Okendo,221.0,72.79,https://albionfit.com
+81,102051,Freddy US,freddystore.com,Judge.me,217.4,96.83,https://freddystore.com/
+82,57303,Embrace Essentials Pte. Limited,wearembrace.com,Judge.me,216.8,100.00,https://wearembrace.com
+83,92619,Klassy Network,klassyshop.com,Yotpo,215.6,100.00,https://klassyshop.com
+84,81757,PROCLAIM,wearproclaim.com,Stamped,215.0,0.00,https://wearproclaim.com
+85,44141,CAKES body,cakesbody.com,Judge.me;Stamped,215.0,0.00,https://cakesbody.com
+86,52055,SABAL,shopsabal.com,Loox;Okendo,215.0,100.00,https://www.shopsabal.com
+87,102711,Formal Dress Shops US,formaldressshops.com,Judge.me,214.8,81.82,https://formaldressshops.com/
+88,96917,Bravissimo,bravissimo.com,Yotpo,212.0,78.88,https://www.bravissimo.com/us/?utm_source=Shareasale&utm_medium=affiliate&utm_campaign=shopbravissimolink
+89,37208,Daughter Lessons NYC,daughterlessonsnyc.com,Yotpo,209.2,100.00,https://www.daughterlessonsnyc.com
+90,89847,Visual Mood,visualmood.com,Loox;Judge.me,208.0,83.12,https://www.visualmood.com
+91,62479,Floralkini,floralkini.com,Judge.me,207.6,100.00,https://www.floralkini.com/collections/2-for-6-99
+92,96951,Petite Plume,petite-plume.com,Okendo;Stamped,207.4,96.90,https://www.petite-plume.com
+93,60083,Radia Smart,radiasmart.com,Yotpo,207.2,100.00,https://radiasmart.com
+94,66978,Splits59,splits59.com,Okendo;Yotpo,205.1,97.31,https://www.splits59.com
+95,84747,Nazeerah,nazeerah.com,Judge.me,203.6,100.00,https://nazeerah.com
+96,61119,Pink Desert,thepinkdesert.com,Okendo,203.0,64.00,https://thepinkdesert.com
+97,93431,Kitty and Vibe,kittyandvibe.com,Judge.me,202.4,66.20,https://www.kittyandvibe.com
+98,60191,duet,duetcollection.com,Judge.me,201.4,100.00,https://duetcollection.com
+99,78976,Qynda Active Wear (US),qynda.com,Judge.me,200.0,0.00,https://qynda.com/
+100,92521,FitVille Footwear,thefitville.com,Judge.me,198.5,22.47,https://thefitville.com/?utm_source=affiliate&utm_medium=awin
+101,111670,Willit Sports,willitsports.com,Loox;Shopify Product Reviews,196.4,88.00,https://willitsports.com/?utm_source=awin&utm_medium=affiliate&utm_id=aff_publisher
+102,93871,Southern House Clothing,southernhouseboutique.com,Judge.me,195.4,100.00,https://Www.southernhouseboutique.com
+103,107794,Selia Richwood,seliarichwood.com,Judge.me,195.0,0.00,https://seliarichwood.com
+104,76880,Non Disclosure Apparel,ndapparel.com,Judge.me,195.0,0.00,https://ndapparel.com
+105,19651,Noel Asmar Uniforms (US & Canada),noelasmaruniforms.com,Judge.me,192.0,100.00,https://www.noelasmaruniforms.com/
+106,39112,Simple Wishes,simplewishes.com,Judge.me,191.4,100.00,https://www.simplewishes.com
+107,93147,BUMPSUIT,bumpsuit.com,Okendo,191.0,100.00,https://bumpsuit.com
+108,110918,BODY by Julia Haart,plusbody.com,Loox;Okendo,190.0,0.00,https://www.plusbody.com
+109,46417,Sauipe Swim LLC,sauipeswim.com,Yotpo,190.0,0.00,https://www.sauipeswim.com
+110,117663,Cloud Slides,cloudslides.com,Loox,187.0,77.14,https://cloudslides.com/
+111,15431,Under Armour US,underarmour.com,Bazaarvoice,186.4,88.08,https://www.underarmour.com/en-us/
+112,33371,Vuori Clothing (US & Canada),vuoriclothing.com,Yotpo,180.8,95.02,https://vuoriclothing.com/
+113,68948,Elastique Athletics US Program,elastiqueathletics.com,Yotpo,180.6,100.00,https://www.elastiqueathletics.com/
+114,67078,Nelle Atelier,nelleatelier.com,Judge.me,177.0,100.00,https://nelleatelier.com
+115,117277,Pietro Brunelli US,pietrobrunelli.it,Judge.me,176.7,33.33,https://www.pietrobrunelli.it/en
+116,30483,Proviz US,provizsports.com,Yotpo,175.9,97.48,https://provizsports.com/en-us
+117,29951,Solbari Sun Protection (US),solbari.com,Yotpo,175.9,35.32,https://www.solbari.com/
+118,97133,SWORLD Inc,swimwearworld.com,Stamped,170.6,73.08,https://www.swimwearworld.com
+119,63296,JO+CO,shopjoandco.com,Judge.me,170.0,0.00,https://www.shopjoandco.com

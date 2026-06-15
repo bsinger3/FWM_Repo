@@ -1,0 +1,13 @@
+{
+  "input": "data/clip_scale_eval_sample_hardened.csv",
+  "output": "data/clip_scale_eval_sample_hardened_no_hash_leaks.csv",
+  "hash_column": "image_average_hash",
+  "input_rows": 3015,
+  "output_rows": 3013,
+  "dropped_rows": 2,
+  "dropped_hash_groups": 1,
+  "dropped_by_split": {
+    "train": 1,
+    "test": 1
+  }
+}

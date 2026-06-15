@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="773" height="270" viewBox="0 0 773 270">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="16" y="28" font-family="Arial, sans-serif" font-size="18" font-weight="700">inseam_inches_display</text>
+<text x="16" y="279" font-family="Arial, sans-serif" font-size="12" fill="#333">24-25</text>
+<rect x="118" y="264" width="5" height="16" fill="#28666e"/>
+<text x="131" y="277" font-family="Arial, sans-serif" font-size="12" fill="#333">49</text>
+<text x="16" y="231" font-family="Arial, sans-serif" font-size="12" fill="#333">26-27</text>
+<rect x="118" y="216" width="10" height="16" fill="#28666e"/>
+<text x="136" y="229" font-family="Arial, sans-serif" font-size="12" fill="#333">96</text>
+<text x="16" y="207" font-family="Arial, sans-serif" font-size="12" fill="#333">28-29</text>
+<rect x="118" y="192" width="14" height="16" fill="#28666e"/>
+<text x="140" y="205" font-family="Arial, sans-serif" font-size="12" fill="#333">133</text>
+<text x="16" y="159" font-family="Arial, sans-serif" font-size="12" fill="#333">30-31</text>
+<rect x="118" y="144" width="19" height="16" fill="#28666e"/>
+<text x="145" y="157" font-family="Arial, sans-serif" font-size="12" fill="#333">179</text>
+<text x="16" y="135" font-family="Arial, sans-serif" font-size="12" fill="#333">32-33</text>
+<rect x="118" y="120" width="21" height="16" fill="#28666e"/>
+<text x="147" y="133" font-family="Arial, sans-serif" font-size="12" fill="#333">194</text>
+<text x="16" y="183" font-family="Arial, sans-serif" font-size="12" fill="#333">34-35</text>
+<rect x="118" y="168" width="19" height="16" fill="#28666e"/>
+<text x="145" y="181" font-family="Arial, sans-serif" font-size="12" fill="#333">175</text>
+<text x="16" y="255" font-family="Arial, sans-serif" font-size="12" fill="#333">36-37</text>
+<rect x="118" y="240" width="9" height="16" fill="#28666e"/>
+<text x="135" y="253" font-family="Arial, sans-serif" font-size="12" fill="#333">85</text>
+<text x="16" y="87" font-family="Arial, sans-serif" font-size="12" fill="#333">&lt;24</text>
+<rect x="118" y="72" width="560" height="16" fill="#28666e"/>
+<text x="686" y="85" font-family="Arial, sans-serif" font-size="12" fill="#333">5,103</text>
+<text x="16" y="111" font-family="Arial, sans-serif" font-size="12" fill="#333">38+</text>
+<rect x="118" y="96" width="70" height="16" fill="#28666e"/>
+<text x="196" y="109" font-family="Arial, sans-serif" font-size="12" fill="#333">638</text>
+</svg>

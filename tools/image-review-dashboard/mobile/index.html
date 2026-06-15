@@ -12,7 +12,11 @@
         <h1>Image Review</h1>
         <p id="bundle-summary">Opening local review file...</p>
       </div>
-      <button id="export-btn" type="button">Export</button>
+      <div class="top-actions">
+        <button id="import-btn" type="button">Import</button>
+        <input id="import-file" type="file" accept="application/json,.json" multiple hidden />
+        <button id="export-btn" type="button">Export</button>
+      </div>
     </header>
 
     <section class="toolbar" aria-label="Review tools">

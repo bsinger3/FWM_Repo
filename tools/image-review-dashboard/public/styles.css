@@ -295,10 +295,24 @@ main {
 }
 
 .card-image-frame {
+  position: relative;
   width: 100%;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   background: #f3f3f3;
+}
+
+.card.image-load-failed .card-image-frame::after {
+  content: "Image failed to load";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
 }
 
 .card img {
@@ -306,6 +320,12 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform-origin: center;
+}
+
+.card-pan {
+  position: absolute;
+  inset: 0;
   transform-origin: center;
 }
 
@@ -386,6 +406,17 @@ main {
   gap: 4px 8px;
 }
 
+.card-title {
+  margin-bottom: 5px;
+  overflow: hidden;
+  color: #444;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .meta-row + .meta-row {
   margin-top: 6px;
 }
@@ -437,6 +468,7 @@ main {
   border: 0;
   border-radius: 8px;
   padding: 0;
+  overflow: auto;
   box-shadow: var(--shadow);
 }
 
@@ -445,11 +477,15 @@ main {
 }
 
 .detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   justify-content: space-between;
   gap: 16px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--line);
+  background: #fff;
 }
 
 .detail-header h2 {
@@ -468,8 +504,6 @@ main {
   grid-template-columns: minmax(260px, 420px) 1fr;
   gap: 16px;
   padding: 16px;
-  overflow: auto;
-  max-height: calc(100vh - 104px);
 }
 
 .detail-image-frame img {
@@ -531,6 +565,12 @@ main {
   border-top: 1px solid rgba(255, 255, 255, 0.75);
   border-bottom: 1px solid rgba(255, 255, 255, 0.75);
   pointer-events: none;
+}
+
+.crop-pan {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
 }
 
 .crop-frame img {

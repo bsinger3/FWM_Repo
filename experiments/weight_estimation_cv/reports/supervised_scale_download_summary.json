@@ -1,0 +1,18 @@
+{
+  "rows": 20000,
+  "status_counts": {
+    "downloaded": 18624,
+    "failed": 1376
+  },
+  "error_counts": {
+    "http_403": 915,
+    "ReadTimeout": 11,
+    "ConnectionError": 318,
+    "http_500": 44,
+    "invalid_image_bytes": 8,
+    "http_404": 80
+  },
+  "elapsed_seconds": 1329.29,
+  "output": "data/supervised_scale_with_images.csv",
+  "image_dir": "cache/supervised_scale_images"
+}

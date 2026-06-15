@@ -1,0 +1,4964 @@
+{
+  "embedding_info": {
+    "rows_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/supervised_scale_vit_base_patch16_clip_224_openai_person_crop_embedding_rows.csv",
+    "embeddings_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/features/supervised_scale_vit_base_patch16_clip_224_openai_person_crop_embeddings.npz",
+    "embedding_rows_loaded": 13712,
+    "embedding_dim": 768,
+    "pca_dims": 96,
+    "pca_explained_variance_ratio_sum": 0.7444
+  },
+  "experiment": {
+    "rows_train": 10584,
+    "rows_test": 3128,
+    "approved_metadata_features": [
+      "height_in",
+      "size_display",
+      "source_site_display"
+    ],
+    "feature_set": {
+      "numeric": [
+        "clip_pc_000",
+        "clip_pc_001",
+        "clip_pc_002",
+        "clip_pc_003",
+        "clip_pc_004",
+        "clip_pc_005",
+        "clip_pc_006",
+        "clip_pc_007",
+        "clip_pc_008",
+        "clip_pc_009",
+        "clip_pc_010",
+        "clip_pc_011",
+        "clip_pc_012",
+        "clip_pc_013",
+        "clip_pc_014",
+        "clip_pc_015",
+        "clip_pc_016",
+        "clip_pc_017",
+        "clip_pc_018",
+        "clip_pc_019",
+        "clip_pc_020",
+        "clip_pc_021",
+        "clip_pc_022",
+        "clip_pc_023",
+        "clip_pc_024",
+        "clip_pc_025",
+        "clip_pc_026",
+        "clip_pc_027",
+        "clip_pc_028",
+        "clip_pc_029",
+        "clip_pc_030",
+        "clip_pc_031",
+        "clip_pc_032",
+        "clip_pc_033",
+        "clip_pc_034",
+        "clip_pc_035",
+        "clip_pc_036",
+        "clip_pc_037",
+        "clip_pc_038",
+        "clip_pc_039",
+        "clip_pc_040",
+        "clip_pc_041",
+        "clip_pc_042",
+        "clip_pc_043",
+        "clip_pc_044",
+        "clip_pc_045",
+        "clip_pc_046",
+        "clip_pc_047",
+        "clip_pc_048",
+        "clip_pc_049",
+        "clip_pc_050",
+        "clip_pc_051",
+        "clip_pc_052",
+        "clip_pc_053",
+        "clip_pc_054",
+        "clip_pc_055",
+        "clip_pc_056",
+        "clip_pc_057",
+        "clip_pc_058",
+        "clip_pc_059",
+        "clip_pc_060",
+        "clip_pc_061",
+        "clip_pc_062",
+        "clip_pc_063",
+        "clip_pc_064",
+        "clip_pc_065",
+        "clip_pc_066",
+        "clip_pc_067",
+        "clip_pc_068",
+        "clip_pc_069",
+        "clip_pc_070",
+        "clip_pc_071",
+        "clip_pc_072",
+        "clip_pc_073",
+        "clip_pc_074",
+        "clip_pc_075",
+        "clip_pc_076",
+        "clip_pc_077",
+        "clip_pc_078",
+        "clip_pc_079",
+        "clip_pc_080",
+        "clip_pc_081",
+        "clip_pc_082",
+        "clip_pc_083",
+        "clip_pc_084",
+        "clip_pc_085",
+        "clip_pc_086",
+        "clip_pc_087",
+        "clip_pc_088",
+        "clip_pc_089",
+        "clip_pc_090",
+        "clip_pc_091",
+        "clip_pc_092",
+        "clip_pc_093",
+        "clip_pc_094",
+        "clip_pc_095",
+        "height_in"
+      ],
+      "categorical": [
+        "size_display"
+      ]
+    },
+    "excluded_feature_families": [
+      "clothing_type_id",
+      "image_quality_bucket as a feature",
+      "multi-person images",
+      "crop/framing geometry",
+      "image dimensions",
+      "person detector geometry",
+      "face detector counts/geometry",
+      "low-signal operational labels"
+    ],
+    "classifier_metrics": [
+      {
+        "classifier": "logistic",
+        "threshold_lbs": 181.0,
+        "train_positive_rows": 1560,
+        "positive_rows": 746,
+        "negative_rows": 2382,
+        "roc_auc": 0.8734,
+        "average_precision": 0.6546,
+        "thresholds": {
+          "0.1": {
+            "predicted_positive_rows": 1867,
+            "precision": 0.3937,
+            "recall": 0.9853,
+            "f1": 0.5626
+          },
+          "0.2": {
+            "predicted_positive_rows": 1487,
+            "precision": 0.4573,
+            "recall": 0.9115,
+            "f1": 0.609
+          },
+          "0.3": {
+            "predicted_positive_rows": 1222,
+            "precision": 0.5139,
+            "recall": 0.8418,
+            "f1": 0.6382
+          },
+          "0.4": {
+            "predicted_positive_rows": 997,
+            "precision": 0.5537,
+            "recall": 0.7399,
+            "f1": 0.6334
+          },
+          "0.5": {
+            "predicted_positive_rows": 792,
+            "precision": 0.601,
+            "recall": 0.6381,
+            "f1": 0.619
+          }
+        }
+      },
+      {
+        "classifier": "hist_gradient",
+        "threshold_lbs": 181.0,
+        "train_positive_rows": 1560,
+        "positive_rows": 746,
+        "negative_rows": 2382,
+        "roc_auc": 0.858,
+        "average_precision": 0.6403,
+        "thresholds": {
+          "0.1": {
+            "predicted_positive_rows": 1084,
+            "precision": 0.5175,
+            "recall": 0.752,
+            "f1": 0.6131
+          },
+          "0.2": {
+            "predicted_positive_rows": 669,
+            "precision": 0.6084,
+            "recall": 0.5456,
+            "f1": 0.5753
+          },
+          "0.3": {
+            "predicted_positive_rows": 480,
+            "precision": 0.6708,
+            "recall": 0.4316,
+            "f1": 0.5253
+          },
+          "0.4": {
+            "predicted_positive_rows": 349,
+            "precision": 0.7163,
+            "recall": 0.3351,
+            "f1": 0.4566
+          },
+          "0.5": {
+            "predicted_positive_rows": 253,
+            "precision": 0.7628,
+            "recall": 0.2587,
+            "f1": 0.3864
+          }
+        }
+      },
+      {
+        "classifier": "logistic",
+        "threshold_lbs": 211.0,
+        "train_positive_rows": 606,
+        "positive_rows": 421,
+        "negative_rows": 2707,
+        "roc_auc": 0.8711,
+        "average_precision": 0.4492,
+        "thresholds": {
+          "0.1": {
+            "predicted_positive_rows": 1543,
+            "precision": 0.2625,
+            "recall": 0.962,
+            "f1": 0.4124
+          },
+          "0.2": {
+            "predicted_positive_rows": 1218,
+            "precision": 0.3087,
+            "recall": 0.8931,
+            "f1": 0.4588
+          },
+          "0.3": {
+            "predicted_positive_rows": 961,
+            "precision": 0.3559,
+            "recall": 0.8124,
+            "f1": 0.4949
+          },
+          "0.4": {
+            "predicted_positive_rows": 792,
+            "precision": 0.3927,
+            "recall": 0.7387,
+            "f1": 0.5128
+          },
+          "0.5": {
+            "predicted_positive_rows": 626,
+            "precision": 0.4361,
+            "recall": 0.6485,
+            "f1": 0.5215
+          }
+        }
+      },
+      {
+        "classifier": "hist_gradient",
+        "threshold_lbs": 211.0,
+        "train_positive_rows": 606,
+        "positive_rows": 421,
+        "negative_rows": 2707,
+        "roc_auc": 0.8551,
+        "average_precision": 0.4625,
+        "thresholds": {
+          "0.1": {
+            "predicted_positive_rows": 374,
+            "precision": 0.4893,
+            "recall": 0.4347,
+            "f1": 0.4604
+          },
+          "0.2": {
+            "predicted_positive_rows": 210,
+            "precision": 0.5381,
+            "recall": 0.2684,
+            "f1": 0.3582
+          },
+          "0.3": {
+            "predicted_positive_rows": 135,
+            "precision": 0.5704,
+            "recall": 0.1829,
+            "f1": 0.277
+          },
+          "0.4": {
+            "predicted_positive_rows": 94,
+            "precision": 0.6489,
+            "recall": 0.1449,
+            "f1": 0.2369
+          },
+          "0.5": {
+            "predicted_positive_rows": 69,
+            "precision": 0.7101,
+            "recall": 0.1164,
+            "f1": 0.2
+          }
+        }
+      },
+      {
+        "classifier": "logistic",
+        "threshold_lbs": 251.0,
+        "train_positive_rows": 145,
+        "positive_rows": 199,
+        "negative_rows": 2929,
+        "roc_auc": 0.8528,
+        "average_precision": 0.2679,
+        "thresholds": {
+          "0.1": {
+            "predicted_positive_rows": 619,
+            "precision": 0.2213,
+            "recall": 0.6884,
+            "f1": 0.335
+          },
+          "0.2": {
+            "predicted_positive_rows": 445,
+            "precision": 0.2382,
+            "recall": 0.5327,
+            "f1": 0.3292
+          },
+          "0.3": {
+            "predicted_positive_rows": 349,
+            "precision": 0.2808,
+            "recall": 0.4925,
+            "f1": 0.3577
+          },
+          "0.4": {
+            "predicted_positive_rows": 278,
+            "precision": 0.2914,
+            "recall": 0.407,
+            "f1": 0.3396
+          },
+          "0.5": {
+            "predicted_positive_rows": 232,
+            "precision": 0.306,
+            "recall": 0.3568,
+            "f1": 0.3295
+          }
+        }
+      },
+      {
+        "classifier": "hist_gradient",
+        "threshold_lbs": 251.0,
+        "train_positive_rows": 145,
+        "positive_rows": 199,
+        "negative_rows": 2929,
+        "roc_auc": 0.7666,
+        "average_precision": 0.2297,
+        "thresholds": {
+          "0.1": {
+            "predicted_positive_rows": 26,
+            "precision": 0.5,
+            "recall": 0.0653,
+            "f1": 0.1156
+          },
+          "0.2": {
+            "predicted_positive_rows": 13,
+            "precision": 0.6923,
+            "recall": 0.0452,
+            "f1": 0.0849
+          },
+          "0.3": {
+            "predicted_positive_rows": 8,
+            "precision": 0.75,
+            "recall": 0.0302,
+            "f1": 0.058
+          },
+          "0.4": {
+            "predicted_positive_rows": 6,
+            "precision": 0.8333,
+            "recall": 0.0251,
+            "f1": 0.0488
+          },
+          "0.5": {
+            "predicted_positive_rows": 5,
+            "precision": 0.8,
+            "recall": 0.0201,
+            "f1": 0.0392
+          }
+        }
+      }
+    ],
+    "results": [
+      {
+        "model": "blend_gte_211_hist_gradient_power_1.0",
+        "mae_lbs": 24.004,
+        "median_abs_error_lbs": 15.84,
+        "rmse_lbs": 35.989,
+        "r2": 0.3978,
+        "within_10_lbs": 0.3494,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7551,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 52.647,
+            "median_abs_error_lbs": 45.088,
+            "rmse_lbs": 64.769,
+            "r2": -1.7542,
+            "within_10_lbs": 0.0992,
+            "within_20_lbs": 0.2145,
+            "within_30_lbs": 0.3271,
+            "mean_signed_error_lbs": -49.416
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 72.337,
+            "median_abs_error_lbs": 69.476,
+            "rmse_lbs": 81.596,
+            "r2": -5.2627,
+            "within_10_lbs": 0.0475,
+            "within_20_lbs": 0.0879,
+            "within_30_lbs": 0.133,
+            "mean_signed_error_lbs": -71.9
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 94.419,
+            "median_abs_error_lbs": 94.727,
+            "rmse_lbs": 101.451,
+            "r2": -14.5111,
+            "within_10_lbs": 0.0151,
+            "within_20_lbs": 0.0452,
+            "within_30_lbs": 0.0553,
+            "mean_signed_error_lbs": -94.302
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.0493
+      },
+      {
+        "model": "blend_gte_181_hist_gradient_power_1.0",
+        "mae_lbs": 24.028,
+        "median_abs_error_lbs": 16.019,
+        "rmse_lbs": 35.042,
+        "r2": 0.4291,
+        "within_10_lbs": 0.3389,
+        "within_20_lbs": 0.5895,
+        "within_30_lbs": 0.7366,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 47.508,
+            "median_abs_error_lbs": 40.692,
+            "rmse_lbs": 59.49,
+            "r2": -1.3236,
+            "within_10_lbs": 0.122,
+            "within_20_lbs": 0.2654,
+            "within_30_lbs": 0.37,
+            "mean_signed_error_lbs": -41.225
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 64.663,
+            "median_abs_error_lbs": 62.126,
+            "rmse_lbs": 74.588,
+            "r2": -4.2331,
+            "within_10_lbs": 0.0499,
+            "within_20_lbs": 0.1283,
+            "within_30_lbs": 0.1781,
+            "mean_signed_error_lbs": -63.57
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 85.064,
+            "median_abs_error_lbs": 83.256,
+            "rmse_lbs": 92.819,
+            "r2": -11.984,
+            "within_10_lbs": 0.0151,
+            "within_20_lbs": 0.0402,
+            "within_30_lbs": 0.0553,
+            "mean_signed_error_lbs": -84.885
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.1377
+      },
+      {
+        "model": "blend_gte_181_hist_gradient_power_1.5",
+        "mae_lbs": 24.043,
+        "median_abs_error_lbs": 15.803,
+        "rmse_lbs": 35.792,
+        "r2": 0.4044,
+        "within_10_lbs": 0.3459,
+        "within_20_lbs": 0.602,
+        "within_30_lbs": 0.7516,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 51.453,
+            "median_abs_error_lbs": 44.704,
+            "rmse_lbs": 63.42,
+            "r2": -1.6407,
+            "within_10_lbs": 0.1046,
+            "within_20_lbs": 0.2279,
+            "within_30_lbs": 0.3432,
+            "mean_signed_error_lbs": -46.664
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 70.139,
+            "median_abs_error_lbs": 67.187,
+            "rmse_lbs": 79.58,
+            "r2": -4.957,
+            "within_10_lbs": 0.0475,
+            "within_20_lbs": 0.0974,
+            "within_30_lbs": 0.1568,
+            "mean_signed_error_lbs": -69.465
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 91.389,
+            "median_abs_error_lbs": 89.848,
+            "rmse_lbs": 98.581,
+            "r2": -13.646,
+            "within_10_lbs": 0.0101,
+            "within_20_lbs": 0.0251,
+            "within_30_lbs": 0.0553,
+            "mean_signed_error_lbs": -91.243
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.0842
+      },
+      {
+        "model": "blend_gte_211_logistic_power_2.0",
+        "mae_lbs": 24.176,
+        "median_abs_error_lbs": 16.081,
+        "rmse_lbs": 35.09,
+        "r2": 0.4276,
+        "within_10_lbs": 0.3418,
+        "within_20_lbs": 0.5841,
+        "within_30_lbs": 0.7321,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 44.328,
+            "median_abs_error_lbs": 38.794,
+            "rmse_lbs": 55.633,
+            "r2": -1.032,
+            "within_10_lbs": 0.1287,
+            "within_20_lbs": 0.2668,
+            "within_30_lbs": 0.3901,
+            "mean_signed_error_lbs": -32.799
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 56.639,
+            "median_abs_error_lbs": 53.656,
+            "rmse_lbs": 67.943,
+            "r2": -3.3421,
+            "within_10_lbs": 0.095,
+            "within_20_lbs": 0.1876,
+            "within_30_lbs": 0.2684,
+            "mean_signed_error_lbs": -53.055
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 74.963,
+            "median_abs_error_lbs": 71.503,
+            "rmse_lbs": 84.519,
+            "r2": -9.7657,
+            "within_10_lbs": 0.0352,
+            "within_20_lbs": 0.0754,
+            "within_30_lbs": 0.1206,
+            "mean_signed_error_lbs": -74.525
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.1415
+      },
+      {
+        "model": "blend_gte_181_hist_gradient_power_2.0",
+        "mae_lbs": 24.184,
+        "median_abs_error_lbs": 15.715,
+        "rmse_lbs": 36.304,
+        "r2": 0.3872,
+        "within_10_lbs": 0.3453,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7542,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 53.6,
+            "median_abs_error_lbs": 46.747,
+            "rmse_lbs": 65.491,
+            "r2": -1.816,
+            "within_10_lbs": 0.0871,
+            "within_20_lbs": 0.1997,
+            "within_30_lbs": 0.3204,
+            "mean_signed_error_lbs": -49.68
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 73.284,
+            "median_abs_error_lbs": 70.185,
+            "rmse_lbs": 82.283,
+            "r2": -5.3685,
+            "within_10_lbs": 0.038,
+            "within_20_lbs": 0.0808,
+            "within_30_lbs": 0.1283,
+            "mean_signed_error_lbs": -72.828
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 95.112,
+            "median_abs_error_lbs": 91.955,
+            "rmse_lbs": 101.816,
+            "r2": -14.6231,
+            "within_10_lbs": 0.0,
+            "within_20_lbs": 0.0201,
+            "within_30_lbs": 0.0402,
+            "mean_signed_error_lbs": -94.995
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.0592
+      },
+      {
+        "model": "blend_gte_211_hist_gradient_power_1.5",
+        "mae_lbs": 24.28,
+        "median_abs_error_lbs": 15.706,
+        "rmse_lbs": 36.785,
+        "r2": 0.3709,
+        "within_10_lbs": 0.3478,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7615,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 55.607,
+            "median_abs_error_lbs": 47.691,
+            "rmse_lbs": 67.506,
+            "r2": -1.9919,
+            "within_10_lbs": 0.0791,
+            "within_20_lbs": 0.1769,
+            "within_30_lbs": 0.3043,
+            "mean_signed_error_lbs": -53.286
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 76.585,
+            "median_abs_error_lbs": 72.564,
+            "rmse_lbs": 85.108,
+            "r2": -5.8133,
+            "within_10_lbs": 0.0285,
+            "within_20_lbs": 0.057,
+            "within_30_lbs": 0.1045,
+            "mean_signed_error_lbs": -76.334
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 99.204,
+            "median_abs_error_lbs": 99.482,
+            "rmse_lbs": 105.577,
+            "r2": -15.7985,
+            "within_10_lbs": 0.0101,
+            "within_20_lbs": 0.0201,
+            "within_30_lbs": 0.0553,
+            "mean_signed_error_lbs": -99.124
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.0257
+      },
+      {
+        "model": "blend_gte_181_logistic_power_2.0",
+        "mae_lbs": 24.379,
+        "median_abs_error_lbs": 16.386,
+        "rmse_lbs": 35.185,
+        "r2": 0.4244,
+        "within_10_lbs": 0.3318,
+        "within_20_lbs": 0.5825,
+        "within_30_lbs": 0.7308,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 45.164,
+            "median_abs_error_lbs": 38.483,
+            "rmse_lbs": 56.698,
+            "r2": -1.1106,
+            "within_10_lbs": 0.126,
+            "within_20_lbs": 0.2681,
+            "within_30_lbs": 0.3968,
+            "mean_signed_error_lbs": -35.253
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 59.535,
+            "median_abs_error_lbs": 56.049,
+            "rmse_lbs": 70.116,
+            "r2": -3.6244,
+            "within_10_lbs": 0.0808,
+            "within_20_lbs": 0.1425,
+            "within_30_lbs": 0.2352,
+            "mean_signed_error_lbs": -57.765
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 78.971,
+            "median_abs_error_lbs": 75.982,
+            "rmse_lbs": 87.4,
+            "r2": -10.512,
+            "within_10_lbs": 0.0201,
+            "within_20_lbs": 0.0452,
+            "within_30_lbs": 0.0754,
+            "mean_signed_error_lbs": -78.549
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.1749
+      },
+      {
+        "model": "blend_gte_211_hist_gradient_power_2.0",
+        "mae_lbs": 24.437,
+        "median_abs_error_lbs": 15.783,
+        "rmse_lbs": 37.153,
+        "r2": 0.3583,
+        "within_10_lbs": 0.3491,
+        "within_20_lbs": 0.5991,
+        "within_30_lbs": 0.7609,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 56.867,
+            "median_abs_error_lbs": 49.887,
+            "rmse_lbs": 68.643,
+            "r2": -2.0936,
+            "within_10_lbs": 0.0737,
+            "within_20_lbs": 0.1662,
+            "within_30_lbs": 0.2895,
+            "mean_signed_error_lbs": -54.975
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 78.564,
+            "median_abs_error_lbs": 74.979,
+            "rmse_lbs": 86.631,
+            "r2": -6.0594,
+            "within_10_lbs": 0.0238,
+            "within_20_lbs": 0.0404,
+            "within_30_lbs": 0.0784,
+            "mean_signed_error_lbs": -78.383
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 101.46,
+            "median_abs_error_lbs": 100.539,
+            "rmse_lbs": 107.404,
+            "r2": -16.3849,
+            "within_10_lbs": 0.0101,
+            "within_20_lbs": 0.0151,
+            "within_30_lbs": 0.0402,
+            "mean_signed_error_lbs": -101.409
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.0167
+      },
+      {
+        "model": "route_gte_211_hist_gradient_cutoff_0.5",
+        "mae_lbs": 24.495,
+        "median_abs_error_lbs": 15.627,
+        "rmse_lbs": 37.421,
+        "r2": 0.349,
+        "within_10_lbs": 0.3513,
+        "within_20_lbs": 0.6033,
+        "within_30_lbs": 0.7625,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 57.082,
+            "median_abs_error_lbs": 49.777,
+            "rmse_lbs": 68.947,
+            "r2": -2.121,
+            "within_10_lbs": 0.071,
+            "within_20_lbs": 0.1716,
+            "within_30_lbs": 0.2855,
+            "mean_signed_error_lbs": -53.789
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 77.989,
+            "median_abs_error_lbs": 74.631,
+            "rmse_lbs": 86.695,
+            "r2": -6.0698,
+            "within_10_lbs": 0.0333,
+            "within_20_lbs": 0.0665,
+            "within_30_lbs": 0.0903,
+            "mean_signed_error_lbs": -76.086
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 99.625,
+            "median_abs_error_lbs": 100.396,
+            "rmse_lbs": 107.126,
+            "r2": -16.2949,
+            "within_10_lbs": 0.0302,
+            "within_20_lbs": 0.0653,
+            "within_30_lbs": 0.0653,
+            "mean_signed_error_lbs": -98.927
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.5,
+        "routed_rows": 69
+      },
+      {
+        "model": "blend_gte_251_hist_gradient_power_1.0",
+        "mae_lbs": 24.638,
+        "median_abs_error_lbs": 15.801,
+        "rmse_lbs": 37.455,
+        "r2": 0.3478,
+        "within_10_lbs": 0.3481,
+        "within_20_lbs": 0.5991,
+        "within_30_lbs": 0.7567,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.042,
+            "median_abs_error_lbs": 51.518,
+            "rmse_lbs": 69.531,
+            "r2": -2.1741,
+            "within_10_lbs": 0.071,
+            "within_20_lbs": 0.1555,
+            "within_30_lbs": 0.2748,
+            "mean_signed_error_lbs": -56.75
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 80.982,
+            "median_abs_error_lbs": 76.872,
+            "rmse_lbs": 88.063,
+            "r2": -6.2947,
+            "within_10_lbs": 0.0119,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -80.88
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 104.158,
+            "median_abs_error_lbs": 101.346,
+            "rmse_lbs": 109.027,
+            "r2": -16.9142,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -104.158
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.0072
+      },
+      {
+        "model": "blend_gte_211_logistic_power_1.5",
+        "mae_lbs": 24.649,
+        "median_abs_error_lbs": 16.603,
+        "rmse_lbs": 35.255,
+        "r2": 0.4221,
+        "within_10_lbs": 0.3331,
+        "within_20_lbs": 0.577,
+        "within_30_lbs": 0.7206,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 41.451,
+            "median_abs_error_lbs": 35.485,
+            "rmse_lbs": 52.512,
+            "r2": -0.8104,
+            "within_10_lbs": 0.1461,
+            "within_20_lbs": 0.307,
+            "within_30_lbs": 0.4263,
+            "mean_signed_error_lbs": -27.864
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 52.231,
+            "median_abs_error_lbs": 48.267,
+            "rmse_lbs": 63.626,
+            "r2": -2.8079,
+            "within_10_lbs": 0.1021,
+            "within_20_lbs": 0.2233,
+            "within_30_lbs": 0.3159,
+            "mean_signed_error_lbs": -47.839
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 69.753,
+            "median_abs_error_lbs": 66.827,
+            "rmse_lbs": 79.554,
+            "r2": -8.5379,
+            "within_10_lbs": 0.0352,
+            "within_20_lbs": 0.0905,
+            "within_30_lbs": 0.1508,
+            "mean_signed_error_lbs": -69.261
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.177
+      },
+      {
+        "model": "route_gte_211_hist_gradient_cutoff_0.25",
+        "mae_lbs": 24.661,
+        "median_abs_error_lbs": 15.738,
+        "rmse_lbs": 37.46,
+        "r2": 0.3476,
+        "within_10_lbs": 0.3504,
+        "within_20_lbs": 0.5985,
+        "within_30_lbs": 0.7574,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 55.856,
+            "median_abs_error_lbs": 48.404,
+            "rmse_lbs": 67.411,
+            "r2": -1.9835,
+            "within_10_lbs": 0.0737,
+            "within_20_lbs": 0.1676,
+            "within_30_lbs": 0.2855,
+            "mean_signed_error_lbs": -46.983
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 72.8,
+            "median_abs_error_lbs": 70.397,
+            "rmse_lbs": 83.215,
+            "r2": -5.5136,
+            "within_10_lbs": 0.0665,
+            "within_20_lbs": 0.1164,
+            "within_30_lbs": 0.1568,
+            "mean_signed_error_lbs": -68.656
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 92.765,
+            "median_abs_error_lbs": 95.587,
+            "rmse_lbs": 102.506,
+            "r2": -14.8353,
+            "within_10_lbs": 0.0503,
+            "within_20_lbs": 0.1005,
+            "within_30_lbs": 0.1106,
+            "mean_signed_error_lbs": -91.99
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.25,
+        "routed_rows": 170
+      },
+      {
+        "model": "blend_gte_181_logistic_power_1.5",
+        "mae_lbs": 24.675,
+        "median_abs_error_lbs": 16.965,
+        "rmse_lbs": 35.05,
+        "r2": 0.4288,
+        "within_10_lbs": 0.3267,
+        "within_20_lbs": 0.5671,
+        "within_30_lbs": 0.7196,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 42.306,
+            "median_abs_error_lbs": 35.687,
+            "rmse_lbs": 53.569,
+            "r2": -0.8841,
+            "within_10_lbs": 0.1421,
+            "within_20_lbs": 0.2989,
+            "within_30_lbs": 0.4276,
+            "mean_signed_error_lbs": -31.032
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 55.262,
+            "median_abs_error_lbs": 51.333,
+            "rmse_lbs": 65.956,
+            "r2": -3.092,
+            "within_10_lbs": 0.0879,
+            "within_20_lbs": 0.1853,
+            "within_30_lbs": 0.2684,
+            "mean_signed_error_lbs": -53.096
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 74.274,
+            "median_abs_error_lbs": 71.099,
+            "rmse_lbs": 82.767,
+            "r2": -9.3239,
+            "within_10_lbs": 0.0201,
+            "within_20_lbs": 0.0553,
+            "within_30_lbs": 0.0905,
+            "mean_signed_error_lbs": -73.825
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.2186
+      },
+      {
+        "model": "route_gte_251_hist_gradient_cutoff_0.35",
+        "mae_lbs": 24.7,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.729,
+        "r2": 0.3382,
+        "within_10_lbs": 0.3497,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7615,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.805,
+            "median_abs_error_lbs": 51.775,
+            "rmse_lbs": 70.347,
+            "r2": -2.2491,
+            "within_10_lbs": 0.063,
+            "within_20_lbs": 0.1542,
+            "within_30_lbs": 0.2721,
+            "mean_signed_error_lbs": -57.808
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.1,
+            "median_abs_error_lbs": 77.987,
+            "rmse_lbs": 89.138,
+            "r2": -6.4739,
+            "within_10_lbs": 0.0095,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -81.989
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 105.432,
+            "median_abs_error_lbs": 101.994,
+            "rmse_lbs": 110.339,
+            "r2": -17.3481,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -105.432
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.35,
+        "routed_rows": 6
+      },
+      {
+        "model": "route_gte_211_hist_gradient_cutoff_0.35",
+        "mae_lbs": 24.707,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.604,
+        "r2": 0.3426,
+        "within_10_lbs": 0.351,
+        "within_20_lbs": 0.5988,
+        "within_30_lbs": 0.7577,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 57.005,
+            "median_abs_error_lbs": 50.153,
+            "rmse_lbs": 68.562,
+            "r2": -2.0863,
+            "within_10_lbs": 0.0724,
+            "within_20_lbs": 0.1609,
+            "within_30_lbs": 0.2775,
+            "mean_signed_error_lbs": -51.121
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 76.104,
+            "median_abs_error_lbs": 72.217,
+            "rmse_lbs": 85.352,
+            "r2": -5.8525,
+            "within_10_lbs": 0.0451,
+            "within_20_lbs": 0.0808,
+            "within_30_lbs": 0.1116,
+            "mean_signed_error_lbs": -73.599
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 96.681,
+            "median_abs_error_lbs": 98.937,
+            "rmse_lbs": 105.135,
+            "r2": -15.658,
+            "within_10_lbs": 0.0402,
+            "within_20_lbs": 0.0804,
+            "within_30_lbs": 0.0804,
+            "mean_signed_error_lbs": -95.984
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.35,
+        "routed_rows": 111
+      },
+      {
+        "model": "route_gte_251_hist_gradient_cutoff_0.5",
+        "mae_lbs": 24.718,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.759,
+        "r2": 0.3371,
+        "within_10_lbs": 0.3497,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7615,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.878,
+            "median_abs_error_lbs": 51.884,
+            "rmse_lbs": 70.416,
+            "r2": -2.2555,
+            "within_10_lbs": 0.063,
+            "within_20_lbs": 0.1542,
+            "within_30_lbs": 0.2721,
+            "mean_signed_error_lbs": -57.882
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.23,
+            "median_abs_error_lbs": 78.282,
+            "rmse_lbs": 89.235,
+            "r2": -6.4902,
+            "within_10_lbs": 0.0095,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -82.119
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 105.708,
+            "median_abs_error_lbs": 101.994,
+            "rmse_lbs": 110.505,
+            "r2": -17.4032,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -105.708
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.5,
+        "routed_rows": 5
+      },
+      {
+        "model": "blend_gte_251_hist_gradient_power_1.5",
+        "mae_lbs": 24.718,
+        "median_abs_error_lbs": 15.721,
+        "rmse_lbs": 37.707,
+        "r2": 0.339,
+        "within_10_lbs": 0.3504,
+        "within_20_lbs": 0.5985,
+        "within_30_lbs": 0.7596,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.8,
+            "median_abs_error_lbs": 51.864,
+            "rmse_lbs": 70.264,
+            "r2": -2.2414,
+            "within_10_lbs": 0.0657,
+            "within_20_lbs": 0.1501,
+            "within_30_lbs": 0.2708,
+            "mean_signed_error_lbs": -57.705
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.06,
+            "median_abs_error_lbs": 77.844,
+            "rmse_lbs": 89.012,
+            "r2": -6.4527,
+            "within_10_lbs": 0.0143,
+            "within_20_lbs": 0.0166,
+            "within_30_lbs": 0.0404,
+            "mean_signed_error_lbs": -81.99
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 105.591,
+            "median_abs_error_lbs": 101.752,
+            "rmse_lbs": 110.215,
+            "r2": -17.3066,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.005,
+            "within_30_lbs": 0.0101,
+            "mean_signed_error_lbs": -105.591
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.0024
+      },
+      {
+        "model": "route_gte_251_hist_gradient_cutoff_0.25",
+        "mae_lbs": 24.728,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.745,
+        "r2": 0.3376,
+        "within_10_lbs": 0.3497,
+        "within_20_lbs": 0.5994,
+        "within_30_lbs": 0.7609,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.922,
+            "median_abs_error_lbs": 51.956,
+            "rmse_lbs": 70.384,
+            "r2": -2.2525,
+            "within_10_lbs": 0.063,
+            "within_20_lbs": 0.1515,
+            "within_30_lbs": 0.2694,
+            "mean_signed_error_lbs": -57.189
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 81.829,
+            "median_abs_error_lbs": 77.806,
+            "rmse_lbs": 88.882,
+            "r2": -6.4311,
+            "within_10_lbs": 0.0095,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -81.369
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 104.86,
+            "median_abs_error_lbs": 101.79,
+            "rmse_lbs": 109.902,
+            "r2": -17.2029,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -104.122
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.25,
+        "routed_rows": 12
+      },
+      {
+        "model": "blend_gte_251_hist_gradient_power_2.0",
+        "mae_lbs": 24.742,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.774,
+        "r2": 0.3366,
+        "within_10_lbs": 0.3504,
+        "within_20_lbs": 0.5988,
+        "within_30_lbs": 0.7605,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.96,
+            "median_abs_error_lbs": 51.883,
+            "rmse_lbs": 70.44,
+            "r2": -2.2576,
+            "within_10_lbs": 0.0657,
+            "within_20_lbs": 0.1501,
+            "within_30_lbs": 0.2694,
+            "mean_signed_error_lbs": -57.936
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.341,
+            "median_abs_error_lbs": 78.269,
+            "rmse_lbs": 89.258,
+            "r2": -6.4939,
+            "within_10_lbs": 0.0143,
+            "within_20_lbs": 0.0166,
+            "within_30_lbs": 0.038,
+            "mean_signed_error_lbs": -82.285
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 106.051,
+            "median_abs_error_lbs": 101.843,
+            "rmse_lbs": 110.568,
+            "r2": -17.4244,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.005,
+            "within_30_lbs": 0.005,
+            "mean_signed_error_lbs": -106.051
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.0015
+      },
+      {
+        "model": "route_gte_251_hist_gradient_cutoff_0.15",
+        "mae_lbs": 24.757,
+        "median_abs_error_lbs": 15.724,
+        "rmse_lbs": 37.785,
+        "r2": 0.3362,
+        "within_10_lbs": 0.3497,
+        "within_20_lbs": 0.5991,
+        "within_30_lbs": 0.7602,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.879,
+            "median_abs_error_lbs": 52.065,
+            "rmse_lbs": 70.259,
+            "r2": -2.241,
+            "within_10_lbs": 0.063,
+            "within_20_lbs": 0.1501,
+            "within_30_lbs": 0.2668,
+            "mean_signed_error_lbs": -56.683
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 81.555,
+            "median_abs_error_lbs": 77.072,
+            "rmse_lbs": 88.632,
+            "r2": -6.3892,
+            "within_10_lbs": 0.0119,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -80.793
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 104.268,
+            "median_abs_error_lbs": 101.763,
+            "rmse_lbs": 109.448,
+            "r2": -17.0529,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -103.53
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.15,
+        "routed_rows": 19
+      },
+      {
+        "model": "route_gte_181_hist_gradient_cutoff_0.5",
+        "mae_lbs": 24.809,
+        "median_abs_error_lbs": 15.867,
+        "rmse_lbs": 37.392,
+        "r2": 0.35,
+        "within_10_lbs": 0.3472,
+        "within_20_lbs": 0.5943,
+        "within_30_lbs": 0.75,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 54.882,
+            "median_abs_error_lbs": 46.111,
+            "rmse_lbs": 66.157,
+            "r2": -1.8736,
+            "within_10_lbs": 0.0697,
+            "within_20_lbs": 0.1649,
+            "within_30_lbs": 0.2802,
+            "mean_signed_error_lbs": -45.691
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 70.981,
+            "median_abs_error_lbs": 69.241,
+            "rmse_lbs": 81.625,
+            "r2": -5.2672,
+            "within_10_lbs": 0.0736,
+            "within_20_lbs": 0.1306,
+            "within_30_lbs": 0.1734,
+            "mean_signed_error_lbs": -67.928
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 89.274,
+            "median_abs_error_lbs": 94.113,
+            "rmse_lbs": 99.725,
+            "r2": -13.9878,
+            "within_10_lbs": 0.0402,
+            "within_20_lbs": 0.0804,
+            "within_30_lbs": 0.1407,
+            "mean_signed_error_lbs": -88.664
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.5,
+        "routed_rows": 253
+      },
+      {
+        "model": "global_ridge_clip_pca_height_size",
+        "mae_lbs": 24.814,
+        "median_abs_error_lbs": 15.738,
+        "rmse_lbs": 37.938,
+        "r2": 0.3309,
+        "within_10_lbs": 0.3494,
+        "within_20_lbs": 0.5994,
+        "within_30_lbs": 0.7602,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 59.283,
+            "median_abs_error_lbs": 52.292,
+            "rmse_lbs": 70.817,
+            "r2": -2.2926,
+            "within_10_lbs": 0.0617,
+            "within_20_lbs": 0.1515,
+            "within_30_lbs": 0.2668,
+            "mean_signed_error_lbs": -58.331
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.947,
+            "median_abs_error_lbs": 78.359,
+            "rmse_lbs": 89.795,
+            "r2": -6.5844,
+            "within_10_lbs": 0.0071,
+            "within_20_lbs": 0.0143,
+            "within_30_lbs": 0.0356,
+            "mean_signed_error_lbs": -82.915
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 107.22,
+            "median_abs_error_lbs": 102.198,
+            "rmse_lbs": 111.459,
+            "r2": -17.7225,
+            "within_10_lbs": 0.0,
+            "within_20_lbs": 0.0,
+            "within_30_lbs": 0.0,
+            "mean_signed_error_lbs": -107.22
+          }
+        }
+      },
+      {
+        "model": "route_gte_181_hist_gradient_cutoff_0.35",
+        "mae_lbs": 24.968,
+        "median_abs_error_lbs": 16.008,
+        "rmse_lbs": 37.346,
+        "r2": 0.3516,
+        "within_10_lbs": 0.3453,
+        "within_20_lbs": 0.5892,
+        "within_30_lbs": 0.7436,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 51.282,
+            "median_abs_error_lbs": 43.91,
+            "rmse_lbs": 62.661,
+            "r2": -1.5779,
+            "within_10_lbs": 0.0845,
+            "within_20_lbs": 0.1877,
+            "within_30_lbs": 0.315,
+            "mean_signed_error_lbs": -38.787
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 63.93,
+            "median_abs_error_lbs": 62.365,
+            "rmse_lbs": 76.325,
+            "r2": -4.4796,
+            "within_10_lbs": 0.1116,
+            "within_20_lbs": 0.1924,
+            "within_30_lbs": 0.2613,
+            "mean_signed_error_lbs": -59.316
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 80.245,
+            "median_abs_error_lbs": 87.016,
+            "rmse_lbs": 92.658,
+            "r2": -11.939,
+            "within_10_lbs": 0.0503,
+            "within_20_lbs": 0.1055,
+            "within_30_lbs": 0.196,
+            "mean_signed_error_lbs": -79.566
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.35,
+        "routed_rows": 412
+      },
+      {
+        "model": "blend_gte_251_logistic_power_2.0",
+        "mae_lbs": 25.002,
+        "median_abs_error_lbs": 16.1,
+        "rmse_lbs": 37.732,
+        "r2": 0.3381,
+        "within_10_lbs": 0.3421,
+        "within_20_lbs": 0.5934,
+        "within_30_lbs": 0.7471,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 52.08,
+            "median_abs_error_lbs": 44.945,
+            "rmse_lbs": 63.468,
+            "r2": -1.6447,
+            "within_10_lbs": 0.0804,
+            "within_20_lbs": 0.1997,
+            "within_30_lbs": 0.3137,
+            "mean_signed_error_lbs": -43.836
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 69.018,
+            "median_abs_error_lbs": 64.536,
+            "rmse_lbs": 78.508,
+            "r2": -4.7976,
+            "within_10_lbs": 0.038,
+            "within_20_lbs": 0.0903,
+            "within_30_lbs": 0.1354,
+            "mean_signed_error_lbs": -63.273
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 85.44,
+            "median_abs_error_lbs": 86.946,
+            "rmse_lbs": 95.305,
+            "r2": -12.6888,
+            "within_10_lbs": 0.0352,
+            "within_20_lbs": 0.0653,
+            "within_30_lbs": 0.1055,
+            "mean_signed_error_lbs": -83.28
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.0552
+      },
+      {
+        "model": "route_gte_211_hist_gradient_cutoff_0.15",
+        "mae_lbs": 25.014,
+        "median_abs_error_lbs": 15.77,
+        "rmse_lbs": 38.024,
+        "r2": 0.3278,
+        "within_10_lbs": 0.3494,
+        "within_20_lbs": 0.5962,
+        "within_30_lbs": 0.7519,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 53.863,
+            "median_abs_error_lbs": 46.262,
+            "rmse_lbs": 65.267,
+            "r2": -1.7968,
+            "within_10_lbs": 0.0791,
+            "within_20_lbs": 0.1796,
+            "within_30_lbs": 0.2936,
+            "mean_signed_error_lbs": -42.364
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 68.332,
+            "median_abs_error_lbs": 65.781,
+            "rmse_lbs": 79.677,
+            "r2": -4.9716,
+            "within_10_lbs": 0.0831,
+            "within_20_lbs": 0.1473,
+            "within_30_lbs": 0.1971,
+            "mean_signed_error_lbs": -62.655
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 84.298,
+            "median_abs_error_lbs": 92.959,
+            "rmse_lbs": 96.812,
+            "r2": -13.125,
+            "within_10_lbs": 0.0804,
+            "within_20_lbs": 0.1558,
+            "within_30_lbs": 0.1809,
+            "mean_signed_error_lbs": -83.078
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.15,
+        "routed_rows": 251
+      },
+      {
+        "model": "blend_gte_251_logistic_power_1.5",
+        "mae_lbs": 25.067,
+        "median_abs_error_lbs": 16.184,
+        "rmse_lbs": 37.714,
+        "r2": 0.3387,
+        "within_10_lbs": 0.3402,
+        "within_20_lbs": 0.5876,
+        "within_30_lbs": 0.7446,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 50.117,
+            "median_abs_error_lbs": 42.697,
+            "rmse_lbs": 61.589,
+            "r2": -1.4904,
+            "within_10_lbs": 0.0952,
+            "within_20_lbs": 0.2024,
+            "within_30_lbs": 0.3338,
+            "mean_signed_error_lbs": -40.422
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 65.8,
+            "median_abs_error_lbs": 61.304,
+            "rmse_lbs": 75.769,
+            "r2": -4.4001,
+            "within_10_lbs": 0.0499,
+            "within_20_lbs": 0.0998,
+            "within_30_lbs": 0.152,
+            "mean_signed_error_lbs": -59.131
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 80.985,
+            "median_abs_error_lbs": 81.446,
+            "rmse_lbs": 91.779,
+            "r2": -11.6945,
+            "within_10_lbs": 0.0402,
+            "within_20_lbs": 0.0905,
+            "within_30_lbs": 0.1206,
+            "mean_signed_error_lbs": -78.612
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.0689
+      },
+      {
+        "model": "blend_gte_251_logistic_power_1.0",
+        "mae_lbs": 25.396,
+        "median_abs_error_lbs": 16.374,
+        "rmse_lbs": 37.879,
+        "r2": 0.3329,
+        "within_10_lbs": 0.3341,
+        "within_20_lbs": 0.5774,
+        "within_30_lbs": 0.7347,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 46.525,
+            "median_abs_error_lbs": 39.111,
+            "rmse_lbs": 58.107,
+            "r2": -1.2168,
+            "within_10_lbs": 0.1139,
+            "within_20_lbs": 0.2453,
+            "within_30_lbs": 0.3887,
+            "mean_signed_error_lbs": -34.1
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 59.965,
+            "median_abs_error_lbs": 56.999,
+            "rmse_lbs": 70.716,
+            "r2": -3.7039,
+            "within_10_lbs": 0.0689,
+            "within_20_lbs": 0.1378,
+            "within_30_lbs": 0.2352,
+            "mean_signed_error_lbs": -51.818
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 73.418,
+            "median_abs_error_lbs": 71.54,
+            "rmse_lbs": 85.516,
+            "r2": -10.021,
+            "within_10_lbs": 0.0603,
+            "within_20_lbs": 0.1055,
+            "within_30_lbs": 0.191,
+            "mean_signed_error_lbs": -70.703
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.0964
+      },
+      {
+        "model": "route_gte_181_hist_gradient_cutoff_0.25",
+        "mae_lbs": 25.426,
+        "median_abs_error_lbs": 16.219,
+        "rmse_lbs": 37.73,
+        "r2": 0.3381,
+        "within_10_lbs": 0.3389,
+        "within_20_lbs": 0.5806,
+        "within_30_lbs": 0.7356,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 48.326,
+            "median_abs_error_lbs": 41.313,
+            "rmse_lbs": 59.864,
+            "r2": -1.3529,
+            "within_10_lbs": 0.1005,
+            "within_20_lbs": 0.2158,
+            "within_30_lbs": 0.3485,
+            "mean_signed_error_lbs": -32.807
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 58.51,
+            "median_abs_error_lbs": 55.523,
+            "rmse_lbs": 72.051,
+            "r2": -3.8832,
+            "within_10_lbs": 0.1378,
+            "within_20_lbs": 0.2375,
+            "within_30_lbs": 0.3135,
+            "mean_signed_error_lbs": -53.569
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 73.375,
+            "median_abs_error_lbs": 66.956,
+            "rmse_lbs": 87.137,
+            "r2": -10.4429,
+            "within_10_lbs": 0.0603,
+            "within_20_lbs": 0.1206,
+            "within_30_lbs": 0.2211,
+            "mean_signed_error_lbs": -72.636
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.25,
+        "routed_rows": 566
+      },
+      {
+        "model": "blend_gte_181_logistic_power_1.0",
+        "mae_lbs": 25.729,
+        "median_abs_error_lbs": 18.347,
+        "rmse_lbs": 35.486,
+        "r2": 0.4145,
+        "within_10_lbs": 0.3027,
+        "within_20_lbs": 0.5358,
+        "within_30_lbs": 0.6886,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 38.35,
+            "median_abs_error_lbs": 31.331,
+            "rmse_lbs": 49.066,
+            "r2": -0.5806,
+            "within_10_lbs": 0.1676,
+            "within_20_lbs": 0.3271,
+            "within_30_lbs": 0.4759,
+            "mean_signed_error_lbs": -24.987
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 49.383,
+            "median_abs_error_lbs": 44.581,
+            "rmse_lbs": 59.96,
+            "r2": -2.3818,
+            "within_10_lbs": 0.0926,
+            "within_20_lbs": 0.2233,
+            "within_30_lbs": 0.3468,
+            "mean_signed_error_lbs": -46.592
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 67.873,
+            "median_abs_error_lbs": 65.649,
+            "rmse_lbs": 76.209,
+            "r2": -7.7526,
+            "within_10_lbs": 0.0251,
+            "within_20_lbs": 0.0553,
+            "within_30_lbs": 0.1206,
+            "mean_signed_error_lbs": -67.397
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.2936
+      },
+      {
+        "model": "blend_gte_211_logistic_power_1.0",
+        "mae_lbs": 26.163,
+        "median_abs_error_lbs": 18.095,
+        "rmse_lbs": 36.383,
+        "r2": 0.3846,
+        "within_10_lbs": 0.3037,
+        "within_20_lbs": 0.5396,
+        "within_30_lbs": 0.6899,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 37.569,
+            "median_abs_error_lbs": 31.965,
+            "rmse_lbs": 47.947,
+            "r2": -0.5094,
+            "within_10_lbs": 0.1555,
+            "within_20_lbs": 0.3458,
+            "within_30_lbs": 0.4879,
+            "mean_signed_error_lbs": -20.424
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 45.884,
+            "median_abs_error_lbs": 40.144,
+            "rmse_lbs": 57.134,
+            "r2": -2.0705,
+            "within_10_lbs": 0.1211,
+            "within_20_lbs": 0.2637,
+            "within_30_lbs": 0.3919,
+            "mean_signed_error_lbs": -40.311
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 62.344,
+            "median_abs_error_lbs": 59.144,
+            "rmse_lbs": 72.164,
+            "r2": -6.8483,
+            "within_10_lbs": 0.0503,
+            "within_20_lbs": 0.1206,
+            "within_30_lbs": 0.1859,
+            "mean_signed_error_lbs": -61.781
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.2397
+      },
+      {
+        "model": "route_gte_181_logistic_cutoff_0.5",
+        "mae_lbs": 26.4,
+        "median_abs_error_lbs": 16.574,
+        "rmse_lbs": 38.758,
+        "r2": 0.3016,
+        "within_10_lbs": 0.3286,
+        "within_20_lbs": 0.5681,
+        "within_30_lbs": 0.7177,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 44.024,
+            "median_abs_error_lbs": 37.68,
+            "rmse_lbs": 55.523,
+            "r2": -1.0241,
+            "within_10_lbs": 0.1153,
+            "within_20_lbs": 0.2547,
+            "within_30_lbs": 0.3928,
+            "mean_signed_error_lbs": -23.723
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 50.318,
+            "median_abs_error_lbs": 41.188,
+            "rmse_lbs": 65.261,
+            "r2": -3.0061,
+            "within_10_lbs": 0.1639,
+            "within_20_lbs": 0.3159,
+            "within_30_lbs": 0.4181,
+            "mean_signed_error_lbs": -44.256
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 64.968,
+            "median_abs_error_lbs": 53.182,
+            "rmse_lbs": 79.748,
+            "r2": -8.5846,
+            "within_10_lbs": 0.0603,
+            "within_20_lbs": 0.1608,
+            "within_30_lbs": 0.2714,
+            "mean_signed_error_lbs": -64.289
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.5,
+        "routed_rows": 792
+      },
+      {
+        "model": "route_gte_251_logistic_cutoff_0.5",
+        "mae_lbs": 26.604,
+        "median_abs_error_lbs": 15.877,
+        "rmse_lbs": 41.666,
+        "r2": 0.1929,
+        "within_10_lbs": 0.3462,
+        "within_20_lbs": 0.5937,
+        "within_30_lbs": 0.7478,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 55.382,
+            "median_abs_error_lbs": 48.965,
+            "rmse_lbs": 66.796,
+            "r2": -1.9293,
+            "within_10_lbs": 0.0777,
+            "within_20_lbs": 0.1756,
+            "within_30_lbs": 0.2936,
+            "mean_signed_error_lbs": -38.804
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 70.347,
+            "median_abs_error_lbs": 66.52,
+            "rmse_lbs": 80.213,
+            "r2": -5.0521,
+            "within_10_lbs": 0.0594,
+            "within_20_lbs": 0.0974,
+            "within_30_lbs": 0.1544,
+            "mean_signed_error_lbs": -56.7
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 80.338,
+            "median_abs_error_lbs": 89.593,
+            "rmse_lbs": 94.346,
+            "r2": -12.4147,
+            "within_10_lbs": 0.1055,
+            "within_20_lbs": 0.1508,
+            "within_30_lbs": 0.2362,
+            "mean_signed_error_lbs": -72.558
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.5,
+        "routed_rows": 232
+      },
+      {
+        "model": "route_gte_211_logistic_cutoff_0.5",
+        "mae_lbs": 26.635,
+        "median_abs_error_lbs": 16.12,
+        "rmse_lbs": 40.092,
+        "r2": 0.2527,
+        "within_10_lbs": 0.3418,
+        "within_20_lbs": 0.5806,
+        "within_30_lbs": 0.7267,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 46.334,
+            "median_abs_error_lbs": 40.912,
+            "rmse_lbs": 56.789,
+            "r2": -1.1174,
+            "within_10_lbs": 0.1086,
+            "within_20_lbs": 0.2212,
+            "within_30_lbs": 0.3472,
+            "mean_signed_error_lbs": -21.071
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 50.29,
+            "median_abs_error_lbs": 40.641,
+            "rmse_lbs": 64.433,
+            "r2": -2.9051,
+            "within_10_lbs": 0.1615,
+            "within_20_lbs": 0.2969,
+            "within_30_lbs": 0.4062,
+            "mean_signed_error_lbs": -38.268
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 60.662,
+            "median_abs_error_lbs": 48.822,
+            "rmse_lbs": 76.518,
+            "r2": -7.8238,
+            "within_10_lbs": 0.1206,
+            "within_20_lbs": 0.2613,
+            "within_30_lbs": 0.3417,
+            "mean_signed_error_lbs": -59.06
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.5,
+        "routed_rows": 626
+      },
+      {
+        "model": "route_gte_181_hist_gradient_cutoff_0.15",
+        "mae_lbs": 26.687,
+        "median_abs_error_lbs": 16.897,
+        "rmse_lbs": 38.972,
+        "r2": 0.2939,
+        "within_10_lbs": 0.3261,
+        "within_20_lbs": 0.5617,
+        "within_30_lbs": 0.7107,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 44.227,
+            "median_abs_error_lbs": 38.11,
+            "rmse_lbs": 55.604,
+            "r2": -1.0299,
+            "within_10_lbs": 0.1166,
+            "within_20_lbs": 0.2507,
+            "within_30_lbs": 0.3861,
+            "mean_signed_error_lbs": -24.053
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 50.778,
+            "median_abs_error_lbs": 42.102,
+            "rmse_lbs": 65.416,
+            "r2": -3.0252,
+            "within_10_lbs": 0.1639,
+            "within_20_lbs": 0.2993,
+            "within_30_lbs": 0.4038,
+            "mean_signed_error_lbs": -44.895
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 64.326,
+            "median_abs_error_lbs": 51.436,
+            "rmse_lbs": 79.121,
+            "r2": -8.4345,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1457,
+            "within_30_lbs": 0.2663,
+            "mean_signed_error_lbs": -63.586
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.15,
+        "routed_rows": 805
+      },
+      {
+        "model": "route_gte_251_logistic_cutoff_0.35",
+        "mae_lbs": 27.189,
+        "median_abs_error_lbs": 16.063,
+        "rmse_lbs": 42.897,
+        "r2": 0.1445,
+        "within_10_lbs": 0.3446,
+        "within_20_lbs": 0.5898,
+        "within_30_lbs": 0.7433,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 53.888,
+            "median_abs_error_lbs": 46.342,
+            "rmse_lbs": 65.249,
+            "r2": -1.7952,
+            "within_10_lbs": 0.0818,
+            "within_20_lbs": 0.1796,
+            "within_30_lbs": 0.3029,
+            "mean_signed_error_lbs": -32.392
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 66.552,
+            "median_abs_error_lbs": 62.832,
+            "rmse_lbs": 77.08,
+            "r2": -4.5886,
+            "within_10_lbs": 0.0665,
+            "within_20_lbs": 0.114,
+            "within_30_lbs": 0.1829,
+            "mean_signed_error_lbs": -47.639
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 73.224,
+            "median_abs_error_lbs": 79.114,
+            "rmse_lbs": 89.172,
+            "r2": -10.9836,
+            "within_10_lbs": 0.1206,
+            "within_20_lbs": 0.1809,
+            "within_30_lbs": 0.2915,
+            "mean_signed_error_lbs": -63.33
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.35,
+        "routed_rows": 304
+      },
+      {
+        "model": "route_gte_181_logistic_cutoff_0.35",
+        "mae_lbs": 28.218,
+        "median_abs_error_lbs": 17.547,
+        "rmse_lbs": 40.373,
+        "r2": 0.2422,
+        "within_10_lbs": 0.3155,
+        "within_20_lbs": 0.5419,
+        "within_30_lbs": 0.6848,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 37.82,
+            "median_abs_error_lbs": 31.782,
+            "rmse_lbs": 48.202,
+            "r2": -0.5254,
+            "within_10_lbs": 0.1515,
+            "within_20_lbs": 0.3217,
+            "within_30_lbs": 0.4665,
+            "mean_signed_error_lbs": -13.538
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 40.124,
+            "median_abs_error_lbs": 28.376,
+            "rmse_lbs": 54.27,
+            "r2": -1.7704,
+            "within_10_lbs": 0.209,
+            "within_20_lbs": 0.4062,
+            "within_30_lbs": 0.5249,
+            "mean_signed_error_lbs": -32.931
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 54.651,
+            "median_abs_error_lbs": 45.198,
+            "rmse_lbs": 67.136,
+            "r2": -5.7927,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1759,
+            "within_30_lbs": 0.3065,
+            "mean_signed_error_lbs": -53.911
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.35,
+        "routed_rows": 1128
+      },
+      {
+        "model": "route_gte_251_logistic_cutoff_0.25",
+        "mae_lbs": 28.549,
+        "median_abs_error_lbs": 16.214,
+        "rmse_lbs": 45.387,
+        "r2": 0.0423,
+        "within_10_lbs": 0.3414,
+        "within_20_lbs": 0.5834,
+        "within_30_lbs": 0.734,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 53.975,
+            "median_abs_error_lbs": 46.197,
+            "rmse_lbs": 65.25,
+            "r2": -1.7953,
+            "within_10_lbs": 0.0845,
+            "within_20_lbs": 0.181,
+            "within_30_lbs": 0.2976,
+            "mean_signed_error_lbs": -24.696
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 63.859,
+            "median_abs_error_lbs": 60.875,
+            "rmse_lbs": 74.943,
+            "r2": -4.283,
+            "within_10_lbs": 0.0784,
+            "within_20_lbs": 0.1306,
+            "within_30_lbs": 0.2043,
+            "mean_signed_error_lbs": -39.511
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 69.209,
+            "median_abs_error_lbs": 59.499,
+            "rmse_lbs": 86.036,
+            "r2": -10.1555,
+            "within_10_lbs": 0.1357,
+            "within_20_lbs": 0.201,
+            "within_30_lbs": 0.3116,
+            "mean_signed_error_lbs": -58.213
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.25,
+        "routed_rows": 394
+      },
+      {
+        "model": "route_gte_211_logistic_cutoff_0.35",
+        "mae_lbs": 29.271,
+        "median_abs_error_lbs": 16.525,
+        "rmse_lbs": 44.057,
+        "r2": 0.0976,
+        "within_10_lbs": 0.3312,
+        "within_20_lbs": 0.5643,
+        "within_30_lbs": 0.6998,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 43.056,
+            "median_abs_error_lbs": 38.964,
+            "rmse_lbs": 53.305,
+            "r2": -0.8655,
+            "within_10_lbs": 0.118,
+            "within_20_lbs": 0.2493,
+            "within_30_lbs": 0.3794,
+            "mean_signed_error_lbs": -9.592
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 42.313,
+            "median_abs_error_lbs": 29.303,
+            "rmse_lbs": 57.42,
+            "r2": -2.1013,
+            "within_10_lbs": 0.19,
+            "within_20_lbs": 0.3682,
+            "within_30_lbs": 0.5107,
+            "mean_signed_error_lbs": -27.8
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 50.713,
+            "median_abs_error_lbs": 35.079,
+            "rmse_lbs": 68.309,
+            "r2": -6.0321,
+            "within_10_lbs": 0.1457,
+            "within_20_lbs": 0.3317,
+            "within_30_lbs": 0.4472,
+            "mean_signed_error_lbs": -48.707
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.35,
+        "routed_rows": 875
+      },
+      {
+        "model": "global_inverse_weighted_ridge_clip_pca_height",
+        "mae_lbs": 29.437,
+        "median_abs_error_lbs": 24.034,
+        "rmse_lbs": 38.623,
+        "r2": 0.3065,
+        "within_10_lbs": 0.2311,
+        "within_20_lbs": 0.4361,
+        "within_30_lbs": 0.6017,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 41.929,
+            "median_abs_error_lbs": 35.135,
+            "rmse_lbs": 53.707,
+            "r2": -0.8938,
+            "within_10_lbs": 0.1595,
+            "within_20_lbs": 0.3016,
+            "within_30_lbs": 0.4276,
+            "mean_signed_error_lbs": -32.418
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 54.909,
+            "median_abs_error_lbs": 48.884,
+            "rmse_lbs": 66.048,
+            "r2": -3.1034,
+            "within_10_lbs": 0.0855,
+            "within_20_lbs": 0.1663,
+            "within_30_lbs": 0.2755,
+            "mean_signed_error_lbs": -52.563
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 74.211,
+            "median_abs_error_lbs": 68.666,
+            "rmse_lbs": 83.162,
+            "r2": -9.4226,
+            "within_10_lbs": 0.0151,
+            "within_20_lbs": 0.0302,
+            "within_30_lbs": 0.0854,
+            "mean_signed_error_lbs": -73.514
+          }
+        }
+      },
+      {
+        "model": "route_gte_181_logistic_cutoff_0.25",
+        "mae_lbs": 30.121,
+        "median_abs_error_lbs": 18.91,
+        "rmse_lbs": 42.292,
+        "r2": 0.1684,
+        "within_10_lbs": 0.3021,
+        "within_20_lbs": 0.5166,
+        "within_30_lbs": 0.6512,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 34.818,
+            "median_abs_error_lbs": 29.792,
+            "rmse_lbs": 44.136,
+            "r2": -0.2789,
+            "within_10_lbs": 0.1662,
+            "within_20_lbs": 0.3458,
+            "within_30_lbs": 0.5013,
+            "mean_signed_error_lbs": -8.733
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 35.47,
+            "median_abs_error_lbs": 25.127,
+            "rmse_lbs": 48.03,
+            "r2": -1.1699,
+            "within_10_lbs": 0.2209,
+            "within_20_lbs": 0.4276,
+            "within_30_lbs": 0.5653,
+            "mean_signed_error_lbs": -28.079
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 49.352,
+            "median_abs_error_lbs": 42.915,
+            "rmse_lbs": 59.987,
+            "r2": -4.4231,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1809,
+            "within_30_lbs": 0.3216,
+            "mean_signed_error_lbs": -48.612
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.25,
+        "routed_rows": 1344
+      },
+      {
+        "model": "route_gte_251_logistic_cutoff_0.15",
+        "mae_lbs": 30.579,
+        "median_abs_error_lbs": 16.466,
+        "rmse_lbs": 48.795,
+        "r2": -0.107,
+        "within_10_lbs": 0.3357,
+        "within_20_lbs": 0.5716,
+        "within_30_lbs": 0.7203,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 52.879,
+            "median_abs_error_lbs": 45.193,
+            "rmse_lbs": 64.229,
+            "r2": -1.7085,
+            "within_10_lbs": 0.0885,
+            "within_20_lbs": 0.185,
+            "within_30_lbs": 0.3123,
+            "mean_signed_error_lbs": -14.053
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 58.364,
+            "median_abs_error_lbs": 54.273,
+            "rmse_lbs": 70.474,
+            "r2": -3.6717,
+            "within_10_lbs": 0.095,
+            "within_20_lbs": 0.1639,
+            "within_30_lbs": 0.2637,
+            "mean_signed_error_lbs": -28.447
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 60.403,
+            "median_abs_error_lbs": 39.191,
+            "rmse_lbs": 79.427,
+            "r2": -8.5074,
+            "within_10_lbs": 0.1608,
+            "within_20_lbs": 0.2513,
+            "within_30_lbs": 0.397,
+            "mean_signed_error_lbs": -46.308
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.15,
+        "routed_rows": 530
+      },
+      {
+        "model": "route_gte_211_logistic_cutoff_0.25",
+        "mae_lbs": 31.945,
+        "median_abs_error_lbs": 17.387,
+        "rmse_lbs": 47.495,
+        "r2": -0.0487,
+        "within_10_lbs": 0.3191,
+        "within_20_lbs": 0.5428,
+        "within_30_lbs": 0.6714,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 40.981,
+            "median_abs_error_lbs": 37.694,
+            "rmse_lbs": 50.752,
+            "r2": -0.6911,
+            "within_10_lbs": 0.1247,
+            "within_20_lbs": 0.2748,
+            "within_30_lbs": 0.4048,
+            "mean_signed_error_lbs": -2.524
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 37.263,
+            "median_abs_error_lbs": 25.843,
+            "rmse_lbs": 52.0,
+            "r2": -1.5435,
+            "within_10_lbs": 0.209,
+            "within_20_lbs": 0.4204,
+            "within_30_lbs": 0.5748,
+            "mean_signed_error_lbs": -21.412
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 45.952,
+            "median_abs_error_lbs": 31.905,
+            "rmse_lbs": 62.788,
+            "r2": -4.9414,
+            "within_10_lbs": 0.1558,
+            "within_20_lbs": 0.3568,
+            "within_30_lbs": 0.4824,
+            "mean_signed_error_lbs": -43.814
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.25,
+        "routed_rows": 1070
+      },
+      {
+        "model": "route_gte_181_logistic_cutoff_0.15",
+        "mae_lbs": 33.613,
+        "median_abs_error_lbs": 22.217,
+        "rmse_lbs": 45.707,
+        "r2": 0.0287,
+        "within_10_lbs": 0.2759,
+        "within_20_lbs": 0.4712,
+        "within_30_lbs": 0.593,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 31.623,
+            "median_abs_error_lbs": 27.251,
+            "rmse_lbs": 39.228,
+            "r2": -0.0103,
+            "within_10_lbs": 0.1836,
+            "within_20_lbs": 0.3713,
+            "within_30_lbs": 0.5389,
+            "mean_signed_error_lbs": -4.033
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 31.299,
+            "median_abs_error_lbs": 24.313,
+            "rmse_lbs": 40.97,
+            "r2": -0.5789,
+            "within_10_lbs": 0.2375,
+            "within_20_lbs": 0.4466,
+            "within_30_lbs": 0.5914,
+            "mean_signed_error_lbs": -23.733
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 45.305,
+            "median_abs_error_lbs": 42.102,
+            "rmse_lbs": 52.601,
+            "r2": -3.1699,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1809,
+            "within_30_lbs": 0.3266,
+            "mean_signed_error_lbs": -44.565
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.15,
+        "routed_rows": 1651
+      },
+      {
+        "model": "route_gte_211_logistic_cutoff_0.15",
+        "mae_lbs": 36.695,
+        "median_abs_error_lbs": 20.246,
+        "rmse_lbs": 52.663,
+        "r2": -0.2894,
+        "within_10_lbs": 0.2935,
+        "within_20_lbs": 0.4978,
+        "within_30_lbs": 0.6119,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 38.278,
+            "median_abs_error_lbs": 35.924,
+            "rmse_lbs": 46.191,
+            "r2": -0.4008,
+            "within_10_lbs": 0.13,
+            "within_20_lbs": 0.2882,
+            "within_30_lbs": 0.4209,
+            "mean_signed_error_lbs": 5.972
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 30.917,
+            "median_abs_error_lbs": 23.234,
+            "rmse_lbs": 42.142,
+            "r2": -0.6705,
+            "within_10_lbs": 0.2257,
+            "within_20_lbs": 0.4584,
+            "within_30_lbs": 0.6271,
+            "mean_signed_error_lbs": -13.704
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 37.374,
+            "median_abs_error_lbs": 28.291,
+            "rmse_lbs": 49.329,
+            "r2": -2.6672,
+            "within_10_lbs": 0.1658,
+            "within_20_lbs": 0.3819,
+            "within_30_lbs": 0.5226,
+            "mean_signed_error_lbs": -34.94
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.15,
+        "routed_rows": 1355
+      },
+      {
+        "model": "specialist_ridge_clip_pca_height_train_gte_181",
+        "mae_lbs": 58.22,
+        "median_abs_error_lbs": 58.144,
+        "rmse_lbs": 65.316,
+        "r2": -0.9834,
+        "within_10_lbs": 0.0547,
+        "within_20_lbs": 0.1167,
+        "within_30_lbs": 0.1937,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 29.644,
+            "median_abs_error_lbs": 25.276,
+            "rmse_lbs": 37.001,
+            "r2": 0.1011,
+            "within_10_lbs": 0.1984,
+            "within_20_lbs": 0.4008,
+            "within_30_lbs": 0.5737,
+            "mean_signed_error_lbs": -0.236
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 29.818,
+            "median_abs_error_lbs": 23.46,
+            "rmse_lbs": 38.909,
+            "r2": -0.4241,
+            "within_10_lbs": 0.2447,
+            "within_20_lbs": 0.4584,
+            "within_30_lbs": 0.6057,
+            "mean_signed_error_lbs": -21.995
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 45.305,
+            "median_abs_error_lbs": 42.102,
+            "rmse_lbs": 52.601,
+            "r2": -3.1699,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1809,
+            "within_30_lbs": 0.3266,
+            "mean_signed_error_lbs": -44.565
+          }
+        },
+        "specialist_train_rows": 1560,
+        "specialist_threshold_lbs": 181.0
+      },
+      {
+        "model": "specialist_ridge_clip_pca_height_train_gte_211",
+        "mae_lbs": 83.365,
+        "median_abs_error_lbs": 87.951,
+        "rmse_lbs": 91.236,
+        "r2": -2.87,
+        "within_10_lbs": 0.0329,
+        "within_20_lbs": 0.0751,
+        "within_30_lbs": 0.1103,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 35.67,
+            "median_abs_error_lbs": 33.829,
+            "rmse_lbs": 42.538,
+            "r2": -0.188,
+            "within_10_lbs": 0.1381,
+            "within_20_lbs": 0.3123,
+            "within_30_lbs": 0.4504,
+            "mean_signed_error_lbs": 16.914
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 26.08,
+            "median_abs_error_lbs": 20.525,
+            "rmse_lbs": 34.026,
+            "r2": -0.0891,
+            "within_10_lbs": 0.2352,
+            "within_20_lbs": 0.4941,
+            "within_30_lbs": 0.6746,
+            "mean_signed_error_lbs": -7.124
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 33.273,
+            "median_abs_error_lbs": 25.965,
+            "rmse_lbs": 42.26,
+            "r2": -1.6915,
+            "within_10_lbs": 0.1658,
+            "within_20_lbs": 0.407,
+            "within_30_lbs": 0.5528,
+            "mean_signed_error_lbs": -30.685
+          }
+        },
+        "specialist_train_rows": 606,
+        "specialist_threshold_lbs": 211.0
+      },
+      {
+        "model": "specialist_ridge_clip_pca_height_train_gte_251",
+        "mae_lbs": 119.35,
+        "median_abs_error_lbs": 127.411,
+        "rmse_lbs": 128.257,
+        "r2": -6.6479,
+        "within_10_lbs": 0.0195,
+        "within_20_lbs": 0.0371,
+        "within_30_lbs": 0.0595,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 56.839,
+            "median_abs_error_lbs": 56.296,
+            "rmse_lbs": 65.612,
+            "r2": -1.8265,
+            "within_10_lbs": 0.0818,
+            "within_20_lbs": 0.1555,
+            "within_30_lbs": 0.2493,
+            "mean_signed_error_lbs": 50.14
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 36.71,
+            "median_abs_error_lbs": 34.149,
+            "rmse_lbs": 43.494,
+            "r2": -0.7794,
+            "within_10_lbs": 0.1449,
+            "within_20_lbs": 0.2755,
+            "within_30_lbs": 0.4347,
+            "mean_signed_error_lbs": 24.84
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 25.526,
+            "median_abs_error_lbs": 23.9,
+            "rmse_lbs": 31.032,
+            "r2": -0.4513,
+            "within_10_lbs": 0.2462,
+            "within_20_lbs": 0.407,
+            "within_30_lbs": 0.6382,
+            "mean_signed_error_lbs": 0.755
+          }
+        },
+        "specialist_train_rows": 145,
+        "specialist_threshold_lbs": 251.0
+      }
+    ],
+    "results_by_211_mae": [
+      {
+        "model": "specialist_ridge_clip_pca_height_train_gte_211",
+        "mae_lbs": 83.365,
+        "median_abs_error_lbs": 87.951,
+        "rmse_lbs": 91.236,
+        "r2": -2.87,
+        "within_10_lbs": 0.0329,
+        "within_20_lbs": 0.0751,
+        "within_30_lbs": 0.1103,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 35.67,
+            "median_abs_error_lbs": 33.829,
+            "rmse_lbs": 42.538,
+            "r2": -0.188,
+            "within_10_lbs": 0.1381,
+            "within_20_lbs": 0.3123,
+            "within_30_lbs": 0.4504,
+            "mean_signed_error_lbs": 16.914
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 26.08,
+            "median_abs_error_lbs": 20.525,
+            "rmse_lbs": 34.026,
+            "r2": -0.0891,
+            "within_10_lbs": 0.2352,
+            "within_20_lbs": 0.4941,
+            "within_30_lbs": 0.6746,
+            "mean_signed_error_lbs": -7.124
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 33.273,
+            "median_abs_error_lbs": 25.965,
+            "rmse_lbs": 42.26,
+            "r2": -1.6915,
+            "within_10_lbs": 0.1658,
+            "within_20_lbs": 0.407,
+            "within_30_lbs": 0.5528,
+            "mean_signed_error_lbs": -30.685
+          }
+        },
+        "specialist_train_rows": 606,
+        "specialist_threshold_lbs": 211.0
+      },
+      {
+        "model": "specialist_ridge_clip_pca_height_train_gte_181",
+        "mae_lbs": 58.22,
+        "median_abs_error_lbs": 58.144,
+        "rmse_lbs": 65.316,
+        "r2": -0.9834,
+        "within_10_lbs": 0.0547,
+        "within_20_lbs": 0.1167,
+        "within_30_lbs": 0.1937,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 29.644,
+            "median_abs_error_lbs": 25.276,
+            "rmse_lbs": 37.001,
+            "r2": 0.1011,
+            "within_10_lbs": 0.1984,
+            "within_20_lbs": 0.4008,
+            "within_30_lbs": 0.5737,
+            "mean_signed_error_lbs": -0.236
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 29.818,
+            "median_abs_error_lbs": 23.46,
+            "rmse_lbs": 38.909,
+            "r2": -0.4241,
+            "within_10_lbs": 0.2447,
+            "within_20_lbs": 0.4584,
+            "within_30_lbs": 0.6057,
+            "mean_signed_error_lbs": -21.995
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 45.305,
+            "median_abs_error_lbs": 42.102,
+            "rmse_lbs": 52.601,
+            "r2": -3.1699,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1809,
+            "within_30_lbs": 0.3266,
+            "mean_signed_error_lbs": -44.565
+          }
+        },
+        "specialist_train_rows": 1560,
+        "specialist_threshold_lbs": 181.0
+      },
+      {
+        "model": "route_gte_211_logistic_cutoff_0.15",
+        "mae_lbs": 36.695,
+        "median_abs_error_lbs": 20.246,
+        "rmse_lbs": 52.663,
+        "r2": -0.2894,
+        "within_10_lbs": 0.2935,
+        "within_20_lbs": 0.4978,
+        "within_30_lbs": 0.6119,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 38.278,
+            "median_abs_error_lbs": 35.924,
+            "rmse_lbs": 46.191,
+            "r2": -0.4008,
+            "within_10_lbs": 0.13,
+            "within_20_lbs": 0.2882,
+            "within_30_lbs": 0.4209,
+            "mean_signed_error_lbs": 5.972
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 30.917,
+            "median_abs_error_lbs": 23.234,
+            "rmse_lbs": 42.142,
+            "r2": -0.6705,
+            "within_10_lbs": 0.2257,
+            "within_20_lbs": 0.4584,
+            "within_30_lbs": 0.6271,
+            "mean_signed_error_lbs": -13.704
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 37.374,
+            "median_abs_error_lbs": 28.291,
+            "rmse_lbs": 49.329,
+            "r2": -2.6672,
+            "within_10_lbs": 0.1658,
+            "within_20_lbs": 0.3819,
+            "within_30_lbs": 0.5226,
+            "mean_signed_error_lbs": -34.94
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.15,
+        "routed_rows": 1355
+      },
+      {
+        "model": "route_gte_181_logistic_cutoff_0.15",
+        "mae_lbs": 33.613,
+        "median_abs_error_lbs": 22.217,
+        "rmse_lbs": 45.707,
+        "r2": 0.0287,
+        "within_10_lbs": 0.2759,
+        "within_20_lbs": 0.4712,
+        "within_30_lbs": 0.593,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 31.623,
+            "median_abs_error_lbs": 27.251,
+            "rmse_lbs": 39.228,
+            "r2": -0.0103,
+            "within_10_lbs": 0.1836,
+            "within_20_lbs": 0.3713,
+            "within_30_lbs": 0.5389,
+            "mean_signed_error_lbs": -4.033
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 31.299,
+            "median_abs_error_lbs": 24.313,
+            "rmse_lbs": 40.97,
+            "r2": -0.5789,
+            "within_10_lbs": 0.2375,
+            "within_20_lbs": 0.4466,
+            "within_30_lbs": 0.5914,
+            "mean_signed_error_lbs": -23.733
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 45.305,
+            "median_abs_error_lbs": 42.102,
+            "rmse_lbs": 52.601,
+            "r2": -3.1699,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1809,
+            "within_30_lbs": 0.3266,
+            "mean_signed_error_lbs": -44.565
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.15,
+        "routed_rows": 1651
+      },
+      {
+        "model": "route_gte_181_logistic_cutoff_0.25",
+        "mae_lbs": 30.121,
+        "median_abs_error_lbs": 18.91,
+        "rmse_lbs": 42.292,
+        "r2": 0.1684,
+        "within_10_lbs": 0.3021,
+        "within_20_lbs": 0.5166,
+        "within_30_lbs": 0.6512,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 34.818,
+            "median_abs_error_lbs": 29.792,
+            "rmse_lbs": 44.136,
+            "r2": -0.2789,
+            "within_10_lbs": 0.1662,
+            "within_20_lbs": 0.3458,
+            "within_30_lbs": 0.5013,
+            "mean_signed_error_lbs": -8.733
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 35.47,
+            "median_abs_error_lbs": 25.127,
+            "rmse_lbs": 48.03,
+            "r2": -1.1699,
+            "within_10_lbs": 0.2209,
+            "within_20_lbs": 0.4276,
+            "within_30_lbs": 0.5653,
+            "mean_signed_error_lbs": -28.079
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 49.352,
+            "median_abs_error_lbs": 42.915,
+            "rmse_lbs": 59.987,
+            "r2": -4.4231,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1809,
+            "within_30_lbs": 0.3216,
+            "mean_signed_error_lbs": -48.612
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.25,
+        "routed_rows": 1344
+      },
+      {
+        "model": "specialist_ridge_clip_pca_height_train_gte_251",
+        "mae_lbs": 119.35,
+        "median_abs_error_lbs": 127.411,
+        "rmse_lbs": 128.257,
+        "r2": -6.6479,
+        "within_10_lbs": 0.0195,
+        "within_20_lbs": 0.0371,
+        "within_30_lbs": 0.0595,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 56.839,
+            "median_abs_error_lbs": 56.296,
+            "rmse_lbs": 65.612,
+            "r2": -1.8265,
+            "within_10_lbs": 0.0818,
+            "within_20_lbs": 0.1555,
+            "within_30_lbs": 0.2493,
+            "mean_signed_error_lbs": 50.14
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 36.71,
+            "median_abs_error_lbs": 34.149,
+            "rmse_lbs": 43.494,
+            "r2": -0.7794,
+            "within_10_lbs": 0.1449,
+            "within_20_lbs": 0.2755,
+            "within_30_lbs": 0.4347,
+            "mean_signed_error_lbs": 24.84
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 25.526,
+            "median_abs_error_lbs": 23.9,
+            "rmse_lbs": 31.032,
+            "r2": -0.4513,
+            "within_10_lbs": 0.2462,
+            "within_20_lbs": 0.407,
+            "within_30_lbs": 0.6382,
+            "mean_signed_error_lbs": 0.755
+          }
+        },
+        "specialist_train_rows": 145,
+        "specialist_threshold_lbs": 251.0
+      },
+      {
+        "model": "route_gte_211_logistic_cutoff_0.25",
+        "mae_lbs": 31.945,
+        "median_abs_error_lbs": 17.387,
+        "rmse_lbs": 47.495,
+        "r2": -0.0487,
+        "within_10_lbs": 0.3191,
+        "within_20_lbs": 0.5428,
+        "within_30_lbs": 0.6714,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 40.981,
+            "median_abs_error_lbs": 37.694,
+            "rmse_lbs": 50.752,
+            "r2": -0.6911,
+            "within_10_lbs": 0.1247,
+            "within_20_lbs": 0.2748,
+            "within_30_lbs": 0.4048,
+            "mean_signed_error_lbs": -2.524
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 37.263,
+            "median_abs_error_lbs": 25.843,
+            "rmse_lbs": 52.0,
+            "r2": -1.5435,
+            "within_10_lbs": 0.209,
+            "within_20_lbs": 0.4204,
+            "within_30_lbs": 0.5748,
+            "mean_signed_error_lbs": -21.412
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 45.952,
+            "median_abs_error_lbs": 31.905,
+            "rmse_lbs": 62.788,
+            "r2": -4.9414,
+            "within_10_lbs": 0.1558,
+            "within_20_lbs": 0.3568,
+            "within_30_lbs": 0.4824,
+            "mean_signed_error_lbs": -43.814
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.25,
+        "routed_rows": 1070
+      },
+      {
+        "model": "route_gte_181_logistic_cutoff_0.35",
+        "mae_lbs": 28.218,
+        "median_abs_error_lbs": 17.547,
+        "rmse_lbs": 40.373,
+        "r2": 0.2422,
+        "within_10_lbs": 0.3155,
+        "within_20_lbs": 0.5419,
+        "within_30_lbs": 0.6848,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 37.82,
+            "median_abs_error_lbs": 31.782,
+            "rmse_lbs": 48.202,
+            "r2": -0.5254,
+            "within_10_lbs": 0.1515,
+            "within_20_lbs": 0.3217,
+            "within_30_lbs": 0.4665,
+            "mean_signed_error_lbs": -13.538
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 40.124,
+            "median_abs_error_lbs": 28.376,
+            "rmse_lbs": 54.27,
+            "r2": -1.7704,
+            "within_10_lbs": 0.209,
+            "within_20_lbs": 0.4062,
+            "within_30_lbs": 0.5249,
+            "mean_signed_error_lbs": -32.931
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 54.651,
+            "median_abs_error_lbs": 45.198,
+            "rmse_lbs": 67.136,
+            "r2": -5.7927,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1759,
+            "within_30_lbs": 0.3065,
+            "mean_signed_error_lbs": -53.911
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.35,
+        "routed_rows": 1128
+      },
+      {
+        "model": "route_gte_211_logistic_cutoff_0.35",
+        "mae_lbs": 29.271,
+        "median_abs_error_lbs": 16.525,
+        "rmse_lbs": 44.057,
+        "r2": 0.0976,
+        "within_10_lbs": 0.3312,
+        "within_20_lbs": 0.5643,
+        "within_30_lbs": 0.6998,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 43.056,
+            "median_abs_error_lbs": 38.964,
+            "rmse_lbs": 53.305,
+            "r2": -0.8655,
+            "within_10_lbs": 0.118,
+            "within_20_lbs": 0.2493,
+            "within_30_lbs": 0.3794,
+            "mean_signed_error_lbs": -9.592
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 42.313,
+            "median_abs_error_lbs": 29.303,
+            "rmse_lbs": 57.42,
+            "r2": -2.1013,
+            "within_10_lbs": 0.19,
+            "within_20_lbs": 0.3682,
+            "within_30_lbs": 0.5107,
+            "mean_signed_error_lbs": -27.8
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 50.713,
+            "median_abs_error_lbs": 35.079,
+            "rmse_lbs": 68.309,
+            "r2": -6.0321,
+            "within_10_lbs": 0.1457,
+            "within_20_lbs": 0.3317,
+            "within_30_lbs": 0.4472,
+            "mean_signed_error_lbs": -48.707
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.35,
+        "routed_rows": 875
+      },
+      {
+        "model": "blend_gte_211_logistic_power_1.0",
+        "mae_lbs": 26.163,
+        "median_abs_error_lbs": 18.095,
+        "rmse_lbs": 36.383,
+        "r2": 0.3846,
+        "within_10_lbs": 0.3037,
+        "within_20_lbs": 0.5396,
+        "within_30_lbs": 0.6899,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 37.569,
+            "median_abs_error_lbs": 31.965,
+            "rmse_lbs": 47.947,
+            "r2": -0.5094,
+            "within_10_lbs": 0.1555,
+            "within_20_lbs": 0.3458,
+            "within_30_lbs": 0.4879,
+            "mean_signed_error_lbs": -20.424
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 45.884,
+            "median_abs_error_lbs": 40.144,
+            "rmse_lbs": 57.134,
+            "r2": -2.0705,
+            "within_10_lbs": 0.1211,
+            "within_20_lbs": 0.2637,
+            "within_30_lbs": 0.3919,
+            "mean_signed_error_lbs": -40.311
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 62.344,
+            "median_abs_error_lbs": 59.144,
+            "rmse_lbs": 72.164,
+            "r2": -6.8483,
+            "within_10_lbs": 0.0503,
+            "within_20_lbs": 0.1206,
+            "within_30_lbs": 0.1859,
+            "mean_signed_error_lbs": -61.781
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.2397
+      },
+      {
+        "model": "blend_gte_181_logistic_power_1.0",
+        "mae_lbs": 25.729,
+        "median_abs_error_lbs": 18.347,
+        "rmse_lbs": 35.486,
+        "r2": 0.4145,
+        "within_10_lbs": 0.3027,
+        "within_20_lbs": 0.5358,
+        "within_30_lbs": 0.6886,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 38.35,
+            "median_abs_error_lbs": 31.331,
+            "rmse_lbs": 49.066,
+            "r2": -0.5806,
+            "within_10_lbs": 0.1676,
+            "within_20_lbs": 0.3271,
+            "within_30_lbs": 0.4759,
+            "mean_signed_error_lbs": -24.987
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 49.383,
+            "median_abs_error_lbs": 44.581,
+            "rmse_lbs": 59.96,
+            "r2": -2.3818,
+            "within_10_lbs": 0.0926,
+            "within_20_lbs": 0.2233,
+            "within_30_lbs": 0.3468,
+            "mean_signed_error_lbs": -46.592
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 67.873,
+            "median_abs_error_lbs": 65.649,
+            "rmse_lbs": 76.209,
+            "r2": -7.7526,
+            "within_10_lbs": 0.0251,
+            "within_20_lbs": 0.0553,
+            "within_30_lbs": 0.1206,
+            "mean_signed_error_lbs": -67.397
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.2936
+      },
+      {
+        "model": "route_gte_211_logistic_cutoff_0.5",
+        "mae_lbs": 26.635,
+        "median_abs_error_lbs": 16.12,
+        "rmse_lbs": 40.092,
+        "r2": 0.2527,
+        "within_10_lbs": 0.3418,
+        "within_20_lbs": 0.5806,
+        "within_30_lbs": 0.7267,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 46.334,
+            "median_abs_error_lbs": 40.912,
+            "rmse_lbs": 56.789,
+            "r2": -1.1174,
+            "within_10_lbs": 0.1086,
+            "within_20_lbs": 0.2212,
+            "within_30_lbs": 0.3472,
+            "mean_signed_error_lbs": -21.071
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 50.29,
+            "median_abs_error_lbs": 40.641,
+            "rmse_lbs": 64.433,
+            "r2": -2.9051,
+            "within_10_lbs": 0.1615,
+            "within_20_lbs": 0.2969,
+            "within_30_lbs": 0.4062,
+            "mean_signed_error_lbs": -38.268
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 60.662,
+            "median_abs_error_lbs": 48.822,
+            "rmse_lbs": 76.518,
+            "r2": -7.8238,
+            "within_10_lbs": 0.1206,
+            "within_20_lbs": 0.2613,
+            "within_30_lbs": 0.3417,
+            "mean_signed_error_lbs": -59.06
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.5,
+        "routed_rows": 626
+      },
+      {
+        "model": "route_gte_181_logistic_cutoff_0.5",
+        "mae_lbs": 26.4,
+        "median_abs_error_lbs": 16.574,
+        "rmse_lbs": 38.758,
+        "r2": 0.3016,
+        "within_10_lbs": 0.3286,
+        "within_20_lbs": 0.5681,
+        "within_30_lbs": 0.7177,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 44.024,
+            "median_abs_error_lbs": 37.68,
+            "rmse_lbs": 55.523,
+            "r2": -1.0241,
+            "within_10_lbs": 0.1153,
+            "within_20_lbs": 0.2547,
+            "within_30_lbs": 0.3928,
+            "mean_signed_error_lbs": -23.723
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 50.318,
+            "median_abs_error_lbs": 41.188,
+            "rmse_lbs": 65.261,
+            "r2": -3.0061,
+            "within_10_lbs": 0.1639,
+            "within_20_lbs": 0.3159,
+            "within_30_lbs": 0.4181,
+            "mean_signed_error_lbs": -44.256
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 64.968,
+            "median_abs_error_lbs": 53.182,
+            "rmse_lbs": 79.748,
+            "r2": -8.5846,
+            "within_10_lbs": 0.0603,
+            "within_20_lbs": 0.1608,
+            "within_30_lbs": 0.2714,
+            "mean_signed_error_lbs": -64.289
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.5,
+        "routed_rows": 792
+      },
+      {
+        "model": "route_gte_181_hist_gradient_cutoff_0.15",
+        "mae_lbs": 26.687,
+        "median_abs_error_lbs": 16.897,
+        "rmse_lbs": 38.972,
+        "r2": 0.2939,
+        "within_10_lbs": 0.3261,
+        "within_20_lbs": 0.5617,
+        "within_30_lbs": 0.7107,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 44.227,
+            "median_abs_error_lbs": 38.11,
+            "rmse_lbs": 55.604,
+            "r2": -1.0299,
+            "within_10_lbs": 0.1166,
+            "within_20_lbs": 0.2507,
+            "within_30_lbs": 0.3861,
+            "mean_signed_error_lbs": -24.053
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 50.778,
+            "median_abs_error_lbs": 42.102,
+            "rmse_lbs": 65.416,
+            "r2": -3.0252,
+            "within_10_lbs": 0.1639,
+            "within_20_lbs": 0.2993,
+            "within_30_lbs": 0.4038,
+            "mean_signed_error_lbs": -44.895
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 64.326,
+            "median_abs_error_lbs": 51.436,
+            "rmse_lbs": 79.121,
+            "r2": -8.4345,
+            "within_10_lbs": 0.0653,
+            "within_20_lbs": 0.1457,
+            "within_30_lbs": 0.2663,
+            "mean_signed_error_lbs": -63.586
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.15,
+        "routed_rows": 805
+      },
+      {
+        "model": "blend_gte_211_logistic_power_1.5",
+        "mae_lbs": 24.649,
+        "median_abs_error_lbs": 16.603,
+        "rmse_lbs": 35.255,
+        "r2": 0.4221,
+        "within_10_lbs": 0.3331,
+        "within_20_lbs": 0.577,
+        "within_30_lbs": 0.7206,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 41.451,
+            "median_abs_error_lbs": 35.485,
+            "rmse_lbs": 52.512,
+            "r2": -0.8104,
+            "within_10_lbs": 0.1461,
+            "within_20_lbs": 0.307,
+            "within_30_lbs": 0.4263,
+            "mean_signed_error_lbs": -27.864
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 52.231,
+            "median_abs_error_lbs": 48.267,
+            "rmse_lbs": 63.626,
+            "r2": -2.8079,
+            "within_10_lbs": 0.1021,
+            "within_20_lbs": 0.2233,
+            "within_30_lbs": 0.3159,
+            "mean_signed_error_lbs": -47.839
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 69.753,
+            "median_abs_error_lbs": 66.827,
+            "rmse_lbs": 79.554,
+            "r2": -8.5379,
+            "within_10_lbs": 0.0352,
+            "within_20_lbs": 0.0905,
+            "within_30_lbs": 0.1508,
+            "mean_signed_error_lbs": -69.261
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.177
+      },
+      {
+        "model": "global_inverse_weighted_ridge_clip_pca_height",
+        "mae_lbs": 29.437,
+        "median_abs_error_lbs": 24.034,
+        "rmse_lbs": 38.623,
+        "r2": 0.3065,
+        "within_10_lbs": 0.2311,
+        "within_20_lbs": 0.4361,
+        "within_30_lbs": 0.6017,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 41.929,
+            "median_abs_error_lbs": 35.135,
+            "rmse_lbs": 53.707,
+            "r2": -0.8938,
+            "within_10_lbs": 0.1595,
+            "within_20_lbs": 0.3016,
+            "within_30_lbs": 0.4276,
+            "mean_signed_error_lbs": -32.418
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 54.909,
+            "median_abs_error_lbs": 48.884,
+            "rmse_lbs": 66.048,
+            "r2": -3.1034,
+            "within_10_lbs": 0.0855,
+            "within_20_lbs": 0.1663,
+            "within_30_lbs": 0.2755,
+            "mean_signed_error_lbs": -52.563
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 74.211,
+            "median_abs_error_lbs": 68.666,
+            "rmse_lbs": 83.162,
+            "r2": -9.4226,
+            "within_10_lbs": 0.0151,
+            "within_20_lbs": 0.0302,
+            "within_30_lbs": 0.0854,
+            "mean_signed_error_lbs": -73.514
+          }
+        }
+      },
+      {
+        "model": "blend_gte_181_logistic_power_1.5",
+        "mae_lbs": 24.675,
+        "median_abs_error_lbs": 16.965,
+        "rmse_lbs": 35.05,
+        "r2": 0.4288,
+        "within_10_lbs": 0.3267,
+        "within_20_lbs": 0.5671,
+        "within_30_lbs": 0.7196,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 42.306,
+            "median_abs_error_lbs": 35.687,
+            "rmse_lbs": 53.569,
+            "r2": -0.8841,
+            "within_10_lbs": 0.1421,
+            "within_20_lbs": 0.2989,
+            "within_30_lbs": 0.4276,
+            "mean_signed_error_lbs": -31.032
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 55.262,
+            "median_abs_error_lbs": 51.333,
+            "rmse_lbs": 65.956,
+            "r2": -3.092,
+            "within_10_lbs": 0.0879,
+            "within_20_lbs": 0.1853,
+            "within_30_lbs": 0.2684,
+            "mean_signed_error_lbs": -53.096
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 74.274,
+            "median_abs_error_lbs": 71.099,
+            "rmse_lbs": 82.767,
+            "r2": -9.3239,
+            "within_10_lbs": 0.0201,
+            "within_20_lbs": 0.0553,
+            "within_30_lbs": 0.0905,
+            "mean_signed_error_lbs": -73.825
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.2186
+      },
+      {
+        "model": "blend_gte_211_logistic_power_2.0",
+        "mae_lbs": 24.176,
+        "median_abs_error_lbs": 16.081,
+        "rmse_lbs": 35.09,
+        "r2": 0.4276,
+        "within_10_lbs": 0.3418,
+        "within_20_lbs": 0.5841,
+        "within_30_lbs": 0.7321,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 44.328,
+            "median_abs_error_lbs": 38.794,
+            "rmse_lbs": 55.633,
+            "r2": -1.032,
+            "within_10_lbs": 0.1287,
+            "within_20_lbs": 0.2668,
+            "within_30_lbs": 0.3901,
+            "mean_signed_error_lbs": -32.799
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 56.639,
+            "median_abs_error_lbs": 53.656,
+            "rmse_lbs": 67.943,
+            "r2": -3.3421,
+            "within_10_lbs": 0.095,
+            "within_20_lbs": 0.1876,
+            "within_30_lbs": 0.2684,
+            "mean_signed_error_lbs": -53.055
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 74.963,
+            "median_abs_error_lbs": 71.503,
+            "rmse_lbs": 84.519,
+            "r2": -9.7657,
+            "within_10_lbs": 0.0352,
+            "within_20_lbs": 0.0754,
+            "within_30_lbs": 0.1206,
+            "mean_signed_error_lbs": -74.525
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "logistic",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.1415
+      },
+      {
+        "model": "route_gte_251_logistic_cutoff_0.15",
+        "mae_lbs": 30.579,
+        "median_abs_error_lbs": 16.466,
+        "rmse_lbs": 48.795,
+        "r2": -0.107,
+        "within_10_lbs": 0.3357,
+        "within_20_lbs": 0.5716,
+        "within_30_lbs": 0.7203,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 52.879,
+            "median_abs_error_lbs": 45.193,
+            "rmse_lbs": 64.229,
+            "r2": -1.7085,
+            "within_10_lbs": 0.0885,
+            "within_20_lbs": 0.185,
+            "within_30_lbs": 0.3123,
+            "mean_signed_error_lbs": -14.053
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 58.364,
+            "median_abs_error_lbs": 54.273,
+            "rmse_lbs": 70.474,
+            "r2": -3.6717,
+            "within_10_lbs": 0.095,
+            "within_20_lbs": 0.1639,
+            "within_30_lbs": 0.2637,
+            "mean_signed_error_lbs": -28.447
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 60.403,
+            "median_abs_error_lbs": 39.191,
+            "rmse_lbs": 79.427,
+            "r2": -8.5074,
+            "within_10_lbs": 0.1608,
+            "within_20_lbs": 0.2513,
+            "within_30_lbs": 0.397,
+            "mean_signed_error_lbs": -46.308
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.15,
+        "routed_rows": 530
+      },
+      {
+        "model": "route_gte_181_hist_gradient_cutoff_0.25",
+        "mae_lbs": 25.426,
+        "median_abs_error_lbs": 16.219,
+        "rmse_lbs": 37.73,
+        "r2": 0.3381,
+        "within_10_lbs": 0.3389,
+        "within_20_lbs": 0.5806,
+        "within_30_lbs": 0.7356,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 48.326,
+            "median_abs_error_lbs": 41.313,
+            "rmse_lbs": 59.864,
+            "r2": -1.3529,
+            "within_10_lbs": 0.1005,
+            "within_20_lbs": 0.2158,
+            "within_30_lbs": 0.3485,
+            "mean_signed_error_lbs": -32.807
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 58.51,
+            "median_abs_error_lbs": 55.523,
+            "rmse_lbs": 72.051,
+            "r2": -3.8832,
+            "within_10_lbs": 0.1378,
+            "within_20_lbs": 0.2375,
+            "within_30_lbs": 0.3135,
+            "mean_signed_error_lbs": -53.569
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 73.375,
+            "median_abs_error_lbs": 66.956,
+            "rmse_lbs": 87.137,
+            "r2": -10.4429,
+            "within_10_lbs": 0.0603,
+            "within_20_lbs": 0.1206,
+            "within_30_lbs": 0.2211,
+            "mean_signed_error_lbs": -72.636
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.25,
+        "routed_rows": 566
+      },
+      {
+        "model": "blend_gte_181_logistic_power_2.0",
+        "mae_lbs": 24.379,
+        "median_abs_error_lbs": 16.386,
+        "rmse_lbs": 35.185,
+        "r2": 0.4244,
+        "within_10_lbs": 0.3318,
+        "within_20_lbs": 0.5825,
+        "within_30_lbs": 0.7308,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 45.164,
+            "median_abs_error_lbs": 38.483,
+            "rmse_lbs": 56.698,
+            "r2": -1.1106,
+            "within_10_lbs": 0.126,
+            "within_20_lbs": 0.2681,
+            "within_30_lbs": 0.3968,
+            "mean_signed_error_lbs": -35.253
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 59.535,
+            "median_abs_error_lbs": 56.049,
+            "rmse_lbs": 70.116,
+            "r2": -3.6244,
+            "within_10_lbs": 0.0808,
+            "within_20_lbs": 0.1425,
+            "within_30_lbs": 0.2352,
+            "mean_signed_error_lbs": -57.765
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 78.971,
+            "median_abs_error_lbs": 75.982,
+            "rmse_lbs": 87.4,
+            "r2": -10.512,
+            "within_10_lbs": 0.0201,
+            "within_20_lbs": 0.0452,
+            "within_30_lbs": 0.0754,
+            "mean_signed_error_lbs": -78.549
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "logistic",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.1749
+      },
+      {
+        "model": "blend_gte_251_logistic_power_1.0",
+        "mae_lbs": 25.396,
+        "median_abs_error_lbs": 16.374,
+        "rmse_lbs": 37.879,
+        "r2": 0.3329,
+        "within_10_lbs": 0.3341,
+        "within_20_lbs": 0.5774,
+        "within_30_lbs": 0.7347,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 46.525,
+            "median_abs_error_lbs": 39.111,
+            "rmse_lbs": 58.107,
+            "r2": -1.2168,
+            "within_10_lbs": 0.1139,
+            "within_20_lbs": 0.2453,
+            "within_30_lbs": 0.3887,
+            "mean_signed_error_lbs": -34.1
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 59.965,
+            "median_abs_error_lbs": 56.999,
+            "rmse_lbs": 70.716,
+            "r2": -3.7039,
+            "within_10_lbs": 0.0689,
+            "within_20_lbs": 0.1378,
+            "within_30_lbs": 0.2352,
+            "mean_signed_error_lbs": -51.818
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 73.418,
+            "median_abs_error_lbs": 71.54,
+            "rmse_lbs": 85.516,
+            "r2": -10.021,
+            "within_10_lbs": 0.0603,
+            "within_20_lbs": 0.1055,
+            "within_30_lbs": 0.191,
+            "mean_signed_error_lbs": -70.703
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.0964
+      },
+      {
+        "model": "route_gte_251_logistic_cutoff_0.25",
+        "mae_lbs": 28.549,
+        "median_abs_error_lbs": 16.214,
+        "rmse_lbs": 45.387,
+        "r2": 0.0423,
+        "within_10_lbs": 0.3414,
+        "within_20_lbs": 0.5834,
+        "within_30_lbs": 0.734,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 53.975,
+            "median_abs_error_lbs": 46.197,
+            "rmse_lbs": 65.25,
+            "r2": -1.7953,
+            "within_10_lbs": 0.0845,
+            "within_20_lbs": 0.181,
+            "within_30_lbs": 0.2976,
+            "mean_signed_error_lbs": -24.696
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 63.859,
+            "median_abs_error_lbs": 60.875,
+            "rmse_lbs": 74.943,
+            "r2": -4.283,
+            "within_10_lbs": 0.0784,
+            "within_20_lbs": 0.1306,
+            "within_30_lbs": 0.2043,
+            "mean_signed_error_lbs": -39.511
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 69.209,
+            "median_abs_error_lbs": 59.499,
+            "rmse_lbs": 86.036,
+            "r2": -10.1555,
+            "within_10_lbs": 0.1357,
+            "within_20_lbs": 0.201,
+            "within_30_lbs": 0.3116,
+            "mean_signed_error_lbs": -58.213
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.25,
+        "routed_rows": 394
+      },
+      {
+        "model": "route_gte_181_hist_gradient_cutoff_0.35",
+        "mae_lbs": 24.968,
+        "median_abs_error_lbs": 16.008,
+        "rmse_lbs": 37.346,
+        "r2": 0.3516,
+        "within_10_lbs": 0.3453,
+        "within_20_lbs": 0.5892,
+        "within_30_lbs": 0.7436,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 51.282,
+            "median_abs_error_lbs": 43.91,
+            "rmse_lbs": 62.661,
+            "r2": -1.5779,
+            "within_10_lbs": 0.0845,
+            "within_20_lbs": 0.1877,
+            "within_30_lbs": 0.315,
+            "mean_signed_error_lbs": -38.787
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 63.93,
+            "median_abs_error_lbs": 62.365,
+            "rmse_lbs": 76.325,
+            "r2": -4.4796,
+            "within_10_lbs": 0.1116,
+            "within_20_lbs": 0.1924,
+            "within_30_lbs": 0.2613,
+            "mean_signed_error_lbs": -59.316
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 80.245,
+            "median_abs_error_lbs": 87.016,
+            "rmse_lbs": 92.658,
+            "r2": -11.939,
+            "within_10_lbs": 0.0503,
+            "within_20_lbs": 0.1055,
+            "within_30_lbs": 0.196,
+            "mean_signed_error_lbs": -79.566
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.35,
+        "routed_rows": 412
+      },
+      {
+        "model": "blend_gte_181_hist_gradient_power_1.0",
+        "mae_lbs": 24.028,
+        "median_abs_error_lbs": 16.019,
+        "rmse_lbs": 35.042,
+        "r2": 0.4291,
+        "within_10_lbs": 0.3389,
+        "within_20_lbs": 0.5895,
+        "within_30_lbs": 0.7366,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 47.508,
+            "median_abs_error_lbs": 40.692,
+            "rmse_lbs": 59.49,
+            "r2": -1.3236,
+            "within_10_lbs": 0.122,
+            "within_20_lbs": 0.2654,
+            "within_30_lbs": 0.37,
+            "mean_signed_error_lbs": -41.225
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 64.663,
+            "median_abs_error_lbs": 62.126,
+            "rmse_lbs": 74.588,
+            "r2": -4.2331,
+            "within_10_lbs": 0.0499,
+            "within_20_lbs": 0.1283,
+            "within_30_lbs": 0.1781,
+            "mean_signed_error_lbs": -63.57
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 85.064,
+            "median_abs_error_lbs": 83.256,
+            "rmse_lbs": 92.819,
+            "r2": -11.984,
+            "within_10_lbs": 0.0151,
+            "within_20_lbs": 0.0402,
+            "within_30_lbs": 0.0553,
+            "mean_signed_error_lbs": -84.885
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.1377
+      },
+      {
+        "model": "blend_gte_251_logistic_power_1.5",
+        "mae_lbs": 25.067,
+        "median_abs_error_lbs": 16.184,
+        "rmse_lbs": 37.714,
+        "r2": 0.3387,
+        "within_10_lbs": 0.3402,
+        "within_20_lbs": 0.5876,
+        "within_30_lbs": 0.7446,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 50.117,
+            "median_abs_error_lbs": 42.697,
+            "rmse_lbs": 61.589,
+            "r2": -1.4904,
+            "within_10_lbs": 0.0952,
+            "within_20_lbs": 0.2024,
+            "within_30_lbs": 0.3338,
+            "mean_signed_error_lbs": -40.422
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 65.8,
+            "median_abs_error_lbs": 61.304,
+            "rmse_lbs": 75.769,
+            "r2": -4.4001,
+            "within_10_lbs": 0.0499,
+            "within_20_lbs": 0.0998,
+            "within_30_lbs": 0.152,
+            "mean_signed_error_lbs": -59.131
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 80.985,
+            "median_abs_error_lbs": 81.446,
+            "rmse_lbs": 91.779,
+            "r2": -11.6945,
+            "within_10_lbs": 0.0402,
+            "within_20_lbs": 0.0905,
+            "within_30_lbs": 0.1206,
+            "mean_signed_error_lbs": -78.612
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.0689
+      },
+      {
+        "model": "route_gte_251_logistic_cutoff_0.35",
+        "mae_lbs": 27.189,
+        "median_abs_error_lbs": 16.063,
+        "rmse_lbs": 42.897,
+        "r2": 0.1445,
+        "within_10_lbs": 0.3446,
+        "within_20_lbs": 0.5898,
+        "within_30_lbs": 0.7433,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 53.888,
+            "median_abs_error_lbs": 46.342,
+            "rmse_lbs": 65.249,
+            "r2": -1.7952,
+            "within_10_lbs": 0.0818,
+            "within_20_lbs": 0.1796,
+            "within_30_lbs": 0.3029,
+            "mean_signed_error_lbs": -32.392
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 66.552,
+            "median_abs_error_lbs": 62.832,
+            "rmse_lbs": 77.08,
+            "r2": -4.5886,
+            "within_10_lbs": 0.0665,
+            "within_20_lbs": 0.114,
+            "within_30_lbs": 0.1829,
+            "mean_signed_error_lbs": -47.639
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 73.224,
+            "median_abs_error_lbs": 79.114,
+            "rmse_lbs": 89.172,
+            "r2": -10.9836,
+            "within_10_lbs": 0.1206,
+            "within_20_lbs": 0.1809,
+            "within_30_lbs": 0.2915,
+            "mean_signed_error_lbs": -63.33
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.35,
+        "routed_rows": 304
+      },
+      {
+        "model": "route_gte_211_hist_gradient_cutoff_0.15",
+        "mae_lbs": 25.014,
+        "median_abs_error_lbs": 15.77,
+        "rmse_lbs": 38.024,
+        "r2": 0.3278,
+        "within_10_lbs": 0.3494,
+        "within_20_lbs": 0.5962,
+        "within_30_lbs": 0.7519,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 53.863,
+            "median_abs_error_lbs": 46.262,
+            "rmse_lbs": 65.267,
+            "r2": -1.7968,
+            "within_10_lbs": 0.0791,
+            "within_20_lbs": 0.1796,
+            "within_30_lbs": 0.2936,
+            "mean_signed_error_lbs": -42.364
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 68.332,
+            "median_abs_error_lbs": 65.781,
+            "rmse_lbs": 79.677,
+            "r2": -4.9716,
+            "within_10_lbs": 0.0831,
+            "within_20_lbs": 0.1473,
+            "within_30_lbs": 0.1971,
+            "mean_signed_error_lbs": -62.655
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 84.298,
+            "median_abs_error_lbs": 92.959,
+            "rmse_lbs": 96.812,
+            "r2": -13.125,
+            "within_10_lbs": 0.0804,
+            "within_20_lbs": 0.1558,
+            "within_30_lbs": 0.1809,
+            "mean_signed_error_lbs": -83.078
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.15,
+        "routed_rows": 251
+      },
+      {
+        "model": "blend_gte_251_logistic_power_2.0",
+        "mae_lbs": 25.002,
+        "median_abs_error_lbs": 16.1,
+        "rmse_lbs": 37.732,
+        "r2": 0.3381,
+        "within_10_lbs": 0.3421,
+        "within_20_lbs": 0.5934,
+        "within_30_lbs": 0.7471,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 52.08,
+            "median_abs_error_lbs": 44.945,
+            "rmse_lbs": 63.468,
+            "r2": -1.6447,
+            "within_10_lbs": 0.0804,
+            "within_20_lbs": 0.1997,
+            "within_30_lbs": 0.3137,
+            "mean_signed_error_lbs": -43.836
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 69.018,
+            "median_abs_error_lbs": 64.536,
+            "rmse_lbs": 78.508,
+            "r2": -4.7976,
+            "within_10_lbs": 0.038,
+            "within_20_lbs": 0.0903,
+            "within_30_lbs": 0.1354,
+            "mean_signed_error_lbs": -63.273
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 85.44,
+            "median_abs_error_lbs": 86.946,
+            "rmse_lbs": 95.305,
+            "r2": -12.6888,
+            "within_10_lbs": 0.0352,
+            "within_20_lbs": 0.0653,
+            "within_30_lbs": 0.1055,
+            "mean_signed_error_lbs": -83.28
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.0552
+      },
+      {
+        "model": "blend_gte_181_hist_gradient_power_1.5",
+        "mae_lbs": 24.043,
+        "median_abs_error_lbs": 15.803,
+        "rmse_lbs": 35.792,
+        "r2": 0.4044,
+        "within_10_lbs": 0.3459,
+        "within_20_lbs": 0.602,
+        "within_30_lbs": 0.7516,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 51.453,
+            "median_abs_error_lbs": 44.704,
+            "rmse_lbs": 63.42,
+            "r2": -1.6407,
+            "within_10_lbs": 0.1046,
+            "within_20_lbs": 0.2279,
+            "within_30_lbs": 0.3432,
+            "mean_signed_error_lbs": -46.664
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 70.139,
+            "median_abs_error_lbs": 67.187,
+            "rmse_lbs": 79.58,
+            "r2": -4.957,
+            "within_10_lbs": 0.0475,
+            "within_20_lbs": 0.0974,
+            "within_30_lbs": 0.1568,
+            "mean_signed_error_lbs": -69.465
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 91.389,
+            "median_abs_error_lbs": 89.848,
+            "rmse_lbs": 98.581,
+            "r2": -13.646,
+            "within_10_lbs": 0.0101,
+            "within_20_lbs": 0.0251,
+            "within_30_lbs": 0.0553,
+            "mean_signed_error_lbs": -91.243
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.0842
+      },
+      {
+        "model": "route_gte_251_logistic_cutoff_0.5",
+        "mae_lbs": 26.604,
+        "median_abs_error_lbs": 15.877,
+        "rmse_lbs": 41.666,
+        "r2": 0.1929,
+        "within_10_lbs": 0.3462,
+        "within_20_lbs": 0.5937,
+        "within_30_lbs": 0.7478,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 55.382,
+            "median_abs_error_lbs": 48.965,
+            "rmse_lbs": 66.796,
+            "r2": -1.9293,
+            "within_10_lbs": 0.0777,
+            "within_20_lbs": 0.1756,
+            "within_30_lbs": 0.2936,
+            "mean_signed_error_lbs": -38.804
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 70.347,
+            "median_abs_error_lbs": 66.52,
+            "rmse_lbs": 80.213,
+            "r2": -5.0521,
+            "within_10_lbs": 0.0594,
+            "within_20_lbs": 0.0974,
+            "within_30_lbs": 0.1544,
+            "mean_signed_error_lbs": -56.7
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 80.338,
+            "median_abs_error_lbs": 89.593,
+            "rmse_lbs": 94.346,
+            "r2": -12.4147,
+            "within_10_lbs": 0.1055,
+            "within_20_lbs": 0.1508,
+            "within_30_lbs": 0.2362,
+            "mean_signed_error_lbs": -72.558
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "logistic",
+        "route_cutoff": 0.5,
+        "routed_rows": 232
+      },
+      {
+        "model": "route_gte_181_hist_gradient_cutoff_0.5",
+        "mae_lbs": 24.809,
+        "median_abs_error_lbs": 15.867,
+        "rmse_lbs": 37.392,
+        "r2": 0.35,
+        "within_10_lbs": 0.3472,
+        "within_20_lbs": 0.5943,
+        "within_30_lbs": 0.75,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 54.882,
+            "median_abs_error_lbs": 46.111,
+            "rmse_lbs": 66.157,
+            "r2": -1.8736,
+            "within_10_lbs": 0.0697,
+            "within_20_lbs": 0.1649,
+            "within_30_lbs": 0.2802,
+            "mean_signed_error_lbs": -45.691
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 70.981,
+            "median_abs_error_lbs": 69.241,
+            "rmse_lbs": 81.625,
+            "r2": -5.2672,
+            "within_10_lbs": 0.0736,
+            "within_20_lbs": 0.1306,
+            "within_30_lbs": 0.1734,
+            "mean_signed_error_lbs": -67.928
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 89.274,
+            "median_abs_error_lbs": 94.113,
+            "rmse_lbs": 99.725,
+            "r2": -13.9878,
+            "within_10_lbs": 0.0402,
+            "within_20_lbs": 0.0804,
+            "within_30_lbs": 0.1407,
+            "mean_signed_error_lbs": -88.664
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.5,
+        "routed_rows": 253
+      },
+      {
+        "model": "blend_gte_211_hist_gradient_power_1.0",
+        "mae_lbs": 24.004,
+        "median_abs_error_lbs": 15.84,
+        "rmse_lbs": 35.989,
+        "r2": 0.3978,
+        "within_10_lbs": 0.3494,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7551,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 52.647,
+            "median_abs_error_lbs": 45.088,
+            "rmse_lbs": 64.769,
+            "r2": -1.7542,
+            "within_10_lbs": 0.0992,
+            "within_20_lbs": 0.2145,
+            "within_30_lbs": 0.3271,
+            "mean_signed_error_lbs": -49.416
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 72.337,
+            "median_abs_error_lbs": 69.476,
+            "rmse_lbs": 81.596,
+            "r2": -5.2627,
+            "within_10_lbs": 0.0475,
+            "within_20_lbs": 0.0879,
+            "within_30_lbs": 0.133,
+            "mean_signed_error_lbs": -71.9
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 94.419,
+            "median_abs_error_lbs": 94.727,
+            "rmse_lbs": 101.451,
+            "r2": -14.5111,
+            "within_10_lbs": 0.0151,
+            "within_20_lbs": 0.0452,
+            "within_30_lbs": 0.0553,
+            "mean_signed_error_lbs": -94.302
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.0493
+      },
+      {
+        "model": "route_gte_211_hist_gradient_cutoff_0.25",
+        "mae_lbs": 24.661,
+        "median_abs_error_lbs": 15.738,
+        "rmse_lbs": 37.46,
+        "r2": 0.3476,
+        "within_10_lbs": 0.3504,
+        "within_20_lbs": 0.5985,
+        "within_30_lbs": 0.7574,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 55.856,
+            "median_abs_error_lbs": 48.404,
+            "rmse_lbs": 67.411,
+            "r2": -1.9835,
+            "within_10_lbs": 0.0737,
+            "within_20_lbs": 0.1676,
+            "within_30_lbs": 0.2855,
+            "mean_signed_error_lbs": -46.983
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 72.8,
+            "median_abs_error_lbs": 70.397,
+            "rmse_lbs": 83.215,
+            "r2": -5.5136,
+            "within_10_lbs": 0.0665,
+            "within_20_lbs": 0.1164,
+            "within_30_lbs": 0.1568,
+            "mean_signed_error_lbs": -68.656
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 92.765,
+            "median_abs_error_lbs": 95.587,
+            "rmse_lbs": 102.506,
+            "r2": -14.8353,
+            "within_10_lbs": 0.0503,
+            "within_20_lbs": 0.1005,
+            "within_30_lbs": 0.1106,
+            "mean_signed_error_lbs": -91.99
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.25,
+        "routed_rows": 170
+      },
+      {
+        "model": "blend_gte_181_hist_gradient_power_2.0",
+        "mae_lbs": 24.184,
+        "median_abs_error_lbs": 15.715,
+        "rmse_lbs": 36.304,
+        "r2": 0.3872,
+        "within_10_lbs": 0.3453,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7542,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 53.6,
+            "median_abs_error_lbs": 46.747,
+            "rmse_lbs": 65.491,
+            "r2": -1.816,
+            "within_10_lbs": 0.0871,
+            "within_20_lbs": 0.1997,
+            "within_30_lbs": 0.3204,
+            "mean_signed_error_lbs": -49.68
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 73.284,
+            "median_abs_error_lbs": 70.185,
+            "rmse_lbs": 82.283,
+            "r2": -5.3685,
+            "within_10_lbs": 0.038,
+            "within_20_lbs": 0.0808,
+            "within_30_lbs": 0.1283,
+            "mean_signed_error_lbs": -72.828
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 95.112,
+            "median_abs_error_lbs": 91.955,
+            "rmse_lbs": 101.816,
+            "r2": -14.6231,
+            "within_10_lbs": 0.0,
+            "within_20_lbs": 0.0201,
+            "within_30_lbs": 0.0402,
+            "mean_signed_error_lbs": -94.995
+          }
+        },
+        "route_threshold_lbs": 181.0,
+        "classifier": "hist_gradient",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.0592
+      },
+      {
+        "model": "route_gte_211_hist_gradient_cutoff_0.35",
+        "mae_lbs": 24.707,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.604,
+        "r2": 0.3426,
+        "within_10_lbs": 0.351,
+        "within_20_lbs": 0.5988,
+        "within_30_lbs": 0.7577,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 57.005,
+            "median_abs_error_lbs": 50.153,
+            "rmse_lbs": 68.562,
+            "r2": -2.0863,
+            "within_10_lbs": 0.0724,
+            "within_20_lbs": 0.1609,
+            "within_30_lbs": 0.2775,
+            "mean_signed_error_lbs": -51.121
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 76.104,
+            "median_abs_error_lbs": 72.217,
+            "rmse_lbs": 85.352,
+            "r2": -5.8525,
+            "within_10_lbs": 0.0451,
+            "within_20_lbs": 0.0808,
+            "within_30_lbs": 0.1116,
+            "mean_signed_error_lbs": -73.599
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 96.681,
+            "median_abs_error_lbs": 98.937,
+            "rmse_lbs": 105.135,
+            "r2": -15.658,
+            "within_10_lbs": 0.0402,
+            "within_20_lbs": 0.0804,
+            "within_30_lbs": 0.0804,
+            "mean_signed_error_lbs": -95.984
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.35,
+        "routed_rows": 111
+      },
+      {
+        "model": "blend_gte_211_hist_gradient_power_1.5",
+        "mae_lbs": 24.28,
+        "median_abs_error_lbs": 15.706,
+        "rmse_lbs": 36.785,
+        "r2": 0.3709,
+        "within_10_lbs": 0.3478,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7615,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 55.607,
+            "median_abs_error_lbs": 47.691,
+            "rmse_lbs": 67.506,
+            "r2": -1.9919,
+            "within_10_lbs": 0.0791,
+            "within_20_lbs": 0.1769,
+            "within_30_lbs": 0.3043,
+            "mean_signed_error_lbs": -53.286
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 76.585,
+            "median_abs_error_lbs": 72.564,
+            "rmse_lbs": 85.108,
+            "r2": -5.8133,
+            "within_10_lbs": 0.0285,
+            "within_20_lbs": 0.057,
+            "within_30_lbs": 0.1045,
+            "mean_signed_error_lbs": -76.334
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 99.204,
+            "median_abs_error_lbs": 99.482,
+            "rmse_lbs": 105.577,
+            "r2": -15.7985,
+            "within_10_lbs": 0.0101,
+            "within_20_lbs": 0.0201,
+            "within_30_lbs": 0.0553,
+            "mean_signed_error_lbs": -99.124
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.0257
+      },
+      {
+        "model": "route_gte_211_hist_gradient_cutoff_0.5",
+        "mae_lbs": 24.495,
+        "median_abs_error_lbs": 15.627,
+        "rmse_lbs": 37.421,
+        "r2": 0.349,
+        "within_10_lbs": 0.3513,
+        "within_20_lbs": 0.6033,
+        "within_30_lbs": 0.7625,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 57.082,
+            "median_abs_error_lbs": 49.777,
+            "rmse_lbs": 68.947,
+            "r2": -2.121,
+            "within_10_lbs": 0.071,
+            "within_20_lbs": 0.1716,
+            "within_30_lbs": 0.2855,
+            "mean_signed_error_lbs": -53.789
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 77.989,
+            "median_abs_error_lbs": 74.631,
+            "rmse_lbs": 86.695,
+            "r2": -6.0698,
+            "within_10_lbs": 0.0333,
+            "within_20_lbs": 0.0665,
+            "within_30_lbs": 0.0903,
+            "mean_signed_error_lbs": -76.086
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 99.625,
+            "median_abs_error_lbs": 100.396,
+            "rmse_lbs": 107.126,
+            "r2": -16.2949,
+            "within_10_lbs": 0.0302,
+            "within_20_lbs": 0.0653,
+            "within_30_lbs": 0.0653,
+            "mean_signed_error_lbs": -98.927
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.5,
+        "routed_rows": 69
+      },
+      {
+        "model": "blend_gte_211_hist_gradient_power_2.0",
+        "mae_lbs": 24.437,
+        "median_abs_error_lbs": 15.783,
+        "rmse_lbs": 37.153,
+        "r2": 0.3583,
+        "within_10_lbs": 0.3491,
+        "within_20_lbs": 0.5991,
+        "within_30_lbs": 0.7609,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 56.867,
+            "median_abs_error_lbs": 49.887,
+            "rmse_lbs": 68.643,
+            "r2": -2.0936,
+            "within_10_lbs": 0.0737,
+            "within_20_lbs": 0.1662,
+            "within_30_lbs": 0.2895,
+            "mean_signed_error_lbs": -54.975
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 78.564,
+            "median_abs_error_lbs": 74.979,
+            "rmse_lbs": 86.631,
+            "r2": -6.0594,
+            "within_10_lbs": 0.0238,
+            "within_20_lbs": 0.0404,
+            "within_30_lbs": 0.0784,
+            "mean_signed_error_lbs": -78.383
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 101.46,
+            "median_abs_error_lbs": 100.539,
+            "rmse_lbs": 107.404,
+            "r2": -16.3849,
+            "within_10_lbs": 0.0101,
+            "within_20_lbs": 0.0151,
+            "within_30_lbs": 0.0402,
+            "mean_signed_error_lbs": -101.409
+          }
+        },
+        "route_threshold_lbs": 211.0,
+        "classifier": "hist_gradient",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.0167
+      },
+      {
+        "model": "blend_gte_251_hist_gradient_power_1.0",
+        "mae_lbs": 24.638,
+        "median_abs_error_lbs": 15.801,
+        "rmse_lbs": 37.455,
+        "r2": 0.3478,
+        "within_10_lbs": 0.3481,
+        "within_20_lbs": 0.5991,
+        "within_30_lbs": 0.7567,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.042,
+            "median_abs_error_lbs": 51.518,
+            "rmse_lbs": 69.531,
+            "r2": -2.1741,
+            "within_10_lbs": 0.071,
+            "within_20_lbs": 0.1555,
+            "within_30_lbs": 0.2748,
+            "mean_signed_error_lbs": -56.75
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 80.982,
+            "median_abs_error_lbs": 76.872,
+            "rmse_lbs": 88.063,
+            "r2": -6.2947,
+            "within_10_lbs": 0.0119,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -80.88
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 104.158,
+            "median_abs_error_lbs": 101.346,
+            "rmse_lbs": 109.027,
+            "r2": -16.9142,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -104.158
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.0,
+        "mean_blend_weight": 0.0072
+      },
+      {
+        "model": "route_gte_251_hist_gradient_cutoff_0.15",
+        "mae_lbs": 24.757,
+        "median_abs_error_lbs": 15.724,
+        "rmse_lbs": 37.785,
+        "r2": 0.3362,
+        "within_10_lbs": 0.3497,
+        "within_20_lbs": 0.5991,
+        "within_30_lbs": 0.7602,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.879,
+            "median_abs_error_lbs": 52.065,
+            "rmse_lbs": 70.259,
+            "r2": -2.241,
+            "within_10_lbs": 0.063,
+            "within_20_lbs": 0.1501,
+            "within_30_lbs": 0.2668,
+            "mean_signed_error_lbs": -56.683
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 81.555,
+            "median_abs_error_lbs": 77.072,
+            "rmse_lbs": 88.632,
+            "r2": -6.3892,
+            "within_10_lbs": 0.0119,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -80.793
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 104.268,
+            "median_abs_error_lbs": 101.763,
+            "rmse_lbs": 109.448,
+            "r2": -17.0529,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -103.53
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.15,
+        "routed_rows": 19
+      },
+      {
+        "model": "route_gte_251_hist_gradient_cutoff_0.25",
+        "mae_lbs": 24.728,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.745,
+        "r2": 0.3376,
+        "within_10_lbs": 0.3497,
+        "within_20_lbs": 0.5994,
+        "within_30_lbs": 0.7609,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.922,
+            "median_abs_error_lbs": 51.956,
+            "rmse_lbs": 70.384,
+            "r2": -2.2525,
+            "within_10_lbs": 0.063,
+            "within_20_lbs": 0.1515,
+            "within_30_lbs": 0.2694,
+            "mean_signed_error_lbs": -57.189
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 81.829,
+            "median_abs_error_lbs": 77.806,
+            "rmse_lbs": 88.882,
+            "r2": -6.4311,
+            "within_10_lbs": 0.0095,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -81.369
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 104.86,
+            "median_abs_error_lbs": 101.79,
+            "rmse_lbs": 109.902,
+            "r2": -17.2029,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -104.122
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.25,
+        "routed_rows": 12
+      },
+      {
+        "model": "blend_gte_251_hist_gradient_power_1.5",
+        "mae_lbs": 24.718,
+        "median_abs_error_lbs": 15.721,
+        "rmse_lbs": 37.707,
+        "r2": 0.339,
+        "within_10_lbs": 0.3504,
+        "within_20_lbs": 0.5985,
+        "within_30_lbs": 0.7596,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.8,
+            "median_abs_error_lbs": 51.864,
+            "rmse_lbs": 70.264,
+            "r2": -2.2414,
+            "within_10_lbs": 0.0657,
+            "within_20_lbs": 0.1501,
+            "within_30_lbs": 0.2708,
+            "mean_signed_error_lbs": -57.705
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.06,
+            "median_abs_error_lbs": 77.844,
+            "rmse_lbs": 89.012,
+            "r2": -6.4527,
+            "within_10_lbs": 0.0143,
+            "within_20_lbs": 0.0166,
+            "within_30_lbs": 0.0404,
+            "mean_signed_error_lbs": -81.99
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 105.591,
+            "median_abs_error_lbs": 101.752,
+            "rmse_lbs": 110.215,
+            "r2": -17.3066,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.005,
+            "within_30_lbs": 0.0101,
+            "mean_signed_error_lbs": -105.591
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "blend_power": 1.5,
+        "mean_blend_weight": 0.0024
+      },
+      {
+        "model": "route_gte_251_hist_gradient_cutoff_0.35",
+        "mae_lbs": 24.7,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.729,
+        "r2": 0.3382,
+        "within_10_lbs": 0.3497,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7615,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.805,
+            "median_abs_error_lbs": 51.775,
+            "rmse_lbs": 70.347,
+            "r2": -2.2491,
+            "within_10_lbs": 0.063,
+            "within_20_lbs": 0.1542,
+            "within_30_lbs": 0.2721,
+            "mean_signed_error_lbs": -57.808
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.1,
+            "median_abs_error_lbs": 77.987,
+            "rmse_lbs": 89.138,
+            "r2": -6.4739,
+            "within_10_lbs": 0.0095,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -81.989
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 105.432,
+            "median_abs_error_lbs": 101.994,
+            "rmse_lbs": 110.339,
+            "r2": -17.3481,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -105.432
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.35,
+        "routed_rows": 6
+      },
+      {
+        "model": "route_gte_251_hist_gradient_cutoff_0.5",
+        "mae_lbs": 24.718,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.759,
+        "r2": 0.3371,
+        "within_10_lbs": 0.3497,
+        "within_20_lbs": 0.6001,
+        "within_30_lbs": 0.7615,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.878,
+            "median_abs_error_lbs": 51.884,
+            "rmse_lbs": 70.416,
+            "r2": -2.2555,
+            "within_10_lbs": 0.063,
+            "within_20_lbs": 0.1542,
+            "within_30_lbs": 0.2721,
+            "mean_signed_error_lbs": -57.882
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.23,
+            "median_abs_error_lbs": 78.282,
+            "rmse_lbs": 89.235,
+            "r2": -6.4902,
+            "within_10_lbs": 0.0095,
+            "within_20_lbs": 0.019,
+            "within_30_lbs": 0.0451,
+            "mean_signed_error_lbs": -82.119
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 105.708,
+            "median_abs_error_lbs": 101.994,
+            "rmse_lbs": 110.505,
+            "r2": -17.4032,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.0101,
+            "within_30_lbs": 0.0201,
+            "mean_signed_error_lbs": -105.708
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "route_cutoff": 0.5,
+        "routed_rows": 5
+      },
+      {
+        "model": "blend_gte_251_hist_gradient_power_2.0",
+        "mae_lbs": 24.742,
+        "median_abs_error_lbs": 15.71,
+        "rmse_lbs": 37.774,
+        "r2": 0.3366,
+        "within_10_lbs": 0.3504,
+        "within_20_lbs": 0.5988,
+        "within_30_lbs": 0.7605,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 58.96,
+            "median_abs_error_lbs": 51.883,
+            "rmse_lbs": 70.44,
+            "r2": -2.2576,
+            "within_10_lbs": 0.0657,
+            "within_20_lbs": 0.1501,
+            "within_30_lbs": 0.2694,
+            "mean_signed_error_lbs": -57.936
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.341,
+            "median_abs_error_lbs": 78.269,
+            "rmse_lbs": 89.258,
+            "r2": -6.4939,
+            "within_10_lbs": 0.0143,
+            "within_20_lbs": 0.0166,
+            "within_30_lbs": 0.038,
+            "mean_signed_error_lbs": -82.285
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 106.051,
+            "median_abs_error_lbs": 101.843,
+            "rmse_lbs": 110.568,
+            "r2": -17.4244,
+            "within_10_lbs": 0.005,
+            "within_20_lbs": 0.005,
+            "within_30_lbs": 0.005,
+            "mean_signed_error_lbs": -106.051
+          }
+        },
+        "route_threshold_lbs": 251.0,
+        "classifier": "hist_gradient",
+        "blend_power": 2.0,
+        "mean_blend_weight": 0.0015
+      },
+      {
+        "model": "global_ridge_clip_pca_height_size",
+        "mae_lbs": 24.814,
+        "median_abs_error_lbs": 15.738,
+        "rmse_lbs": 37.938,
+        "r2": 0.3309,
+        "within_10_lbs": 0.3494,
+        "within_20_lbs": 0.5994,
+        "within_30_lbs": 0.7602,
+        "high_weight_rollup": {
+          "gte_181": {
+            "rows": 746,
+            "mae_lbs": 59.283,
+            "median_abs_error_lbs": 52.292,
+            "rmse_lbs": 70.817,
+            "r2": -2.2926,
+            "within_10_lbs": 0.0617,
+            "within_20_lbs": 0.1515,
+            "within_30_lbs": 0.2668,
+            "mean_signed_error_lbs": -58.331
+          },
+          "gte_211": {
+            "rows": 421,
+            "mae_lbs": 82.947,
+            "median_abs_error_lbs": 78.359,
+            "rmse_lbs": 89.795,
+            "r2": -6.5844,
+            "within_10_lbs": 0.0071,
+            "within_20_lbs": 0.0143,
+            "within_30_lbs": 0.0356,
+            "mean_signed_error_lbs": -82.915
+          },
+          "gte_251": {
+            "rows": 199,
+            "mae_lbs": 107.22,
+            "median_abs_error_lbs": 102.198,
+            "rmse_lbs": 111.459,
+            "r2": -17.7225,
+            "within_10_lbs": 0.0,
+            "within_20_lbs": 0.0,
+            "within_30_lbs": 0.0,
+            "mean_signed_error_lbs": -107.22
+          }
+        }
+      }
+    ],
+    "slice_metrics": []
+  }
+}

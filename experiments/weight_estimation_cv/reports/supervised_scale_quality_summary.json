@@ -1,0 +1,38 @@
+{
+  "input": "data/supervised_scale_no_hash_leaks.csv",
+  "output": "data/supervised_scale_with_quality_tags.csv",
+  "rows": 19946,
+  "downloaded_rows": 18570,
+  "face_visible_rows": 5089,
+  "large_face_visible_rows": 4126,
+  "person_visible_rows": 16489,
+  "full_body_likely_rows": 12740,
+  "torso_or_partial_body_rows": 3679,
+  "multiple_people_rows": 2733,
+  "low_signal_rows": 3162,
+  "quality_buckets": {
+    "full_body_likely": 12740,
+    "torso_or_partial_body": 3679,
+    "low_signal": 3162,
+    "face_only_or_small_person": 295,
+    "person_visible_low_coverage": 70
+  },
+  "by_split": {
+    "test": {
+      "rows": 4571,
+      "downloaded_rows": 4197,
+      "face_visible_rows": 1597,
+      "person_visible_rows": 3890,
+      "full_body_likely_rows": 3193,
+      "torso_or_partial_body_rows": 680
+    },
+    "train": {
+      "rows": 15375,
+      "downloaded_rows": 14373,
+      "face_visible_rows": 3492,
+      "person_visible_rows": 12599,
+      "full_body_likely_rows": 9547,
+      "torso_or_partial_body_rows": 2999
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "input": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/eval_sample_with_images.csv",
+  "downloaded_only": true,
+  "rows": 971,
+  "train_rows": 698,
+  "test_rows": 273,
+  "results": [
+    {
+      "model": "ridge_height_size_category_predict_bmi",
+      "target": "bmi",
+      "features": [
+        "height_in",
+        "size_display",
+        "clothing_type_id",
+        "source_site_display"
+      ],
+      "rows_train": 698,
+      "rows_test": 273,
+      "mae_lbs": 31.958,
+      "rmse_lbs": 42.29,
+      "r2": 0.2962,
+      "within_10_lbs": 0.2125,
+      "within_15_lbs": 0.3004,
+      "within_20_lbs": 0.4249
+    },
+    {
+      "model": "ridge_height_existing_cv_predict_bmi",
+      "target": "bmi",
+      "features": [
+        "height_in",
+        "person_count_yolo_detect",
+        "main_person_height_pct_yolo_detect",
+        "main_person_bbox_area_pct_yolo_detect",
+        "body_coverage_score_yolo_pose",
+        "image_width_downloaded",
+        "image_height_downloaded",
+        "size_display",
+        "clothing_type_id",
+        "source_site_display",
+        "has_face_yunet"
+      ],
+      "rows_train": 698,
+      "rows_test": 273,
+      "mae_lbs": 32.185,
+      "rmse_lbs": 42.412,
+      "r2": 0.2922,
+      "within_10_lbs": 0.2234,
+      "within_15_lbs": 0.3004,
+      "within_20_lbs": 0.4066
+    },
+    {
+      "model": "random_forest_height_size_category_predict_bmi",
+      "target": "bmi",
+      "features": [
+        "height_in",
+        "image_width_downloaded",
+        "image_height_downloaded",
+        "size_display",
+        "clothing_type_id",
+        "source_site_display"
+      ],
+      "rows_train": 698,
+      "rows_test": 273,
+      "mae_lbs": 32.251,
+      "rmse_lbs": 42.82,
+      "r2": 0.2785,
+      "within_10_lbs": 0.1978,
+      "within_15_lbs": 0.3187,
+      "within_20_lbs": 0.4103
+    },
+    {
+      "model": "mean_bmi_x_height",
+      "target": "bmi",
+      "features": [
+        "height_in"
+      ],
+      "rows_train": 698,
+      "rows_test": 273,
+      "mae_lbs": 36.31,
+      "rmse_lbs": 45.139,
+      "r2": 0.1982,
+      "within_10_lbs": 0.1648,
+      "within_15_lbs": 0.2344,
+      "within_20_lbs": 0.3187
+    },
+    {
+      "model": "ridge_height_only_predict_bmi",
+      "target": "bmi",
+      "features": [
+        "height_in"
+      ],
+      "rows_train": 698,
+      "rows_test": 273,
+      "mae_lbs": 36.391,
+      "rmse_lbs": 45.243,
+      "r2": 0.1945,
+      "within_10_lbs": 0.1612,
+      "within_15_lbs": 0.2344,
+      "within_20_lbs": 0.326
+    },
+    {
+      "model": "mean_weight",
+      "target": "weight_lbs",
+      "features": [],
+      "rows_train": 698,
+      "rows_test": 273,
+      "mae_lbs": 41.385,
+      "rmse_lbs": 50.543,
+      "r2": -0.0053,
+      "within_10_lbs": 0.1245,
+      "within_15_lbs": 0.1941,
+      "within_20_lbs": 0.2564
+    }
+  ]
+}

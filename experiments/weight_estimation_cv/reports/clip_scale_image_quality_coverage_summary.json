@@ -1,0 +1,38 @@
+{
+  "input": "data/clip_scale_eval_sample_hardened_no_hash_leaks.csv",
+  "output": "data/clip_scale_eval_sample_with_quality_tags.csv",
+  "rows": 3013,
+  "downloaded_rows": 2473,
+  "face_visible_rows": 703,
+  "large_face_visible_rows": 554,
+  "person_visible_rows": 2237,
+  "full_body_likely_rows": 1675,
+  "torso_or_partial_body_rows": 554,
+  "multiple_people_rows": 393,
+  "low_signal_rows": 752,
+  "quality_buckets": {
+    "full_body_likely": 1675,
+    "low_signal": 752,
+    "torso_or_partial_body": 554,
+    "face_only_or_small_person": 24,
+    "person_visible_low_coverage": 8
+  },
+  "by_split": {
+    "test": {
+      "rows": 794,
+      "downloaded_rows": 756,
+      "face_visible_rows": 257,
+      "person_visible_rows": 693,
+      "full_body_likely_rows": 536,
+      "torso_or_partial_body_rows": 155
+    },
+    "train": {
+      "rows": 2219,
+      "downloaded_rows": 1717,
+      "face_visible_rows": 446,
+      "person_visible_rows": 1544,
+      "full_body_likely_rows": 1139,
+      "torso_or_partial_body_rows": 399
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "rows": 3015,
+  "train_rows": 2220,
+  "test_rows": 795,
+  "source_files": 125,
+  "source_groups": 84,
+  "image_hosts": {
+    "judgeme.imgix.net": 523,
+    "media-dynamic.okendo.io": 484,
+    "cdn-yotpo-images-production.yotpo.com": 455,
+    "cdn.shopify.com": 263,
+    "m.media-amazon.com": 233,
+    "photos-us.bazaarvoice.com": 154,
+    "cdn.stamped.io": 123,
+    "images.loox.io": 113,
+    "res.cloudinary.com": 84,
+    "review-images.onequince.com": 84,
+    "www.lulus.com": 81,
+    "www.rotita.com": 73,
+    "d1rc46soeuwz3b.cloudfront.net": 69,
+    "images-na.ssl-images-amazon.com": 67,
+    "fashionpass.s3-us-west-1.amazonaws.com": 66,
+    "static-dress.missacc.com": 42,
+    "": 37,
+    "cdn1.stamped.io": 33,
+    "m.rotita.com": 10,
+    "image.lilyease.com": 8
+  },
+  "weight_bins": {
+    "101-120": 492,
+    "121-140": 582,
+    "141-160": 568,
+    "161-180": 413,
+    "181-210": 351,
+    "211-250": 270,
+    "251-350": 131,
+    "70-100": 208
+  },
+  "weight_lbs": {
+    "min": 70.0,
+    "max": 350.0,
+    "avg": 158.25
+  },
+  "height_in": {
+    "min": 48.0,
+    "max": 81.0,
+    "avg": 64.84
+  }
+}

@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import JSZip from "jszip";
 import { createServer } from "node:http";
-import { readFile, mkdir, writeFile, unlink } from "node:fs/promises";
+import { readFile, mkdir, writeFile, unlink, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,6 +20,7 @@ const returnsDir =
   process.env.FWM_IMAGE_REVIEW_RETURNS_DIR ||
   path.join(repoRoot, "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns");
 const manifestPath = path.join(returnsDir, "human_labeled_returns_manifest.json");
+const eligibleIndexPath = path.join(returnsDir, "image_review_eligible_index.json");
 const cropReturnHeaders = [
   "crop_has_adjustment",
   "crop_mode",
@@ -29,6 +30,36 @@ const cropReturnHeaders = [
   "crop_zoom",
   "crop_rotation_deg",
 ];
+let checkpointCommentCachePromise = null;
+const eligibleRowCountCache = new Map();
+let eligibleIndexPromise = null;
+
+const imageFieldNames = ["image_url_to_use", "raw_scraped_image_url"];
+const measurementFieldNames = [
+  "weight_lbs_display",
+  "weight_display_display",
+  "weight_lbs",
+  "waist_in",
+  "waist_in_display",
+  "hips_in_display",
+  "hips_in",
+  "bust_in_display",
+  "bust_in_number_display",
+  "bust_in",
+  "bra_band_in_display",
+  "bra_band_in",
+  "cupsize_display",
+  "cup_size",
+  "inseam_inches_display",
+  "inseam_in",
+];
+const rowKeyFieldNames = ["review_row_key", "source_file", "source_row_number"];
+const packageRowTotals = {
+  approve_candidates: 72113,
+  needs_human_review: 40170,
+  disapprove_candidates: 211918,
+};
+const reviewWorkbookPartSize = 1000;
 
 const bucketConfig = {
   approve_candidates: {
@@ -63,6 +94,7 @@ function sendJson(res, data, status = 200) {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Content-Length": Buffer.byteLength(body),
+    "Cache-Control": "no-store, max-age=0",
   });
   res.end(body);
 }
@@ -100,6 +132,17 @@ async function writeManifest(manifest) {
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 }
 
+async function readEligibleIndex() {
+  if (!eligibleIndexPromise) {
+    eligibleIndexPromise = (async () => {
+      if (!existsSync(eligibleIndexPath)) return null;
+      const parsed = JSON.parse(await readFile(eligibleIndexPath, "utf8"));
+      return parsed.package_dir === packageDir ? parsed : null;
+    })();
+  }
+  return eligibleIndexPromise;
+}
+
 function getBucketAndPartFromFile(filename) {
   for (const [bucket, config] of Object.entries(bucketConfig)) {
     const match = filename.match(config.pattern);
@@ -123,10 +166,135 @@ async function getWorksheetRowCountFast(filePath) {
   return Math.max(rowMatches.length - 1, 0);
 }
 
+function decodeXmlText(value = "") {
+  return String(value)
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+function columnLettersToIndex(letters = "") {
+  let index = 0;
+  for (const letter of letters.toUpperCase()) {
+    index = index * 26 + (letter.charCodeAt(0) - 64);
+  }
+  return index;
+}
+
+function parseSharedStrings(sharedStringsXml = "") {
+  const strings = [];
+  const itemPattern = /<si\b[^>]*>([\s\S]*?)<\/si>/g;
+  let match;
+  while ((match = itemPattern.exec(sharedStringsXml))) {
+    const textParts = Array.from(match[1].matchAll(/<t\b[^>]*>([\s\S]*?)<\/t>/g), (part) =>
+      decodeXmlText(part[1]),
+    );
+    strings.push(textParts.join(""));
+  }
+  return strings;
+}
+
+function getXmlAttribute(attributes, name) {
+  return attributes.match(new RegExp(`\\b${name}="([^"]*)"`))?.[1] || "";
+}
+
+function getCellXmlText(attributes, body, sharedStrings) {
+  const type = getXmlAttribute(attributes, "t");
+  if (type === "inlineStr") {
+    const textParts = Array.from(body.matchAll(/<t\b[^>]*>([\s\S]*?)<\/t>/g), (part) => decodeXmlText(part[1]));
+    return textParts.join("");
+  }
+  const value = body.match(/<v\b[^>]*>([\s\S]*?)<\/v>/)?.[1] || "";
+  if (type === "s") return sharedStrings[Number(value)] || "";
+  return decodeXmlText(value);
+}
+
+function getCellColumnIndex(attributes) {
+  const ref = getXmlAttribute(attributes, "r");
+  const letters = ref.match(/^[A-Z]+/i)?.[0] || "";
+  return columnLettersToIndex(letters);
+}
+
+function hasAnyFieldValue(raw, fieldNames) {
+  return fieldNames.some((fieldName) => String(raw[fieldName] || "").trim());
+}
+
+function getRawRowKey(raw, rowNumber) {
+  return raw.review_row_key || `${raw.source_file || "unknown"}::${raw.source_row_number || rowNumber}`;
+}
+
+function isDashboardEligibleRaw(raw) {
+  return hasAnyFieldValue(raw, imageFieldNames) && hasAnyFieldValue(raw, measurementFieldNames);
+}
+
+function estimatePartRowCount(bucket, partIndex, partCount) {
+  const total = packageRowTotals[bucket];
+  if (!total) return reviewWorkbookPartSize;
+  if (partIndex < partCount - 1) return Math.min(reviewWorkbookPartSize, Math.max(total - partIndex * reviewWorkbookPartSize, 0));
+  return Math.max(total - partIndex * reviewWorkbookPartSize, 0);
+}
+
+async function getEligibleWorksheetSummaryFast(filePath) {
+  if (eligibleRowCountCache.has(filePath)) return eligibleRowCountCache.get(filePath);
+
+  const summaryPromise = (async () => {
+    const bytes = await readFile(filePath);
+    const zip = await JSZip.loadAsync(bytes);
+    const sheetXml = await zip.file("xl/worksheets/sheet1.xml")?.async("string");
+    if (!sheetXml) return { rowCount: 0, rowKeys: new Set() };
+
+    const sharedStringsXml = await zip.file("xl/sharedStrings.xml")?.async("string");
+    const sharedStrings = parseSharedStrings(sharedStringsXml || "");
+    const rows = Array.from(sheetXml.matchAll(/<row\b([^>]*)>([\s\S]*?)<\/row>/g), (match, index) => ({
+      attributes: match[1],
+      body: match[2],
+      rowNumber: Number(getXmlAttribute(match[1], "r")) || index + 1,
+    }));
+    if (rows.length < 2) return { rowCount: 0, rowKeys: new Set() };
+
+    const headersByColumn = new Map();
+    const headerCells = rows[0].body.matchAll(/<c\b([^>]*)>([\s\S]*?)<\/c>/g);
+    for (const cell of headerCells) {
+      const columnIndex = getCellColumnIndex(cell[1]);
+      if (!columnIndex) continue;
+      const header = getCellXmlText(cell[1], cell[2], sharedStrings).trim();
+      if (header) headersByColumn.set(columnIndex, header);
+    }
+
+    const relevantColumns = new Map();
+    const relevantFields = new Set([...imageFieldNames, ...measurementFieldNames, ...rowKeyFieldNames]);
+    for (const [columnIndex, header] of headersByColumn.entries()) {
+      if (relevantFields.has(header)) relevantColumns.set(columnIndex, header);
+    }
+    if (relevantColumns.size === 0) return { rowCount: 0, rowKeys: new Set() };
+
+    const rowKeys = new Set();
+    for (const rowInfo of rows.slice(1)) {
+      const raw = {};
+      const cells = rowInfo.body.matchAll(/<c\b([^>]*)>([\s\S]*?)<\/c>/g);
+      for (const cell of cells) {
+        const columnIndex = getCellColumnIndex(cell[1]);
+        const header = relevantColumns.get(columnIndex);
+        if (!header) continue;
+        raw[header] = getCellXmlText(cell[1], cell[2], sharedStrings);
+      }
+      if (isDashboardEligibleRaw(raw)) rowKeys.add(getRawRowKey(raw, rowInfo.rowNumber));
+    }
+    return { rowCount: rowKeys.size, rowKeys };
+  })();
+
+  eligibleRowCountCache.set(filePath, summaryPromise);
+  return summaryPromise;
+}
+
 async function listParts() {
   const { readdir } = await import("node:fs/promises");
   const files = await readdir(packageDir);
   const manifest = await readManifest();
+  const manifestLookup = buildManifestLookup(manifest);
+  const eligibleIndex = await readEligibleIndex();
   const savedCountsByBucket = {};
   const savedCountsByPart = {};
   const savedCountsByExport = {};
@@ -154,24 +322,44 @@ async function listParts() {
     ]),
   );
 
+  const filesByBucket = new Map();
   for (const filename of files) {
     const parsed = getBucketAndPartFromFile(filename);
     if (!parsed) continue;
-    const rowCount = await getWorksheetRowCountFast(path.join(packageDir, filename));
-    const savedRowCount = savedCountsByPart[`${parsed.bucket}::${filename}`] || 0;
-    const remainingRowCount = Math.max(rowCount - savedRowCount, 0);
-    buckets[parsed.bucket].rowCount += rowCount;
-    buckets[parsed.bucket].savedRowCount += savedRowCount;
-    buckets[parsed.bucket].remainingRowCount += remainingRowCount;
-    if (remainingRowCount > 0) buckets[parsed.bucket].remainingPartCount += 1;
-    buckets[parsed.bucket].parts.push({
-      part: parsed.part,
-      partNumber: parsed.partNumber,
-      filename,
-      rowCount,
-      savedRowCount,
-      remainingRowCount,
-    });
+    const entries = filesByBucket.get(parsed.bucket) || [];
+    entries.push({ ...parsed, filename });
+    filesByBucket.set(parsed.bucket, entries);
+  }
+
+  for (const [bucket, entries] of filesByBucket.entries()) {
+    entries.sort((a, b) => a.partNumber - b.partNumber);
+    for (const [partIndex, entry] of entries.entries()) {
+      const filename = entry.filename;
+      const indexedPart = eligibleIndex?.parts?.[filename] || null;
+      const rowKeys = indexedPart?.row_keys || null;
+      const rowCount = indexedPart ? Number(indexedPart.row_count || 0) : estimatePartRowCount(bucket, partIndex, entries.length);
+      let savedRowCount = savedCountsByPart[`${bucket}::${filename}`] || 0;
+      if (rowKeys) {
+        savedRowCount = rowKeys.reduce(
+          (count, rowKey) =>
+            count + (manifest.decisions[getDecisionKey(bucket, filename, rowKey)] || manifestLookup.byRowKey.has(rowKey) ? 1 : 0),
+          0,
+        );
+      }
+      const remainingRowCount = Math.max(rowCount - savedRowCount, 0);
+      buckets[bucket].rowCount += rowCount;
+      buckets[bucket].savedRowCount += savedRowCount;
+      buckets[bucket].remainingRowCount += remainingRowCount;
+      if (remainingRowCount > 0) buckets[bucket].remainingPartCount += 1;
+      buckets[bucket].parts.push({
+        part: entry.part,
+        partNumber: entry.partNumber,
+        filename,
+        rowCount,
+        savedRowCount,
+        remainingRowCount,
+      });
+    }
   }
 
   for (const bucket of Object.values(buckets)) {
@@ -233,6 +421,33 @@ function getDecisionKey(bucket, partFile, rowKey) {
   return `${bucket}::${partFile}::${rowKey}`;
 }
 
+function sourceDecisionKey(sourceFile, sourceRowNumber) {
+  const sourceKey = `${sourceFile || ""}::${sourceRowNumber || ""}`;
+  return sourceKey === "::" ? "" : sourceKey;
+}
+
+function buildManifestLookup(manifest) {
+  const byRowKey = new Map();
+  const bySource = new Map();
+  for (const decision of Object.values(manifest.decisions || {})) {
+    if (decision.review_row_key && !byRowKey.has(decision.review_row_key)) {
+      byRowKey.set(decision.review_row_key, decision);
+    }
+    const sourceKey = sourceDecisionKey(decision.source_file, decision.source_row_number);
+    if (sourceKey && !bySource.has(sourceKey)) bySource.set(sourceKey, decision);
+  }
+  return { byRowKey, bySource };
+}
+
+function findSavedDecision(manifest, lookup, bucket, partFile, rowKey, sourceFile, sourceRowNumber) {
+  return (
+    manifest.decisions[getDecisionKey(bucket, partFile, rowKey)] ||
+    lookup.byRowKey.get(rowKey) ||
+    lookup.bySource.get(sourceDecisionKey(sourceFile, sourceRowNumber)) ||
+    null
+  );
+}
+
 function mapHumanState(productionDecision) {
   const normalized = String(productionDecision || "").trim().toUpperCase();
   if (["APPROVE", "APPROVED", "YES"].includes(normalized)) return "APPROVE";
@@ -240,7 +455,7 @@ function mapHumanState(productionDecision) {
   return "NEUTRAL";
 }
 
-function normalizeDisplayRow(raw, bucket, part, partFile, defaultDecision, savedDecision) {
+function normalizeDisplayRow(raw, bucket, part, partFile, defaultDecision, savedDecision, checkpointComments) {
   const rowKey =
     raw.review_row_key ||
     `${raw.source_file || "unknown"}::${raw.source_row_number || raw.__rowNumber}`;
@@ -249,6 +464,13 @@ function normalizeDisplayRow(raw, bucket, part, partFile, defaultDecision, saved
   const reviewNotes = savedDecision?.review_notes ?? raw.review_notes ?? "";
   const humanState = savedDecision ? mapHumanState(productionDecision) : "NEUTRAL";
   const cropAdjustment = normalizeCropAdjustment(savedDecision || raw);
+  const shiftedSourceFields = hasShiftedSourceFields(raw);
+  const sourceFile = shiftedSourceFields ? raw.user_comment : raw.source_file || "";
+  const sourceRowNumber = shiftedSourceFields ? raw.source_file : raw.source_row_number || "";
+  const userComment =
+    shiftedSourceFields && checkpointComments?.has(rowKey)
+      ? checkpointComments.get(rowKey)
+      : raw.user_comment || "";
 
   return {
     bucket,
@@ -293,17 +515,92 @@ function normalizeDisplayRow(raw, bucket, part, partFile, defaultDecision, saved
       braBandIn: raw.bra_band_in_display || "",
       cupSize: raw.cupsize_display || "",
       inseamIn: raw.inseam_inches_display || "",
-      userComment: raw.user_comment || "",
+      userComment,
       productTitle: raw.product_title_raw || "",
       productCategory: raw.product_category_raw || "",
     },
     source: {
       sourceFamily: raw.source_family || "",
       sourceSite: raw.source_site_display || "",
-      sourceFile: raw.source_file || "",
-      sourceRowNumber: raw.source_row_number || "",
+      sourceFile,
+      sourceRowNumber,
     },
   };
+}
+
+function hasShiftedSourceFields(raw) {
+  return isSourceCsvPath(raw.user_comment) && /^\d+$/.test(String(raw.source_file || ""));
+}
+
+function isSourceCsvPath(value) {
+  return /\/step_1_raw_scraping_data\/.+\.csv$/.test(String(value || ""));
+}
+
+async function readCheckpointCommentCache() {
+  if (!checkpointCommentCachePromise) {
+    checkpointCommentCachePromise = buildCheckpointCommentCache();
+  }
+  return checkpointCommentCachePromise;
+}
+
+async function buildCheckpointCommentCache() {
+  const checkpointDir = path.join(packageDir, "cv_gate_checkpoint_parts");
+  const commentsByRowKey = new Map();
+  if (!existsSync(checkpointDir)) return commentsByRowKey;
+
+  const files = (await readdir(checkpointDir)).filter((filename) => filename.endsWith(".csv"));
+  for (const filename of files) {
+    const csv = await readFile(path.join(checkpointDir, filename), "utf8");
+    const records = parseCsvRecords(csv);
+    if (records.length < 2) continue;
+    const headers = records[0];
+    const rowKeyIndex = headers.indexOf("review_row_key");
+    const commentIndex = headers.indexOf("user_comment");
+    if (rowKeyIndex === -1 || commentIndex === -1) continue;
+    for (const record of records.slice(1)) {
+      const rowKey = record[rowKeyIndex];
+      const comment = record[commentIndex];
+      if (rowKey && comment && !isSourceCsvPath(comment)) commentsByRowKey.set(rowKey, comment);
+    }
+  }
+  return commentsByRowKey;
+}
+
+function parseCsvRecords(csv) {
+  const records = [];
+  let record = [];
+  let field = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < csv.length; index += 1) {
+    const char = csv[index];
+    const next = csv[index + 1];
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        field += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === "," && !inQuotes) {
+      record.push(field);
+      field = "";
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") index += 1;
+      record.push(field);
+      if (record.some((value) => value !== "")) records.push(record);
+      record = [];
+      field = "";
+    } else {
+      field += char;
+    }
+  }
+
+  if (field || record.length) {
+    record.push(field);
+    records.push(record);
+  }
+  return records;
 }
 
 async function readWorkbookRows(bucket, part) {
@@ -328,19 +625,38 @@ async function readWorkbookRows(bucket, part) {
   const sheet = workbook.worksheets[0];
   const headers = getHeaders(sheet);
   const manifest = await readManifest();
+  const manifestLookup = buildManifestLookup(manifest);
+  const checkpointComments = await readCheckpointCommentCache();
   const rows = [];
 
   sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
     if (rowNumber === 1) return;
     const raw = getRowObject(row, headers);
     raw.__rowNumber = rowNumber;
-    const rowKey =
-      raw.review_row_key ||
-      `${raw.source_file || "unknown"}::${raw.source_row_number || rowNumber}`;
-    const decisionKey = getDecisionKey(bucket, filename, rowKey);
-    const savedDecision = manifest.decisions[decisionKey];
+    if (!isDashboardEligibleRaw(raw)) return;
+    const rowKey = getRawRowKey(raw, rowNumber);
+    const shiftedSourceFields = hasShiftedSourceFields(raw);
+    const sourceFile = shiftedSourceFields ? raw.user_comment : raw.source_file || "";
+    const sourceRowNumber = shiftedSourceFields ? raw.source_file : raw.source_row_number || "";
+    const savedDecision = findSavedDecision(
+      manifest,
+      manifestLookup,
+      bucket,
+      filename,
+      rowKey,
+      sourceFile,
+      sourceRowNumber,
+    );
     rows.push(
-      normalizeDisplayRow(raw, bucket, partString, filename, config.defaultDecision, savedDecision),
+      normalizeDisplayRow(
+        raw,
+        bucket,
+        partString,
+        filename,
+        config.defaultDecision,
+        savedDecision,
+        checkpointComments,
+      ),
     );
   });
 
@@ -741,6 +1057,9 @@ if (invokedDirectly) {
 export {
   bucketConfig,
   createImageReviewServer,
+  getBucketAndPartFromFile,
+  getEligibleWorksheetSummaryFast,
+  isDashboardEligibleRaw,
   listParts,
   normalizeCropAdjustment,
   readWorkbookRows,

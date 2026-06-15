@@ -1,0 +1,15 @@
+retailer: dippindaisys_com
+site: dippindaisys.com
+claimed_at: 2026-06-10T20:21:47Z
+completed_at: 2026-06-10T20:21:54Z
+status: no_public_product_seed
+source: Awin advertiser queue
+programme: Dippin Daisys (US)
+provider_hint: Judge.me
+why_request: swim/shapewear gap; bottoms/activewear gap
+scope: public product pages and public review/provider feeds only
+stop_conditions: 429/captcha/WAF/auth challenge
+rows_written: 0
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/dippindaisys_com/dippindaisys_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/dippindaisys_com/dippindaisys_com_reviews_matching_intake_schema_summary.json
+error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.

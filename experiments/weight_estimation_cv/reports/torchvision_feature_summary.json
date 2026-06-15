@@ -1,0 +1,28 @@
+{
+  "input": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/eval_sample_with_images.csv",
+  "device": "cpu",
+  "candidate_rows": 971,
+  "models": [
+    {
+      "model": "resnet18",
+      "rows": 971,
+      "feature_dim": 512,
+      "errors": [],
+      "output": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/features/resnet18_features.npz"
+    },
+    {
+      "model": "mobilenet_v3_small",
+      "rows": 971,
+      "feature_dim": 576,
+      "errors": [],
+      "output": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/features/mobilenet_v3_small_features.npz"
+    },
+    {
+      "model": "efficientnet_b0",
+      "rows": 971,
+      "feature_dim": 1280,
+      "errors": [],
+      "output": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/features/efficientnet_b0_features.npz"
+    }
+  ]
+}

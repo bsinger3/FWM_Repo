@@ -1,0 +1,35 @@
+{
+  "input": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/eval_sample_hardened.csv",
+  "output": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/eval_sample_with_face_tags.csv",
+  "rows": 1200,
+  "downloaded_rows": 971,
+  "face_visible_rows": 279,
+  "large_face_visible_rows": 217,
+  "person_visible_rows": 0,
+  "full_body_likely_rows": 0,
+  "torso_or_partial_body_rows": 0,
+  "multiple_people_rows": 0,
+  "low_signal_rows": 921,
+  "quality_buckets": {
+    "low_signal": 921,
+    "face_only_or_small_person": 279
+  },
+  "by_split": {
+    "test": {
+      "rows": 349,
+      "downloaded_rows": 273,
+      "face_visible_rows": 74,
+      "person_visible_rows": 0,
+      "full_body_likely_rows": 0,
+      "torso_or_partial_body_rows": 0
+    },
+    "train": {
+      "rows": 851,
+      "downloaded_rows": 698,
+      "face_visible_rows": 205,
+      "person_visible_rows": 0,
+      "full_body_likely_rows": 0,
+      "torso_or_partial_body_rows": 0
+    }
+  }
+}

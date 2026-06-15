@@ -1,0 +1,13 @@
+{
+  "input": "data/supervised_scale_hardened.csv",
+  "output": "data/supervised_scale_no_hash_leaks.csv",
+  "hash_column": "image_average_hash",
+  "input_rows": 20000,
+  "output_rows": 19946,
+  "dropped_rows": 54,
+  "dropped_hash_groups": 12,
+  "dropped_by_split": {
+    "train": 34,
+    "test": 20
+  }
+}

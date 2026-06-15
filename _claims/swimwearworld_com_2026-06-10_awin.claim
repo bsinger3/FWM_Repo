@@ -1,0 +1,14 @@
+retailer: swimwearworld_com
+site: swimwearworld.com
+claimed_at: 2026-06-10T20:40:50Z
+completed_at: 2026-06-10T20:42:02Z
+status: completed
+source: Awin advertiser queue
+programme: SWORLD Inc
+provider_hint: Stamped
+why_request: swim/shapewear gap
+scope: public product pages and public review/provider feeds only
+stop_conditions: 429/captcha/WAF/auth challenge
+rows_written: 0
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/swimwearworld_com/swimwearworld_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/swimwearworld_com/swimwearworld_com_reviews_matching_intake_schema_summary.json

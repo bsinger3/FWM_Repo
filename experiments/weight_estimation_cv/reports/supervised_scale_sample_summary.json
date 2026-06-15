@@ -1,0 +1,53 @@
+{
+  "input": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/ground_truth_manifest.csv",
+  "output": "data/supervised_scale_sample.csv",
+  "rows": 20000,
+  "train_rows": 15409,
+  "test_rows": 4591,
+  "source_files": 130,
+  "source_groups": 83,
+  "image_hosts": {
+    "m.media-amazon.com": 6961,
+    "cdn-yotpo-images-production.yotpo.com": 2042,
+    "cdn.shopify.com": 1866,
+    "images-na.ssl-images-amazon.com": 1829,
+    "judgeme.imgix.net": 1578,
+    "photos-us.bazaarvoice.com": 1125,
+    "www.lulus.com": 969,
+    "review-images.onequince.com": 959,
+    "media-dynamic.okendo.io": 915,
+    "fashionpass.s3-us-west-1.amazonaws.com": 506,
+    "res.cloudinary.com": 483,
+    "images.loox.io": 223,
+    "cdn.stamped.io": 176,
+    "www.rotita.com": 127,
+    "d1rc46soeuwz3b.cloudfront.net": 116,
+    "static-dress.missacc.com": 40,
+    "cdn1.stamped.io": 36,
+    "m.rotita.com": 20,
+    "d4yxl4pe8dqlj.cloudfront.net": 16,
+    "image.lilyease.com": 8,
+    "cdn-1.stacees.co.uk": 3,
+    "klaviyo.s3.amazonaws.com": 2
+  },
+  "weight_bins": {
+    "101-120": 2805,
+    "121-140": 5430,
+    "141-160": 4348,
+    "161-180": 2551,
+    "181-210": 1936,
+    "211-250": 1056,
+    "251-350": 549,
+    "70-100": 1325
+  },
+  "weight_lbs": {
+    "min": 70.0,
+    "max": 350.0,
+    "avg": 152.08
+  },
+  "height_in": {
+    "min": 48.0,
+    "max": 84.0,
+    "avg": 64.76
+  }
+}

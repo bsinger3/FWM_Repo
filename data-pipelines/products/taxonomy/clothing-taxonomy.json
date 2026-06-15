@@ -1,0 +1,256 @@
+{
+  "version": "2026-06-04",
+  "mother_categories": [
+    {
+      "id": "tops",
+      "label": "Tops",
+      "measurement_profile_id": "upper_body",
+      "description": "Upper-body garments such as shirts, blouses, tees, tanks, and sweaters."
+    },
+    {
+      "id": "bottoms",
+      "label": "Bottoms",
+      "measurement_profile_id": "lower_body",
+      "description": "General lower-body garments when the site does not distinguish pants, skirts, or shorts clearly."
+    },
+    {
+      "id": "skirts",
+      "label": "Skirts",
+      "measurement_profile_id": "lower_body",
+      "description": "Skirts and skirt-like garments, including retailer length groups."
+    },
+    {
+      "id": "pants",
+      "label": "Pants",
+      "measurement_profile_id": "lower_body",
+      "description": "Long lower-body garments such as pants, jeans, trousers, leggings, and joggers."
+    },
+    {
+      "id": "shorts",
+      "label": "Shorts",
+      "measurement_profile_id": "lower_body",
+      "description": "Short lower-body garments, including denim shorts, active shorts, and tailored shorts."
+    },
+    {
+      "id": "dresses",
+      "label": "Dresses",
+      "measurement_profile_id": "full_body",
+      "description": "One-piece dresses and gowns."
+    },
+    {
+      "id": "bodysuits",
+      "label": "Bodysuits",
+      "measurement_profile_id": "upper_body",
+      "description": "Bodysuits and one-piece tops."
+    },
+    {
+      "id": "swimwear",
+      "label": "Swimwear",
+      "measurement_profile_id": "swim",
+      "description": "One-piece swimsuits, bikinis, tankinis, and swim separates."
+    },
+    {
+      "id": "outerwear",
+      "label": "Outerwear",
+      "measurement_profile_id": "upper_body",
+      "description": "Jackets, coats, blazers, and similar layering pieces."
+    },
+    {
+      "id": "intimates",
+      "label": "Intimates",
+      "measurement_profile_id": "intimates",
+      "description": "Bras, underwear, lingerie, shapewear, and related garments."
+    },
+    {
+      "id": "sets",
+      "label": "Sets",
+      "measurement_profile_id": "full_body",
+      "description": "Matching sets and multi-piece outfits."
+    },
+    {
+      "id": "source-review",
+      "label": "Source Review",
+      "measurement_profile_id": "unknown",
+      "description": "Unavailable, ambiguous, non-product, or otherwise review-required source pages."
+    }
+  ],
+  "measurement_profiles": [
+    {
+      "id": "upper_body",
+      "fields": ["height_in_display", "bust_in_display", "bra_band_in_display", "cupsize_display", "size_display"],
+      "fit_notes": "Prioritize bust, band/cup when present, height, and ordered size."
+    },
+    {
+      "id": "lower_body",
+      "fields": ["height_in_display", "weight_lbs_display", "waist_in", "hips_in_display", "inseam_inches_display", "size_display"],
+      "fit_notes": "Prioritize waist, hips, inseam, height, weight, and ordered size."
+    },
+    {
+      "id": "full_body",
+      "fields": ["height_in_display", "weight_lbs_display", "bust_in_display", "waist_in", "hips_in_display", "size_display"],
+      "fit_notes": "Use both upper- and lower-body context because fit crosses the full garment."
+    },
+    {
+      "id": "bra",
+      "fields": ["bra_band_in_display", "cupsize_display", "bust_in_display", "size_display"],
+      "fit_notes": "Band and cup are the most important structured fields."
+    },
+    {
+      "id": "swim",
+      "fields": ["height_in_display", "weight_lbs_display", "bust_in_display", "bra_band_in_display", "cupsize_display", "waist_in", "hips_in_display", "size_display"],
+      "fit_notes": "Swim can need bust, waist, hips, height, weight, and ordered size depending on one-piece vs separate."
+    },
+    {
+      "id": "intimates",
+      "fields": ["bra_band_in_display", "cupsize_display", "bust_in_display", "waist_in", "hips_in_display", "size_display"],
+      "fit_notes": "Use bra profile for bras and lower-body fields for underwear or shapewear."
+    },
+    {
+      "id": "unknown",
+      "fields": [],
+      "fit_notes": "Do not publish until reviewed."
+    }
+  ],
+  "category_tags": [
+    {
+      "id": "blouse",
+      "mother_category_id": "tops",
+      "aliases": ["blouses"]
+    },
+    {
+      "id": "shirt",
+      "mother_category_id": "tops",
+      "aliases": ["button down", "button-down", "shirts"]
+    },
+    {
+      "id": "tee",
+      "mother_category_id": "tops",
+      "aliases": ["t-shirt", "t shirt", "tshirt"]
+    },
+    {
+      "id": "tank",
+      "mother_category_id": "tops",
+      "aliases": ["camisole", "cami", "tank top"]
+    },
+    {
+      "id": "sweater",
+      "mother_category_id": "tops",
+      "aliases": ["cardigan", "pullover", "sweaters"]
+    },
+    {
+      "id": "jeans",
+      "mother_category_id": "pants",
+      "aliases": ["denim", "jean"]
+    },
+    {
+      "id": "long-pants",
+      "mother_category_id": "pants",
+      "aliases": ["full-length pants", "long pants"]
+    },
+    {
+      "id": "trousers",
+      "mother_category_id": "pants",
+      "aliases": ["dress pants", "slacks", "trouser"]
+    },
+    {
+      "id": "leggings",
+      "mother_category_id": "pants",
+      "aliases": ["legging", "tights"]
+    },
+    {
+      "id": "wide-leg-pants",
+      "mother_category_id": "pants",
+      "aliases": ["wide leg", "wide-leg"]
+    },
+    {
+      "id": "shorts",
+      "mother_category_id": "shorts",
+      "aliases": ["short"]
+    },
+    {
+      "id": "denim-shorts",
+      "mother_category_id": "shorts",
+      "aliases": ["jean shorts"]
+    },
+    {
+      "id": "mini-skirt",
+      "mother_category_id": "skirts",
+      "aliases": ["mini skirts", "short skirt"]
+    },
+    {
+      "id": "midi-skirt",
+      "mother_category_id": "skirts",
+      "aliases": ["midi skirts"]
+    },
+    {
+      "id": "maxi-skirt",
+      "mother_category_id": "skirts",
+      "aliases": ["long skirt", "maxi skirts"]
+    },
+    {
+      "id": "dress",
+      "mother_category_id": "dresses",
+      "aliases": ["dresses", "sundress"]
+    },
+    {
+      "id": "mini-dress",
+      "mother_category_id": "dresses",
+      "aliases": ["short dress"]
+    },
+    {
+      "id": "midi-dress",
+      "mother_category_id": "dresses",
+      "aliases": []
+    },
+    {
+      "id": "maxi-dress",
+      "mother_category_id": "dresses",
+      "aliases": ["long dress"]
+    },
+    {
+      "id": "gown",
+      "mother_category_id": "dresses",
+      "aliases": ["evening gown", "formal dress"]
+    },
+    {
+      "id": "bodysuit",
+      "mother_category_id": "bodysuits",
+      "aliases": ["bodysuits", "one piece top"]
+    },
+    {
+      "id": "one-piece-swimsuit",
+      "mother_category_id": "swimwear",
+      "aliases": ["one piece swimsuit", "one-piece", "one piece swim"]
+    },
+    {
+      "id": "bikini",
+      "mother_category_id": "swimwear",
+      "aliases": ["two piece swimsuit", "two-piece swimsuit"]
+    },
+    {
+      "id": "jacket",
+      "mother_category_id": "outerwear",
+      "aliases": ["blazer", "jackets", "shacket"]
+    },
+    {
+      "id": "coat",
+      "mother_category_id": "outerwear",
+      "aliases": ["coats", "parka", "trench"]
+    },
+    {
+      "id": "bra",
+      "mother_category_id": "intimates",
+      "aliases": ["bralette", "bras", "sports bra"]
+    },
+    {
+      "id": "underwear",
+      "mother_category_id": "intimates",
+      "aliases": ["briefs", "panties", "panty", "thong"]
+    },
+    {
+      "id": "matching-set",
+      "mother_category_id": "sets",
+      "aliases": ["set", "sets", "two piece set"]
+    }
+  ]
+}

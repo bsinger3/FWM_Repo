@@ -25,6 +25,16 @@ As of 2026-05-20, the first implementation step is intentionally backend-only:
 - No foreign key has been added from `public.images` to the staging product tables yet.
 - Shipping countries/geos are not currently tracked on `staging.product_pages` or `public.images`.
 
+Product-table source data now has a dedicated repo workspace:
+
+```text
+data-pipelines/products/
+```
+
+Use that directory for retailer category evidence, product-level CSV contracts,
+canonical taxonomy config, and merchant-specific scratch outputs before rows are
+promoted into staging or public product tables.
+
 Migration:
 
 ```text

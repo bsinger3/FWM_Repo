@@ -66,6 +66,7 @@ const el = {
   detailNeutral: document.getElementById("detail-neutral"),
   detailNotes: document.getElementById("detail-notes"),
   cropFrame: document.getElementById("crop-frame"),
+  cropPan: document.getElementById("crop-pan"),
   cropImage: document.getElementById("crop-image"),
   cropX: document.getElementById("crop-x"),
   cropY: document.getElementById("crop-y"),
@@ -295,9 +296,10 @@ function reasonColor(reason) {
   return "#667085";
 }
 
-function imageSrc(url) {
+function imageSrc(url, retryToken = "") {
   if (!url) return "";
-  return `${IMAGE_PROXY}${encodeURIComponent(url)}`;
+  const retrySuffix = retryToken ? `&retry=${encodeURIComponent(retryToken)}` : "";
+  return `${IMAGE_PROXY}${encodeURIComponent(url)}${retrySuffix}`;
 }
 
 function fillReasonSelect(select, includeBlank = false) {
@@ -337,8 +339,11 @@ async function init() {
 }
 
 function updateSourceSummary() {
-  const bucketCount = Object.values(state.parts.buckets)
-    .map((bucket) => `${bucket.label}: ${bucket.remainingPartCount} batches left`)
+  const bucketCount = ["approve_candidates", "needs_human_review", "disapprove_candidates"]
+    .map((bucket) => {
+      const config = state.parts.buckets[bucket];
+      return `${config.label}: ${derivedBucketCounts(bucket).remainingPartCount} batches left`;
+    })
     .join(" | ");
   el.sourceSummary.textContent = `${state.parts.packageId} | ${bucketCount}`;
 }
@@ -351,11 +356,12 @@ function renderTabs() {
   el.bucketTabs.textContent = "";
   for (const bucket of ["approve_candidates", "needs_human_review", "disapprove_candidates"]) {
     const config = state.parts.buckets[bucket];
+    const counts = derivedBucketCounts(bucket);
     const button = document.createElement("button");
     button.className = bucket === state.bucket ? "tab active" : "tab";
     button.type = "button";
-    button.textContent = `${config.label} (${config.remainingPartCount})`;
-    button.title = `${config.remainingPartCount} batches still have work; ${config.remainingRowCount} unreviewed of ${config.rowCount} rows`;
+    button.textContent = `${config.label} (${counts.remainingPartCount})`;
+    button.title = `${counts.remainingPartCount} batches still have work; ${counts.remainingRowCount} unreviewed of ${config.rowCount} rows`;
     button.addEventListener("click", async () => {
       state.bucket = bucket;
       state.part = firstRemainingPart(config)?.part || "001";
@@ -371,9 +377,10 @@ function renderPartSelect() {
   const parts = state.parts.buckets[state.bucket].parts;
   el.partSelect.textContent = "";
   for (const part of parts) {
+    const counts = derivedPartCounts(state.bucket, part);
     const option = document.createElement("option");
     option.value = part.part;
-    option.textContent = `Part ${part.part} (${part.remainingRowCount} left)`;
+    option.textContent = `Part ${part.part} (${counts.remainingRowCount} left)`;
     option.selected = part.part === state.part;
     el.partSelect.appendChild(option);
   }
@@ -383,7 +390,41 @@ function nextCandidatePart(visitedParts = new Set()) {
   const parts = state.parts.buckets[state.bucket].parts;
   const startIndex = Math.max(parts.findIndex((part) => part.part === state.part), 0);
   const ordered = [...parts.slice(startIndex + 1), ...parts.slice(0, startIndex)];
-  return ordered.find((part) => part.remainingRowCount > 0 && !visitedParts.has(part.part));
+  return ordered.find((part) => derivedPartCounts(state.bucket, part).remainingRowCount > 0 && !visitedParts.has(part.part));
+}
+
+function derivedBucketCounts(bucket) {
+  const config = state.parts.buckets[bucket];
+  const parts = config.parts.map((part) => derivedPartCounts(bucket, part));
+  return {
+    remainingRowCount: parts.reduce((sum, part) => sum + part.remainingRowCount, 0),
+    remainingPartCount: parts.filter((part) => part.remainingRowCount > 0).length,
+  };
+}
+
+function derivedPartCounts(bucket, part) {
+  const locallyCompleted = dirtyCompletedCount(bucket, part.filename);
+  return {
+    remainingRowCount: Math.max(part.remainingRowCount - locallyCompleted, 0),
+  };
+}
+
+function dirtyCompletedCount(bucket, partFile) {
+  let count = 0;
+  for (const decision of state.dirty.values()) {
+    if (decision.bucket !== bucket || decision.partFile !== partFile) continue;
+    if (isCompletedReviewDecision(decision)) count += 1;
+  }
+  return count;
+}
+
+function isCompletedReviewDecision(decision) {
+  return ["APPROVE", "DISAPPROVE"].includes(String(decision.humanState || "").toUpperCase());
+}
+
+function isHiddenBySavedFilter(row, decision) {
+  if (row.savedDecisionState === "saved" || decision.savedDecisionState === "saved") return true;
+  return state.dirty.has(rowDecisionKey(row)) && isCompletedReviewDecision(decision);
 }
 
 async function loadRows(visitedParts = new Set()) {
@@ -464,7 +505,7 @@ function renderReasonFilter() {
 
 function passesFilters(row) {
   const decision = getRowDecision(row);
-  if (el.hideSaved.checked && decision.savedDecisionState === "saved") return false;
+  if (el.hideSaved.checked && isHiddenBySavedFilter(row, decision)) return false;
 
   const q = el.searchInput.value.trim().toLowerCase();
   if (q) {
@@ -484,7 +525,7 @@ function passesFilters(row) {
 
   const stateFilter = el.stateFilter.value;
   if (stateFilter === "dirty" && !state.dirty.has(rowDecisionKey(row))) return false;
-  if (stateFilter === "saved" && decision.savedDecisionState !== "saved") return false;
+  if (stateFilter === "saved" && row.savedDecisionState !== "saved" && decision.savedDecisionState !== "saved") return false;
   if (["APPROVE", "DISAPPROVE", "NEUTRAL"].includes(stateFilter) && decision.humanState !== stateFilter) return false;
 
   const reasonFilter = state.legendFilter || el.reasonFilter.value;
@@ -556,8 +597,10 @@ function renderCard(row) {
     appendMeta(row, "Waist", row.display.waistIn ? `${row.display.waistIn}"` : ""),
     appendMeta(row, "Hips", row.display.hipsIn ? `${row.display.hipsIn}"` : ""),
   ].join("");
+  const shouldShowCvReason = row.bucket !== "approve_candidates" || row.cvReasonCode !== "CLEAR_PASS";
+  const cardTitle = row.display.productTitle || row.display.clothingType || row.display.productCategory || "";
   const cvSummary = [
-    el.showReasons.checked ? appendMeta(row, "CV", shortReason(row.cvReasonCode || row.defaultDecision)) : "",
+    el.showReasons.checked && shouldShowCvReason ? appendMeta(row, "CV", shortReason(row.cvReasonCode || row.defaultDecision)) : "",
     row.duplicateImageCount > 1 ? appendMeta(row, "Dup", `x${row.duplicateImageCount}`) : "",
   ].join("");
 
@@ -566,9 +609,12 @@ function renderCard(row) {
     ${crop.hasCropAdjustment ? '<div class="crop-chip">Crop</div>' : ""}
     ${decision.savedDecisionState === "saved" ? '<div class="saved-chip">Saved</div>' : ""}
     <div class="card-image-frame">
-      <img alt="" loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(imageSrc(row.imageUrl))}" data-original="${escapeHtml(row.imageUrl)}" />
+      <div class="card-pan">
+        <img alt="" loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(imageSrc(row.imageUrl))}" data-original="${escapeHtml(row.imageUrl)}" />
+      </div>
     </div>
     <div class="meta">
+      ${cardTitle ? `<div class="card-title" title="${escapeHtml(cardTitle)}">${escapeHtml(cardTitle)}</div>` : ""}
       <div class="meta-row">${summary}</div>
       <div class="meta-row">${cvSummary}</div>
     </div>
@@ -581,13 +627,22 @@ function renderCard(row) {
   `;
 
   const img = article.querySelector("img");
-  applyCropToImage(img, crop);
+  const pan = article.querySelector(".card-pan");
+  applyCropToCard(pan, img, crop);
   img.addEventListener("error", () => {
-    if (img.src !== row.imageUrl && row.imageUrl) {
+    const retryStep = img.dataset.retryStep || "proxy";
+    if (retryStep === "proxy" && row.imageUrl) {
+      img.dataset.retryStep = "direct";
       img.src = row.imageUrl;
-      applyCropToImage(img, crop);
-    } else {
-      img.style.display = "none";
+      applyCropToCard(pan, img, crop);
+    } else if (retryStep === "direct" && row.imageUrl) {
+      img.dataset.retryStep = "proxy-retry";
+      img.src = imageSrc(row.imageUrl, String(Date.now()));
+      applyCropToCard(pan, img, crop);
+    } else if (retryStep !== "failed") {
+      img.dataset.retryStep = "failed";
+      article.classList.add("image-load-failed");
+      img.removeAttribute("src");
     }
   });
 
@@ -637,6 +692,9 @@ function render() {
   const fragment = document.createDocumentFragment();
   for (const row of rows) fragment.appendChild(renderCard(row));
   el.grid.appendChild(fragment);
+  renderTabs();
+  renderPartSelect();
+  updateSourceSummary();
   renderLegend(rows);
   updateCounts(rows);
   updateSaveStatus();
@@ -816,9 +874,23 @@ function formatCropAdjustment(cropAdjustment) {
 }
 
 function applyCropToImage(img, cropAdjustment) {
-  const crop = normalizeCropAdjustment(cropAdjustment);
-  img.style.objectPosition = `${crop.cropObjectPositionXPct}% ${crop.cropObjectPositionYPct}%`;
+  const normalized = normalizeCropAdjustment(cropAdjustment);
+  const crop = normalized.hasCropAdjustment ? normalized : defaultCropAdjustment();
+  img.style.objectFit = "cover";
+  img.style.objectPosition = cropObjectPosition(crop);
+  applyRotatedImageBox(img, crop);
   img.style.transform = cropTransform(crop);
+}
+
+function applyCropToCard(pan, img, cropAdjustment) {
+  const normalized = normalizeCropAdjustment(cropAdjustment);
+  const crop = normalized.hasCropAdjustment ? normalized : defaultCropAdjustment();
+  applyCropPanBox(pan, crop);
+  pan.style.transform = cropPanTransform(crop);
+  img.style.objectFit = "cover";
+  img.style.objectPosition = cropObjectPosition(crop);
+  applyRotatedImageBox(img, crop);
+  img.style.transform = cropEditorImageTransform(crop);
 }
 
 function setCropEditorImage(imageUrl) {
@@ -844,13 +916,18 @@ function updateCropPreview(markAdjusted = false) {
   const y = Number(el.cropY.value);
   const zoom = Number(el.cropZoom.value);
   const rotation = Number(el.cropStatus.dataset.rotationDeg || 0);
-  el.cropImage.style.objectPosition = `${x}% ${y}%`;
-  el.cropImage.style.transform = cropTransform({
+  const crop = {
     cropObjectPositionXPct: x,
     cropObjectPositionYPct: y,
     cropZoom: zoom,
     cropRotationDeg: rotation,
-  });
+  };
+  applyCropPanBox(el.cropPan, crop);
+  el.cropPan.style.transform = cropPanTransform(crop);
+  el.cropImage.style.objectFit = "cover";
+  el.cropImage.style.objectPosition = cropObjectPosition(crop);
+  applyRotatedImageBox(el.cropImage, crop);
+  el.cropImage.style.transform = cropEditorImageTransform(crop);
   el.cropStatus.textContent =
     el.cropStatus.dataset.adjusted === "true"
       ? `Manual crop: ${x}% horizontal, ${y}% vertical, ${zoom.toFixed(2)}x zoom, ${rotation}deg rotation`
@@ -859,10 +936,44 @@ function updateCropPreview(markAdjusted = false) {
 
 function cropTransform(cropAdjustment) {
   const crop = normalizeCropAdjustment(cropAdjustment);
-  const maxPanPct = ((crop.cropZoom - 1) / Math.max(crop.cropZoom, 1)) * 50;
-  const translateX = (((50 - crop.cropObjectPositionXPct) / 50) * maxPanPct).toFixed(2);
-  const translateY = (((50 - crop.cropObjectPositionYPct) / 50) * maxPanPct).toFixed(2);
-  return `translate(${translateX}%, ${translateY}%) scale(${crop.cropZoom}) rotate(${crop.cropRotationDeg}deg)`;
+  return `${cropPanTransform(crop)} ${cropImageTransform(crop)}`;
+}
+
+function cropPanTransform(cropAdjustment) {
+  const crop = normalizeCropAdjustment(cropAdjustment);
+  const overflowPct = ((crop.cropZoom - 1) / Math.max(crop.cropZoom, 1)) * 100;
+  const translateX = ((-crop.cropObjectPositionXPct / 100) * overflowPct).toFixed(2);
+  const translateY = ((-crop.cropObjectPositionYPct / 100) * overflowPct).toFixed(2);
+  return `translate(${translateX}%, ${translateY}%)`;
+}
+
+function cropObjectPosition(cropAdjustment) {
+  const crop = normalizeCropAdjustment(cropAdjustment);
+  return `${crop.cropObjectPositionXPct}% ${crop.cropObjectPositionYPct}%`;
+}
+
+function cropImageTransform(cropAdjustment) {
+  const crop = normalizeCropAdjustment(cropAdjustment);
+  return `scale(${crop.cropZoom}) rotate(${crop.cropRotationDeg}deg)`;
+}
+
+function cropEditorImageTransform(cropAdjustment) {
+  const crop = normalizeCropAdjustment(cropAdjustment);
+  return `rotate(${crop.cropRotationDeg}deg)`;
+}
+
+function applyCropPanBox(element, cropAdjustment) {
+  const crop = normalizeCropAdjustment(cropAdjustment);
+  const sizePct = (crop.cropZoom * 100).toFixed(2);
+  element.style.width = `${sizePct}%`;
+  element.style.height = `${sizePct}%`;
+}
+
+function applyRotatedImageBox(img, cropAdjustment) {
+  const crop = normalizeCropAdjustment(cropAdjustment);
+  const isQuarterTurn = crop.cropRotationDeg % 180 !== 0;
+  img.style.width = isQuarterTurn ? "133.333%" : "100%";
+  img.style.height = isQuarterTurn ? "75%" : "100%";
 }
 
 function ensurePanHasZoom() {
@@ -1031,6 +1142,7 @@ function bindEvents() {
 function bindCropDrag() {
   const drag = {
     active: false,
+    hasMoved: false,
     startX: 0,
     startY: 0,
     cropX: 50,
@@ -1039,6 +1151,7 @@ function bindCropDrag() {
 
   el.cropFrame.addEventListener("pointerdown", (event) => {
     drag.active = true;
+    drag.hasMoved = false;
     drag.startX = event.clientX;
     drag.startY = event.clientY;
     drag.cropX = Number(el.cropX.value);
@@ -1049,9 +1162,16 @@ function bindCropDrag() {
 
   el.cropFrame.addEventListener("pointermove", (event) => {
     if (!drag.active) return;
+    const pointerDeltaX = event.clientX - drag.startX;
+    const pointerDeltaY = event.clientY - drag.startY;
+    if (!drag.hasMoved && Math.hypot(pointerDeltaX, pointerDeltaY) < 4) {
+      event.preventDefault();
+      return;
+    }
+    drag.hasMoved = true;
     const rect = el.cropFrame.getBoundingClientRect();
-    const deltaX = ((event.clientX - drag.startX) / Math.max(rect.width, 1)) * 100;
-    const deltaY = ((event.clientY - drag.startY) / Math.max(rect.height, 1)) * 100;
+    const deltaX = (pointerDeltaX / Math.max(rect.width, 1)) * 100;
+    const deltaY = (pointerDeltaY / Math.max(rect.height, 1)) * 100;
     el.cropX.value = String(Math.round(Math.min(100, Math.max(0, drag.cropX - deltaX))));
     el.cropY.value = String(Math.round(Math.min(100, Math.max(0, drag.cropY - deltaY))));
     ensurePanHasZoom();

@@ -1,0 +1,14 @@
+retailer: everleakproof_com
+site: everleakproof.com
+claimed_at: 2026-06-10T18:39:49Z
+completed_at: 2026-06-10T18:40:19Z
+status: completed
+source: Awin advertiser queue
+programme: EverLeakProof US
+provider_hint: Loox
+why_request: full-bust/lingerie gap; adaptive/specialty fit gap
+scope: public product pages and public review/provider feeds only
+stop_conditions: 429/captcha/WAF/auth challenge
+rows_written: 0
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/everleakproof_com/everleakproof_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/everleakproof_com/everleakproof_com_reviews_matching_intake_schema_summary.json

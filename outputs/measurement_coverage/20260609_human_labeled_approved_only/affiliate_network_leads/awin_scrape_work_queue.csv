@@ -1,0 +1,71 @@
+apply_order,join_priority,programmeName,normalized_domain,review_providers,why_request,approvalRate,displayUrl,slug,existing_data_dir_found,existing_scrape_doc_found,existing_scraper_script_found,existing_claim_found,scrape_action
+1,request_now,Company,shopbrabar.com,Loox,full-bust/lingerie gap; plus/curve gap; tall/petite gap,100.00,https://shopbrabar.com,shopbrabar_com,no,no,no,no,scrape_with_loox_adapter
+2,request_now,Self-Adore (US),self-adore.com,Judge.me,full-bust/lingerie gap; swim/shapewear gap; bottoms/activewear gap,0.00,https://self-adore.com/,self_adore_com,no,no,no,no,probe_judgeme_then_scrape
+3,request_now,duoFIT Maternity Activewear,builtlikeamother.com,Judge.me,full-bust/lingerie gap; maternity/postpartum gap; bottoms/activewear gap,0.00,https://builtlikeamother.com,builtlikeamother_com,no,no,no,no,probe_judgeme_then_scrape
+4,request_now,CURVEEZ,curveez.com,Judge.me,full-bust/lingerie gap; swim/shapewear gap,73.81,https://curveez.com?utm_source=share-a-sale&utm_medium=affiliate&utm_campaign=text-general,curveez_com,no,no,no,no,probe_judgeme_then_scrape
+5,request_now,Gatherall,wegatherall.com,Judge.me,full-bust/lingerie gap; adaptive/specialty fit gap,100.00,https://wegatherall.com/,wegatherall_com,no,no,no,no,probe_judgeme_then_scrape
+6,request_now,EverLeakProof US,everleakproof.com,Loox,full-bust/lingerie gap; adaptive/specialty fit gap,85.71,https://everleakproof.com,everleakproof_com,no,no,no,no,scrape_with_loox_adapter
+7,request_now,TheRY,therygroup.com,Loox;Judge.me,maternity/postpartum gap; adaptive/specialty fit gap,12.50,https://therygroup.com,therygroup_com,no,no,no,no,scrape_with_loox_adapter
+8,request_now,ucalingerie.com,ucalingerie.com,Stamped,full-bust/lingerie gap; swim/shapewear gap,100.00,https://ucalingerie.com,ucalingerie_com,no,no,no,no,probe_stamped_then_scrape
+9,request_now,baleaf,baleaf.com,Judge.me,full-bust/lingerie gap; bottoms/activewear gap,17.56,https://www.baleaf.com,baleaf_com,no,no,no,no,probe_judgeme_then_scrape
+10,request_now,Springrose,springrose.co,Okendo,full-bust/lingerie gap; adaptive/specialty fit gap,0.00,https://www.springrose.co,springrose_co,no,no,no,no,scrape_with_okendo_adapter
+11,request_now,Gooseberry Intimates Ltd,gooseberryintimates.com,Okendo,full-bust/lingerie gap; swim/shapewear gap,100.00,https://gooseberryintimates.com,gooseberryintimates_com,no,no,no,no,scrape_with_okendo_adapter
+12,request_now,Selia Richwood,seliarichwood.com,Judge.me,full-bust/lingerie gap; swim/shapewear gap,0.00,https://seliarichwood.com,seliarichwood_com,no,no,no,no,probe_judgeme_then_scrape
+13,request_now,Heyjoanie LLC,heyjoanie.com,Judge.me,tall/petite gap; bottoms/activewear gap,33.33,https://www.heyjoanie.com,heyjoanie_com,no,no,no,no,probe_judgeme_then_scrape
+14,request_now,Solbari Sun Protection (US),solbari.com,Yotpo,swim/shapewear gap; bottoms/activewear gap,35.32,https://www.solbari.com/,solbari_com,no,no,no,no,probe_yotpo_then_scrape
+15,request_now,Dippin Daisys (US),dippindaisys.com,Judge.me,swim/shapewear gap; bottoms/activewear gap,100.00,https://dippindaisys.com,dippindaisys_com,no,no,no,no,probe_judgeme_then_scrape
+16,request_now,WOLACO (US),wolaco.com,Yotpo,adaptive/specialty fit gap; bottoms/activewear gap,82.78,https://www.wolaco.com/,wolaco_com,no,no,no,no,probe_yotpo_then_scrape
+17,request_now,Cadense,cadense.com,Judge.me,adaptive/specialty fit gap; bottoms/activewear gap,100.00,https://cadense.com/,cadense_com,no,no,no,no,probe_judgeme_then_scrape
+18,request_now,UNTUCKit (US),untuckit.com,Yotpo;Bazaarvoice,plus/curve gap; bottoms/activewear gap,91.97,https://www.untuckit.com/,untuckit_com,no,no,no,no,probe_yotpo_then_scrape
+19,request_now,Line in the Sand,lineinthesand.com,Judge.me,swim/shapewear gap; bottoms/activewear gap,0.00,https://www.lineinthesand.com,lineinthesand_com,no,no,no,no,probe_judgeme_then_scrape
+20,request_now,SOL SWIM,shopsolswim.com,Judge.me,swim/shapewear gap; bottoms/activewear gap,0.00,https://www.shopsolswim.com/,shopsolswim_com,no,no,no,no,probe_judgeme_then_scrape
+21,request_now,Sweat and Milk,sweatandmilk.com,Judge.me,maternity/postpartum gap; bottoms/activewear gap,78.92,https://sweatandmilk.com/,sweatandmilk_com,no,no,no,no,probe_judgeme_then_scrape
+22,request_now,Bravissimo,bravissimo.com,Yotpo,full-bust/lingerie gap; swim/shapewear gap,78.88,https://www.bravissimo.com/us/?utm_source=Shareasale&utm_medium=affiliate&utm_campaign=shopbravissimolink,bravissimo_com,no,no,no,no,probe_yotpo_then_scrape
+23,request_now,Waistdear,waistdear.com,Stamped;Yotpo,swim/shapewear gap; bottoms/activewear gap,100.00,https://www.waistdear.com/pages/rewards,waistdear_com,no,no,no,no,probe_stamped_then_scrape
+24,request_now,Boux Avenue US,bouxavenue.com,Bazaarvoice,full-bust/lingerie gap; swim/shapewear gap,0.00,https://www.bouxavenue.com/us,bouxavenue_com,no,no,no,no,probe_bazaarvoice_then_scrape
+25,request_now,SILVERWIND,mysilverwind.com,Loox;Judge.me,swim/shapewear gap; bottoms/activewear gap,79.85,https://www.mysilverwind.com/collections/shop-all,mysilverwind_com,no,no,no,no,scrape_with_loox_adapter
+26,request_now,Sunshine Society (US),iamsunshinesociety.com,Loox;Judge.me,full-bust/lingerie gap,100.00,https://www.iamsunshinesociety.com/,iamsunshinesociety_com,no,no,no,no,scrape_with_loox_adapter
+27,request_now,Zeagoo,zeagoo.com,Judge.me,full-bust/lingerie gap,100.00,https://zeagoo.com,zeagoo_com,no,no,no,no,probe_judgeme_then_scrape
+28,request_now,Lusomé,lusome.com,Judge.me,full-bust/lingerie gap,100.00,https://lusome.com/,lusome_com,no,no,no,no,probe_judgeme_then_scrape
+29,request_now,EBY (US),shop.join-eby.com,Okendo,full-bust/lingerie gap,77.38,https://shop.join-eby.com/,shop_join_eby_com,no,no,no,no,scrape_with_okendo_adapter
+30,request_now,PerfectDD,perfectdd.com,Judge.me,full-bust/lingerie gap,100.00,https://perfectdd.com/,perfectdd_com,no,no,no,no,probe_judgeme_then_scrape
+31,request_now,Belly Bandit,bellybandit.com,Judge.me,maternity/postpartum gap,92.40,https://bellybandit.com,bellybandit_com,no,no,no,no,probe_judgeme_then_scrape
+32,request_now,KING SupportWear,kingsonly.co,Judge.me,adaptive/specialty fit gap; bottoms/activewear gap,0.00,https://kingsonly.co/,kingsonly_co,no,no,no,no,probe_judgeme_then_scrape
+33,request_now,PURTY BODY Affiliate Program,purtybody.com,Okendo,full-bust/lingerie gap,99.01,https://purtybody.com/,purtybody_com,no,no,no,no,scrape_with_okendo_adapter
+34,request_now,Net Positive,wearnetpositive.com,Okendo,full-bust/lingerie gap,76.73,https://wearnetpositive.com/,wearnetpositive_com,no,no,no,no,scrape_with_okendo_adapter
+35,request_now,A DOMANI,adomanisleep.com,Okendo,maternity/postpartum gap,100.00,https://www.adomanisleep.com/,adomanisleep_com,no,no,no,no,scrape_with_okendo_adapter
+36,request_now,Rosewater Collective LLC,rosewaterhouse.com,Loox;Judge.me,maternity/postpartum gap,100.00,https://rosewaterhouse.com/,rosewaterhouse_com,no,no,no,no,scrape_with_loox_adapter
+37,request_now,Pietro Brunelli US,pietrobrunelli.it,Judge.me,maternity/postpartum gap,33.33,https://www.pietrobrunelli.it/en,pietrobrunelli_it,no,no,no,no,probe_judgeme_then_scrape
+38,request_now,PROCLAIM,wearproclaim.com,Stamped,full-bust/lingerie gap,0.00,https://www.wearproclaim.com/,wearproclaim_com,no,no,no,no,probe_stamped_then_scrape
+39,request_now,CAKES body,cakesbody.com,Judge.me;Stamped,full-bust/lingerie gap,0.00,https://cakesbody.com,cakesbody_com,no,no,no,no,probe_judgeme_then_scrape
+40,request_now,Lovability (US),lovabilityinc.com,Stamped;Yotpo,full-bust/lingerie gap,93.48,https://lovabilityinc.com/,lovabilityinc_com,no,no,no,no,probe_stamped_then_scrape
+41,request_now,Snag Tights US,snagtights.us,Judge.me,full-bust/lingerie gap,76.72,https://snagtights.us/,snagtights_us,no,no,no,no,probe_judgeme_then_scrape
+42,request_now,FIND ME NOW (US),findmenowthelabel.com,Loox,full-bust/lingerie gap,0.00,https://findmenowthelabel.com/,findmenowthelabel_com,no,no,no,no,scrape_with_loox_adapter
+43,request_next,Helen Jon,helenjon.com,Judge.me,swim/shapewear gap,99.53,https://www.helenjon.com,helenjon_com,no,no,no,no,probe_judgeme_then_scrape
+44,request_next,onewith,onewithswim.com,Okendo,swim/shapewear gap,100.00,https://onewithswim.com,onewithswim_com,no,no,no,no,scrape_with_okendo_adapter
+45,request_next,Nelle Atelier,nelleatelier.com,Judge.me,tall/petite gap,100.00,https://nelleatelier.com,nelleatelier_com,no,no,no,no,probe_judgeme_then_scrape
+46,request_next,Albion Fit,albionfit.com,Okendo,swim/shapewear gap,72.79,https://albionfit.com,albionfit_com,no,no,no,no,scrape_with_okendo_adapter
+47,request_next,SWORLD Inc,swimwearworld.com,Stamped,swim/shapewear gap,73.08,https://www.swimwearworld.com,swimwearworld_com,no,no,no,no,probe_stamped_then_scrape
+48,request_next,Fig & Willow,shopfigandwillow.com,Judge.me,plus/curve gap,0.00,https://shopfigandwillow.com,shopfigandwillow_com,no,no,no,no,probe_judgeme_then_scrape
+49,request_now,Etalon,shopetalon.com,Yotpo,full-bust/lingerie gap,100.00,https://shopetalon.com/products/etalon-posture-bra,shopetalon_com,no,no,no,no,probe_yotpo_then_scrape
+50,request_now,"Ulivary Fashion Co.,Ltd",ulivarylife.com,Judge.me,full-bust/lingerie gap,100.00,https://ulivarylife.com,ulivarylife_com,no,no,no,no,probe_judgeme_then_scrape
+51,request_now,Au Natural,liveaunatural.com,Loox,full-bust/lingerie gap,100.00,https://liveaunatural.com/,liveaunatural_com,no,no,no,no,scrape_with_loox_adapter
+52,request_now,Bloomers Intimates LLC,bloomersintimates.com,Judge.me,full-bust/lingerie gap,96.72,https://bloomersintimates.com/,bloomersintimates_com,no,no,no,no,probe_judgeme_then_scrape
+53,request_now,AVIANAYA LLC DBA Journelle,journelle.com,Judge.me,full-bust/lingerie gap,67.07,https://www.journelle.com/,journelle_com,no,no,no,no,probe_judgeme_then_scrape
+54,request_now,JuJu Jams,jujujams.com,Yotpo,full-bust/lingerie gap,0.00,https://JuJuJams.com,jujujams_com,no,no,no,no,probe_yotpo_then_scrape
+55,request_now,Satingel,satingel.com,Judge.me,full-bust/lingerie gap,0.00,https://satingel.com/,satingel_com,no,no,no,no,probe_judgeme_then_scrape
+56,request_now,Montelle Intimates,montelleintimates.com,Judge.me;Stamped;Yotpo,full-bust/lingerie gap,59.33,https://montelleintimates.com,montelleintimates_com,no,no,no,no,probe_judgeme_then_scrape
+57,request_now,Radia Smart,radiasmart.com,Yotpo,maternity/postpartum gap,100.00,https://radiasmart.com,radiasmart_com,no,no,no,no,probe_yotpo_then_scrape
+58,request_now,Klassy Network,klassyshop.com,Yotpo,full-bust/lingerie gap,100.00,https://klassyshop.com,klassyshop_com,no,no,no,no,probe_yotpo_then_scrape
+59,request_now,Embrace Essentials Pte. Limited,wearembrace.com,Judge.me,full-bust/lingerie gap,100.00,https://wearembrace.com,wearembrace_com,no,no,no,no,probe_judgeme_then_scrape
+60,request_now,Niidor,niidor.com,Loox,full-bust/lingerie gap,0.00,https://niidor.com/,niidor_com,no,no,no,no,scrape_with_loox_adapter
+61,request_now,Feelingirl US,feelingirl.com,Yotpo,full-bust/lingerie gap,0.00,https://feelingirl.com/,feelingirl_com,no,no,no,no,probe_yotpo_then_scrape
+62,request_now,Shebird,shebirdshop.com,Okendo,full-bust/lingerie gap; bottoms/activewear gap,100.00,https://www.shebirdshop.com,shebirdshop_com,no,no,no,no,scrape_with_okendo_adapter
+63,request_next,SPLASH ON MAIN LLC,splashonmain.com,Yotpo,swim/shapewear gap,0.00,https://splashonmain.com/,splashonmain_com,no,no,no,no,probe_yotpo_then_scrape
+64,request_next,Beach Bum Club,beachbumclub.ca,Judge.me,swim/shapewear gap,0.00,https://beachbumclub.ca,beachbumclub_ca,no,no,no,no,probe_judgeme_then_scrape
+65,request_next,BODY by Julia Haart,plusbody.com,Loox;Okendo,swim/shapewear gap,0.00,https://bodybyjulia.com/,plusbody_com,no,no,no,no,scrape_with_okendo_adapter
+66,request_now,duet,duetcollection.com,Judge.me,maternity/postpartum gap,100.00,https://duetcollection.com,duetcollection_com,no,no,no,no,probe_judgeme_then_scrape
+67,request_now,Simple Wishes,simplewishes.com,Judge.me,maternity/postpartum gap,100.00,https://simplewishes.com/,simplewishes_com,no,no,no,no,probe_judgeme_then_scrape
+68,request_next,Oner Active Global,us.oneractive.com,Yotpo,bottoms/activewear gap,92.84,https://us.oneractive.com/,us_oneractive_com,no,no,no,no,probe_yotpo_then_scrape
+69,request_next,Non Disclosure Apparel,ndapparel.com,Judge.me,full-bust/lingerie gap,0.00,https://ndapparel.com,ndapparel_com,no,no,no,no,probe_judgeme_then_scrape
+70,request_next,Dmoose (US),dmoose.com,Okendo,bottoms/activewear gap,100.00,https://www.dmoose.com/,dmoose_com,no,no,no,no,scrape_with_okendo_adapter

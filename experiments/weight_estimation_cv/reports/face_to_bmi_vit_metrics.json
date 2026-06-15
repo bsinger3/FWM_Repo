@@ -1,0 +1,71 @@
+{
+  "model": "liujie-zheng/face-to-bmi-vit",
+  "weights_url": "https://face-to-bmi-weights.s3.us-east.cloud-object-storage.appdomain.cloud/aug_epoch_7.pt",
+  "weights_path": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/models/face_to_bmi_vit/weights/aug_epoch_7.pt",
+  "input": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/eval_sample_with_quality_tags.csv",
+  "predictions": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/face_to_bmi_vit_predictions.csv",
+  "attempted_rows": 74,
+  "status_counts": {
+    "ok": 74
+  },
+  "baseline_face_visible": {
+    "model": "ridge_height_metadata_predict_bmi",
+    "target": "bmi",
+    "features": [
+      "height_in",
+      "size_display",
+      "clothing_type_id",
+      "source_site_display",
+      "image_quality_bucket"
+    ],
+    "rows_train": 205,
+    "rows_test": 74,
+    "mae_lbs": 37.785,
+    "median_abs_error_lbs": 27.712,
+    "rmse_lbs": 50.219,
+    "r2": 0.2128,
+    "within_10_lbs": 0.1351,
+    "within_20_lbs": 0.3919,
+    "within_30_lbs": 0.5676
+  },
+  "baseline_large_face_visible": {
+    "model": "ridge_height_metadata_predict_bmi",
+    "target": "bmi",
+    "features": [
+      "height_in",
+      "size_display",
+      "clothing_type_id",
+      "source_site_display",
+      "image_quality_bucket"
+    ],
+    "rows_train": 159,
+    "rows_test": 58,
+    "mae_lbs": 36.223,
+    "median_abs_error_lbs": 24.201,
+    "rmse_lbs": 47.963,
+    "r2": 0.2172,
+    "within_10_lbs": 0.1379,
+    "within_20_lbs": 0.3621,
+    "within_30_lbs": 0.5345
+  },
+  "face_visible_all_predicted": {
+    "rows": 74,
+    "mae_lbs": 43.261,
+    "median_abs_error_lbs": 28.578,
+    "rmse_lbs": 58.583,
+    "r2": -0.0712,
+    "within_10_lbs": 0.0946,
+    "within_20_lbs": 0.3108,
+    "within_30_lbs": 0.5135
+  },
+  "face_visible_test_predicted": {
+    "rows": 74,
+    "mae_lbs": 43.261,
+    "median_abs_error_lbs": 28.578,
+    "rmse_lbs": 58.583,
+    "r2": -0.0712,
+    "within_10_lbs": 0.0946,
+    "within_20_lbs": 0.3108,
+    "within_30_lbs": 0.5135
+  }
+}

@@ -75,6 +75,23 @@ p {
   font-weight: 700;
 }
 
+.top-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+#import-btn {
+  border: 1px solid #cbd2dc;
+  border-radius: 8px;
+  min-height: 32px;
+  padding: 0 10px;
+  background: #fff;
+  color: #15191f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .toolbar {
   display: grid;
   grid-template-columns: 1fr 1fr;

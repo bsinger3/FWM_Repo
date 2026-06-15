@@ -98,7 +98,11 @@ function makeBucket(label: string, filename: string) {
   };
 }
 
-async function installDashboardMocks(page: Page, savePayloads: SavePayload[] = []) {
+async function installDashboardMocks(
+  page: Page,
+  savePayloads: SavePayload[] = [],
+  options: { failFirstProxyImage?: boolean; rows?: Array<ReturnType<typeof makeReviewRow>> } = {},
+) {
   await page.addInitScript(() => window.localStorage.clear());
   await page.route("**/api/parts", async (route) => {
     await route.fulfill({ json: partsResponse() });
@@ -106,7 +110,7 @@ async function installDashboardMocks(page: Page, savePayloads: SavePayload[] = [
   await page.route("**/api/rows?**", async (route) => {
     await route.fulfill({
       json: {
-        rows,
+        rows: options.rows ?? rows,
         rejectionReasons: [],
       },
     });
@@ -128,7 +132,20 @@ async function installDashboardMocks(page: Page, savePayloads: SavePayload[] = [
       },
     });
   });
+  let proxyImageAttempts = 0;
   await page.route("https://fwm-proxy.bsinger3.workers.dev/**", async (route) => {
+    proxyImageAttempts += 1;
+    if (options.failFirstProxyImage && proxyImageAttempts === 1) {
+      await route.fulfill({ status: 503, body: "temporary image failure" });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "image/svg+xml",
+      body: placeholderSvg,
+    });
+  });
+  await page.route("https://images.example.com/**", async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "image/svg+xml",
@@ -146,6 +163,11 @@ test("box-select card clicks select cards instead of opening the detail panel", 
   await installDashboardMocks(page);
   await openDashboard(page);
 
+  const firstImage = page.locator(".card").first().locator("img");
+  await expect(firstImage).toHaveCSS("object-fit", "cover");
+  await expect(page.locator(".card").first().locator(".card-image-frame")).toHaveCSS("aspect-ratio", "3 / 4");
+  await expect(page.locator(".card").first().locator(".card-title")).toHaveText("Jeans row-a");
+
   await page.locator("#box-mode").check();
   await page.locator(".card").first().click();
 
@@ -155,6 +177,43 @@ test("box-select card clicks select cards instead of opening the detail panel", 
   await page.locator("#clear-selected").click();
   await expect(page.locator("#selected-count")).toHaveText("0 selected");
   await expect(page.locator(".card.selected")).toHaveCount(0);
+});
+
+test("card image retries direct URL after a temporary proxy failure", async ({ page }) => {
+  await installDashboardMocks(page, [], { failFirstProxyImage: true });
+  await openDashboard(page);
+
+  const firstImage = page.locator(".card").first().locator("img");
+  await expect(firstImage).toHaveJSProperty("complete", true);
+  await expect(firstImage).not.toHaveJSProperty("naturalWidth", 0);
+  await expect(page.locator(".card").first()).not.toHaveClass(/image-load-failed/);
+});
+
+test("unflagged crop metadata does not move card thumbnails out of frame", async ({ page }) => {
+  await installDashboardMocks(page);
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "fwm-image-review-unsaved-decisions",
+      JSON.stringify({
+        "needs_human_review::images_needing_human_review_part_001.xlsx::row-a": {
+          cropAdjustment: {
+            hasCropAdjustment: false,
+            cropObjectPositionXPct: 0,
+            cropObjectPositionYPct: 100,
+            cropZoom: 1.6,
+            cropRotationDeg: 90,
+          },
+        },
+      }),
+    );
+  });
+  await openDashboard(page);
+
+  const firstImage = page.locator(".card").first().locator("img");
+  await expect(firstImage).toHaveCSS("object-position", "50% 50%");
+  await expect(page.locator(".card").first().locator(".card-pan")).toHaveJSProperty("style.transform", "translate(0%, 0%)");
+  await expect(firstImage).toHaveJSProperty("style.transform", "rotate(0deg)");
+  await expect(page.locator(".card").first().locator(".crop-chip")).toHaveCount(0);
 });
 
 test("box-select drag selects every card inside the drag rectangle", async ({ page }) => {
@@ -221,6 +280,190 @@ test("visible bulk actions can be undone after an accidental bulk decision", asy
   await expect(page.locator(".card.approved")).toHaveCount(0);
 });
 
+test("bucket and part remaining counts include local completed decisions", async ({ page }) => {
+  await installDashboardMocks(page);
+  await openDashboard(page);
+
+  await expect(page.getByRole("button", { name: "Needs Human Review (1)" })).toBeVisible();
+  await expect(page.locator("#part-select")).toContainText("Part 001 (2 left)");
+
+  await page.locator("#approve-visible-unmarked").click();
+
+  await expect(page.getByRole("button", { name: "Needs Human Review (0)" })).toBeVisible();
+  await expect(page.locator("#part-select")).toContainText("Part 001 (0 left)");
+  await expect(page.locator("#source-summary")).toContainText("Needs Human Review: 0 batches left");
+
+  await page.locator("#undo-action").click();
+
+  await expect(page.getByRole("button", { name: "Needs Human Review (1)" })).toBeVisible();
+  await expect(page.locator("#part-select")).toContainText("Part 001 (2 left)");
+  await expect(page.locator("#source-summary")).toContainText("Needs Human Review: 1 batches left");
+});
+
+test("hide saved also hides local completed decisions before export", async ({ page }) => {
+  await installDashboardMocks(page);
+  await openDashboard(page);
+
+  await page.locator("#hide-saved").check();
+  await expect(page.locator(".card")).toHaveCount(2);
+
+  await page.locator(".card").first().locator(".approve-action").click();
+
+  await expect(page.locator("#visible-count")).toHaveText("1 visible");
+  await expect(page.locator(".card")).toHaveCount(1);
+  await expect(page.locator("#save-status")).toHaveText("1 unsaved decision");
+});
+
+test("approve candidate cards omit clear-pass CV reason text", async ({ page }) => {
+  await installDashboardMocks(page, [], {
+    rows: rows.map((row) => ({
+      ...row,
+      bucket: "approve_candidates",
+      defaultDecision: "APPROVE",
+      cvDecision: "APPROVE",
+      cvReasonCode: "CLEAR_PASS",
+      cvReasonSummary: "Clear Pass",
+    })),
+  });
+  await openDashboard(page);
+
+  await page.getByRole("button", { name: "Approve Candidates (1)", exact: true }).click();
+
+  await expect(page.locator(".card").first().locator(".card-title")).toHaveText("Jeans row-a");
+  await expect(page.locator(".card").first().locator(".meta")).not.toContainText("CV Clear Pass");
+});
+
+test("rotation-only crop adjustment keeps the full card image visible", async ({ page }) => {
+  await installDashboardMocks(page);
+  await openDashboard(page);
+
+  await page.locator(".card").first().locator(".detail-action").click();
+  await page.locator("#crop-rotate").click();
+  await expect(page.locator("#crop-zoom")).toHaveValue("1");
+  await expect(page.locator("#crop-pan")).toHaveJSProperty("style.transform", "translate(0%, 0%)");
+  const cropPanRatio = await page.locator("#crop-pan").evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return rect.width / rect.height;
+  });
+  expect(cropPanRatio).toBeCloseTo(3 / 4, 1);
+  const cropImageRatio = await page.locator("#crop-image").evaluate((img) => {
+    const style = getComputedStyle(img);
+    return parseFloat(style.width) / parseFloat(style.height);
+  });
+  expect(cropImageRatio).toBeCloseTo(4 / 3, 1);
+  await expect(page.locator("#crop-image")).toHaveJSProperty("style.transform", "rotate(90deg)");
+  await page.locator("#detail-apply").click();
+
+  const firstImage = page.locator(".card").first().locator("img");
+  await expect(firstImage).toHaveCSS("object-fit", "cover");
+  await expect(page.locator(".card").first().locator(".card-pan")).toHaveJSProperty("style.transform", "translate(0%, 0%)");
+  const cardImageRatio = await firstImage.evaluate((img) => {
+    const style = getComputedStyle(img);
+    return parseFloat(style.width) / parseFloat(style.height);
+  });
+  expect(cardImageRatio).toBeCloseTo(4 / 3, 1);
+  await expect(firstImage).toHaveJSProperty("style.transform", "rotate(90deg)");
+  await expect(page.locator(".card").first().locator(".crop-chip")).toHaveText("Crop");
+});
+
+test("crop pan sliders stay on screen axes after rotation", async ({ page }) => {
+  await installDashboardMocks(page);
+  await openDashboard(page);
+
+  await page.locator(".card").first().locator(".detail-action").click();
+  await page.locator("#crop-rotate").click();
+  await page.locator("#crop-y").evaluate((input) => {
+    const range = input as HTMLInputElement;
+    range.value = "80";
+    range.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  await expect(page.locator("#crop-zoom")).toHaveValue("1.18");
+  await expect(page.locator("#crop-pan")).toHaveJSProperty("style.transform", "translate(-7.63%, -12.2%)");
+  await expect(page.locator("#crop-image")).toHaveCSS("object-fit", "cover");
+  await expect(page.locator("#crop-image")).toHaveJSProperty("style.transform", "rotate(90deg)");
+  await expect(page.locator("#crop-image")).toHaveCSS("object-position", "50% 80%");
+});
+
+test("crop sliders can reach every edge of the zoomed cover image", async ({ page }) => {
+  await installDashboardMocks(page);
+  await openDashboard(page);
+
+  await page.locator(".card").first().locator(".detail-action").click();
+  await page.locator("#crop-y").evaluate((input) => {
+    const range = input as HTMLInputElement;
+    range.value = "0";
+    range.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await expect(page.locator("#crop-image")).toHaveCSS("object-position", "50% 0%");
+  await expect(page.locator("#crop-pan")).toHaveJSProperty("style.transform", "translate(-7.63%, 0%)");
+
+  await page.locator("#crop-y").evaluate((input) => {
+    const range = input as HTMLInputElement;
+    range.value = "100";
+    range.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await expect(page.locator("#crop-image")).toHaveCSS("object-position", "50% 100%");
+  await expect(page.locator("#crop-pan")).toHaveJSProperty("style.transform", "translate(-7.63%, -15.25%)");
+
+  await page.locator("#crop-x").evaluate((input) => {
+    const range = input as HTMLInputElement;
+    range.value = "0";
+    range.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await expect(page.locator("#crop-image")).toHaveCSS("object-position", "0% 100%");
+  await expect(page.locator("#crop-pan")).toHaveJSProperty("style.transform", "translate(0%, -15.25%)");
+
+  await page.locator("#crop-x").evaluate((input) => {
+    const range = input as HTMLInputElement;
+    range.value = "100";
+    range.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await expect(page.locator("#crop-image")).toHaveCSS("object-position", "100% 100%");
+  await expect(page.locator("#crop-pan")).toHaveJSProperty("style.transform", "translate(-15.25%, -15.25%)");
+
+  await page.locator("#detail-apply").click();
+
+  const firstCard = page.locator(".card").first();
+  await expect(firstCard.locator(".crop-chip")).toHaveText("Crop");
+  await expect(firstCard.locator("img")).toHaveCSS("object-fit", "cover");
+  await expect(firstCard.locator("img")).toHaveCSS("object-position", "100% 100%");
+  await expect(firstCard.locator(".card-pan")).toHaveJSProperty("style.transform", "translate(-15.25%, -15.25%)");
+});
+
+test("clicking the crop frame does not auto-zoom", async ({ page }) => {
+  await installDashboardMocks(page);
+  await openDashboard(page);
+
+  await page.locator(".card").first().locator(".detail-action").click();
+  await page.locator("#crop-frame").click();
+
+  await expect(page.locator("#crop-zoom")).toHaveValue("1");
+  await expect(page.locator("#crop-status")).toHaveText("No manual crop saved");
+  await expect(page.locator("#crop-pan")).toHaveJSProperty("style.transform", "translate(0%, 0%)");
+});
+
+test("detail dialog scroll returns all the way to the top", async ({ page }) => {
+  await installDashboardMocks(page);
+  await openDashboard(page);
+
+  const dialog = page.locator("#detail-dialog");
+  await page.locator(".card").first().locator(".detail-action").click();
+  await expect(dialog).toHaveAttribute("open", "");
+  await dialog.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect
+    .poll(() => dialog.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(0);
+  await dialog.evaluate((element) => {
+    element.scrollTop = 0;
+  });
+  await expect
+    .poll(() => dialog.evaluate((element) => element.scrollTop))
+    .toBe(0);
+});
+
 test("card action buttons, detail actions, and export preserve CV review metadata", async ({ page }) => {
   const savePayloads: SavePayload[] = [];
   await installDashboardMocks(page, savePayloads);
@@ -254,14 +497,20 @@ test("card action buttons, detail actions, and export preserve CV review metadat
   await page.locator("#crop-rotate").click();
   await expect(page.locator("#crop-status")).toContainText("Manual crop");
   await expect(page.locator("#crop-status")).toContainText("90deg rotation");
+  await expect(page.locator("#crop-image")).toHaveCSS("object-fit", "cover");
   await page.locator("#detail-apply").click();
   await expect(page.locator("#detail-dialog")).not.toHaveAttribute("open", "");
   await expect(page.locator(".card").first().locator("img")).toHaveCSS("object-position", "72% 28%");
+  await expect(page.locator(".card").first().locator("img")).toHaveCSS("object-fit", "cover");
+  await expect(page.locator(".card").first().locator(".card-pan")).toHaveJSProperty(
+    "style.transform",
+    "translate(-13.94%, -5.42%)",
+  );
   await expect(page.locator(".card").first().locator("img")).toHaveJSProperty(
     "style.transform",
-    "translate(-4.26%, 4.26%) scale(1.24) rotate(90deg)",
+    "rotate(90deg)",
   );
-  await expect(page.locator(".card").first().locator(".card-image-frame")).toHaveCSS("aspect-ratio", "3 / 4");
+  await expect(page.locator("#crop-frame")).toHaveCSS("aspect-ratio", "3 / 4");
   await expect(page.locator(".card").first().locator(".meta")).toBeVisible();
   await expect(page.locator(".card").first().locator(".crop-chip")).toHaveText("Crop");
 

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="773" height="174" viewBox="0 0 773 174">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="16" y="28" font-family="Arial, sans-serif" font-size="18" font-weight="700">bust_in_number_display</text>
+<text x="16" y="159" font-family="Arial, sans-serif" font-size="12" fill="#333">28-31</text>
+<rect x="118" y="144" width="46" height="16" fill="#28666e"/>
+<text x="172" y="157" font-family="Arial, sans-serif" font-size="12" fill="#333">6</text>
+<text x="16" y="87" font-family="Arial, sans-serif" font-size="12" fill="#333">32-35</text>
+<rect x="118" y="72" width="560" height="16" fill="#28666e"/>
+<text x="686" y="85" font-family="Arial, sans-serif" font-size="12" fill="#333">72</text>
+<text x="16" y="111" font-family="Arial, sans-serif" font-size="12" fill="#333">36-39</text>
+<rect x="118" y="96" width="388" height="16" fill="#28666e"/>
+<text x="514" y="109" font-family="Arial, sans-serif" font-size="12" fill="#333">50</text>
+<text x="16" y="135" font-family="Arial, sans-serif" font-size="12" fill="#333">40-43</text>
+<rect x="118" y="120" width="77" height="16" fill="#28666e"/>
+<text x="203" y="133" font-family="Arial, sans-serif" font-size="12" fill="#333">10</text>
+<text x="16" y="183" font-family="Arial, sans-serif" font-size="12" fill="#333">44-47</text>
+<rect x="118" y="168" width="7" height="16" fill="#28666e"/>
+<text x="133" y="181" font-family="Arial, sans-serif" font-size="12" fill="#333">1</text>
+</svg>

@@ -1,0 +1,18 @@
+{
+  "rows": 3015,
+  "status_counts": {
+    "cached": 2466,
+    "failed": 540,
+    "downloaded": 9
+  },
+  "error_counts": {
+    "http_404": 12,
+    "http_403": 484,
+    "invalid_image_bytes": 5,
+    "http_500": 2,
+    "invalid_url": 37
+  },
+  "elapsed_seconds": 90.37,
+  "output": "data/clip_scale_eval_sample_with_images.csv",
+  "image_dir": "cache/clip_scale_images"
+}

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="773" height="438" viewBox="0 0 773 438">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="16" y="28" font-family="Arial, sans-serif" font-size="18" font-weight="700">cupsize_display</text>
+<text x="16" y="327" font-family="Arial, sans-serif" font-size="12" fill="#333">AA</text>
+<rect x="118" y="312" width="5" height="16" fill="#28666e"/>
+<text x="131" y="325" font-family="Arial, sans-serif" font-size="12" fill="#333">5</text>
+<text x="16" y="207" font-family="Arial, sans-serif" font-size="12" fill="#333">A</text>
+<rect x="118" y="192" width="152" height="16" fill="#28666e"/>
+<text x="278" y="205" font-family="Arial, sans-serif" font-size="12" fill="#333">143</text>
+<text x="16" y="159" font-family="Arial, sans-serif" font-size="12" fill="#333">B</text>
+<rect x="118" y="144" width="404" height="16" fill="#28666e"/>
+<text x="530" y="157" font-family="Arial, sans-serif" font-size="12" fill="#333">380</text>
+<text x="16" y="135" font-family="Arial, sans-serif" font-size="12" fill="#333">C</text>
+<rect x="118" y="120" width="479" height="16" fill="#28666e"/>
+<text x="605" y="133" font-family="Arial, sans-serif" font-size="12" fill="#333">450</text>
+<text x="16" y="87" font-family="Arial, sans-serif" font-size="12" fill="#333">D</text>
+<rect x="118" y="72" width="560" height="16" fill="#28666e"/>
+<text x="686" y="85" font-family="Arial, sans-serif" font-size="12" fill="#333">526</text>
+<text x="16" y="111" font-family="Arial, sans-serif" font-size="12" fill="#333">DD</text>
+<rect x="118" y="96" width="548" height="16" fill="#28666e"/>
+<text x="674" y="109" font-family="Arial, sans-serif" font-size="12" fill="#333">515</text>
+<text x="16" y="183" font-family="Arial, sans-serif" font-size="12" fill="#333">DDD</text>
+<rect x="118" y="168" width="281" height="16" fill="#28666e"/>
+<text x="407" y="181" font-family="Arial, sans-serif" font-size="12" fill="#333">264</text>
+<text x="16" y="303" font-family="Arial, sans-serif" font-size="12" fill="#333">E</text>
+<rect x="118" y="288" width="17" height="16" fill="#28666e"/>
+<text x="143" y="301" font-family="Arial, sans-serif" font-size="12" fill="#333">16</text>
+<text x="16" y="279" font-family="Arial, sans-serif" font-size="12" fill="#333">F</text>
+<rect x="118" y="264" width="37" height="16" fill="#28666e"/>
+<text x="163" y="277" font-family="Arial, sans-serif" font-size="12" fill="#333">35</text>
+<text x="16" y="231" font-family="Arial, sans-serif" font-size="12" fill="#333">G</text>
+<rect x="118" y="216" width="75" height="16" fill="#28666e"/>
+<text x="201" y="229" font-family="Arial, sans-serif" font-size="12" fill="#333">71</text>
+<text x="16" y="255" font-family="Arial, sans-serif" font-size="12" fill="#333">H</text>
+<rect x="118" y="240" width="40" height="16" fill="#28666e"/>
+<text x="166" y="253" font-family="Arial, sans-serif" font-size="12" fill="#333">38</text>
+<text x="16" y="351" font-family="Arial, sans-serif" font-size="12" fill="#333">I</text>
+<rect x="118" y="336" width="3" height="16" fill="#28666e"/>
+<text x="129" y="349" font-family="Arial, sans-serif" font-size="12" fill="#333">3</text>
+<text x="16" y="375" font-family="Arial, sans-serif" font-size="12" fill="#333">INCHES</text>
+<rect x="118" y="360" width="1" height="16" fill="#28666e"/>
+<text x="127" y="373" font-family="Arial, sans-serif" font-size="12" fill="#333">1</text>
+<text x="16" y="399" font-family="Arial, sans-serif" font-size="12" fill="#333">CM</text>
+<rect x="118" y="384" width="1" height="16" fill="#28666e"/>
+<text x="127" y="397" font-family="Arial, sans-serif" font-size="12" fill="#333">1</text>
+<text x="16" y="423" font-family="Arial, sans-serif" font-size="12" fill="#333">BB</text>
+<rect x="118" y="408" width="1" height="16" fill="#28666e"/>
+<text x="127" y="421" font-family="Arial, sans-serif" font-size="12" fill="#333">1</text>
+<text x="16" y="447" font-family="Arial, sans-serif" font-size="12" fill="#333">CCUP</text>
+<rect x="118" y="432" width="1" height="16" fill="#28666e"/>
+<text x="127" y="445" font-family="Arial, sans-serif" font-size="12" fill="#333">1</text>
+</svg>

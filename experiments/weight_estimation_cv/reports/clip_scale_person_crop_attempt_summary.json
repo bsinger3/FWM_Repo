@@ -1,0 +1,19 @@
+{
+  "input": "data/clip_scale_eval_sample_with_quality_tags.csv",
+  "attempts": "data/clip_scale_person_crop_attempt_rows.csv",
+  "attempted_rows": 2473,
+  "status_counts": {
+    "ok": 2237,
+    "no_person": 236
+  },
+  "by_split": {
+    "test": {
+      "ok": 693,
+      "no_person": 63
+    },
+    "train": {
+      "ok": 1544,
+      "no_person": 173
+    }
+  }
+}

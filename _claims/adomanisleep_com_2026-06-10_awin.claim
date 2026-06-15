@@ -1,0 +1,14 @@
+retailer: adomanisleep_com
+site: adomanisleep.com
+claimed_at: 2026-06-10T18:44:38Z
+completed_at: 2026-06-10T18:44:45Z
+status: completed
+source: Awin advertiser queue
+programme: A DOMANI
+provider_hint: Okendo
+why_request: maternity/postpartum gap
+scope: public product pages and public review/provider feeds only
+stop_conditions: 429/captcha/WAF/auth challenge
+rows_written: 0
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/adomanisleep_com/adomanisleep_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/adomanisleep_com/adomanisleep_com_reviews_matching_intake_schema_summary.json

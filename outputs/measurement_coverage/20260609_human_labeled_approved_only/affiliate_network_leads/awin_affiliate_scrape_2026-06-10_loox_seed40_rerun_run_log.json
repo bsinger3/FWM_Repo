@@ -1,0 +1,44 @@
+[
+  {
+    "started_at": "2026-06-10T18:44:09Z",
+    "finished_at": "2026-06-10T18:44:16Z",
+    "domain": "findmenowthelabel.com",
+    "programme_name": "FIND ME NOW (US)",
+    "provider": "Loox",
+    "status": "completed",
+    "rows": 0,
+    "errors_count": 0,
+    "output_csv": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/findmenowthelabel_com/findmenowthelabel_com_reviews_matching_intake_schema.csv",
+    "summary_json": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/findmenowthelabel_com/findmenowthelabel_com_reviews_matching_intake_schema_summary.json",
+    "claim_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/_claims/findmenowthelabel_com_2026-06-10_awin.claim",
+    "error": ""
+  },
+  {
+    "started_at": "2026-06-10T18:44:16Z",
+    "finished_at": "2026-06-10T18:44:23Z",
+    "domain": "liveaunatural.com",
+    "programme_name": "Au Natural",
+    "provider": "Loox",
+    "status": "completed",
+    "rows": 0,
+    "errors_count": 0,
+    "output_csv": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/liveaunatural_com/liveaunatural_com_reviews_matching_intake_schema.csv",
+    "summary_json": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/liveaunatural_com/liveaunatural_com_reviews_matching_intake_schema_summary.json",
+    "claim_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/_claims/liveaunatural_com_2026-06-10_awin.claim",
+    "error": ""
+  },
+  {
+    "started_at": "2026-06-10T18:44:23Z",
+    "finished_at": "2026-06-10T18:44:31Z",
+    "domain": "niidor.com",
+    "programme_name": "Niidor",
+    "provider": "Loox",
+    "status": "completed",
+    "rows": 0,
+    "errors_count": 0,
+    "output_csv": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/niidor_com/niidor_com_reviews_matching_intake_schema.csv",
+    "summary_json": "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/niidor_com/niidor_com_reviews_matching_intake_schema_summary.json",
+    "claim_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/_claims/niidor_com_2026-06-10_awin.claim",
+    "error": ""
+  }
+]

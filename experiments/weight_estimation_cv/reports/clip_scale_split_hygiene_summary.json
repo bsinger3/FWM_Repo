@@ -1,0 +1,71 @@
+{
+  "input": "data/clip_scale_eval_sample_with_images.csv",
+  "output": "data/clip_scale_eval_sample_hardened.csv",
+  "rows": 3015,
+  "downloaded_rows": 2475,
+  "train_rows": 2220,
+  "test_rows": 795,
+  "exact_url_height_weight_duplicate_rows": 0,
+  "duplicates": {
+    "image_url": {
+      "groups": 13,
+      "rows": 57,
+      "cross_split_groups": 0
+    },
+    "image_file_sha1": {
+      "groups": 23,
+      "rows": 83,
+      "cross_split_groups": 0
+    },
+    "image_average_hash": {
+      "groups": 26,
+      "rows": 91,
+      "cross_split_groups": 1
+    },
+    "row_id": {
+      "groups": 0,
+      "rows": 0,
+      "cross_split_groups": 0
+    }
+  },
+  "cross_split_leaks": {
+    "image_url": 0,
+    "image_file_sha1": 0,
+    "image_average_hash": 1,
+    "row_id": 0
+  },
+  "split_download_status": {
+    "test": {
+      "cached": 751,
+      "downloaded": 6,
+      "failed": 38
+    },
+    "train": {
+      "cached": 1715,
+      "downloaded": 3,
+      "failed": 502
+    }
+  },
+  "hosts_top_20": {
+    "judgeme.imgix.net": 523,
+    "media-dynamic.okendo.io": 484,
+    "cdn-yotpo-images-production.yotpo.com": 455,
+    "cdn.shopify.com": 263,
+    "m.media-amazon.com": 233,
+    "photos-us.bazaarvoice.com": 154,
+    "cdn.stamped.io": 123,
+    "images.loox.io": 113,
+    "res.cloudinary.com": 84,
+    "review-images.onequince.com": 84,
+    "www.lulus.com": 81,
+    "www.rotita.com": 73,
+    "d1rc46soeuwz3b.cloudfront.net": 69,
+    "images-na.ssl-images-amazon.com": 67,
+    "fashionpass.s3-us-west-1.amazonaws.com": 66,
+    "static-dress.missacc.com": 42,
+    "": 37,
+    "cdn1.stamped.io": 33,
+    "m.rotita.com": 10,
+    "image.lilyease.com": 8
+  }
+}
