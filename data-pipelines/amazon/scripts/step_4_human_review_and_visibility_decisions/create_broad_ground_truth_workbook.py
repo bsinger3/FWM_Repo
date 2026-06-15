@@ -2,6 +2,7 @@
 """Create a Google-Sheets-friendly XLSX workbook for broad ground-truth labeling."""
 
 from __future__ import annotations
+import sys
 
 import csv
 from pathlib import Path
@@ -12,7 +13,16 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-OUT_DIR = REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling_broad"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+OUT_DIR = CV_EXPERIMENTS_DIR / "ground_truth_labeling_broad"
 SOURCE_CSV = OUT_DIR / "combined_amazon_nonamazon_llm_seeded_ground_truth_queue.csv"
 OUTPUT_XLSX = OUT_DIR / "combined_amazon_nonamazon_llm_seeded_ground_truth_queue.xlsx"
 

@@ -1,8 +1,8 @@
 retailer: kingsonly_co
 site: kingsonly.co
-claimed_at: 2026-06-10T20:22:52Z
-completed_at: 2026-06-10T20:23:00Z
-status: no_public_product_seed
+claimed_at: 2026-06-15T18:43:14Z
+completed_at: 2026-06-15T18:44:06Z
+status: completed
 source: Awin advertiser queue
 programme: KING SupportWear
 provider_hint: Judge.me
@@ -10,6 +10,5 @@ why_request: adaptive/specialty fit gap; bottoms/activewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/kingsonly_co/kingsonly_co_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/kingsonly_co/kingsonly_co_reviews_matching_intake_schema_summary.json
-error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/kingsonly_co/kingsonly_co_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/kingsonly_co/kingsonly_co_reviews_matching_intake_schema_summary.json

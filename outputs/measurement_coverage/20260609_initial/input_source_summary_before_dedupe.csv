@@ -1,6 +1,0 @@
-coverage_source_tier,coverage_source_label,input_rows_before_dedupe
-cv_gated_all,cv_gate_checkpoint_parts,324201
-unprocessed,unprocessed_not_cv_or_human,154201
-human_labeled,human_labeled_returns,37718
-ready_labeled_source,ready_labeled_source,3000
-ready_human_approved,ready_human_approved,1761

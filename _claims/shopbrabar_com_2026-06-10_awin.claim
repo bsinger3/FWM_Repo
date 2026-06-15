@@ -1,7 +1,7 @@
 retailer: shopbrabar_com
 site: shopbrabar.com
-claimed_at: 2026-06-10T18:39:04Z
-completed_at: 2026-06-10T18:39:35Z
+claimed_at: 2026-06-15T17:33:09Z
+completed_at: 2026-06-15T17:39:25Z
 status: completed
 source: Awin advertiser queue
 programme: Company
@@ -10,5 +10,5 @@ why_request: full-bust/lingerie gap; plus/curve gap; tall/petite gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/shopbrabar_com/shopbrabar_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/shopbrabar_com/shopbrabar_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/shopbrabar_com/shopbrabar_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/shopbrabar_com/shopbrabar_com_reviews_matching_intake_schema_summary.json

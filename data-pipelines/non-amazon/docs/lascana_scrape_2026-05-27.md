@@ -5,7 +5,7 @@
 - Retailer: `lascana_com`
 - Sovrn merchant domain: `lascana.at`
 - Scrape target confirmed from triage evidence/public pages: `https://www.lascana.com`
-- Source: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Source: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Triage bucket: `sovrn_first_pass_scrape_candidate`
 - Provider: Yotpo
 - Reviews/photo reviews present: yes

@@ -8,6 +8,7 @@ import csv
 import hashlib
 import json
 import re
+import sys
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
@@ -15,9 +16,15 @@ from urllib.parse import urlsplit, urlunsplit
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PROJECT_ROOT = REPO_ROOT.parent
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import cv_annotated_pending_human_review_root, raw_scraped_data_root  # noqa: E402
+
 DEFAULT_SEARCH_ROOTS = [
-    PROJECT_ROOT / "FWM_Data/non-amazon/data/step_1_raw_scraping_data",
-    PROJECT_ROOT / "FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions",
+    raw_scraped_data_root(),
+    cv_annotated_pending_human_review_root() / "amazon_legacy_step_4_human_review_and_visibility_decisions",
 ]
 DEFAULT_OUTPUT = REPO_ROOT / "experiments/weight_estimation_cv/data/ground_truth_manifest.csv"
 DEFAULT_REPORT = REPO_ROOT / "experiments/weight_estimation_cv/reports/ground_truth_manifest_summary.json"

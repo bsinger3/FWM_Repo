@@ -62,13 +62,13 @@ Internal storage/BrisApps/FWM_Image_Review/returns_to_laptop/
 Generated phone HTML apps live under:
 
 ```text
-/Users/briannasinger/Projects/FWM/FWM_Repo/outputs/02_supabase_needs_human_review_cv_first_pass/
+/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/
 ```
 
 Example:
 
 ```text
-/Users/briannasinger/Projects/FWM/FWM_Repo/outputs/02_supabase_needs_human_review_cv_first_pass/v002_fwm_review_unsaved_50_cards.html
+/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/v002_fwm_review_unsaved_50_cards.html
 ```
 
 ## Copy App To Phone With OpenMTP
@@ -79,7 +79,7 @@ Example:
 4. Mac side: open:
 
 ```text
-/Users/briannasinger/Projects/FWM/FWM_Repo/outputs/02_supabase_needs_human_review_cv_first_pass/
+/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/
 ```
 
 5. Phone side: open:
@@ -103,7 +103,7 @@ Internal storage/BrisApps/FWM_Image_Review/returns_to_laptop/
 3. Mac side: open:
 
 ```text
-/Users/briannasinger/Projects/FWM/FWM_Repo/outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/
+/Users/briannasinger/Projects/FWM/FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/
 ```
 
 4. Drag the exported `fwm_mobile_review_decisions_*.json` file from the phone side to the Mac side.
@@ -114,19 +114,19 @@ After the JSON is copied into `human_labeled_returns/`, run:
 
 ```bash
 cd /Users/briannasinger/Projects/FWM/FWM_Repo
-npm run image-review:import-mobile -- outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/fwm_mobile_review_decisions_YYYYMMDDTHHMMSSZ.json
+npm run image-review:import-mobile -- ../FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/fwm_mobile_review_decisions_YYYYMMDDTHHMMSSZ.json
 ```
 
 This creates normal return workbooks under:
 
 ```text
-/Users/briannasinger/Projects/FWM/FWM_Repo/outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/
+/Users/briannasinger/Projects/FWM/FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/
 ```
 
 It also updates:
 
 ```text
-/Users/briannasinger/Projects/FWM/FWM_Repo/outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_returns_manifest.json
+/Users/briannasinger/Projects/FWM/FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/human_labeled_returns_manifest.json
 ```
 
 The source workbook files are not edited.

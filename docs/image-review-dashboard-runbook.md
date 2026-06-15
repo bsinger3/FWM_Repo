@@ -77,7 +77,7 @@ npm run image-review:mobile-bundle -- --parts needs_human_review:001,approve_can
 
 The generated folder is:
 
-`outputs/02_supabase_needs_human_review_cv_first_pass/mobile_review_bundle/`
+`../FWM_Data/03_cv_annotated_pending_human_review/mobile_review_bundle/`
 
 For Android Chrome, prefer the generated single-file app, not the multi-file folder. Copy the versioned `v###_fwm_review_*.html` file to the phone and open it in Chrome. Progress is remembered in Chrome on the phone for that generated bundle.
 
@@ -109,7 +109,7 @@ npm run image-review:import-mobile -- /path/to/fwm_mobile_review_decisions_YYYYM
 
 That import writes the usual return workbooks and manifest entries into:
 
-`outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/`
+`../FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/`
 
 Notes:
 
@@ -130,11 +130,11 @@ Use the localhost URL, not the local `index.html` file path. The dashboard needs
 
 The dashboard reads source workbooks from:
 
-`outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/`
+`../FWM_Data/03_cv_annotated_pending_human_review/partial_170000_rows_cv_gated/`
 
 It writes generated human-labeled returns to:
 
-`outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/`
+`../FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/`
 
 The source workbooks are not edited in place.
 
@@ -142,7 +142,7 @@ The source workbooks are not edited in place.
 
 When you reopen the dashboard, it reloads saved decisions from:
 
-`outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/human_labeled_returns_manifest.json`
+`../FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/human_labeled_returns_manifest.json`
 
 Use `Hide saved` to show only cards that still need review.
 

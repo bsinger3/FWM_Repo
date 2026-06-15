@@ -17,10 +17,10 @@ provider: unknown
 evidence_url: https://www.synergyclothing.com/category/shop-organic/womens-collection/
 
 duplicate_check: no prior synergyclothing_com claim/output/script/doc found before this attempt
-script: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_synergyclothing_reviews.py
+script: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Repo/data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_synergyclothing_reviews.py
 doc: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Repo/data-pipelines/non-amazon/docs/synergyclothing_scrape_2026-05-27.md
-output_csv: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/synergyclothing_com/synergyclothing_com_reviews_matching_intake_schema.csv
-summary_json: C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/synergyclothing_com/synergyclothing_com_reviews_matching_intake_schema_summary.json
+output_csv: FWM_Data/00_raw_scraped_data/synergyclothing_com/legacy_pre_2026-06-15/synergyclothing_com_reviews_matching_intake_schema.csv
+summary_json: FWM_Data/00_raw_scraped_data/synergyclothing_com/legacy_pre_2026-06-15/synergyclothing_com_reviews_matching_intake_schema_summary.json
 
 result:
   products_discovered: 0

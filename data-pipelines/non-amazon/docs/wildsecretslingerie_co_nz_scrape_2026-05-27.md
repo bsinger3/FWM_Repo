@@ -2,7 +2,7 @@
 
 ## Source and scope
 
-- Triage source: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Triage source: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Target: `wildsecretslingerie_co_nz` / `www.wildsecretslingerie.co.nz`
 - Sovrn triage facts: first-pass candidate, CPA, reviews present, photo review status `unknown_sample_too_small`, shipping `AU|NZ|US`, provider unknown, payout fields not populated.
 - Access policy: public SearchSpring product API and public PDP HTML only. The scraper stops on 429/captcha/WAF/auth-like responses.

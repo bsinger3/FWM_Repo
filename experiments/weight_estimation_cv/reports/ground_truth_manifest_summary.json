@@ -11,103 +11,103 @@
   },
   "top_sources": [
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/hollisterco_com/hollisterco_com_reviews_matching_intake_schema.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/hollisterco_com/legacy_pre_2026-06-15/hollisterco_com_reviews_matching_intake_schema.csv",
       19643
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/bloomchic/bloomchic_reviews_matching_amazon_schema.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/bloomchic/legacy_pre_2026-06-15/bloomchic_reviews_matching_amazon_schema.csv",
       6160
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/quince_com/quince_com_reviews_matching_intake_schema.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/quince_com/legacy_pre_2026-06-15/quince_com_reviews_matching_intake_schema.csv",
       3544
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/petalandpup_com/petalandpup_com_reviews_matching_amazon_schema.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/petalandpup_com/legacy_pre_2026-06-15/petalandpup_com_reviews_matching_amazon_schema.csv",
       2133
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_016.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_016.csv",
       1961
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/lulus_com/lulus_com_live_smoke_20260515_reviews_matching_intake_schema.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/lulus_com/legacy_pre_2026-06-15/lulus_com_live_smoke_20260515_reviews_matching_intake_schema.csv",
       1867
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_015.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_015.csv",
       1756
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_012.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_012.csv",
       1721
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/2026-04-23_unassigned_decision_artifacts/cv_enriched_batch/part_002_only/images_to_approve_part_002.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/2026-04-23_unassigned_decision_artifacts/cv_enriched_batch/part_002_only/images_to_approve_part_002.csv",
       1690
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_011.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_011.csv",
       1687
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_014.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_014.csv",
       1656
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/popflexactive_com/popflexactive_com_reviews_matching_amazon_schema.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/popflexactive_com/legacy_pre_2026-06-15/popflexactive_com_reviews_matching_amazon_schema.csv",
       1588
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_003.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_003.csv",
       1507
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_002.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_002.csv",
       1506
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_010.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_010.csv",
       1475
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_013.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_013.csv",
       1454
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_004.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_004.csv",
       1297
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_005.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_005.csv",
       1151
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_006.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_006.csv",
       1146
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_007.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_007.csv",
       1081
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_009.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_009.csv",
       1063
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_001.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_001.csv",
       994
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_008.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/capped_measurement_person_chunks/images_to_approve_capped_measurement_person_part_008.csv",
       771
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/byltbasics_com/byltbasics_com_reviews_matching_intake_schema.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/byltbasics_com/legacy_pre_2026-06-15/byltbasics_com_reviews_matching_intake_schema.csv",
       748
     ],
     [
-      "/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/archive/images_to_approve_part_001.csv",
+      "/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/archive/images_to_approve_part_001.csv",
       677
     ]
   ],

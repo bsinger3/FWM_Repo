@@ -4,7 +4,7 @@
 
 - Retailer: `abrandjeans_com`
 - Domain: `abrandjeans.com`
-- Source: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Source: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Triage bucket: `sovrn_first_pass_scrape_candidate`
 - Provider hint: Okendo
 - Reviews/photo reviews present: yes

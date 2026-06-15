@@ -7,6 +7,7 @@ actions directly, while semantic labels are routed to LLM or human review.
 """
 
 from __future__ import annotations
+import sys
 
 import argparse
 import csv
@@ -24,8 +25,17 @@ from PIL import Image, ImageStat
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_INPUT = REPO_ROOT / "outputs/cv_experiments/yolo_segmentation_crop_reasons_broad_2026_05_25/yolo_segmentation_crop_reason_rows.csv"
-DEFAULT_OUT_DIR = REPO_ROOT / "outputs/cv_experiments/fit_image_sorter_2026_05_27"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+DEFAULT_INPUT = CV_EXPERIMENTS_DIR / "yolo_segmentation_crop_reasons_broad_2026_05_25/yolo_segmentation_crop_reason_rows.csv"
+DEFAULT_OUT_DIR = CV_EXPERIMENTS_DIR / "fit_image_sorter_2026_05_27"
 
 OUTPUT_COLUMNS = [
     "review_row_key",

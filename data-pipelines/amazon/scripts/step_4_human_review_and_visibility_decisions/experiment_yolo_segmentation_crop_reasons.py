@@ -20,10 +20,19 @@ from experiment_image_quality_baseline import fetch_image  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-GROUND_TRUTH_CSV = REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling/labeled_image_rejection_reason_queue.csv"
-OUT_DIR = REPO_ROOT / "outputs/cv_experiments/yolo_segmentation_crop_reasons"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+GROUND_TRUTH_CSV = CV_EXPERIMENTS_DIR / "ground_truth_labeling/labeled_image_rejection_reason_queue.csv"
+OUT_DIR = CV_EXPERIMENTS_DIR / "yolo_segmentation_crop_reasons"
 CACHE_DIR = OUT_DIR / "image_cache"
-DEFAULT_MODEL_PATH = REPO_ROOT / "outputs/cv_experiments/model_cache/yolo11n-seg.pt"
+DEFAULT_MODEL_PATH = CV_EXPERIMENTS_DIR / "model_cache/yolo11n-seg.pt"
 
 REASONS = [
     "NEEDS_CROP",

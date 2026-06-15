@@ -9,11 +9,11 @@ prior_reference: /Users/briannasinger/Projects/FWM_Repo/data-pipelines/non-amazo
 scope: scrape every public missacc.com product; extract actual customer review records, shopper images, review text, rating/date, reviewer, ordered size/body/measurement comments, product metadata, and product URLs; stop on 429/captcha/WAF/auth challenge
 completed_at: 2026-05-17T19:42:09Z
 status: completed
-script: /Users/briannasinger/Projects/FWM_Repo/data-pipelines/non-amazon/scripts/step_1_raw_scrape/scrape_missacc_reviews.py
-output_csv: /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/missacc_com/missacc_com_reviews_matching_amazon_schema.csv
-review_records_jsonl: /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/missacc_com/missacc_com_review_records.jsonl
-summary_json: /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/missacc_com/missacc_com_reviews_matching_amazon_schema_summary.json
-catalog_snapshot_json: /Users/briannasinger/Projects/FWM_Data/non-amazon/data/step_1_raw_scraping_data/missacc_com/missacc_com_public_catalog_snapshot.json
+script: /Users/briannasinger/Projects/FWM_Repo/data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_missacc_reviews.py
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/missacc_com/legacy_pre_2026-06-15/missacc_com_reviews_matching_amazon_schema.csv
+review_records_jsonl: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/missacc_com/legacy_pre_2026-06-15/missacc_com_review_records.jsonl
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/missacc_com/legacy_pre_2026-06-15/missacc_com_reviews_matching_amazon_schema_summary.json
+catalog_snapshot_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/missacc_com/legacy_pre_2026-06-15/missacc_com_public_catalog_snapshot.json
 products_discovered: 10318
 products_scanned: 10318
 review_pages_scanned: 21106

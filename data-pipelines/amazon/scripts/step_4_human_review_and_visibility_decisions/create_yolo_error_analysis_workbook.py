@@ -2,6 +2,7 @@
 """Create a Google-Sheets-friendly workbook for YOLO segmentation error analysis."""
 
 from __future__ import annotations
+import sys
 
 import csv
 from pathlib import Path
@@ -12,7 +13,16 @@ from openpyxl.styles import Alignment, Font, PatternFill
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-EXP_DIR = REPO_ROOT / "outputs/cv_experiments/yolo_segmentation_crop_reasons_broad_2026_05_25"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+EXP_DIR = CV_EXPERIMENTS_DIR / "yolo_segmentation_crop_reasons_broad_2026_05_25"
 SOURCE_CSV = EXP_DIR / "yolo_segmentation_crop_reason_rows.csv"
 OUTPUT_XLSX = EXP_DIR / "yolo_error_analysis_workbook.xlsx"
 OUTPUT_SUMMARY = EXP_DIR / "yolo_error_analysis_summary.csv"

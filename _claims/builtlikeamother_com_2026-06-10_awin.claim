@@ -10,6 +10,6 @@ why_request: full-bust/lingerie gap; maternity/postpartum gap; bottoms/activewea
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/builtlikeamother_com/builtlikeamother_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/builtlikeamother_com/builtlikeamother_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/builtlikeamother_com/legacy_pre_2026-06-15/builtlikeamother_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/builtlikeamother_com/legacy_pre_2026-06-15/builtlikeamother_com_reviews_matching_intake_schema_summary.json
 error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.

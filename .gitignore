@@ -36,5 +36,6 @@ _preserved_local_before_sync_*/
 !.env.example
 
 # Codex transcript artifacts are uploaded to Supabase, not stored in Git.
+codex-*.json
 codex-chat-transcript*.json
 codex-*transcript*.json
