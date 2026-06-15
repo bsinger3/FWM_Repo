@@ -14,16 +14,23 @@ from csv_output_validation import validate_csv_records
 
 
 PIPELINE_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = PIPELINE_ROOT / "data" / "step_4_human_review_and_visibility_decisions"
+REPO_ROOT = PIPELINE_ROOT.parent
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root, human_reviewed_ready_to_publish_root  # noqa: E402
+
+DATA_DIR = cv_annotated_pending_human_review_root() / "amazon_legacy_step_4_human_review_and_visibility_decisions"
 REPORTS_DIR = DATA_DIR / "reports"
 REVIEW_QUEUE_DIR = DATA_DIR / "review_queue"
 CV_ENRICHED_DIR = DATA_DIR / "cv_enriched_batch"
 CV_RULES_DIR = DATA_DIR / "cv_rules_applied_batch"
 FINAL_RESOLVED_DIR = DATA_DIR / "final_resolved_batch"
-STEP5_FINAL_DIR = PIPELINE_ROOT / "data" / "step_5_publish_ready_outputs" / "final_human_approved_batches"
-MODEL_DIR = PIPELINE_ROOT / "models"
+STEP5_FINAL_DIR = human_reviewed_ready_to_publish_root() / "legacy_final_human_approved_batches"
+MODEL_DIR = archive_root() / "deprecated_scrape_runs" / "legacy_top_level_2026-06-15" / "models"
 DEFAULT_VENDOR_DIR = PIPELINE_ROOT.parents[1] / ".codex_vendor"
-SAMPLE_OUTPUT_PATH = PIPELINE_ROOT / "docs" / "images_intake_sample - sampleOutput1.csv"
+SAMPLE_OUTPUT_PATH = REPO_ROOT / "docs" / "amazon_legacy" / "images_intake_sample - sampleOutput1.csv"
 
 DEFAULT_YOLO_DETECT_MODEL = PIPELINE_ROOT.parents[1] / "yolov8n.pt"
 DEFAULT_YOLO_POSE_MODEL = PIPELINE_ROOT.parents[1] / "yolov8n-pose.pt"

@@ -2,7 +2,11 @@ import { spawn } from "node:child_process";
 import { existsSync, watch } from "node:fs";
 import path from "node:path";
 
-const transcriptPathArg = process.argv[2] || "codex-chat-transcript.json";
+const transcriptPathArg = process.argv[2] || process.env.FWM_TRANSCRIPT_PATH;
+if (!transcriptPathArg) {
+  console.error("Pass a transcript path or set FWM_TRANSCRIPT_PATH. Transcript JSON files should not live in the repo root.");
+  process.exit(1);
+}
 const source = process.argv[3] || "codex";
 const transcriptPath = path.resolve(process.cwd(), transcriptPathArg);
 

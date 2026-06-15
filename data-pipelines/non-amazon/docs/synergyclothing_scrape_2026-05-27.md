@@ -4,7 +4,7 @@
 
 - Retailer: `synergyclothing_com`
 - Domain: `synergyclothing.com`
-- Source: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Source: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Triage bucket: `sovrn_first_pass_scrape_candidate`
 - Triage facts: CPC, CPC amount not populated, reviews present, photo reviews present, shipping `US`, provider unknown.
 - Evidence URL: `https://www.synergyclothing.com/category/shop-organic/womens-collection/`

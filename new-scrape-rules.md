@@ -76,22 +76,26 @@ across those rows.
 
 ## Output Location And Naming
 
-For non-Amazon retailers, write outputs under:
+For all retailers and sources, write raw scrape outputs under:
 
 ```text
-data-pipelines/non-amazon/data/step_1_raw_scraping_data/<retailer>/
+FWM_Data/00_raw_scraped_data/<retailer_or_source>/<run_id>/
 ```
 
-Use these filenames:
+For simple merchant review scrapes, prefer these filenames inside the run
+folder:
 
 ```text
-<retailer>_reviews_matching_amazon_schema.csv
-<retailer>_reviews_matching_amazon_schema_summary.json
+raw_reviews.csv
+raw_products.csv
+scrape_manifest.json
+run_log.txt
 ```
 
-The summary JSON should include at least:
+The scrape manifest should include at least:
 
 - `site`
+- `source_family` such as `amazon`, `affiliate`, `retailer`, or `direct`
 - `products_scanned` or equivalent page/review count
 - `rows_written`
 - `distinct_reviews`
@@ -104,6 +108,11 @@ The summary JSON should include at least:
 - `output_csv`
 - `started_at`
 - `finished_at`
+
+Do not create new repo-root `outputs/` folders or new
+`data-pipelines/*/data/` folders. After raw scrape, downstream stages are
+unified in `FWM_Data/01_cleaned_normalized_data` through
+`FWM_Data/04_human_reviewed_ready_to_publish`.
 
 At the end of every scrape, report these metrics to the user in the final
 handoff. These are required for judging whether rows are ready for insertion
@@ -406,8 +415,8 @@ The scrape should therefore preserve enough context for audit and manual review:
 ## Repo References
 
 - `image-approval-context.md`
-- `data-pipelines/amazon/docs/images_intake_sample - contraints.csv`
-- `data-pipelines/amazon/docs/images_intake_sample - sampleOutput1.csv`
-- `data-pipelines/non-amazon/scripts/step_1_raw_scrape/`
+- `data-pipelines/docs/amazon_legacy/images_intake_sample - contraints.csv`
+- `data-pipelines/docs/amazon_legacy/images_intake_sample - sampleOutput1.csv`
+- `data-pipelines/scripts/00_raw_scrape/non_amazon/`
 - `supabase/migrations/20260413141641_remote_schema.sql`
 - `index.html`

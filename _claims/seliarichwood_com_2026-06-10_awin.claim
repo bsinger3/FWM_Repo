@@ -1,15 +1,14 @@
 retailer: seliarichwood_com
 site: seliarichwood.com
-claimed_at: 2026-06-10T20:21:32Z
-completed_at: 2026-06-10T20:21:39Z
-status: no_public_product_seed
+claimed_at: 2026-06-15T17:33:09Z
+completed_at: 2026-06-15T17:42:58Z
+status: completed
 source: Awin advertiser queue
 programme: Selia Richwood
 provider_hint: Judge.me
 why_request: full-bust/lingerie gap; swim/shapewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
-rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/seliarichwood_com/seliarichwood_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/seliarichwood_com/seliarichwood_com_reviews_matching_intake_schema_summary.json
-error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.
+rows_written: 4
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/seliarichwood_com/seliarichwood_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/seliarichwood_com/seliarichwood_com_reviews_matching_intake_schema_summary.json

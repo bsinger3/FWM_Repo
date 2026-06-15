@@ -1,7 +1,7 @@
 retailer: untuckit_com
 site: untuckit.com
-claimed_at: 2026-06-10T20:42:12Z
-completed_at: 2026-06-10T20:43:40Z
+claimed_at: 2026-06-15T17:53:42Z
+completed_at: 2026-06-15T18:03:28Z
 status: completed
 source: Awin advertiser queue
 programme: UNTUCKit (US)
@@ -10,5 +10,5 @@ why_request: plus/curve gap; bottoms/activewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/untuckit_com/untuckit_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/untuckit_com/untuckit_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/untuckit_com/untuckit_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/untuckit_com/untuckit_com_reviews_matching_intake_schema_summary.json

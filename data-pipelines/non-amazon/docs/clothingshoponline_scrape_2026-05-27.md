@@ -4,7 +4,7 @@
 
 - Retailer: `clothingshoponline_com`
 - Domain: `clothingshoponline.com`
-- Source: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Source: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Triage status: `sovrn_first_pass_scrape_candidate`
 - Provider hint: `Yotpo; Loox`
 - Reviews present: yes

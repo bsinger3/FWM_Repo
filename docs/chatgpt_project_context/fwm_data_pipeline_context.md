@@ -18,19 +18,23 @@ Known local data paths:
 - Mac: `/Users/briannasinger/Projects/FWM/FWM_Data`
 - Windows: `C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data`
 
-Recommended data layout:
+Canonical data layout:
 
 ```text
 FWM_Data/
-  amazon/
-    data/
-    models/
-  non-amazon/
-    data/
-  models/
+  00_raw_scraped_data/
+  01_cleaned_normalized_data/
+  02_supabase_qualified_data/
+  03_cv_annotated_pending_human_review/
+  04_human_reviewed_ready_to_publish/
+  _reports/
+  _archive/
 ```
 
-The repo may keep symlinks at `data-pipelines/amazon/data`, `data-pipelines/amazon/models`, and `data-pipelines/non-amazon/data`, but the real files should live in `FWM_Data`.
+`00_raw_scraped_data` may be organized by merchant/source. After raw scrape,
+pipeline stages are unified; Amazon vs non-Amazon should be metadata columns,
+not top-level lifecycle folders. Do not create new `data-pipelines/*/data`
+folders for generated data.
 
 ## Scrape Handoff Requirements
 
@@ -54,7 +58,7 @@ We have not been able to scrape Amazon reliably using Codex prompts alone. Use A
 
 Image review is one of the biggest operational bottlenecks in the pipeline. There are too many scraped photos for fully manual sorting. The current direction is to use computer vision models to quickly separate obvious approvals, obvious rejections, and rows that still need manual review.
 
-The Amazon Step 4 image workflow in `data-pipelines/amazon/scripts/step_4_human_review_and_visibility_decisions/` uses CV-enriched batches and rule-applied batches. The main rule library, `cv_rules_workflow_lib.py`, uses YOLO detect, YOLO pose, and YuNet face detection. Important CV fields include:
+The Stage 03 image workflow in `data-pipelines/scripts/03_cv_annotate/` uses CV-enriched batches and rule-applied batches. The main rule library, `cv_rules_workflow_lib.py`, uses YOLO detect, YOLO pose, and YuNet face detection. Important CV fields include:
 
 - `person_count_yolo_detect`
 - `main_person_height_pct_yolo_detect`

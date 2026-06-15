@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PIPELINE_ROOT = SCRIPT_DIR.parents[1]
-SAMPLE_OUTPUT_PATH = PIPELINE_ROOT / "docs" / "images_intake_sample - sampleOutput1.csv"
+SAMPLE_OUTPUT_PATH = PIPELINE_ROOT.parent / "docs" / "amazon_legacy" / "images_intake_sample - sampleOutput1.csv"
 
 STEP2_NORMALIZED_COLUMNS = [
     "created_at_display",

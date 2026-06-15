@@ -2,6 +2,7 @@
 """Baseline image-quality and URL-recovery experiment for Step 4 ground truth."""
 
 from __future__ import annotations
+import sys
 
 import argparse
 import csv
@@ -21,12 +22,21 @@ from PIL import Image, ImageStat
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
 PROJECT_ROOT = REPO_ROOT.parent
 DATA_ROOT = PROJECT_ROOT / "FWM_Data"
-
-PART001 = DATA_ROOT / "amazon/data/step_4_human_review_and_visibility_decisions/manual_chunks/backup/images_to_approve_part_001_SORTED_FacialDetectionGT_RejectionReasons1.csv"
-PART002 = DATA_ROOT / "amazon/data/step_4_human_review_and_visibility_decisions/part_002_REVIEWED.csv"
-OUT_DIR = REPO_ROOT / "outputs/cv_experiments/image_quality_baseline"
+AMAZON_STEP4 = cv_annotated_pending_human_review_root() / "amazon_legacy_step_4_human_review_and_visibility_decisions"
+PART001 = AMAZON_STEP4 / "manual_chunks/backup/images_to_approve_part_001_SORTED_FacialDetectionGT_RejectionReasons1.csv"
+PART002 = AMAZON_STEP4 / "part_002_REVIEWED.csv"
+OUT_DIR = CV_EXPERIMENTS_DIR / "image_quality_baseline"
 
 
 def larger_image_url_candidates(url: str) -> List[str]:

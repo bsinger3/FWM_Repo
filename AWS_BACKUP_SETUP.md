@@ -1,6 +1,6 @@
 # AWS Backup Setup
 
-This document records the current S3 backup setup for `FWM_Data` on the Mac and Windows machines.
+This document records the current S3 backup setup for `FWM_Data` on the Mac and Windows machines. S3 is disaster/remote backup for the local lifecycle data tree; keep local archive folders under `FWM_Data/_archive/` before syncing.
 
 ## Current Setup
 

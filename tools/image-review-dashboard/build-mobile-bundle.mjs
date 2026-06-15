@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { readWorkbookRows } from "./server.mjs";
+import { defaultImageReviewPackageDir, defaultImageReviewReturnsDir, cvPendingReviewRoot } from "./paths.mjs";
 
 const IMAGE_PROXY = "https://fwm-proxy.bsinger3.workers.dev/?url=";
 const __filename = fileURLToPath(import.meta.url);
@@ -13,19 +14,18 @@ const execFileAsync = promisify(execFile);
 const toolDir = path.dirname(__filename);
 const repoRoot = path.resolve(toolDir, "../..");
 const mobileSourceDir = path.join(toolDir, "mobile");
-const reviewRoot = path.join(repoRoot, "outputs/02_supabase_needs_human_review_cv_first_pass");
-const defaultPackageDir = path.join(reviewRoot, "partial_170000_rows_cv_gated");
-const archivePackageDir = path.join(reviewRoot, "Archive/partial_170000_rows_cv_gated");
+const reviewRoot = cvPendingReviewRoot(repoRoot);
+const defaultPackageDir = defaultImageReviewPackageDir(repoRoot);
 const packageDir =
   process.env.FWM_IMAGE_REVIEW_PACKAGE_DIR ||
-  (existsSync(defaultPackageDir) ? defaultPackageDir : archivePackageDir);
+  defaultPackageDir;
 const defaultOutputDir = path.join(
   reviewRoot,
   "mobile_review_bundle",
 );
 const mobileBundleManifestPath =
   process.env.FWM_MOBILE_REVIEW_BUNDLE_MANIFEST ||
-  path.join(reviewRoot, "human_labeled_returns/mobile_review_bundle_manifest.json");
+  path.join(defaultImageReviewReturnsDir(repoRoot), "mobile_review_bundle_manifest.json");
 
 function getArg(name, fallback = "") {
   const prefix = `--${name}=`;
@@ -188,7 +188,7 @@ function sourceKeyFromDecision(decision) {
 }
 
 async function readReviewedDecisionIndex() {
-  const returnsDir = path.join(reviewRoot, "human_labeled_returns");
+  const returnsDir = defaultImageReviewReturnsDir(repoRoot);
   const index = {
     byDecisionKey: new Set(),
     byRowKey: new Set(),

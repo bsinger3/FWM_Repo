@@ -2,6 +2,7 @@
 """Build the next reason-labeling queue with LLM-vision seeded candidates."""
 
 from __future__ import annotations
+import sys
 
 import argparse
 import csv
@@ -17,11 +18,20 @@ from urllib.request import Request, urlopen
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
 PROJECT_ROOT = REPO_ROOT.parent
 DATA_ROOT = PROJECT_ROOT / "FWM_Data"
-PART002 = DATA_ROOT / "amazon/data/step_4_human_review_and_visibility_decisions/part_002_REVIEWED.csv"
-PREVIOUS_LABELS = REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling/labeled_image_rejection_reason_queue.csv"
-OUT_DIR = REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling_next"
+PART002 = cv_annotated_pending_human_review_root() / "amazon_legacy_step_4_human_review_and_visibility_decisions" / "part_002_REVIEWED.csv"
+PREVIOUS_LABELS = CV_EXPERIMENTS_DIR / "ground_truth_labeling/labeled_image_rejection_reason_queue.csv"
+OUT_DIR = CV_EXPERIMENTS_DIR / "ground_truth_labeling_next"
 DEFAULT_ENV_PATH = REPO_ROOT / ".env"
 
 MANUAL_COL = "Manual_approval(1=approved,2=reject, 3=ApprovedANDLabel'Pretty\")"

@@ -6,8 +6,8 @@ Date: 2026-05-20
 
 Yes, this workspace has human-labeled reference data that can be used as ground truth for image-sorting experiments. The strongest local source is:
 
-- `/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/manual_chunks/backup/images_to_approve_part_001_SORTED_FacialDetectionGT_RejectionReasons1.csv`
-- `/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/part_002_REVIEWED.csv`
+- `/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/manual_chunks/backup/images_to_approve_part_001_SORTED_FacialDetectionGT_RejectionReasons1.csv`
+- `/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/part_002_REVIEWED.csv`
 
 These files include manual approval/rejection labels, manually labeled face presence, free-text rejection reasons for some rows, and prior CV outputs from YOLO/YuNet-style detectors.
 
@@ -27,7 +27,7 @@ The currently available local CV outputs show that YOLO + YuNet are useful for t
 
 File:
 
-`/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/manual_chunks/backup/images_to_approve_part_001_SORTED_FacialDetectionGT_RejectionReasons1.csv`
+`/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/manual_chunks/backup/images_to_approve_part_001_SORTED_FacialDetectionGT_RejectionReasons1.csv`
 
 Rows: 3,000.
 
@@ -49,7 +49,7 @@ Manual face labels:
 
 File:
 
-`/Users/briannasinger/Projects/FWM/FWM_Data/amazon/data/step_4_human_review_and_visibility_decisions/part_002_REVIEWED.csv`
+`/Users/briannasinger/Projects/FWM/FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/part_002_REVIEWED.csv`
 
 Labeled rows: 707.
 
@@ -90,7 +90,7 @@ Why useful:
 - Counts people.
 - Gives bounding boxes to estimate whether the subject is large enough in frame.
 - Local repo already contains YOLOv8 weights:
-  - `/Users/briannasinger/Projects/FWM/FWM_Data/models/yolov8n.pt`
+  - `/Users/briannasinger/Projects/FWM/FWM_Data/_models/yolov8n.pt`
 
 Best use here:
 
@@ -121,7 +121,7 @@ Why useful:
 - Estimates body keypoints.
 - Can score how much of the body is visible.
 - Local repo already contains:
-  - `/Users/briannasinger/Projects/FWM/FWM_Data/models/yolov8n-pose.pt`
+  - `/Users/briannasinger/Projects/FWM/FWM_Data/_models/yolov8n-pose.pt`
 
 Best use here:
 
@@ -450,7 +450,7 @@ The human labels already in this workspace should be reused to tune thresholds a
 
 The best downloadable/free starting point is:
 
-- Use the existing YOLOv8 detection and pose weights already in `FWM_Data/models`.
+- Use the existing YOLOv8 detection and pose weights in `FWM_Data/_models`.
 - Keep YuNet for face detection.
 - Add Marqo FashionCLIP for category and product-photo checks.
 - Evaluate Grounding DINO or OWLv2 only after FashionCLIP calibration, because they are heavier and likely only needed for garment-box localization.

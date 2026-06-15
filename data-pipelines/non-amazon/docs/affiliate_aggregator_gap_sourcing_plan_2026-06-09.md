@@ -61,7 +61,7 @@ These are useful for discovering culturally relevant apparel brands, but they ar
    - preserve market domains when they expose different review systems
 3. Dedupe against:
    - `FWM_Data/WebLeads/leads.csv`
-   - `FWM_Repo/data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+   - `FWM_Repo/data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
    - `FWM_Repo/outputs/measurement_coverage/20260609_human_labeled_approved_only/lead_gap_reprioritization.csv`
    - existing folders under `FWM_Data/non-amazon/data/step_1_raw_scraping_data/`
    - existing claim files under `_claims/`

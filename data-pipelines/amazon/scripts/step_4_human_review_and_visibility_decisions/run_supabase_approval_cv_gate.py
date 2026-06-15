@@ -2,6 +2,7 @@
 """Run the known YOLO/pose CV gate over Supabase approval-candidate workbooks."""
 
 from __future__ import annotations
+import sys
 
 import argparse
 import csv
@@ -32,8 +33,17 @@ from build_supabase_image_review_package import gather_candidates
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_INPUT_PACKAGE = REPO_ROOT / "outputs/supabase_production_image_review_2026_05_28_s3_refresh_sovrn_prioritized"
-DEFAULT_OUTPUT_PACKAGE = REPO_ROOT / "outputs/supabase_production_image_review_2026_05_28_s3_refresh_cv_gated"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+DEFAULT_INPUT_PACKAGE = cv_annotated_pending_human_review_root() / "supabase_production_image_review_2026_05_28_s3_refresh_sovrn_prioritized"
+DEFAULT_OUTPUT_PACKAGE = cv_annotated_pending_human_review_root() / "supabase_production_image_review_2026_05_28_s3_refresh_cv_gated"
 MAX_ROWS_PER_WORKBOOK = 1000
 
 BASE_COLUMNS = [

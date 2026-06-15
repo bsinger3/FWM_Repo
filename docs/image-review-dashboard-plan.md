@@ -17,7 +17,7 @@ The dashboard should let a reviewer:
 
 Primary current output folder:
 
-`outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated/`
+`../FWM_Data/03_cv_annotated_pending_human_review/partial_170000_rows_cv_gated/`
 
 Current package summary:
 
@@ -337,7 +337,7 @@ Use a four-stage persistence plan:
 
 2. Durable return workbooks:
    - Add a `Save progress / Export decisions` button in the toolbar.
-   - Clicking it writes new workbook files under `outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/`.
+   - Clicking it writes new workbook files under `../FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/`.
    - The generated files should contain only reviewed or changed rows by default, grouped by source bucket and part.
    - Generated file names should include package ID or date, bucket, source part number, and timestamp, for example `human_labeled_approve_candidates_part_001_2026-06-02T153000.xlsx`.
    - The source workbook should be copied into the return workbook shape with updated `production_decision`, `rejection_reason`, and `review_notes`, while preserving provenance columns.
@@ -365,7 +365,7 @@ The first implementation may export both a compact machine-readable delta and wo
 
 Recommended return folder:
 
-`outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns/`
+`../FWM_Data/04_human_reviewed_ready_to_publish/human_labeled_returns/`
 
 Recommended generated artifacts:
 

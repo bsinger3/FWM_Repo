@@ -4,7 +4,7 @@ This note is for the next Codex chat that needs to restore `FWM_Data` from S3 on
 
 ## Goal
 
-Download the full `FWM_Data` directory from the private S3 bucket to the local machine.
+Download the full lifecycle-based `FWM_Data` directory from the private S3 bucket to the local machine.
 
 ## Local Paths
 

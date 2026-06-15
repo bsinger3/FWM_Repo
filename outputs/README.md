@@ -1,14 +1,16 @@
-# Outputs Folder Map
+# Outputs Deprecated
 
-This folder is organized around the current Supabase image-review workflow.
+Generated pipeline outputs no longer live in the repo root.
 
-## Active Folders
+Use the sibling local data directory instead:
 
-- `01_supabase_ready_human_approved`: rows Brianna has already manually approved and that are candidates for Supabase upload prep.
-- `02_supabase_needs_human_review_cv_first_pass`: rows that have had a first pass from CV models and still need human review before production.
-- `03_supabase_unprocessed_not_cv_or_human`: rows that have not yet completed the full CV gate and should not be labeled for Supabase approval yet.
+```text
+../FWM_Data/
+  02_supabase_qualified_data/
+  03_cv_annotated_pending_human_review/
+  04_human_reviewed_ready_to_publish/
+  _reports/
+  _archive/
+```
 
-## Archive
-
-- `archive`: older generated packages, smoke tests, superseded review folders, and CV experiment outputs.
-
+This directory remains only as a deprecation note for old commands and docs.

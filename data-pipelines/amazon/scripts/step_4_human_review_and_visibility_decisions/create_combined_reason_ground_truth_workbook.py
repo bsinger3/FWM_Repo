@@ -2,6 +2,7 @@
 """Create one combined yes/no ground-truth workbook for sparse rejection reasons."""
 
 from __future__ import annotations
+import sys
 
 import csv
 import re
@@ -14,11 +15,20 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-BROAD_DIR = REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling_broad"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+BROAD_DIR = CV_EXPERIMENTS_DIR / "ground_truth_labeling_broad"
 LABELED_CSV = BROAD_DIR / "labeled_2026_05_25/usable_labeled_ground_truth_normalized.csv"
 BROAD_SOURCE_CSV = BROAD_DIR / "combined_amazon_nonamazon_llm_seeded_ground_truth_queue.csv"
-YOLO_ROWS_CSV = REPO_ROOT / "outputs/cv_experiments/yolo_segmentation_crop_reasons_broad_2026_05_25/yolo_segmentation_crop_reason_rows.csv"
-OUT_DIR = REPO_ROOT / "outputs/cv_experiments/combined_reason_ground_truth_2026_05_25"
+YOLO_ROWS_CSV = CV_EXPERIMENTS_DIR / "yolo_segmentation_crop_reasons_broad_2026_05_25/yolo_segmentation_crop_reason_rows.csv"
+OUT_DIR = CV_EXPERIMENTS_DIR / "combined_reason_ground_truth_2026_05_25"
 OUTPUT_XLSX = OUT_DIR / "combined_rejection_reason_yes_no_review_queue.xlsx"
 OUTPUT_CSV = OUT_DIR / "combined_rejection_reason_yes_no_review_queue.csv"
 REPORT_MD = OUT_DIR / "combined_rejection_reason_yes_no_review_queue_report.md"

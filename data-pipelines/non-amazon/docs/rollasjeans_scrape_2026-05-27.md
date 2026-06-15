@@ -3,7 +3,7 @@
 ## Scope
 
 - Retailer: `rollasjeans_com`
-- Source triage row: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Source triage row: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Triage notes: first-pass Sovrn candidate, CPC, reviews present, photo reviews present, shipping `US`, provider unknown, CPC amount not populated.
 - Seed category: `https://rollasjeans.com/collections/womens/clothing/tops`
 - Seed PDPs:

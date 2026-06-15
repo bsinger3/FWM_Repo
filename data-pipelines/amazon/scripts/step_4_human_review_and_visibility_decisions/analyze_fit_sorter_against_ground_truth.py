@@ -2,6 +2,7 @@
 """Compare first fit-image sorter output against available ground truth."""
 
 from __future__ import annotations
+import sys
 
 import csv
 from collections import Counter
@@ -9,9 +10,18 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-SORTER_DIR = REPO_ROOT / "outputs/cv_experiments/fit_image_sorter_2026_05_27"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+SORTER_DIR = CV_EXPERIMENTS_DIR / "fit_image_sorter_2026_05_27"
 SORTER_CSV = SORTER_DIR / "fit_image_sorter_results.csv"
-GROUND_TRUTH_CSV = REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling_broad/labeled_2026_05_25/usable_labeled_ground_truth_normalized.csv"
+GROUND_TRUTH_CSV = CV_EXPERIMENTS_DIR / "ground_truth_labeling_broad/labeled_2026_05_25/usable_labeled_ground_truth_normalized.csv"
 REPORT_MD = SORTER_DIR / "fit_image_sorter_ground_truth_comparison.md"
 MISSES_CSV = SORTER_DIR / "fit_image_sorter_known_reject_misses.csv"
 

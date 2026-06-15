@@ -1,8 +1,8 @@
 retailer: shopsolswim_com
 site: shopsolswim.com
-claimed_at: 2026-06-10T20:22:09Z
-completed_at: 2026-06-10T20:22:16Z
-status: no_public_product_seed
+claimed_at: 2026-06-15T18:04:10Z
+completed_at: 2026-06-15T18:12:27Z
+status: completed
 source: Awin advertiser queue
 programme: SOL SWIM
 provider_hint: Judge.me
@@ -10,6 +10,5 @@ why_request: swim/shapewear gap; bottoms/activewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/shopsolswim_com/shopsolswim_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/shopsolswim_com/shopsolswim_com_reviews_matching_intake_schema_summary.json
-error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/shopsolswim_com/shopsolswim_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/shopsolswim_com/shopsolswim_com_reviews_matching_intake_schema_summary.json

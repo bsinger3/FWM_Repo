@@ -2,6 +2,7 @@
 """Add Google Sheets IMAGE formulas to Supabase image review workbooks."""
 
 from __future__ import annotations
+import sys
 
 from pathlib import Path
 
@@ -11,7 +12,16 @@ from openpyxl.utils import get_column_letter
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-PACKAGE_DIR = REPO_ROOT / "outputs/supabase_production_image_review_2026_05_28_s3_refresh_sovrn_prioritized"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+PACKAGE_DIR = cv_annotated_pending_human_review_root() / "supabase_production_image_review_2026_05_28_s3_refresh_sovrn_prioritized"
 PREVIEW_COLUMN_NAME = "image_preview"
 PREVIEW_COLUMN_INDEX = 4
 

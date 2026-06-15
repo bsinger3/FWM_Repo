@@ -10,6 +10,6 @@ why_request: swim/shapewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/helenjon_com/helenjon_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/helenjon_com/helenjon_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/helenjon_com/legacy_pre_2026-06-15/helenjon_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/helenjon_com/legacy_pre_2026-06-15/helenjon_com_reviews_matching_intake_schema_summary.json
 error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.

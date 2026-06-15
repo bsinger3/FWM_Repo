@@ -1,14 +1,15 @@
 retailer: waistdear_com
 site: waistdear.com
-claimed_at: 2026-06-10T20:43:40Z
-completed_at: 2026-06-10T20:46:17Z
-status: completed
+claimed_at: 2026-06-15T14:01:51Z
+completed_at: 2026-06-15T14:02:06Z
+status: no_public_product_seed
 source: Awin advertiser queue
 programme: Waistdear
 provider_hint: Stamped;Yotpo
 why_request: swim/shapewear gap; bottoms/activewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
-rows_written: 5
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/waistdear_com/waistdear_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/waistdear_com/waistdear_com_reviews_matching_intake_schema_summary.json
+rows_written: 0
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/waistdear_com/legacy_pre_2026-06-15/waistdear_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/waistdear_com/legacy_pre_2026-06-15/waistdear_com_reviews_matching_intake_schema_summary.json
+error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.

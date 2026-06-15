@@ -1,7 +1,7 @@
 retailer: shopfigandwillow_com
 site: shopfigandwillow.com
-claimed_at: 2026-06-10T20:23:29Z
-completed_at: 2026-06-10T20:23:37Z
+claimed_at: 2026-06-15T19:00:39Z
+completed_at: 2026-06-15T19:00:49Z
 status: no_public_product_seed
 source: Awin advertiser queue
 programme: Fig & Willow
@@ -10,6 +10,6 @@ why_request: plus/curve gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/shopfigandwillow_com/shopfigandwillow_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/shopfigandwillow_com/shopfigandwillow_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/shopfigandwillow_com/shopfigandwillow_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/shopfigandwillow_com/shopfigandwillow_com_reviews_matching_intake_schema_summary.json
 error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.

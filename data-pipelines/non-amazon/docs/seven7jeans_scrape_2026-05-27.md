@@ -4,7 +4,7 @@
 
 - Retailer: `seven7jeans_com`
 - Domain: `seven7jeans.com`
-- Source: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Source: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Triage status: `sovrn_first_pass_scrape_candidate`
 - Pricing model: `CPA+CPC`
 - Provider hint: `unknown`

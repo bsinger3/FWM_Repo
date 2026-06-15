@@ -463,7 +463,10 @@ async function main() {
     arg !== "--skip-openai-summary" &&
     !arg.startsWith("--table=")
   ));
-  const transcriptPathArg = positionalArgs[0] || "codex-chat-transcript.json";
+  const transcriptPathArg = positionalArgs[0] || process.env.FWM_TRANSCRIPT_PATH;
+  if (!transcriptPathArg) {
+    throw new Error("Pass a transcript path or set FWM_TRANSCRIPT_PATH. Transcript JSON files should not live in the repo root.");
+  }
   const transcriptPath = path.resolve(process.cwd(), transcriptPathArg);
   const source = positionalArgs[1] || "codex";
 

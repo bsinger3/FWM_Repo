@@ -33,7 +33,7 @@ def data_root() -> Path:
 
 
 def output_dir() -> Path:
-    return data_root() / "raw" / "apify"
+    return data_root() / "00_raw_scraped_data" / "amazon" / "apify"
 
 
 def metadata_dir(destination: Path) -> Path:

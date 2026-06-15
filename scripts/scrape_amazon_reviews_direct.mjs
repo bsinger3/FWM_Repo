@@ -28,7 +28,7 @@ function dataRoot() {
 }
 
 function defaultOutputDir() {
-  return path.join(dataRoot(), "raw", "direct_amazon");
+  return path.join(dataRoot(), "00_raw_scraped_data", "amazon", "direct_amazon");
 }
 
 function parseArgs(argv) {
@@ -112,7 +112,7 @@ Scrapes public Amazon media review pages directly with Playwright.
 Options:
   --batch-size <n>            ASINs per output batch. Default: ${DEFAULT_BATCH_SIZE}
   --max-pages <n>             Review pages per ASIN. Default: ${DEFAULT_MAX_PAGES}
-  --output-dir <path>         Output directory. Default: ../FWM_Data/raw/direct_amazon
+  --output-dir <path>         Output directory. Default: ../FWM_Data/00_raw_scraped_data/amazon/direct_amazon
   --start-batch-number <n>    First batch file number. Default: next available
   --sleep-ms <n>              Delay after each page request. Default: 4000
   --page-timeout-ms <n>       Navigation timeout. Default: 45000

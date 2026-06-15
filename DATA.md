@@ -1,118 +1,110 @@
 # FWM Data Storage
 
-This repo should stay small enough to push to GitHub. Keep source code, docs, schema, and app files in `FWM_Repo`; keep scraped data and generated pipeline outputs outside the repo.
+This repo should stay lightweight. Keep source code, docs, schemas, migrations,
+tests, and small manifests in `FWM_Repo`; keep scraped data and generated
+pipeline artifacts in the sibling `FWM_Data` directory.
 
 ## What Stays In Git
 
-- App files such as `index.html`, `config.js`, and static pages.
-- Supabase migrations and schema files.
-- Pipeline scripts in `data-pipelines/**/scripts/`.
-- Lightweight pipeline docs in `data-pipelines/**/docs/`.
+- App files, scripts, schemas, migrations, and tests.
+- Lightweight pipeline docs and runbooks.
+- Small manifests that explain where generated data lives.
 
 ## What Stays Out Of Git
 
-- Raw scraped CSVs and downloaded source files.
-- Intermediate review batches and generated exports.
-- Publish-ready output files that can be regenerated or backed up elsewhere.
-- Local ML model files such as `.pt`, `.onnx`, and `.caffemodel`.
-- Local cache/vendor folders.
+- Raw scraped CSVs, JSONL files, downloaded images, and source workbooks.
+- Intermediate review packages, CV outputs, mobile review bundles, and returns.
+- Publish-ready exports that are backed up through `FWM_Data` and S3.
+- Local ML model weights and downloaded model/cache assets.
+- Codex transcript JSON files after they have been verified in Supabase.
 
 ## Local Data Directory
 
-Use this sibling directory for local scraping work:
+Use this sibling directory for local scraping and generated data:
 
 ```text
 Mac:     /Users/briannasinger/Projects/FWM/FWM_Data
 Windows: C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data
 ```
 
-Recommended layout:
+Canonical layout:
 
 ```text
 FWM_Data/
-  amazon/
-    data/
-    models/
-  non-amazon/
-    data/
-  models/
+  00_raw_scraped_data/
+    <merchant_or_source>/
+      <run_id>/
+        raw_reviews.csv
+        raw_products.csv
+        images/
+        scrape_manifest.json
+        run_log.txt
+  01_cleaned_normalized_data/
+  02_supabase_qualified_data/
+  03_cv_annotated_pending_human_review/
+  04_human_reviewed_ready_to_publish/
+  _reports/
+  _archive/
+    old_outputs/
+    old_review_bundles/
+    old_cv_experiments/
+    transcripts/
+    deprecated_scrape_runs/
 ```
 
-The repo can keep local symlinks at `data-pipelines/amazon/data`, `data-pipelines/amazon/models`, and `data-pipelines/non-amazon/data` so existing scripts can still use their current paths while the real files live in `FWM_Data`.
+`00_raw_scraped_data` is the only stage organized primarily by merchant/source.
+After raw scrape, Amazon vs non-Amazon should be metadata such as
+`source_family`, `source_site_display`, or retailer/source columns rather than
+top-level lifecycle folders.
 
-For new retailer scrapes, follow [new-scrape-rules.md](new-scrape-rules.md).
-Every scrape handoff should report how many rows have a product URL, at least
-one measurement, a customer image, the ordered size, and how many rows satisfy
-all four requirements for Supabase insertion.
+Stage meanings:
+
+- `00_raw_scraped_data`: raw scraper outputs, source-specific and messy.
+- `01_cleaned_normalized_data`: unified rows with standard columns, normalized
+  product/image URLs, parsed measurements, retailer/source metadata, and
+  deduping where appropriate.
+- `02_supabase_qualified_data`: candidate rows with at least image, product URL,
+  and one measurement.
+- `03_cv_annotated_pending_human_review`: Supabase-qualified rows with
+  image-level CV annotations, stable `review_id`, crop metadata, future image
+  annotation fields, and review package generation. These rows are not yet human
+  reviewed.
+- `04_human_reviewed_ready_to_publish`: human-approved rows ready for Supabase
+  or production publishing.
+
+## Transcript Artifacts
+
+Codex transcript JSON files belong in Supabase table `codex_chat_transcripts`.
+Before removing a local transcript file, verify the corresponding row exists in
+Supabase with the expected `chat_key`, `message_count`, timing, and summary
+metadata. Temporary or archival local copies belong under
+`FWM_Data/_archive/transcripts/`, not in the repo root.
 
 ## S3 Backup
 
-Copy `.env.example` to `.env`, then set these values:
+S3 is the remote disaster backup for the local `FWM_Data` tree. It is not the
+only archive; local archive folders under `FWM_Data/_archive/` should exist
+before syncing.
+
+Copy `.env.example` to `.env`, then set:
 
 ```text
-FWM_DATA_DIR=C:/Users/bsing/OneDrive/Documents/Projects/FWM/FWM_Data
+FWM_DATA_DIR=/Users/briannasinger/Projects/FWM/FWM_Data
 FWM_S3_BUCKET=s3://fwm-scraping-data-briannasinger
 FWM_AWS_PROFILE=fwm
 ```
 
-On Mac, use:
-
-```text
-FWM_DATA_DIR=/Users/briannasinger/Projects/FWM/FWM_Data
-```
-
-Use the dedicated AWS CLI profile `fwm`. On this Windows machine, `fwm` is configured with access keys for the IAM user `codex-sync`, not root login credentials.
-
 Verify the active identity:
 
-```powershell
-aws sts get-caller-identity --profile fwm
+```bash
+aws sts get-caller-identity --profile "$FWM_AWS_PROFILE"
 ```
 
-Expected identity:
-
-```text
-arn:aws:iam::326804802943:user/codex-sync
-```
-
-After an AWS bucket exists, back up the local data directory with:
-
-```powershell
-.\scripts\sync-data-to-s3.ps1
-```
-
-On Git Bash or WSL, you can also use:
+Back up the local data directory:
 
 ```bash
 scripts/sync-data-to-s3.sh
 ```
 
-Restore with:
-
-```powershell
-aws --profile fwm s3 sync s3://fwm-scraping-data-briannasinger C:\Users\bsing\OneDrive\Documents\Projects\FWM\FWM_Data --exclude ".DS_Store"
-```
-
-Use a private bucket. Do not put scraped data in a public bucket unless you have deliberately reviewed the privacy and licensing implications.
-
-Current note:
-
-- The `fwm` profile authenticates as IAM user `codex-sync`.
-- `codex-sync` has bucket-scoped S3 permissions for `s3://fwm-scraping-data-briannasinger`.
-- Do not use AWS root credentials for normal backup or restore work.
-
-## Creating The Bucket
-
-After AWS CLI login is configured, create a private encrypted bucket:
-
-```bash
-scripts/create-private-s3-bucket.sh YOUR_GLOBALLY_UNIQUE_BUCKET_NAME us-east-1
-```
-
-Then update `.env`:
-
-```text
-FWM_S3_BUCKET=s3://YOUR_GLOBALLY_UNIQUE_BUCKET_NAME
-```
-
-See [AWS_BACKUP_SETUP.md](AWS_BACKUP_SETUP.md) for the current Windows-specific login, backup, and restore workflow.
+On this Mac, `FWM_AWS_PROFILE=default` has previously been the working profile.
+Confirm the identity before using it.

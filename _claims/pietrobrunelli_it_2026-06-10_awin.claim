@@ -1,15 +1,14 @@
 retailer: pietrobrunelli_it
 site: pietrobrunelli.it
-claimed_at: 2026-06-10T20:23:00Z
-completed_at: 2026-06-10T20:23:07Z
-status: no_public_product_seed
+claimed_at: 2026-06-15T18:43:14Z
+completed_at: 2026-06-15T18:53:21Z
+status: completed
 source: Awin advertiser queue
 programme: Pietro Brunelli US
 provider_hint: Judge.me
 why_request: maternity/postpartum gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
-rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/pietrobrunelli_it/pietrobrunelli_it_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/pietrobrunelli_it/pietrobrunelli_it_reviews_matching_intake_schema_summary.json
-error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.
+rows_written: 2
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/pietrobrunelli_it/pietrobrunelli_it_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/pietrobrunelli_it/pietrobrunelli_it_reviews_matching_intake_schema_summary.json

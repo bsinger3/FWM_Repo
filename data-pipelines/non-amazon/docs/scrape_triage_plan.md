@@ -11,7 +11,7 @@ Last updated: 2026-05-27 America/New_York
 - Do not start a site already listed as active or claimed unless the claim is stale and the user confirms it is safe to take over.
 - Default to first-time scrapes. Completed claim files in `_claims` are historical notes, not active queue items. Do not choose a completed retailer for another run unless the user explicitly asks for a refresh/resume, the prior result is marked blocked/partial/incomplete, or the triage plan clearly says it needs revisit.
 - When picking "the next" scrape, skip completed retailers and choose an unclaimed site with no completed output/claim from the sheet intake or `Next Candidates` lists before considering any old refresh.
-- The completed Sovrn Commerce triage is now part of this scrape triage. Use `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv` for the sortable Sovrn candidate list, and check the full tracker before promoting a Sovrn merchant into implementation.
+- The completed Sovrn Commerce triage is now part of this scrape triage. Use `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv` for the sortable Sovrn candidate list, and check the full tracker before promoting a Sovrn merchant into implementation.
 - Before assigning "next," search the repo and data root for the merchant domain/slug across scripts, docs, `_claims`, `_active_scrape_claims`, and output directories. Any hit means the site is already attempted and is not eligible as a first-time scrape unless the user explicitly names it or asks for a revisit/resume.
 - If a site returns `429`, captcha, auth wall, WAF challenge, or suspicious-request behavior, stop retrying and mark it for revisit instead of increasing request pressure.
 - Do not reject a site just because it lacks customer-photo reviews. Some useful sites expose catalog model images plus model height/size/measurements. For those, scrape the model image and model measurements, and mark rows with `image_source_type=catalog_model_image` instead of treating the image as a customer review image.
@@ -119,9 +119,9 @@ After the five queued claim files above:
 
 Source files:
 
-- Full tracker: `data-pipelines/non-amazon/docs/sovrn_commerce_apparel_triage_tracker.csv`
-- Sortable scrape-candidate list: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
-- Full triage report: `data-pipelines/non-amazon/docs/sovrn_commerce_full_triage_report.md`
+- Full tracker: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_apparel_triage_tracker.csv`
+- Sortable scrape-candidate list: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
+- Full triage report: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_full_triage_report.md`
 
 Completion summary:
 

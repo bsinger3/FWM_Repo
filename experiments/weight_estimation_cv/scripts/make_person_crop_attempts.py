@@ -19,7 +19,7 @@ EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = EXPERIMENT_ROOT.parents[1]
 PROJECT_ROOT = REPO_ROOT.parent
 DEFAULT_INPUT = EXPERIMENT_ROOT / "data/eval_sample_with_quality_tags.csv"
-DEFAULT_DETECT_MODEL = PROJECT_ROOT / "FWM_Data/models/yolov8n.pt"
+DEFAULT_DETECT_MODEL = PROJECT_ROOT / "FWM_Data/_models/yolov8n.pt"
 DEFAULT_ATTEMPTS = EXPERIMENT_ROOT / "data/person_crop_attempt_rows.csv"
 DEFAULT_REPORT = EXPERIMENT_ROOT / "reports/person_crop_attempt_summary.json"
 
@@ -152,4 +152,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

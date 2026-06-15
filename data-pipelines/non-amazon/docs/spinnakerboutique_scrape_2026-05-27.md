@@ -4,7 +4,7 @@
 
 - Retailer: `spinnakerboutique_com`
 - Domain: `spinnakerboutique.com`
-- Source: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Source: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Triage bucket: `sovrn_first_pass_scrape_candidate`
 - Provider hint: Loox
 - Reviews/photo reviews present: yes

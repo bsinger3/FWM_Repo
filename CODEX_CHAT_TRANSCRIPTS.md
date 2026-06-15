@@ -8,7 +8,7 @@ This repo can archive full Codex chat transcripts into Supabase and generate a s
 - A local upload script:
 
 ```bash
-node scripts/upload-codex-chat-transcript.mjs codex-chat-transcript.json
+node scripts/upload-codex-chat-transcript.mjs /path/to/session-transcript.json
 ```
 
 - A convenience npm script:
@@ -41,7 +41,8 @@ Use the service role key, not the anon key. The table is intentionally locked do
 
 The upload script:
 
-1. Reads `codex-chat-transcript.json`
+1. Reads the transcript JSON path passed on the command line, or the path in
+   `FWM_TRANSCRIPT_PATH`
 2. Resolves conversation start/end timestamps from transcript metadata when available
 3. Builds a `full_text` version from all messages
 4. Uses the OpenAI Responses API to generate a structured context summary
@@ -106,13 +107,19 @@ The handoff transcript should include the user requests, major assistant actions
 At the end of a Codex conversation, use this prompt:
 
 ```text
-Please update `codex-chat-transcript.json` so it includes this full conversation, then run `npm run sync:codex-chat` to upload it to the dev Supabase `codex_chat_transcripts` table with a fresh context summary. After it finishes, tell me the `chat_key`, `message_count`, and whether the upload succeeded.
+Please write the temporary transcript JSON outside the repo root, then run
+`node scripts/upload-codex-chat-transcript.mjs /path/to/session-transcript.json`
+to upload it to the dev Supabase `codex_chat_transcripts` table with a fresh
+context summary. After it finishes, tell me the `chat_key`, `message_count`,
+and whether the upload succeeded.
 ```
 
 Short version:
 
 ```text
-Update the local transcript with this full chat, then run `npm run sync:codex-chat` and confirm the upload to `codex_chat_transcripts`.
+Update a temporary transcript JSON outside the repo root, upload it with
+`scripts/upload-codex-chat-transcript.mjs`, and confirm the upload to
+`codex_chat_transcripts`.
 ```
 
 This works best as the final prompt in the thread, because it tells Codex to do both required steps:
@@ -151,7 +158,9 @@ For the closest thing to automatic syncing without browser automation, run:
 npm run watch:codex-chat
 ```
 
-Leave that watcher running during a session. Whenever `codex-chat-transcript.json` is updated or replaced, it reruns the upload and upserts the transcript row.
+Leave that watcher running during a session. Whenever the explicit transcript
+path is updated or replaced, it reruns the upload and upserts the transcript
+row. Do not keep watcher input files in the repo root.
 
 ## Dev-Only Schema Source
 

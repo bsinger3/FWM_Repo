@@ -2,6 +2,7 @@
 """Audit LOW_RESOLUTION yes-label rows for recoverable larger image URLs."""
 
 from __future__ import annotations
+import sys
 
 import csv
 import re
@@ -16,7 +17,16 @@ from PIL import Image
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-OUT_DIR = REPO_ROOT / "outputs/cv_experiments/combined_reason_ground_truth_2026_05_25"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+OUT_DIR = CV_EXPERIMENTS_DIR / "combined_reason_ground_truth_2026_05_25"
 LABELED_DIR = OUT_DIR / "labeled_2026_05_27"
 LABELED_CSV = LABELED_DIR / "combined_rejection_reason_yes_no_review_queue_labeled.csv"
 AUDIT_CSV = LABELED_DIR / "low_resolution_url_upgrade_audit.csv"

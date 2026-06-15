@@ -4,7 +4,7 @@
 
 - Retailer: `quince_com`
 - Domain: `quince.com`
-- Source: `data-pipelines/non-amazon/docs/sovrn_commerce_scrape_triage_candidates.csv`
+- Source: `data-pipelines/docs/sovrn_commerce/sovrn_commerce_scrape_triage_candidates.csv`
 - Triage status: approved refresh of existing scraper
 - Provider hint: Yotpo
 - Picture reviews present: yes

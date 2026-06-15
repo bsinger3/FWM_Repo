@@ -2,6 +2,7 @@
 """Run the resumable YOLO CV gate over every Supabase-qualified review row."""
 
 from __future__ import annotations
+import sys
 
 import argparse
 import csv
@@ -29,7 +30,16 @@ from cv_rules_workflow_lib import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_FULL_OUTPUT = REPO_ROOT / "outputs/supabase_production_image_review_2026_05_28_s3_refresh_full_cv_gated"
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
+DEFAULT_FULL_OUTPUT = cv_annotated_pending_human_review_root() / "supabase_production_image_review_2026_05_28_s3_refresh_full_cv_gated"
 PART_COLUMNS = BASE_COLUMNS + ["original_review_bucket", "full_cv_route_bucket"]
 
 def parse_args() -> argparse.Namespace:

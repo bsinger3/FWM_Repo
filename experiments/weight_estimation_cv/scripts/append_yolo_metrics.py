@@ -19,8 +19,8 @@ PROJECT_ROOT = REPO_ROOT.parent
 DEFAULT_INPUT = REPO_ROOT / "experiments/weight_estimation_cv/data/eval_sample_with_images.csv"
 DEFAULT_OUTPUT = REPO_ROOT / "experiments/weight_estimation_cv/data/eval_sample_with_images_yolo.csv"
 DEFAULT_REPORT = REPO_ROOT / "experiments/weight_estimation_cv/reports/yolo_metric_summary.json"
-DEFAULT_DETECT_MODEL = PROJECT_ROOT / "FWM_Data/models/yolov8n.pt"
-DEFAULT_POSE_MODEL = PROJECT_ROOT / "FWM_Data/models/yolov8n-pose.pt"
+DEFAULT_DETECT_MODEL = PROJECT_ROOT / "FWM_Data/_models/yolov8n.pt"
+DEFAULT_POSE_MODEL = PROJECT_ROOT / "FWM_Data/_models/yolov8n-pose.pt"
 
 
 def parse_args() -> argparse.Namespace:

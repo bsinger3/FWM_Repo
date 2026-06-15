@@ -1,7 +1,7 @@
 retailer: mysilverwind_com
 site: mysilverwind.com
-claimed_at: 2026-06-10T20:34:13Z
-completed_at: 2026-06-10T20:36:19Z
+claimed_at: 2026-06-15T14:01:51Z
+completed_at: 2026-06-15T14:13:12Z
 status: completed
 source: Awin advertiser queue
 programme: SILVERWIND
@@ -10,5 +10,5 @@ why_request: swim/shapewear gap; bottoms/activewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 2366
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/mysilverwind_com/mysilverwind_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/mysilverwind_com/mysilverwind_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/mysilverwind_com/legacy_pre_2026-06-15/mysilverwind_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/mysilverwind_com/legacy_pre_2026-06-15/mysilverwind_com_reviews_matching_intake_schema_summary.json

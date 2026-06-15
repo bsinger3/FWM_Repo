@@ -19,6 +19,8 @@ test-results/
 
 # Scraping data and generated pipeline artifacts live outside this repo.
 # See DATA.md for the local directory and S3 backup workflow.
+_active_scrape_claims/*.claim
+!_active_scrape_claims/missacc_com.claim
 data-pipelines/**/data
 data-pipelines/**/data/
 data-pipelines/**/models
@@ -36,5 +38,6 @@ _preserved_local_before_sync_*/
 !.env.example
 
 # Codex transcript artifacts are uploaded to Supabase, not stored in Git.
+codex-*.json
 codex-chat-transcript*.json
 codex-*transcript*.json

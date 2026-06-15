@@ -14,7 +14,7 @@ Current local parent layouts:
 
 The starter script in this folder writes to:
 
-- `../FWM_Data/raw/apify/`
+- `../FWM_Data/00_raw_scraped_data/amazon/apify/`
 
 Run scripts from anywhere; they resolve paths relative to the repo automatically.
 
@@ -27,7 +27,7 @@ What it does:
 - reads a CSV with an `asin` column
 - chunks ASINs into sequential Apify runs
 - requests `media_reviews_only`
-- saves raw dataset output to `../FWM_Data/raw/apify/batch_###.json`
+- saves raw dataset output to `../FWM_Data/00_raw_scraped_data/amazon/apify/batch_###.json`
 
 Expected environment variables:
 
@@ -64,7 +64,7 @@ What it does:
 - reads a CSV with an `asin` column, or one or more `--asin` values
 - visits public Amazon `media_reviews_only` review pages with Playwright
 - extracts review text, rating, date, size/color, helpful count, and customer image URLs when review cards are visible
-- saves raw JSON output to `../FWM_Data/raw/direct_amazon/batch_###.json`
+- saves raw JSON output to `../FWM_Data/00_raw_scraped_data/amazon/direct_amazon/batch_###.json`
 - stops clearly on CAPTCHA, bot checks, or Amazon sign-in/claim pages instead of attempting to bypass them
 
 Example:
@@ -76,7 +76,7 @@ node scripts/scrape_amazon_reviews_direct.mjs path/to/fresh_asins.csv --batch-si
 Single-ASIN smoke test:
 
 ```bash
-node scripts/scrape_amazon_reviews_direct.mjs --asin B0F8QS88QD --max-pages 1 --debug-dir ../FWM_Data/raw/direct_amazon_debug
+node scripts/scrape_amazon_reviews_direct.mjs --asin B0F8QS88QD --max-pages 1 --debug-dir ../FWM_Data/00_raw_scraped_data/amazon/direct_amazon_debug
 ```
 
 Notes:

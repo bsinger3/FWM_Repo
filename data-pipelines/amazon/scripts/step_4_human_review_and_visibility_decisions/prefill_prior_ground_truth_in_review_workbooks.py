@@ -2,6 +2,7 @@
 """Prefill Supabase review workbooks from prior human ground truth labels."""
 
 from __future__ import annotations
+import sys
 
 import csv
 import os
@@ -13,10 +14,19 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
 PACKAGE_DIR = Path(
     os.environ.get(
         "SUPABASE_REVIEW_PACKAGE_DIR",
-        REPO_ROOT / "outputs/supabase_production_image_review_2026_05_28_s3_refresh_sovrn_prioritized",
+        cv_annotated_pending_human_review_root() / "supabase_production_image_review_2026_05_28_s3_refresh_sovrn_prioritized",
     )
 )
 SKIP_FILES: set[str] = set()
@@ -55,14 +65,14 @@ REJECTION_OPTIONS = [
 ]
 
 GROUND_TRUTH_FILES = [
-    REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling/labeled_image_rejection_reason_queue.csv",
-    REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling_broad/labeled_2026_05_25/combined_amazon_nonamazon_llm_seeded_ground_truth_queue_labeled.csv",
-    REPO_ROOT / "outputs/cv_experiments/ground_truth_labeling_broad/labeled_2026_05_25/usable_labeled_ground_truth_normalized.csv",
-    REPO_ROOT / "outputs/cv_experiments/combined_reason_ground_truth_2026_05_25/labeled_2026_05_27/combined_rejection_reason_yes_no_review_queue_labeled.csv",
-    REPO_ROOT / "outputs/cv_experiments/yolo_segmentation_crop_reasons_broad_2026_05_25/needs_crop_calibration_labeled_2026_05_25/needs_crop_yes_no_review_queue_labeled.csv",
-    REPO_ROOT / "outputs/cv_experiments/yolo_segmentation_crop_reasons_broad_2026_05_25/needs_crop_control_labeled_2026_05_25/needs_crop_yes_no_control_review_queue_labeled.csv",
-    REPO_ROOT / "outputs/cv_experiments/yolo_segmentation_crop_reasons_broad_2026_05_25/openai_not_worn_calibration_2026_05_25/human_review_labeled_2026_05_25/openai_not_worn_human_review_latest_labeled.csv",
-    REPO_ROOT / "outputs/supabase_approved_upload_staging/2026_05_28_batch_001/labeled_source/supabase_image_review_approve_candidates_part_001_labeled.csv",
+    CV_EXPERIMENTS_DIR / "ground_truth_labeling/labeled_image_rejection_reason_queue.csv",
+    CV_EXPERIMENTS_DIR / "ground_truth_labeling_broad/labeled_2026_05_25/combined_amazon_nonamazon_llm_seeded_ground_truth_queue_labeled.csv",
+    CV_EXPERIMENTS_DIR / "ground_truth_labeling_broad/labeled_2026_05_25/usable_labeled_ground_truth_normalized.csv",
+    CV_EXPERIMENTS_DIR / "combined_reason_ground_truth_2026_05_25/labeled_2026_05_27/combined_rejection_reason_yes_no_review_queue_labeled.csv",
+    CV_EXPERIMENTS_DIR / "yolo_segmentation_crop_reasons_broad_2026_05_25/needs_crop_calibration_labeled_2026_05_25/needs_crop_yes_no_review_queue_labeled.csv",
+    CV_EXPERIMENTS_DIR / "yolo_segmentation_crop_reasons_broad_2026_05_25/needs_crop_control_labeled_2026_05_25/needs_crop_yes_no_control_review_queue_labeled.csv",
+    CV_EXPERIMENTS_DIR / "yolo_segmentation_crop_reasons_broad_2026_05_25/openai_not_worn_calibration_2026_05_25/human_review_labeled_2026_05_25/openai_not_worn_human_review_latest_labeled.csv",
+    LEGACY_OUTPUTS_ARCHIVE / "supabase_approved_upload_staging/2026_05_28_batch_001/labeled_source/supabase_image_review_approve_candidates_part_001_labeled.csv",
 ]
 
 REASON_NORMALIZATION = {

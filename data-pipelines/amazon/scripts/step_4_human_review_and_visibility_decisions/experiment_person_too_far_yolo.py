@@ -2,6 +2,7 @@
 """Evaluate simple YOLO geometry rules for PERSON_TOO_FAR."""
 
 from __future__ import annotations
+import sys
 
 import csv
 from pathlib import Path
@@ -9,11 +10,20 @@ from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+PIPELINE_SCRIPTS_DIR = REPO_ROOT / "data-pipelines" / "scripts"
+if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
+
+from pipeline_paths import archive_root, cv_annotated_pending_human_review_root  # noqa: E402
+
+LEGACY_OUTPUTS_ARCHIVE = archive_root() / "old_outputs" / "repo_outputs_archive" / "supabase_output_cleanup_2026_05_29"
+CV_EXPERIMENTS_DIR = LEGACY_OUTPUTS_ARCHIVE / "cv_experiments"
+
 PROJECT_ROOT = REPO_ROOT.parent
 DATA_ROOT = PROJECT_ROOT / "FWM_Data"
-PART002 = DATA_ROOT / "amazon/data/step_4_human_review_and_visibility_decisions/part_002_REVIEWED.csv"
-EXPLICIT_REASONS = REPO_ROOT / "outputs/cv_experiments/yolo_reason_baseline/explicit_reason_rows.csv"
-OUT_DIR = REPO_ROOT / "outputs/cv_experiments/person_too_far_yolo"
+PART002 = cv_annotated_pending_human_review_root() / "amazon_legacy_step_4_human_review_and_visibility_decisions" / "part_002_REVIEWED.csv"
+EXPLICIT_REASONS = CV_EXPERIMENTS_DIR / "yolo_reason_baseline/explicit_reason_rows.csv"
+OUT_DIR = CV_EXPERIMENTS_DIR / "person_too_far_yolo"
 
 MANUAL_COL = "Manual_approval(1=approved,2=reject, 3=ApprovedANDLabel'Pretty\")"
 

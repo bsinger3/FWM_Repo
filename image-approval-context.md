@@ -163,7 +163,7 @@ contain CV-related assets and local review samples:
 - `yolov8n.pt`
 - `yolov8n-pose.pt`
 - `archive.image_vectors` schema with a 768-dimension embedding column
-- `data-pipelines/amazon/data/step_4_human_review_and_visibility_decisions/review_queue/part_002_only_optimized_combined_review_queue_ANNOTATED.xlsx`
+- `../FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/review_queue/part_002_only_optimized_combined_review_queue_ANNOTATED.xlsx`
 - `.codex_tmp/sample_sheets/approved_sample.jpg`
 - `.codex_tmp/sample_sheets/not_approved_sample.jpg`
 - `.codex_tmp/disagreement_sheets/*`
@@ -211,7 +211,7 @@ Common rejection cases:
 
 The annotated Amazon review workbook is a useful human-label source:
 
-`data-pipelines/amazon/data/step_4_human_review_and_visibility_decisions/review_queue/part_002_only_optimized_combined_review_queue_ANNOTATED.xlsx`
+`../FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/review_queue/part_002_only_optimized_combined_review_queue_ANNOTATED.xlsx`
 
 It has one sheet, `part_002_only_optimized_combine`, with 999 data rows.
 
@@ -283,7 +283,7 @@ Metric patterns from the labeled rows:
 
 Part 001 includes a backup CSV with explicit rejection reasons:
 
-`data-pipelines/amazon/data/step_4_human_review_and_visibility_decisions/manual_chunks/backup/images_to_approve_part_001_SORTED_FacialDetectionGT_RejectionReasons1.csv`
+`../FWM_Data/03_cv_annotated_pending_human_review/amazon_legacy_step_4_human_review_and_visibility_decisions/manual_chunks/backup/images_to_approve_part_001_SORTED_FacialDetectionGT_RejectionReasons1.csv`
 
 It has 3,000 rows:
 

@@ -5,6 +5,7 @@ import { readFile, mkdir, writeFile, unlink, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { defaultImageReviewPackageDir, defaultImageReviewReturnsDir } from "./paths.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const toolDir = path.dirname(__filename);
@@ -12,15 +13,13 @@ const repoRoot = path.resolve(toolDir, "../..");
 const publicDir = path.join(toolDir, "public");
 const packageDir =
   process.env.FWM_IMAGE_REVIEW_PACKAGE_DIR ||
-  path.join(
-    repoRoot,
-    "outputs/02_supabase_needs_human_review_cv_first_pass/partial_170000_rows_cv_gated",
-  );
+  defaultImageReviewPackageDir(repoRoot);
 const returnsDir =
   process.env.FWM_IMAGE_REVIEW_RETURNS_DIR ||
-  path.join(repoRoot, "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns");
+  defaultImageReviewReturnsDir(repoRoot);
 const manifestPath = path.join(returnsDir, "human_labeled_returns_manifest.json");
 const eligibleIndexPath = path.join(returnsDir, "image_review_eligible_index.json");
+const includeImageOnlyRows = process.env.FWM_IMAGE_REVIEW_INCLUDE_IMAGE_ONLY === "1";
 const cropReturnHeaders = [
   "crop_has_adjustment",
   "crop_mode",
@@ -226,7 +225,7 @@ function getRawRowKey(raw, rowNumber) {
 }
 
 function isDashboardEligibleRaw(raw) {
-  return hasAnyFieldValue(raw, imageFieldNames) && hasAnyFieldValue(raw, measurementFieldNames);
+  return hasAnyFieldValue(raw, imageFieldNames) && (includeImageOnlyRows || hasAnyFieldValue(raw, measurementFieldNames));
 }
 
 function estimatePartRowCount(bucket, partIndex, partCount) {
