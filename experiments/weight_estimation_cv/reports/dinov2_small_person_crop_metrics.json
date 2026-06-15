@@ -1,7 +1,7 @@
 {
   "model": "timm/vit_small_patch14_dinov2 YOLO person-crop embeddings + FWM regressors",
   "input": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/eval_sample_with_quality_tags.csv",
-  "detect_model": "/Users/briannasinger/Projects/FWM/FWM_Data/models/yolov8n.pt",
+  "detect_model": "/Users/briannasinger/Projects/FWM/FWM_Data/_models/yolov8n.pt",
   "embeddings": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/features/dinov2_small_person_crop_embeddings.npz",
   "rows_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/dinov2_small_person_crop_embedding_rows.csv",
   "attempts_file": "/Users/briannasinger/Projects/FWM/FWM_Repo/experiments/weight_estimation_cv/data/dinov2_small_person_crop_attempt_rows.csv",

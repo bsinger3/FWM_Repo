@@ -26,7 +26,7 @@ PROJECT_ROOT = REPO_ROOT.parent
 DEFAULT_INPUT = REPO_ROOT / "experiments/weight_estimation_cv/data/eval_sample_hardened.csv"
 DEFAULT_OUTPUT = REPO_ROOT / "experiments/weight_estimation_cv/data/eval_sample_with_quality_tags.csv"
 DEFAULT_REPORT = REPO_ROOT / "experiments/weight_estimation_cv/reports/image_quality_coverage_summary.json"
-DEFAULT_DETECT_MODEL = PROJECT_ROOT / "FWM_Data/models/yolov8n.pt"
+DEFAULT_DETECT_MODEL = PROJECT_ROOT / "FWM_Data/_models/yolov8n.pt"
 
 
 def parse_args() -> argparse.Namespace:
