@@ -21,6 +21,7 @@ const returnsDir =
   path.join(repoRoot, "outputs/02_supabase_needs_human_review_cv_first_pass/human_labeled_returns");
 const manifestPath = path.join(returnsDir, "human_labeled_returns_manifest.json");
 const eligibleIndexPath = path.join(returnsDir, "image_review_eligible_index.json");
+const includeImageOnlyRows = process.env.FWM_IMAGE_REVIEW_INCLUDE_IMAGE_ONLY === "1";
 const cropReturnHeaders = [
   "crop_has_adjustment",
   "crop_mode",
@@ -226,7 +227,7 @@ function getRawRowKey(raw, rowNumber) {
 }
 
 function isDashboardEligibleRaw(raw) {
-  return hasAnyFieldValue(raw, imageFieldNames) && hasAnyFieldValue(raw, measurementFieldNames);
+  return hasAnyFieldValue(raw, imageFieldNames) && (includeImageOnlyRows || hasAnyFieldValue(raw, measurementFieldNames));
 }
 
 function estimatePartRowCount(bucket, partIndex, partCount) {

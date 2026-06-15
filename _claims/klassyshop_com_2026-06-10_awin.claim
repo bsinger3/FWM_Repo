@@ -1,7 +1,7 @@
 retailer: klassyshop_com
 site: klassyshop.com
-claimed_at: 2026-06-10T20:26:01Z
-completed_at: 2026-06-10T20:27:35Z
+claimed_at: 2026-06-15T14:14:37Z
+completed_at: 2026-06-15T14:15:48Z
 status: completed
 source: Awin advertiser queue
 programme: Klassy Network
@@ -9,6 +9,6 @@ provider_hint: Yotpo
 why_request: full-bust/lingerie gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
-rows_written: 34
+rows_written: 0
 output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/klassyshop_com/klassyshop_com_reviews_matching_intake_schema.csv
 summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/klassyshop_com/klassyshop_com_reviews_matching_intake_schema_summary.json

@@ -1,7 +1,7 @@
 retailer: cakesbody_com
 site: cakesbody.com
-claimed_at: 2026-06-10T20:46:17Z
-completed_at: 2026-06-10T20:46:27Z
+claimed_at: 2026-06-15T13:57:38Z
+completed_at: 2026-06-15T13:57:50Z
 status: completed
 source: Awin advertiser queue
 programme: CAKES body
@@ -9,6 +9,6 @@ provider_hint: Judge.me;Stamped
 why_request: full-bust/lingerie gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
-rows_written: 50
+rows_written: 52
 output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/cakesbody_com/cakesbody_com_reviews_matching_intake_schema.csv
 summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/non-amazon/data/step_1_raw_scraping_data/cakesbody_com/cakesbody_com_reviews_matching_intake_schema_summary.json
