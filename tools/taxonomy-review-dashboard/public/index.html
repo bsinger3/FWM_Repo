@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FWM Taxonomy Review</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Taxonomy Review</h1>
+        <p id="source-summary">Loading taxonomy packet...</p>
+      </div>
+      <div class="save-panel">
+        <div id="save-status">No saved review file yet</div>
+        <button id="save-btn" class="primary-btn" type="button">Save review decisions</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="toolbar" aria-label="Review controls">
+        <label class="control grow">
+          <span>Search</span>
+          <input id="search-input" type="search" placeholder="URL, title, tag, evidence..." />
+        </label>
+        <label class="control">
+          <span>Decision</span>
+          <select id="decision-filter">
+            <option value="">All</option>
+            <option value="unreviewed">Unreviewed</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="not_product">Not product</option>
+            <option value="needs_review">Needs review</option>
+          </select>
+        </label>
+        <label class="control">
+          <span>Category</span>
+          <select id="category-filter">
+            <option value="">All categories</option>
+          </select>
+        </label>
+        <div class="control click-mode-control">
+          <span>Click mode</span>
+          <div class="segmented" role="group" aria-label="Click mode">
+            <button id="click-inspect" class="active" type="button" data-click-mode="inspect">Inspect</button>
+            <button id="click-approve" type="button" data-click-mode="approved">Approve</button>
+            <button id="click-reject" type="button" data-click-mode="rejected">Reject</button>
+            <button id="click-not-product" type="button" data-click-mode="not_product">Not product</button>
+          </div>
+        </div>
+        <span id="visible-count" class="count-pill">0 visible</span>
+        <button id="approve-visible" type="button">Approve shown unreviewed</button>
+        <button id="needs-review-visible" type="button">Mark shown needs review</button>
+      </section>
+
+      <section id="grid" class="grid" aria-live="polite">
+        <div class="loading">Loading cards...</div>
+      </section>
+      <div class="load-more-panel">
+        <button id="load-more" type="button" hidden>Load more</button>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

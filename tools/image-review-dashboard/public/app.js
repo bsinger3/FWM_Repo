@@ -331,7 +331,7 @@ async function init() {
   loadDirty();
   loadPreferences();
   state.parts = await fetchJson("/api/parts");
-  state.part = firstRemainingPart(state.parts.buckets[state.bucket])?.part || state.part;
+  ensureActiveBucketAndPart();
   renderTabs();
   updateSourceSummary();
   await loadRows();
@@ -350,6 +350,27 @@ function updateSourceSummary() {
 
 function firstRemainingPart(config) {
   return config.parts.find((part) => part.remainingRowCount > 0) || config.parts[0];
+}
+
+function firstAvailableBucket() {
+  const buckets = ["approve_candidates", "needs_human_review", "disapprove_candidates"];
+  return (
+    buckets.find((bucket) => state.parts.buckets[bucket]?.parts.some((part) => part.remainingRowCount > 0)) ||
+    buckets.find((bucket) => state.parts.buckets[bucket]?.parts.length > 0) ||
+    state.bucket
+  );
+}
+
+function ensureActiveBucketAndPart() {
+  const activeConfig = state.parts.buckets[state.bucket];
+  if (!activeConfig?.parts.length) {
+    state.bucket = firstAvailableBucket();
+  }
+  const config = state.parts.buckets[state.bucket];
+  const hasCurrentPart = config?.parts.some((part) => part.part === state.part);
+  if (!hasCurrentPart) {
+    state.part = firstRemainingPart(config)?.part || "001";
+  }
 }
 
 function renderTabs() {

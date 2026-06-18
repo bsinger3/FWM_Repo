@@ -36,6 +36,8 @@ _preserved_local_before_sync_*/
 .env
 .env.*
 !.env.example
+config.dev.js
+index.dev.html
 
 # Codex transcript artifacts are uploaded to Supabase, not stored in Git.
 codex-*.json

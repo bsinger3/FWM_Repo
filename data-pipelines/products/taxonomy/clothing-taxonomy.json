@@ -38,6 +38,12 @@
       "description": "One-piece dresses and gowns."
     },
     {
+      "id": "jumpsuits",
+      "label": "Jumpsuits",
+      "measurement_profile_id": "full_body",
+      "description": "One-piece bifurcated garments such as jumpsuits."
+    },
+    {
       "id": "bodysuits",
       "label": "Bodysuits",
       "measurement_profile_id": "upper_body",
@@ -211,6 +217,11 @@
       "id": "gown",
       "mother_category_id": "dresses",
       "aliases": ["evening gown", "formal dress"]
+    },
+    {
+      "id": "jumpsuit",
+      "mother_category_id": "jumpsuits",
+      "aliases": ["jumpsuits", "jump suit"]
     },
     {
       "id": "bodysuit",

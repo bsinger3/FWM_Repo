@@ -291,6 +291,8 @@ async function getEligibleWorksheetSummaryFast(filePath) {
 async function listParts() {
   const { readdir } = await import("node:fs/promises");
   const files = await readdir(packageDir);
+  const packageId = path.basename(packageDir);
+  const isDefaultPackage = path.resolve(packageDir) === path.resolve(defaultImageReviewPackageDir(repoRoot));
   const manifest = await readManifest();
   const manifestLookup = buildManifestLookup(manifest);
   const eligibleIndex = await readEligibleIndex();
@@ -335,8 +337,13 @@ async function listParts() {
     for (const [partIndex, entry] of entries.entries()) {
       const filename = entry.filename;
       const indexedPart = eligibleIndex?.parts?.[filename] || null;
-      const rowKeys = indexedPart?.row_keys || null;
-      const rowCount = indexedPart ? Number(indexedPart.row_count || 0) : estimatePartRowCount(bucket, partIndex, entries.length);
+      let rowKeys = indexedPart?.row_keys || null;
+      let rowCount = indexedPart ? Number(indexedPart.row_count || 0) : estimatePartRowCount(bucket, partIndex, entries.length);
+      if (!indexedPart && !isDefaultPackage) {
+        const worksheetSummary = await getEligibleWorksheetSummaryFast(path.join(packageDir, filename));
+        rowCount = worksheetSummary.rowCount;
+        rowKeys = Array.from(worksheetSummary.rowKeys);
+      }
       let savedRowCount = savedCountsByPart[`${bucket}::${filename}`] || 0;
       if (rowKeys) {
         savedRowCount = rowKeys.reduce(
@@ -368,7 +375,7 @@ async function listParts() {
   const latestExport = manifest.exports.at(-1) || null;
 
   return {
-    packageId: "partial_170000_rows_cv_gated",
+    packageId,
     packageDir,
     returnsDir,
     manifestExists: existsSync(manifestPath),
@@ -473,7 +480,7 @@ function normalizeDisplayRow(raw, bucket, part, partFile, defaultDecision, saved
 
   return {
     bucket,
-    packageId: "partial_170000_rows_cv_gated",
+    packageId: path.basename(packageDir),
     partNumber: Number(part),
     partFile,
     rowNumber: raw.__rowNumber,
