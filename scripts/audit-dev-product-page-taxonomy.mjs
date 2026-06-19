@@ -3,6 +3,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { fwmDataDir } from "../tools/image-review-dashboard/paths.mjs";
 import {
   assertApprovedDevDatabaseUrl,
@@ -390,7 +391,7 @@ function decodeHtml(value) {
     .replace(/&gt;/g, ">");
 }
 
-function stripTags(value) {
+export function stripTags(value) {
   return decodeHtml(String(value || "").replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
 }
 
@@ -606,7 +607,7 @@ function extractUrlOnlyTextFields(url) {
   return extractPageTextFields("", url, {});
 }
 
-function catalogFromFields(fields, { error = "" } = {}) {
+export function catalogFromFields(fields, { error = "" } = {}) {
   return {
     catalog_image_url: fields.catalog_image_url || "",
     catalog_image_urls: Array.isArray(fields.catalog_image_urls)
@@ -629,7 +630,7 @@ function asinFromUrl(url) {
   return (match?.[1] || "unknown").replace(/[^a-z0-9_-]/gi, "_");
 }
 
-function normalizeBrowserBreadcrumb(text) {
+export function normalizeBrowserBreadcrumb(text) {
   return String(text || "")
     .split(/\r?\n/)
     .map((part) => part.trim())
@@ -798,7 +799,7 @@ function candidateItemTagsForWrites(itemTags) {
   return [];
 }
 
-function extractTaxonomy(fields) {
+export function extractTaxonomy(fields) {
   const itemTags = [];
   const attributeTags = [];
 
@@ -1532,7 +1533,13 @@ async function main() {
   if (!apply) console.log("Dry-run only. No Supabase rows were written.");
 }
 
-main().catch((error) => {
-  console.error(error.message || error);
-  process.exitCode = 1;
-});
+// Only run the full audit when invoked directly as a CLI. Importing this module
+// (e.g. to reuse extractTaxonomy in the free Amazon backfill) must NOT trigger a run.
+const invokedDirectly = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (invokedDirectly) {
+  main().catch((error) => {
+    console.error(error.message || error);
+    process.exitCode = 1;
+  });
+}
