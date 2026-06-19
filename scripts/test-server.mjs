@@ -8,7 +8,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
 const host = "127.0.0.1";
-const port = Number(process.env.PORT || 4173);
+// Dedicated test-harness port. Deliberately NOT 4173/4174 — those belong to the
+// image-review (4173) and taxonomy-review (4174) dashboards, which devs run
+// locally. Sharing a port let Playwright's reuseExistingServer silently adopt a
+// running dashboard and serve the wrong pages, failing the whole suite.
+const port = Number(process.env.PORT || 4322);
 
 const contentTypes = new Map([
   [".html", "text/html; charset=utf-8"],
