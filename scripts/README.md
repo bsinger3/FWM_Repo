@@ -360,6 +360,94 @@ npm run dev-images:measurement-audit:estimate -- \
   --pricing-date=YYYY-MM-DD
 ```
 
+Auto-crop backfill writes `crop_spec` (mode `cover-window`) into dev
+`public.images` from YOLO detect+pose boxes. The crop decision is shared with the
+review dashboard (`scripts/lib/detection-crop.mjs`) so what gets written equals
+what was reviewed. Per the taxonomy-coverage decision, it writes only
+`whole_body` / `garment_priority` / `garment_partial` modes and skips
+`head_priority` (no usable garment region) plus no-person / fetch-error rows.
+
+```bash
+# 1. Detect person boxes + keypoints (CV venv) for the rows to crop:
+../FWM_Data/_venv_cv/bin/python scripts/detect_person_boxes.py \
+  --input /tmp/crop_sample.ndjson --output /tmp/crop_bboxes.ndjson \
+  --detect-model ../FWM_Data/_models/yolov8n.pt --pose-model ../FWM_Data/_models/yolov8n-pose.pt
+
+# 2. Visual review dashboard (original + overlays vs rendered 3:4 card):
+npm run dev-images:crops:dashboard -- --input=/tmp/crop_bboxes.ndjson
+
+# 3. Dry-run backfill (local report only, no Supabase writes):
+npm run dev-images:crops:backfill -- --input=/tmp/crop_bboxes.ndjson
+
+# 4. Verify the dry-run report:
+npm run dev-images:report:verify -- \
+  --type=crops --report=/absolute/path/dev_image_crop_backfill_YYYYMMDDTHHMMSSZ.json
+
+# 5. Apply (writes crop_spec to dev only, behind all guards):
+FWM_DEV_DB_WRITE_OK=yes-i-understand-this-is-dev \
+  npm run dev-images:crops:backfill -- --input=/tmp/crop_bboxes.ndjson --apply \
+  --verified-report=/absolute/path/dev_refresh_report_verify_crops_YYYYMMDDTHHMMSSZ.json
+```
+
+The catalog (clothing_type_id → mother_category) is built from dev
+`staging.clothing_type_tags`; override with `--catalog=/path.json`. The apply step
+only ever writes the small `crop_spec` JSON — it never uploads or alters image
+bytes; cropping happens at render time from the window percentages.
+
+Prettiness / photo-quality scoring (plan section 12) is dry-run only. The scorer
+(`prettiness_domainfit_technical_v3`) applies deterministic rules over precomputed
+YOLO/pose CV metrics and freshly decoded pixel stats — no model runs at score time
+— and writes a score-distribution report, an HTML review sheet (top/middle/bottom
+buckets), and a CSV. It never writes Supabase rows:
+
+```bash
+# First run rebuilds the workbook CV index cache (~395MB scan); later runs reuse it.
+npm run dev-images:prettiness:dry-run -- --rebuild-cv-cache --limit=300
+npm run dev-images:prettiness:dry-run -- --limit=300 --source=workbook --review-bucket=40
+```
+
+Components:
+
+- `aspect_score`, `resolution_score` — from the fetched image header
+  (JPEG/PNG/WebP dimensions).
+- `body_visible_score` — how complete the body is in the source image, from the
+  workbook YOLO/pose CV metrics (`scripts/lib/workbook-cv-index.mjs`, joined by
+  `review_row_key`).
+- `body_card_coverage_score` — crop-aware: how much of the body can survive the
+  3:4 card crop and how much of the card it fills AFTER cropping
+  (`scripts/lib/card-crop-geometry.mjs`). With a realized `crop_spec` it scores
+  that window; without one it uses the position-independent **best-achievable**
+  3:4 crop (croppability ceiling), not a naive centered crop. NOTE: under the
+  no-bbox-position data we have, the ceiling equals the centered crop exactly, so
+  low coverage on tall images is a true geometric limit (a person filling most of
+  a very tall image cannot show head+feet in a 3:4 card at any placement), not a
+  default-crop artifact. Auto-crop placement would change *which* body slice is
+  shown, not this coverage ceiling, and is a separate workstream gated on
+  re-running CV for bbox/keypoint positions.
+- `technical_quality_score` (v3) — deterministic pixel stats from a decoded 96px
+  thumbnail (`scripts/lib/pixel-stats.mjs`): `lighting_score` (exposure clipping,
+  brightness, contrast, color cast) weighted 0.65 and `background_clutter_score`
+  weighted 0.35. **Clutter is a COARSE whole-frame edge-busyness proxy** — with no
+  person bbox position in the CV checkpoint it cannot isolate the background, so a
+  busy outfit/pattern reads as clutter too. A clean subject-vs-background version
+  is gated on the same CV re-run the crop work needs (person mask). On `--no-pixels`
+  the technical bucket is skipped and the model reverts to `prettiness_domain_fit_v2`.
+- `aesthetic_score` (CLIP, Phase 1) stays null. Smiling/composition belong here and
+  ride along on that future CLIP pass.
+
+Blend: the plan target is aesthetic 0.55 / technical 0.25 / domain-fit 0.20. While
+aesthetic is null, technical's share is **clamped** to its planned 0.25 and
+domain-fit absorbs the orphaned aesthetic weight (→ 0.75), i.e.
+`prettiness = 0.25*technical + 0.75*domain_fit` — *not* the 0.56 technical share
+that plain renormalization would hand a half-finished proxy bucket.
+
+Flags: `--source=all|workbook|baseline` (baseline rows from the production
+pg_dump have no CV match, so body components are null and the score falls back to
+aspect + resolution + technical), `--no-pixels` (skip decode; v2 domain-fit only),
+`--rebuild-cv-cache`, `--limit`, `--review-bucket`, `--timeout-ms`. The report also
+reports the conservatively derived plan §11 `full_body_visible` boolean per row
+(report only; not written).
+
 Dry-run and estimate reports can be validated before review/apply:
 
 ```bash

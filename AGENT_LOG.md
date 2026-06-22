@@ -147,13 +147,35 @@ in the report `clutter_note`. Clutter constants in pixel-stats are first-pass
 guesses needing calibration on the first real dry-run. `sharp` install flagged 2
 moderate npm-audit advisories (transitive) — not addressed.
 
-**Open / handoff:** Not yet run against live dev Supabase (needs the dev-Supabase
-guard approval + `SUPABASE_SERVICE_ROLE_KEY`) — only the math is unit-tested.
-Next: (1) run the guarded dry-run, eyeball the HTML buckets, **calibrate the
-clutter `EDGE_THRESHOLD`/band constants**; (2) Phase 1 = CLIP aesthetic, which also
-carries SMILING + true composition (both deferred, not in v3); (3) the clean
-subject/background clutter rides on the crop work's CV re-run (bbox + person mask).
-NOT committed — working tree only (v2 was also never committed).
+**Update (16:xx) — calibrated + autocrop-card scoring + COMMITTED:**
+- Ran the guarded dev dry-run (150 workbook rows). Clutter was saturated at 0
+  (real photos have busyness 0.34–0.79 on a 96px thumb; my first-pass "busy"
+  anchor 0.40 was below p10). Recalibrated `backgroundClutterScore` anchors to
+  `CLUTTER_BUSYNESS_CLEAN=0.40 … BUSY=0.66`; clutter now spreads 0–1 (mean ~0.47),
+  technical rose to a real lighting+clutter blend (~0.76). Lighting needed no change.
+- Added **autocrop-CARD scoring**: new flags `--auto-crops=<crop-backfill.json>`
+  (loads id→crop_spec, overrides DB), `--only-auto-crops`, `--compare-card`. With a
+  crop_spec, lighting/clutter are now measured on the CROPPED card pixels (via
+  `sharp.extract`), not the full source. New `cropWindowFractions()` in
+  card-crop-geometry; **fixed `estimateBodyAfterCrop` to honor the cover-window
+  model** (it silently ignored `windowXPct` and fell back to the centered ceiling;
+  only the prettiness scorer calls it, so no other impact). HTML cards now render
+  the actual crop window.
+- Result on the 157 autocropped rows (`auto_crop_garment_aware_v1`, still dry-run,
+  loaded from the crop-backfill report — NOT yet in DB): technical card 0.78 vs
+  full 0.76 (Δ +0.02); gain concentrated in garment_priority (+0.11) /
+  garment_partial (+0.09) crops, whole_body ~neutral. Makes sense: tight garment
+  crops shed background → clutter drops.
+- **Bri preference (saved to memory):** future review dashboards w/ prettiness
+  scores need a slider that filters visible images by score threshold (may move to
+  the live frontend later).
+
+**Open / handoff:** (1) Apply the autocrop backfill to dev DB so the scorer reads
+real `crop_spec` values (in progress this session, after this commit). (2) Phase 1
+= CLIP aesthetic (also carries SMILING + true composition; deferred). (3) Clean
+subject/background clutter still rides on the crop CV re-run (person mask). NOW
+COMMITTED (scorer + pixel-stats + card-crop-geometry + workbook-cv-index + README +
+`sharp` dep).
 
 ## 2026-06-22 09:50 EDT — Claude Code — Reddit post harvester (RSS, file-first)
 

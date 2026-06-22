@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "image-review": "node tools/image-review-dashboard/server.mjs",
+    "extraction-audit:build": "node tools/extraction-audit-dashboard/build-dataset.mjs",
+    "extraction-audit": "node tools/extraction-audit-dashboard/server.mjs",
     "image-review:mobile-bundle": "node tools/image-review-dashboard/build-mobile-bundle.mjs",
     "image-review:import-mobile": "node tools/image-review-dashboard/import-mobile-decisions.mjs",
     "dev-images:guard": "node scripts/dev-supabase-migrations.mjs",
@@ -29,6 +31,9 @@
     "dev-images:orientation-audit": "node scripts/audit-dev-image-orientation.mjs",
     "dev-images:orientation:promote": "node scripts/promote-dev-orientation-results.mjs",
     "dev-images:measurement-audit:estimate": "node scripts/estimate-dev-measurement-llm-audit.mjs",
+    "dev-images:prettiness:dry-run": "node scripts/score-dev-image-prettiness.mjs",
+    "dev-images:crops:dashboard": "node scripts/build-auto-crop-dashboard.mjs",
+    "dev-images:crops:backfill": "node scripts/backfill-dev-image-crops.mjs",
     "dev-images:report:verify": "node scripts/verify-dev-refresh-report.mjs",
     "dev-images:preview:verify": "node scripts/verify-dev-preview-contract.mjs",
     "dev-images:state:verify": "node scripts/verify-dev-image-refresh-state.mjs",
@@ -44,6 +49,7 @@
     "@playwright/test": "^1.54.2"
   },
   "dependencies": {
-    "exceljs": "^4.4.0"
+    "exceljs": "^4.4.0",
+    "sharp": "^0.35.2"
   }
 }
