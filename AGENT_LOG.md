@@ -70,6 +70,19 @@ commit. Next from the 09:50 handoff: (a) promote NDJSON → `staging.reddit_post
 (c) body→catalog matching; (d) schedule harvest. The pre-fill link format these
 produce in `match_query_url` is now live and working.
 
+**Follow-up fix (race condition, committed after 8acce26):** The first version
+(8acce26) had an intermittent bug — `loadRandomResults()` was still called
+unconditionally on page load (index.html:1000), so it raced the prefill
+`f.requestSubmit()`: `loadRandomResults` sets `isLoading=true` before its await,
+and if that await hadn't resolved when the submit handler reached `loadMore()`,
+`loadMore` early-returned on the `isLoading` guard and the random gallery
+rendered instead of the search. Looked like the prefill "didn't work" (sidebar
+collapsed but results were random). Fix: removed the unconditional
+`loadRandomResults()` call; `prefillFromQuery()` is now the single owner — it
+runs the search when measurements are present, else calls `loadRandomResults()`
+itself. Deterministic now (verified 5/5 loads → real-search "Found N results",
+no-params → random gallery). Applied to BOTH index.html and index.dev.html.
+
 ## 2026-06-22 11:15 EDT — Claude Code — Measurement-extraction audit dashboard
 
 **Did:** Built a new READ-ONLY dashboard to audit how well we extracted

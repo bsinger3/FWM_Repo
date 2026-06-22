@@ -941,8 +941,10 @@
         isLoading = false;
       }
 
-      // Load random results when page loads
-      loadRandomResults();
+      // Random results load on page load UNLESS the URL pre-fills measurements,
+      // in which case prefillFromQuery() (below) runs the real search instead.
+      // Triggering both here would race: this async load can clobber the
+      // auto-search results, or leave isLoading=true so loadMore() bails.
 
       // Infinite scroll
       mainContent.addEventListener("scroll", async () => {
@@ -1101,8 +1103,11 @@
           }
         }
 
-        // No measurement params -> leave a normal visitor completely alone.
-        if (!filledAny) return;
+        // No measurement params -> show the normal random gallery and stop.
+        if (!filledAny) {
+          loadRandomResults();
+          return;
+        }
 
         // Enable the require-* checkboxes for fields that now have values.
         Object.keys(measurementFieldIds).forEach((fieldName) =>
