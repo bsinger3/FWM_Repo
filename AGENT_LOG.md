@@ -33,6 +33,309 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-22 16:10 EDT — Claude Code — Pre-fill from URL (Reddit share links)
+
+**Did:** Implemented item (b) from my 09:50 Reddit-harvester handoff — the
+`index.html` change to read measurement query params, pre-fill the form, and
+auto-run the search. Added an identical self-contained `prefillFromQuery()` IIFE
+to **both `index.html`** (after the submit handler, ~line 1115) **and
+`index.dev.html`** (~line 1146). Confirmed first that the form IDs, `getUtmParams`,
+`measurementFieldIds`, and `syncRequireToggle` are identical in both files.
+- Param contract (locked — `staging.reddit_posts.match_query_url` depends on it):
+  `h_ft→#h-ft, h_in→#h-in, weight→#w, bust→#b, cup→#cup-size, waist→#waist,
+  hips→#p`, plus `req=height,waist,hips` → ticks the matching `require-*` boxes.
+- Defensive: ignores missing/blank/non-finite params; clamps each numeric to the
+  input's own `min`/`max`; runs `normalizeCupSize()` on `cup`; calls
+  `syncRequireToggle()` so the disabled-by-default require checkboxes get enabled
+  before being ticked (they only enable when their field has a value). Submits via
+  `f.requestSubmit()` **iff** ≥1 measurement param was present — otherwise returns
+  early and a normal visitor is untouched.
+
+**Heads-up / verified in browser (test-server on 4322, prod config.js → real
+Supabase):** (1) `?h_ft=5&h_in=5&weight=140&bust=34&cup=C&waist=29&hips=39` →
+all fields populate, search auto-runs, **24 real cards** render, sidebar
+collapses, **0 console errors**. (2) `req=height,waist,hips` correctly ticks only
+those three require boxes (weight stays unchecked); that strict query happens to
+return 0 results — data restrictiveness, not a bug (the search still executed).
+(3) No-params `/` → form empty, sidebar open, no auto-search. NOTE: the page
+already calls `loadRandomResults()` at index.html:1000 on every load, so `#out`
+shows ~24 *random* cards even with no params — that's the pre-existing baseline,
+NOT my code (result-count stays empty, sidebar stays open). Added a `site`
+entry to `.claude/launch.json` (node scripts/test-server.mjs, port 4322) for the
+preview server. UTM tracking untouched.
+
+**Open / handoff:** NOT committed (main has many unrelated uncommitted changes).
+Did not run the full Playwright E2E suite — pre-commit runs it; the human can
+commit. Next from the 09:50 handoff: (a) promote NDJSON → `staging.reddit_posts`;
+(c) body→catalog matching; (d) schedule harvest. The pre-fill link format these
+produce in `match_query_url` is now live and working.
+
+## 2026-06-22 11:15 EDT — Claude Code — Measurement-extraction audit dashboard
+
+**Did:** Built a new READ-ONLY dashboard to audit how well we extracted
+measurements from review comments on approved images. New tool dir
+`tools/extraction-audit-dashboard/`:
+- `lib/analyze.mjs` — the deterministic analyzer (single source of truth for
+  recognized measurement types + comment colour-coding). Tokenizes a comment,
+  classifies each number as **captured** (matches an extracted field) vs
+  **missed**, tags measurement keywords (incl. bra/band/cup, age, pregnancy
+  weeks), and computes a `suspicion` score. **This is where new regex tests for
+  missed/incorrect extraction should be added.**
+- `build-dataset.mjs` (npm `extraction-audit:build`) — joins the human-labeled
+  returns manifest (APPROVE rows + any `review_notes`) to the CV-gated workbooks,
+  recovers the true comment for column-shifted rows via the checkpoint comment
+  cache (now also step_4 / absolute-path `user_comment` artifacts, not just
+  step_1), drops rows with no auditable comment, filters to "checkable" rows,
+  then **dedupes by comment text** (the same review recurs across many image
+  rows — keep one representative, `duplicateCount` = #images sharing it), sorts
+  mismatch-first (commented rows pinned top), and writes
+  `FWM_Data/_reports/extraction_audit/dataset.json` + a `rowkey_to_id.json`
+  flag-migration map. **26,729 unique comments** from 38,759 checkable rows
+  (12,030 dup rows collapsed) / 39,734 approved + 8 commented.
+- `server.mjs` (npm `extraction-audit`, port **4175**) — loads the dataset in
+  memory, paginates/filters (site, suspicion, only-flagged, only-commented,
+  search), persists reviewer "incorrect extraction" flags+notes to
+  `FWM_Data/_reports/extraction_audit/flags.json` **keyed by comment id**
+  (`commentId()` in analyze.mjs), and `/api/export` writes the flagged rows as a
+  regex-test seed **into the data repo** (`flagged_extractions_<ts>.json` +
+  `flagged_extractions.latest.json`), not the browser Downloads folder.
+- `public/` — card UI: image + colour-coded comment + extracted-measurements
+  table + flag checkbox/note. Added `.claude/launch.json` (extraction-audit).
+
+**Heads-up:** Port **4175** (4173/4174/4322 already taken). Dataset is precomputed
+— rerun `extraction-audit:build` after editing `lib/analyze.mjs` or when new
+approvals land. Did NOT touch the existing image-review dashboard or any
+extractor; only added files + 2 npm scripts. Column-shift artifacts (whole
+comment dumped into e.g. `inseam_inches_display`) show as ⚠ in the measures
+table — those are real extraction bugs, not display bugs. Suspicion scoring is a
+heuristic (product names with numbers like "72 Styles" can inflate it); reviewer
+flags are the ground truth. Next step per the human: turn flagged rows into new
+deterministic regex tests in `lib/analyze.mjs` + the Python intake parser
+(`data-pipelines/scripts/00_raw_scrape/non_amazon/step1_intake_utils.py`) and
+rerun extraction on all comments.
+
+**Open / handoff:** Not committed (main has many unrelated uncommitted changes).
+The flagging loop is live and the human is already using it.
+
+## 2026-06-22 14:30 EDT — Claude Code — Prettiness scorer v3 (technical bucket: lighting + coarse clutter)
+
+**Did:** Extended `scripts/score-dev-image-prettiness.mjs` from v2 (domain-fit
+only) to **`prettiness_domainfit_technical_v3`**, adding a deterministic technical
+bucket from freshly decoded pixels. Still DRY-RUN ONLY (never writes Supabase).
+- New `scripts/lib/pixel-stats.mjs` — decodes via **`sharp` (NEW dependency,
+  added to package.json)** to a 96px thumbnail, computes luminance/exposure/
+  contrast/color-cast stats + a whole-frame Sobel `edge_busyness`. Pure arithmetic;
+  unit-tested on synthetic images (flat gray = 0 contrast/0 edges, near-black =
+  100% shadow-clip, blue fill = strong cast, checkerboard edges 0.74 ≫ 0.0).
+- `lighting_score` (exposure 0.4 / brightness 0.3 / contrast 0.2 / cast 0.1) and
+  `background_clutter_score` blend into `technical_quality_score` (lighting 0.65 /
+  clutter 0.35). The top-level blend is now REAL (v2 just set prettiness=domainFit):
+  `blendPrettiness` applies plan weights, but **clamps technical to its planned
+  0.25 share while aesthetic is null** so a half-finished proxy can't dominate —
+  `prettiness = 0.25*technical + 0.75*domain_fit` (verified: 0.70 vs the 0.58 plain
+  renormalization would give for d=0.8,t=0.4). Default-on; `--no-pixels` reverts to
+  v2. Plumbed into CSV/HTML/report/summary; README updated.
+
+**Heads-up — VERIFIED the clutter question:** the CV checkpoint CSVs
+(`cv_gate_checkpoint_parts`) have exactly 50 cols and only 5 YOLO/CV ones
+(`person_count`, `height_pct`, `bbox_area_pct`, `body_coverage_pose`,
+`has_face_yunet`). **Non-person detections were NOT retained, and there is no
+person bbox POSITION** — so a clean subject-vs-background clutter signal is
+impossible without re-running detection. v3's clutter is therefore a COARSE
+whole-frame proxy (busy outfit/pattern reads as clutter); weighted low and flagged
+in the report `clutter_note`. Clutter constants in pixel-stats are first-pass
+guesses needing calibration on the first real dry-run. `sharp` install flagged 2
+moderate npm-audit advisories (transitive) — not addressed.
+
+**Open / handoff:** Not yet run against live dev Supabase (needs the dev-Supabase
+guard approval + `SUPABASE_SERVICE_ROLE_KEY`) — only the math is unit-tested.
+Next: (1) run the guarded dry-run, eyeball the HTML buckets, **calibrate the
+clutter `EDGE_THRESHOLD`/band constants**; (2) Phase 1 = CLIP aesthetic, which also
+carries SMILING + true composition (both deferred, not in v3); (3) the clean
+subject/background clutter rides on the crop work's CV re-run (bbox + person mask).
+NOT committed — working tree only (v2 was also never committed).
+
+## 2026-06-22 09:50 EDT — Claude Code — Reddit post harvester (RSS, file-first)
+
+**Did:** Built `scripts/harvest-reddit-posts.mjs` — harvests Reddit posts where
+people ask for clothing/fit help and include body measurements and/or self
+photos, to later match against the `images` catalog. Output is **file-first**,
+written OUTSIDE the repo to the sibling `FWM_Data/reddit_harvest/`
+(`posts.ndjson` append-only + deduped, `_state/seen_ids.json`, `runs/run_*.json`).
+Nothing touches Supabase. Validated live: PetiteFashionAdvice + ABraThatFits =
+146 records, 116 with parsed measurements (height/weight/bust/cup/waist/hips/
+inseam), 50 with verified image URLs. Extractor handles `5'1"`, `5 ft 1`, cm,
+kg→lbs, bra sizes (`32DD`), and label-with-filler (`waist is about 27`).
+
+**Heads-up (important — the API path is DEAD):** Reddit's 2026 "Responsible
+Builder Policy" **disabled self-serve script-app creation**, and the
+unauthenticated `*.json` endpoints return 403. So OAuth is NOT available to us
+(human confirmed no grandfathered key). The **public Atom RSS feed
+`https://www.reddit.com/r/<sub>/new/.rss` is the working path** — no auth, no
+app. Gotchas: (1) the trailing-slash path `/new/.rss` works, bare `/new.rss`
+returned an empty 200; (2) it's rate-limited (~1 req/min — `x-ratelimit-remaining`
+hits 0); the script paces (`--delay-ms`, default 2500) and backs off on 429;
+(3) must send a descriptive `User-Agent`. Do NOT revive the
+`REDDIT_CLIENT_ID/SECRET` OAuth plan in `.env.example` — those keys are unused
+and uncreatable.
+
+**DB (dev, applied):** Created landing tables via
+`supabase/dev-migrations/20260622_dev_17_reddit_posts_staging.sql` (applied to
+dev `gosqgqpftqlawvnyelkt`, verified). `staging.reddit_posts` (40 cols:
+provenance + full `post_body` + `created_utc` + `permalink`, measurements
+mirroring `public.images`, request fields that land NULL for now since
+clothing-type extraction is deferred, workflow/reply cols) +
+`staging.reddit_post_matches` (post ↔ `public.images`, **image_id is a SOFT ref —
+no FK** because the dev pipeline rebuilds `public.images`). `response_deadline` =
+`created_utc + 24h` via TRIGGER, not a generated column (`timestamptz + interval`
+is STABLE not IMMUTABLE → errors `42P17`). Reused `public.set_updated_at()`.
+Decision: reply link will be a **pre-filled FWM search URL** (`match_query_url`),
+not per-card URLs — the site is a measurement-search app, not a page-per-card
+gallery, and only reads `URLSearchParams` for UTM today.
+
+**Open / handoff:** Full ~24-sub rotation done — `FWM_Data/reddit_harvest/
+posts.ndjson` holds 1231 records (412 measurement-bearing across good subs;
+`findfashion`/`HelpMeFind` inflate image counts with item photos, low body-match
+value). Rotation list + tiers inline in the harvester. Next, not yet done:
+(a) **promote script** NDJSON → `staging.reddit_posts` (table is ready);
+(b) small `index.html` change to read measurement query params and pre-fill+run
+the search (~15-20 lines; fills `match_query_url`); (c) body→catalog matching →
+`reddit_post_matches`; (d) schedule harvest every few hrs. Measurement parse is
+heuristic — `raw_record`/`measurements_raw` kept for review. New files not
+committed (working tree only): harvester + the dev migration.
+
+## 2026-06-21 14:30 EDT — Claude Code — Garment-aware auto-crop pipeline
+
+**Did:** Built an end-to-end auto-crop pipeline (dev-only, dry-run; writes no
+Supabase rows yet). New/changed:
+- `scripts/lib/card-crop-geometry.mjs` `solveAutoCrop()` — pure solver. Given a
+  person box + optional garment `priorityRegion`, outputs a live-site `crop_spec`
+  (object-position + zoom≤1.6). Tiers: (1) whole body + zoom-to-fill; (2) body
+  too tall → keep the WHOLE garment region from taxonomy (sacrifice head/legs);
+  (3) garment also too tall → keep the garment TOP; (4) no taxonomy → keep head.
+- `scripts/lib/garment-region.mjs` — maps mother category + clothing type +
+  pose keypoints to the vertical garment band (jeans→waist-to-ankle,
+  blouse→shoulders-to-hem, etc.).
+- `scripts/detect_person_boxes.py` — YOLO detect+pose emitter (person bbox xyxy +
+  COCO keypoints nose/shoulders/hips/knees/ankles). The CV-gate pipeline computes
+  the bbox but discards it; this re-derives it.
+- `scripts/build-auto-crop-dashboard.mjs` — before/after review dashboard
+  (original w/ green person + blue garment band + red crop window vs the rendered
+  3:4 card). Output in `../FWM_Data/_reports/dev_auto_crop_dashboard_*.html`.
+Validated on a 160-image sample: 160/160 cropped, 0 errors; modes 118 whole_body
+/ 29 garment_priority / 10 garment_partial / 3 head_priority.
+
+**Heads-up:** CV runtime is a throwaway venv at `../FWM_Data/_venv_cv`
+(ultralytics 8.4.75 + torch 2.12.1); weights at `../FWM_Data/_models/yolov8n*.pt`.
+Taxonomy join: `public.images.clothing_type_id` → `staging.clothing_type_tags.
+mother_category_id`. A few image clothing_type_ids (e.g. `swimsuit`) aren't in
+the tag catalog — aliased in the dashboard (`swimsuit→swimwear`, `tee/cami→tops`).
+The live frontend `applyCropSpec` (index.dev.html) uses object-position + a
+center-scale zoom capped at 1.6; the solver matches that exactly. NOTE this
+differs from the dashboard editor's pan-box model — live site is what we target.
+
+**Crop model change (2026-06-22):** switched auto-crop from object-position +
+capped 1.6 zoom to an EXPLICIT crop window (`crop_spec.mode:"cover-window"` with
+windowX/Y/W/HPct). Reason: small subjects need >1.6 zoom to fill the card, and
+object-position center-locks on exactly-3:4 images (can't pan to an off-centre
+subject). Solver now: resolution-aware max zoom (MIN_CROP_SHORT_PX=320, abs cap
+6), window centred on subject/garment + clamped to image edges, 6% subject
+margin. The dashboard after-render was updated to the window model (absolute img
+sized 1/winW × 1/winH). **IMPORTANT: the live `index.dev.html` applyCropSpec
+still uses the OLD object-position+1.6 model and CANNOT render these crops — it
+needs a `cover-window` branch before the §14 preview is truthful.**
+
+**Frontend + schema (DONE 2026-06-22):** (a) Added a `cover-window` branch to
+`index.dev.html` `applyCropSpec` — wraps the card img in a positioned `.thumb`
+and renders the explicit window via object-fit:fill + width/height/left/top
+(= 1/winW × 1/winH, offset to window top-left); NO zoom cap (the old 1.6 cap only
+applied to the object-position path, which still handles legacy/manual crops).
+Verified the CSS math equals the dashboard after-render. (b) Locked the contract
+in dev migration `20260622_dev_16_crop_spec_contract.sql` (documented column
+comment + `images_crop_spec_contract_chk` CHECK NOT VALID; existing 181 rows are
+all `object-position`, so they pass). APPLIED to dev.
+
+**Backfill skip rule (human decision 2026-06-22):** Taxonomy coverage is
+incomplete. The backfill must SKIP writing a crop for any image whose solver mode
+is `head_priority` (= body doesn't fit AND no usable garment region, from missing
+taxonomy OR missing pose keypoints) — those would be guesses. Still write
+`whole_body` (geometry only, taxonomy irrelevant) and `garment_priority`/
+`garment_partial`. Also skip no-person / fetch-error rows. Net: write iff mode in
+{whole_body, garment_priority, garment_partial}. (Sample: 3/160 were head_priority.)
+
+**Backfill writer (DONE 2026-06-22, dry-run validated, NOT applied):** Built:
+- `scripts/lib/detection-crop.mjs` — shared crop decision (decideCrop,
+  personBoxFractions, keypointYFractions, cropSpecForStorage, WRITABLE_MODES) so
+  the dashboard and backfill make IDENTICAL crops. Parity proven on the 160-sample:
+  both = {whole_body 118, garment_priority 26, garment_partial 13, head_priority 3}.
+- `scripts/backfill-dev-image-crops.mjs` (npm `dev-images:crops:backfill`) —
+  dry-run by default (local report only); `--apply` writes `crop_spec`
+  (cover-window, source auto, cropModelVersion `auto_crop_garment_aware_v1`,
+  scoredAt) to dev via REST PATCH behind: dev guard + `FWM_DEV_DB_WRITE_OK` +
+  `--verified-report` (type `crops`). Skip rule enforced (157 writes / 3 skipped).
+  Catalog built from dev `staging.clothing_type_tags` via psql (or `--catalog`).
+- Added `crops` type to `verify-dev-refresh-report.mjs` (9 checks, passes).
+- npm `dev-images:crops:dashboard`. Both apply gates negative-tested (refuse
+  without write flag / without verified report).
+
+**Open / handoff:** Next — (a) run detection on the FULL approved set (the sample
+used /tmp/crop_bboxes.ndjson, 160 rows) so the backfill input covers all approved
+images; (b) dry-run → dashboard review → verify → `--apply` to write crops to dev;
+(c) feed auto-crop coverage back into prettiness `body_card_coverage`. The dashboard
+and backfill both now use `decideCrop` from `detection-crop.mjs` (dashboard refactored
+off its inline copies; output verified identical, 118/26/13/3) — single source of
+truth, no drift. NOT committed — working tree only.
+
+## 2026-06-21 12:40 EDT — Claude Code — Prettiness scorer v1 + body/crop signals (plan §12)
+
+**Did:** Built the deterministic, no-ML scorer for plan §12 (DRY-RUN ONLY, never
+writes Supabase). New files:
+- `scripts/score-dev-image-prettiness.mjs` (npm `dev-images:prettiness:dry-run`)
+- `scripts/lib/card-crop-geometry.mjs` — pure cover-crop geometry; computes how
+  much of the body survives the 3:4 card crop + card coverage AFTER crop. Takes a
+  `crop_spec` override, else centered cover. **Reuse this for auto-cropping.**
+- `scripts/lib/workbook-cv-index.mjs` — caches the 65-part / 395MB CV checkpoint
+  CSVs into `../FWM_Data/_cache/workbook_cv_index.json` (264,573 keys), joined by
+  `review_row_key`.
+Model `prettiness_domain_fit_v1` blends aspect, resolution, `body_visible`
+(YOLO/pose completeness), and `body_card_coverage` (crop-aware). Aesthetic (CLIP)
++ technical (MUSIQ/NIMA) stay null. Writes JSON + HTML review sheet + CSV to
+`_reports/`. Validated live: 300 workbook rows, 298 CV-matched, 0 skips, scores
+0.53–1.0 with sensible ranking (tall images that lose head/feet to the 3:4 crop
+score low even when the source shows a full body — the core auto-crop signal).
+
+**Heads-up:** (1) Body components need workbook CV, so **baseline rows
+(`source_file='production_baseline_pg_dump'`) have no match** and fall back to
+aspect+resolution only — use `--source=workbook` to review CV-bearing rows.
+(2) `body_coverage_score_yolo_pose` is 0–100 in the CSVs (lib normalizes to 0–1).
+(3) Card coverage assumes a **centered person** — YOLO metrics carry no bbox
+position; recorded in the report. (4) dev `public.images` has `source_file` not
+`source_site`; prettiness columns still unpopulated. (5) The CV cache lives
+outside the repo in `FWM_Data/_cache/` (41MB); rebuild with `--rebuild-cv-cache`.
+
+**Crop finding (important):** model is now `prettiness_domain_fit_v2`. The
+`body_card_coverage` component scores a realized `crop_spec` when present, else a
+position-independent **best-achievable 3:4 crop ceiling**
+(`estimateBestAchievableCrop`). Verified across the 298-row sample that the
+ceiling equals the centered crop EXACTLY (0 diff) — because with no bbox position
+the centered-person assumption already yields optimal placement. Consequence:
+low coverage on tall images is a TRUE geometric limit, not a default-crop
+artifact. 82/298 (27.5%) of approved workbook images are geometrically capped —
+no 3:4 crop can show their full body. Auto-crop placement (head/feet priority)
+would change WHICH slice shows, not the coverage score, and is gated on
+re-running CV for bbox/keypoint positions (not in any current artifact). So crop
+placement is NOT a prerequisite for prettiness.
+
+**Open / handoff:** Phase 1 = CLIP/OpenCLIP aesthetic (needs a local ~46k-image
+cache + Python torch/open_clip); Phase 2 = MUSIQ/NIMA. No apply/promote path yet
+by design (§12 first pass is dry-run). Calibration note: derived
+`full_body_visible` on approved rows came out 195 true / 0 false / 105 null — the
+`false` thresholds may be too strict, though approved rows passed a CV body gate
+so few-false is expected. NOT committed — working tree only. Unrelated:
+`20260620000000_add_affiliate_columns_to_staging_product_pages.sql` is in the
+production-applied `supabase/migrations/` path; confirm that's intentional vs.
+the plan's dev-only rule.
+
 ## 2026-06-19 15:00 EDT — Codex — Archived current chat transcript
 
 **Did:** Uploaded this Codex chat to `public.codex_chat_transcripts` using

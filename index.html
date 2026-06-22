@@ -1057,6 +1057,71 @@
         await loadMore();
       });
 
+      // Pre-fill the form from URL query params and auto-run the search.
+      // Param contract (do NOT rename — staging.reddit_posts.match_query_url
+      // holds links built from exactly these names):
+      //   h_ft, h_in, weight, bust, cup, waist, hips, req=height,waist,hips
+      // Runs alongside getUtmParams(); a visitor with no measurement params
+      // sees the normal, untouched experience.
+      (function prefillFromQuery() {
+        const p = new URLSearchParams(window.location.search);
+        const numFields = {
+          h_ft: "h-ft",
+          h_in: "h-in",
+          weight: "w",
+          bust: "b",
+          waist: "waist",
+          hips: "p",
+        };
+
+        let filledAny = false;
+
+        for (const [param, id] of Object.entries(numFields)) {
+          const raw = p.get(param);
+          if (raw == null || raw.trim() === "") continue;
+          const val = Number(raw);
+          if (!Number.isFinite(val)) continue;
+          const input = document.getElementById(id);
+          if (!input) continue;
+          let v = val;
+          const min = parseFloat(input.min);
+          const max = parseFloat(input.max);
+          if (Number.isFinite(min) && v < min) v = min;
+          if (Number.isFinite(max) && v > max) v = max;
+          input.value = String(v);
+          filledAny = true;
+        }
+
+        const cupRaw = p.get("cup");
+        if (cupRaw != null && cupRaw.trim() !== "") {
+          const cupInput = document.getElementById("cup-size");
+          if (cupInput) {
+            cupInput.value = normalizeCupSize(cupRaw);
+            filledAny = true;
+          }
+        }
+
+        // No measurement params -> leave a normal visitor completely alone.
+        if (!filledAny) return;
+
+        // Enable the require-* checkboxes for fields that now have values.
+        Object.keys(measurementFieldIds).forEach((fieldName) =>
+          syncRequireToggle(fieldName),
+        );
+
+        const reqRaw = p.get("req");
+        if (reqRaw) {
+          reqRaw.split(",").forEach((name) => {
+            const checkbox = document.getElementById(
+              `require-${name.trim().toLowerCase()}`,
+            );
+            if (checkbox && !checkbox.disabled) checkbox.checked = true;
+          });
+        }
+
+        f.requestSubmit();
+      })();
+
       async function loadMore() {
         if (isLoading || !hasMore) return;
 
