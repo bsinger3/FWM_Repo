@@ -6,16 +6,167 @@ from "What's next" whenever you're ready.
 
 ---
 
-> **Heads-up — this file now covers TWO parallel sessions.** The original notes
-> below are about the **extraction-audit / dev-database** work (all dry-run, nothing
-> committed). A **separate** session (this one) built the **pre-fill-from-URL** site
-> feature and **committed it to git locally** — see section 0 directly below. The
-> "nothing committed" framing in the rest of this doc applies to the dev-DB work, NOT
-> to the pre-fill feature.
+> **Heads-up — this file now covers multiple parallel sessions.** The original
+> notes below are about the **extraction-audit / dev-database** work (all dry-run,
+> nothing committed). Separate sections now cover Curvevera scraping, Reddit
+> harvesting, Amazon taxonomy, and the pre-fill-from-URL site feature. The
+> pre-fill feature was committed locally; the Curvevera and Reddit work described
+> here is file-only and uncommitted.
+
+---
+
+## ★ Auto-crop + prettiness session — image cropping & photo-quality scoring
+
+**One-line status:** Built garment-aware auto-cropping end-to-end; the person-detection
+job that feeds it is **paused at ~2,381 of 45,269 images** and will **resume cleanly**.
+**Nothing was written to any database.** Safe to shut down.
+
+### What this is
+So review photos display well in the site's 3:4 cards, we auto-choose a crop per image:
+- Whole body fits → frame it and zoom so the person fills the card.
+- Body too tall to fit → keep the **garment** matching the product's category (jeans →
+  the whole pair of pants, blouse → the whole top), sacrificing the head if needed.
+- Even the garment too long → keep the **top** of the garment (waistband / neckline).
+- No taxonomy on the image → **skipped for now** (your call earlier).
+
+Alongside it, a deterministic **photo-quality ("prettiness") score** (plan §12) — still
+dry-run, no ML yet; aesthetic/CLIP scoring is a later phase.
+
+### The one thing in flight: the detection run
+A Python YOLO job (`scripts/detect_person_boxes.py`) is detecting the person box + pose
+keypoints for all **45,269** taxonomy-having images. It **paused at ~2,381 done** (no
+process is running now — clean to shut down) and is **resumable** — `--resume` skips
+everything already in the output file.
+
+**To resume when you're back** (runs in the background, survives closing the terminal):
+```bash
+cd /Users/briannasinger/Projects/FWM/FWM_Repo
+nohup ../FWM_Data/_venv_cv/bin/python scripts/detect_person_boxes.py \
+  --input ../FWM_Data/_cache/crop_worklist.ndjson \
+  --output ../FWM_Data/_cache/crop_bboxes_full.ndjson \
+  --detect-model ../FWM_Data/_models/yolov8n.pt \
+  --pose-model ../FWM_Data/_models/yolov8n-pose.pt \
+  --resume > ../FWM_Data/_cache/detect_run.log 2>&1 &
+```
+Progress anytime: `wc -l < ../FWM_Data/_cache/crop_bboxes_full.ndjson` (out of 45,269).
+It takes a few hours. **Or just tell me "resume the detection" and I'll run it.**
+
+### What's next (after detection finishes)
+1. **Review dashboard** over the full set (before/after thumbnails, like the one you
+   already approved):
+   `node scripts/build-auto-crop-dashboard.mjs --input=../FWM_Data/_cache/crop_bboxes_full.ndjson --catalog=../FWM_Data/_cache/clothing_catalog.json`
+2. **Backfill dry-run**, then — only after you approve — **apply** to dev.
+   `scripts/backfill-dev-image-crops.mjs` is **dry-run by default (local report only)**;
+   `--apply` writes `crop_spec` to **dev** Supabase behind the dev guard + an explicit
+   write flag + a passed verification report. Writes only whole-body / garment-priority /
+   garment-partial crops; head-priority and no-taxonomy rows are skipped.
+   → *(Answers your earlier question: the backfill writes to a local file by default; it
+   only touches dev Supabase when you explicitly run it with `--apply`.)*
+
+### Already done this session (no action needed)
+- **Frontend can display the crops:** `index.dev.html`'s `applyCropSpec` has a
+  `cover-window` branch that renders the exact crop rectangle.
+- **Schema locked:** the `crop_spec` JSON shape is documented + CHECK-constrained in
+  `supabase/dev-migrations/20260622_dev_16_crop_spec_contract.sql` (apply via
+  `npm run dev-images:migrations` if not yet applied to dev).
+- Dashboard and backfill share **one** crop-decision lib (`scripts/lib/detection-crop.mjs`)
+  — what you see in the dashboard is exactly what gets written.
+- High-waisted bottoms were clipping at the waistband → fixed (raised the waistband
+  anchor + a small top-biased margin).
+
+### Key files (all on disk; survive shutdown; uncommitted)
+- `scripts/lib/card-crop-geometry.mjs` — crop solver (pure geometry)
+- `scripts/lib/garment-region.mjs` — category → which part of the body to keep
+- `scripts/lib/detection-crop.mjs` — shared decision wrapper
+- `scripts/detect_person_boxes.py` — YOLO detection (the paused job)
+- `scripts/build-auto-crop-dashboard.mjs` — before/after review dashboard
+- `scripts/backfill-dev-image-crops.mjs` — dev writer (dry-run by default)
+- `scripts/score-dev-image-prettiness.mjs` — photo-quality scorer (dry-run)
+- CV runtime/data in `../FWM_Data/` (NOT in repo): `_venv_cv/`, `_models/yolov8n*.pt`,
+  `_cache/crop_worklist.ndjson`, `_cache/crop_bboxes_full.ndjson` (partial),
+  `_cache/clothing_catalog.json`
+
+### Safety
+- **Nothing written to dev or production DB** — all crop/prettiness work is dry-run.
+- These files are **uncommitted** in the working tree (consistent with this repo's
+  handoff style — see `AGENT_LOG.md`); they survive the shutdown on disk.
+- No background process of mine is running; nothing to stop before you power off.
 
 ---
 
 ## What we accomplished today
+
+### C. Curvevera full-site review scrape + taxonomy sidecar (Codex — file-only, paused safely)
+
+> This is a separate session from the Reddit, Amazon taxonomy, pre-fill, and
+> extraction-audit notes below. It is **file-only**: nothing was written to dev or
+> prod Supabase, and nothing was committed.
+
+**The goal:** determine whether Curvevera reviews can be scraped sitewide, starting
+from the product page you sent, while also collecting product taxonomy data during
+the same pass so we do not need to refetch product pages later.
+
+**What I confirmed before scraping:**
+- The recent taxonomy work is visible in this repo. The key rule is that product
+  page scrapes should capture product title, product description, and full
+  breadcrumb/category signals during intake. The recent Amazon taxonomy work also
+  added `category_breadcrumb_path`, so new scrapes should preserve that shape when
+  the source site exposes it.
+- Curvevera is a Shopify store using Loox reviews. The public Shopify sitemap lists
+  **465 product pages**. Product-level Loox review iframes are public and pageable,
+  so we can scrape reviews for each exact product rather than relying on a sitewide
+  aggregate widget.
+- Curvevera pages sampled so far do **not** expose useful breadcrumb markup. The
+  scraper captures blank breadcrumb fields honestly, and preserves fallback taxonomy
+  signals instead: title, description, Shopify product id/handle/vendor/type/tags,
+  URL slug, JSON-LD product data, Loox count/rating, and raw notes.
+
+**What was built:**
+- New scraper:
+  `data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_curvevera_reviews.py`
+- It discovers products from Curvevera's public sitemap, fetches each product page
+  and Shopify `.json`, captures taxonomy signals, then walks the public Loox review
+  pages for that Shopify product id.
+- It checkpoints after each product and supports resume mode.
+
+**Current saved state after shutdown pause:**
+- Status: `paused_for_shutdown_repaired_checkpoint`
+- Products discovered: **465**
+- Products completed: **131**
+- Products remaining: **334**
+- Review rows written: **14,881**
+- Product taxonomy records written: **131**
+- Products with title: **131 / 131**
+- Products with description: **131 / 131**
+- Products with breadcrumb: **0 / 131** (site does not appear to expose breadcrumbs)
+- Last completed product:
+  `https://curvevera.com/products/women-high-waisted-capri-shaper`
+- I interrupted the run for your shutdown request while it was checkpointing. That
+  clipped the JSONL file mid-rewrite, so I repaired it from the CSV and revalidated:
+  **CSV rows = 14,881, JSONL valid rows = 14,881, bad JSONL lines = 0**.
+
+**Saved files:**
+- Reviews CSV:
+  `/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/curvevera_com/curvevera_com_reviews_matching_intake_schema.csv`
+- Reviews JSONL:
+  `/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/curvevera_com/curvevera_com_reviews_matching_intake_schema.jsonl`
+- Product taxonomy sidecar:
+  `/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/curvevera_com/curvevera_com_product_taxonomy_signals.json`
+- Summary:
+  `/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/curvevera_com/curvevera_com_reviews_matching_intake_schema_summary.json`
+
+**To resume Curvevera when you are back:**
+```bash
+cd /Users/briannasinger/Projects/FWM/FWM_Repo
+python3 data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_curvevera_reviews.py --resume --delay-seconds 0.35 --product-delay-seconds 2
+```
+
+**After it finishes:**
+1. Inspect the summary JSON for `status`, `products_scanned`, `rows_written`, and
+   any products where Loox reported reviews but no visible review cards parsed.
+2. Decide whether to load the CSV/JSONL into the raw review intake path.
+3. Run downstream taxonomy classification from the product taxonomy sidecar instead
+   of refetching Curvevera product pages.
 
 ### R. Reddit post harvester (Claude Code — file-only, NOTHING committed, NOTHING in DB)
 
@@ -140,6 +291,32 @@ breadcrumb). **It autosaves into the repo** (`data-pipelines/products/manual_tax
 **One unverified item:** the live end-to-end test of the auto-retry was blocked by a
 brief Anthropic infra hiccup (it gated that one network test command). Logic is reviewed
 and its parts are individually proven; I'll confirm it live next session.
+
+#### ⏳ PENDING TO-DOs — do these AFTER the backfill reaches 4,498/4,498
+
+> A reminder cron is also armed in-session, but it dies if the Claude session closes —
+> so these are written here too. Both are dev-only and reversible.
+
+1. **Mark the dead (404) Amazon pages so their images drop out of search.**
+   The backfill records pages that returned HTTP 404 (`skip_reason:http_status_404`).
+   A script is built + dry-run-verified: `scripts/mark-dev-amazon-404-pages.mjs`. It
+   sets those `staging.product_pages.source_status='page_not_found'` AND inserts the
+   `image_reports` dead-link rows the search RPC actually honors.
+   ```bash
+   node scripts/mark-dev-amazon-404-pages.mjs                          # dry-run: review counts
+   node scripts/mark-dev-amazon-404-pages.mjs --apply --i-understand-dev-writes   # write (dev)
+   ```
+   (As of last check: ~15 pages / ~41 images. Run it once the full backfill is done so
+   it catches every 404. Idempotent — safe to re-run.)
+
+2. **Tiny search migration (the clean fix).** Right now the search
+   (`match_by_measurements`) only hides "dead" images via an `image_reports` row with
+   `anon_id='manual_product_category_review_2026_05_20'` — it ignores `source_status`.
+   So #1 reuses that manual-review anon_id to make the hide work today. The cleaner,
+   durable fix is a small migration making the search **also exclude images whose
+   product page has `source_status='page_not_found'`** — then any dead page (now or
+   future) auto-drops from search with honest provenance. Ping me and I'll draft it as
+   a dev migration for review (needs a search-function redeploy).
 
 ---
 
