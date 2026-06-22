@@ -28,6 +28,7 @@
     "dev-images:taxonomy:promote": "node scripts/promote-dev-taxonomy-results.mjs",
     "dev-images:taxonomy:fix-rompers-jumpsuits": "node scripts/fix-dev-romper-jumpsuit-categories.mjs",
     "taxonomy-review": "node tools/taxonomy-review-dashboard/server.mjs",
+    "amazon-taxonomy-review": "node tools/amazon-taxonomy-manual-review/server.mjs",
     "dev-images:orientation-audit": "node scripts/audit-dev-image-orientation.mjs",
     "dev-images:orientation:promote": "node scripts/promote-dev-orientation-results.mjs",
     "dev-images:measurement-audit:estimate": "node scripts/estimate-dev-measurement-llm-audit.mjs",

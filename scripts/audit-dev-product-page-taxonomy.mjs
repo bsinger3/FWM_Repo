@@ -799,6 +799,40 @@ function candidateItemTagsForWrites(itemTags) {
   return [];
 }
 
+function phraseInSegment(phrase, segment) {
+  const pattern = new RegExp(`(^|[^a-z0-9])${phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`, "i");
+  return pattern.test(segment);
+}
+
+// Resolve a category tie using the Amazon breadcrumb. Among the tied mother
+// categories, return the one whose controlled clothing-type phrases match the
+// deepest (right-most = most specific) breadcrumb segment. Returns null if the
+// breadcrumb has <2 segments or does not clearly favour exactly one category.
+function breadcrumbTieBreak(breadcrumb, tiedCategoryIds) {
+  const segments = String(breadcrumb || "")
+    .split(">")
+    .map((segment) => segment.trim().toLowerCase())
+    .filter(Boolean);
+  if (segments.length < 2 || tiedCategoryIds.length < 2) return null;
+  const tied = new Set(tiedCategoryIds);
+  const bestDepth = new Map(); // mother_category_id -> deepest matching segment index
+  for (const [, , motherCategoryId, phrases] of CONTROLLED_ITEM_TAGS) {
+    if (!tied.has(motherCategoryId)) continue;
+    for (let i = 0; i < segments.length; i += 1) {
+      for (const phrase of phrases) {
+        if (phraseInSegment(phrase, segments[i])) {
+          if (i > (bestDepth.get(motherCategoryId) ?? -1)) bestDepth.set(motherCategoryId, i);
+        }
+      }
+    }
+  }
+  if (!bestDepth.size) return null;
+  const ranked = Array.from(bestDepth.entries()).sort((a, b) => b[1] - a[1]);
+  // Require a strict winner — the deepest breadcrumb match must be unambiguous.
+  if (ranked.length >= 2 && ranked[0][1] === ranked[1][1]) return null;
+  return ranked[0][0];
+}
+
 export function extractTaxonomy(fields) {
   const itemTags = [];
   const attributeTags = [];
@@ -847,16 +881,37 @@ export function extractTaxonomy(fields) {
   const broadVotes = Array.from(categoryVotes.entries()).sort((a, b) => b[1].rank - a[1].rank);
   const broad = broadVotes[0];
   const runnerUp = broadVotes[1];
-  const categoryAmbiguous = Boolean(broad && runnerUp && broad[1].rank === runnerUp[1].rank);
-  const primaryCategory = broad && !categoryAmbiguous
+  let categoryAmbiguous = Boolean(broad && runnerUp && broad[1].rank === runnerUp[1].rank);
+
+  // Breadcrumb tie-break: when two categories tie on rank (e.g. "Boot Cut Pants"
+  // -> shoes(boots) vs bottoms(pants)), the source breadcrumb almost always
+  // settles it ("… > Pants > Wear to Work"). Among the tied categories, pick the
+  // one whose controlled phrases match the DEEPEST (most specific, right-most)
+  // breadcrumb segment. Deterministic and free; resolves the bulk of ties.
+  let chosen = broad;
+  let resolvedByBreadcrumb = false;
+  if (categoryAmbiguous && broad) {
+    const topRank = broad[1].rank;
+    const tiedIds = broadVotes.filter(([, vote]) => vote.rank === topRank).map(([id]) => id);
+    const winnerId = breadcrumbTieBreak(fields.breadcrumb, tiedIds);
+    if (winnerId) {
+      chosen = broadVotes.find(([id]) => id === winnerId) || broad;
+      categoryAmbiguous = false;
+      resolvedByBreadcrumb = true;
+    }
+  }
+
+  const primaryCategory = chosen && !categoryAmbiguous
     ? {
-        mother_category_id: broad[0],
-        category_confidence: broad[1].tag.confidence,
-        category_evidence: broad[1].tag.evidence,
-        category_source_field: broad[1].tag.source_field,
+        mother_category_id: chosen[0],
+        category_confidence: resolvedByBreadcrumb ? "high" : chosen[1].tag.confidence,
+        category_evidence: resolvedByBreadcrumb
+          ? `breadcrumb: ${String(fields.breadcrumb || "").slice(0, 200)}`
+          : chosen[1].tag.evidence,
+        category_source_field: resolvedByBreadcrumb ? "breadcrumb" : chosen[1].tag.source_field,
       }
     : null;
-  const primaryRank = broad?.[1]?.rank ?? 0;
+  const primaryRank = chosen?.[1]?.rank ?? 0;
   const itemTagsForOutput = primaryCategory
     ? itemTagsSorted.filter((tag) =>
         tag.mother_category_id === primaryCategory.mother_category_id || tagRank(tag) >= primaryRank
