@@ -96,6 +96,7 @@ function queryProductPages() {
         category_confidence,
         category_evidence,
         category_source_field,
+        category_breadcrumb_path,
         category_extractor_version,
         category_checked_at,
         observed_clothing_type_ids,

@@ -202,6 +202,10 @@ function plannedPromotions(taxonomyReport) {
       normalized_product_page_url: result.normalized_product_page_url,
       final_url: result.final_url || null,
       category: primary,
+      // Full source breadcrumb path. Newer reports carry it top-level; older rows
+      // only have it in extracted_fields_preview.breadcrumb (breadcrumbs are short,
+      // so the 500-char preview is not truncated).
+      breadcrumb_path: result.breadcrumb_path || result.extracted_fields_preview?.breadcrumb || null,
       catalog: result.catalog || null,
       item_tags: itemTags,
       attribute_tags: attributeTags,
@@ -281,6 +285,7 @@ set
   category_confidence = ${sqlString(row.category.category_confidence)},
   category_evidence = ${sqlString(row.category.category_evidence)},
   category_source_field = ${sqlString(row.category.category_source_field)},
+  category_breadcrumb_path = coalesce(nullif(${sqlString(row.breadcrumb_path || "")}, ''), category_breadcrumb_path),
   category_extractor_version = ${sqlString(row.extractor_version)},
   category_checked_at = now(),
   catalog_image_url = coalesce(nullif(${sqlString(catalog.catalog_image_url)}, ''), catalog_image_url),
@@ -305,6 +310,7 @@ where id = ${sqlString(row.product_page_id)}::uuid;`);
       statements.push(`
 update staging.product_pages
 set
+  category_breadcrumb_path = coalesce(nullif(${sqlString(row.breadcrumb_path || "")}, ''), category_breadcrumb_path),
   category_extractor_version = ${sqlString(row.extractor_version)},
   category_checked_at = now(),
   catalog_image_url = coalesce(nullif(${sqlString(catalog.catalog_image_url)}, ''), catalog_image_url),

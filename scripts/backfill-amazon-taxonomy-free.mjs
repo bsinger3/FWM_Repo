@@ -180,13 +180,19 @@ function parseBsrCategories(html) {
 
 function isCaptchaOrBlock(status, html) {
   if (status === 503 || status === 429) return true;
+  // Only treat body markers as a block on otherwise-OK responses. A 404/410/etc.
+  // is a dead page, NOT throttling — Amazon's 404 "dog" page contains
+  // api-services-support@amazon.com, which previously tripped this and wasted
+  // minutes of backoff on a page that will never load. Hard errors fall through
+  // to the status>=400 skip below.
+  if (status >= 400) return false;
   const lower = html.slice(0, 20000).toLowerCase();
   return (
     lower.includes("/errors/validatecaptcha") ||
-    lower.includes("api-services-support@amazon.com") ||
     lower.includes("enter the characters you see below") ||
     lower.includes("type the characters you see") ||
-    lower.includes("to discuss automated access")
+    lower.includes("to discuss automated access") ||
+    (lower.includes("api-services-support@amazon.com") && lower.includes("automated access"))
   );
 }
 
@@ -293,6 +299,10 @@ async function processPage(entry) {
       skipped: false,
       http_status: status,
       final_url: finalUrl,
+      // Full source breadcrumb path, kept verbatim and un-truncated so the
+      // promote step can retain the fine-grained leaves the classifier collapses
+      // into mother_category_id. e.g. "Clothing, Shoes & Jewelry > Women > Clothing > Jeans".
+      breadcrumb_path: fields.breadcrumb || "",
       extracted_fields_preview: Object.fromEntries(
         ["title", "breadcrumb", "description", "url_slug"].map((k) => [k, String(fields[k] || "").slice(0, 500)]),
       ),
@@ -361,7 +371,8 @@ async function main() {
       : row.proposed?.primaryCategory?.mother_category_id
         ? `${row.proposed.primaryCategory.mother_category_id} (${row.proposed.primaryCategory.category_confidence})`
         : "no-category";
-    console.log(`[${processed}/${batch.length}] ${entry.asin} -> ${tag}`);
+    const ts = new Date().toLocaleTimeString("en-US", { hour12: false });
+    console.log(`[${ts}] [${processed}/${batch.length}] ${entry.asin} -> ${tag}`);
     if (processed < batch.length) await sleep(jitterDelay());
   }
 

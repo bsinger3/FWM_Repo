@@ -1211,6 +1211,9 @@ function updateSql(results) {
     if (result.skipped || !result.proposed) continue;
     const category = result.proposed.primaryCategory;
     const catalog = result.catalog || {};
+    // Full source breadcrumb path, kept verbatim so promotion retains the leaves
+    // that mother_category_id collapses. Sourced from the captured breadcrumb field.
+    const breadcrumbPath = result.breadcrumb_path || result.extracted_fields_preview?.breadcrumb || "";
     if (category) {
       statements.push(`
 update staging.product_pages
@@ -1219,6 +1222,7 @@ set
   category_confidence = ${sqlString(category.category_confidence)},
   category_evidence = ${sqlString(category.category_evidence)},
   category_source_field = ${sqlString(category.category_source_field)},
+  category_breadcrumb_path = coalesce(nullif(${sqlString(breadcrumbPath)}, ''), category_breadcrumb_path),
   category_extractor_version = ${sqlString(EXTRACTOR_VERSION)},
   category_checked_at = now(),
   catalog_image_url = coalesce(nullif(${sqlString(catalog.catalog_image_url)}, ''), catalog_image_url),
@@ -1236,6 +1240,7 @@ where id = ${sqlString(result.product_page_id)}::uuid;`);
       statements.push(`
 update staging.product_pages
 set
+  category_breadcrumb_path = coalesce(nullif(${sqlString(breadcrumbPath)}, ''), category_breadcrumb_path),
   category_extractor_version = ${sqlString(EXTRACTOR_VERSION)},
   category_checked_at = now(),
   catalog_image_url = coalesce(nullif(${sqlString(catalog.catalog_image_url)}, ''), catalog_image_url),
