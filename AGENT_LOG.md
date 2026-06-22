@@ -33,6 +33,200 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-22 ~13:30 EDT — Claude Code — Amazon taxonomy backfill: tie-break, retry sweep, breadcrumb retention, review dashboard
+
+**Did (commits c3f3f9d, 3a6e2a7, 09f86b8 on main; earlier bcaad65/05c1d92):**
+- **Breadcrumb tie-break in `extractTaxonomy()`** (`scripts/audit-dev-product-page-taxonomy.mjs`):
+  when two mother categories tie, pick the one whose controlled phrases match the
+  deepest breadcrumb segment. Resolves **172/226 (76%)** of the backfill's ambiguous
+  rows for free; tagged `category_source_field="breadcrumb"`. Fixes the root cause for
+  all future scrapes too.
+- **`category_breadcrumb_path`**: new dev column (`supabase/dev-migrations/20260622_dev_18…`,
+  APPLIED to dev) that retains the full source breadcrumb path. Wired through capture
+  (`backfill-amazon-taxonomy-free.mjs`), promote (`promote-dev-taxonomy-results.mjs`) and
+  the audit `--apply` path (both SQL branches, with fallback to
+  `extracted_fields_preview.breadcrumb` so already-fetched rows promote too), plus the
+  working-copy export. Doc: `data-pipelines/docs/scrape_required_fields_for_product_pages.md`.
+- **Auto retry-skips sweep** in the backfill: when a run clears all pending pages it
+  re-fetches transient skips (captcha_or_block/timeout/fetch_error), NOT dead 4xx;
+  last-line-per-id keeps it resumable. Flags `--retry-skips`, `--no-auto-retry`. Report
+  assembly now re-classifies every row via the current `extractTaxonomy` (so the
+  tie-break lands in the final report without a re-fetch).
+- **Manual-review dashboard** `tools/amazon-taxonomy-manual-review/` (`npm run
+  amazon-taxonomy-review`, port 4176): residual rows (ambiguous/blocked/404) with
+  click-to-open Amazon links + structured taxonomy dropdowns; autosaves into
+  `data-pipelines/products/manual_taxonomy_review/` (gitignored). Re-classifies live, so
+  the queue is **137, not 302**.
+- Also: 404-as-block bug fixed (was wasting ~6.5min backoff/dead page); timestamped
+  progress output; `FWM_AWS_PROFILE=default` in `.env` (S3 sync was defaulting to a
+  missing `fwm` profile); compact session transcript upserted to `codex_chat_transcripts`
+  (source=claude, key `claude-fwm-free-amazon-product-page-taxonomy-ba-840c7c07e2917676`).
+
+**Heads-up:**
+- The backfill report is **dry-run**; nothing was promoted to Supabase. Human approves
+  via the taxonomy-review dashboard before `promote-dev-taxonomy-results.mjs --apply`.
+- **Playwright does NOT rescue blocked pages** while the IP is throttled — tested 10,
+  only 2 got through (the rest 200 + bare "Amazon.com" soft-block). Blocked rows are an
+  IP-rate-limit problem; the right fix is the retry sweep later / from a fresh IP, not a
+  browser.
+- The big pile of unrelated uncommitted files in the tree (reddit/, crop, affiliate,
+  GoogleAnalytics/) is **other sessions' work — I did not touch it.**
+
+**Open / handoff:** Backfill stopped ~2,787/4,498 at user shutdown (resumable). On
+restart: re-run `node scripts/backfill-amazon-taxonomy-free.mjs --delay-min-ms=4000
+--delay-max-ms=8000` — new code finishes the rest, auto-retries blocked, and writes a
+report with the tie-break applied. Then promote-review the report and clear residual via
+the dashboard. Live end-to-end test of `--retry-skips` is unverified (a transient
+command-classifier outage blocked the network test) but logic is reviewed + components
+proven. Full status for the human is in `22June2026_NotesForBri.md`.
+
+## 2026-06-22 18:25 EDT — Claude Code — Write-back path: corrected measurements → dev images (verified dry-run; apply pending human OK)
+
+**Did:** Built the write-back so the audit-corrected (current-regex) measurements
+reach dev `public.images` WITHOUT mutating the 326 review workbooks (those have
+`image_preview` formula cells ExcelJS rewrite would strip; 0 embedded media but
+still risky).
+- `scripts/build-measurement-overrides.mjs` (npm `dev-images:measurement-overrides`)
+  turns `reextraction.json` `final` into
+  `FWM_Data/_reports/extraction_audit/measurement_overrides.json` —
+  `{ commentId -> {height_in_display, weight_lbs_display, waist_in, hips_in_display,
+  bust_in_display, bra_band_in_display, cupsize_display, inseam_inches_display} }`.
+  26,729 entries. (Age omitted: `public.images.age_years_display` EXISTS but the
+  loader's RPC payload doesn't carry it — propagating age needs an RPC change,
+  separate task. Pregnancy already re-parsed by the loader from the comment.)
+- `scripts/load-dev-approved-images.mjs` gained `--measurement-overrides=PATH`.
+  When set, it joins each row by `commentId(user_comment)` (imported from the
+  audit `analyze.mjs`, same FNV id) and replaces the workbook measurement columns
+  with the override before `toNumberOrNull`. Falls back to workbook columns when a
+  comment has no override. Adds `measurement_override_rows_applied` +
+  `measurements` to the dry-run report.
+
+**Verified (dry-run, NOTHING written):** report
+`dev_approved_images_loader_dry_run_20260622T181816Z.json`. Dev has 46,428 images;
+39,734 approved decisions; override applied to **27,773** planned rows. Spot-checked
+fills land verbatim, e.g. comment "32,29,45 are my measurements… 5'7… 150lbs" →
+workbook bust/waist/hips empty → now bust 32 / waist 29 / hips 45 in the override
+sent to dev.
+
+**Heads-up / BLOCKER for apply:** the loader plan has **7,000
+`quarantine_duplicate_conflict`** rows (pre-existing duplicate-image-URL condition,
+NOT from this change). `--apply` is blocked until a human sets
+`FWM_DEV_IMAGE_LOAD_SKIP_DUPLICATE_CONFLICTS=yes-reviewed-dry-run`, which quarantines
+those 7,000 (their corrections won't land) and writes the other ~33k
+(31,222 merge_into_baseline + 1,495 insert + 17 merge_into_existing_review_row_key).
+Reversible on dev via `npm run dev-images:baseline:restore`.
+
+**Open / handoff:** Awaiting human OK to run the gated `--apply`. Apply cmd:
+`FWM_DEV_IMAGE_LOAD_SKIP_DUPLICATE_CONFLICTS=yes-reviewed-dry-run node
+scripts/load-dev-approved-images.mjs --apply --resolve-workbooks
+--measurement-overrides=<.../measurement_overrides.json>`. Not committed.
+
+## 2026-06-22 18:10 EDT — Claude Code — Extraction-audit dashboard v2 (review state + live extractions)
+
+**Did:** Retrofitted `tools/extraction-audit-dashboard/` per human feedback so the
+measurement audit is resumable and always current:
+- **Live-regex extractions:** `build-dataset.mjs` now extracts via the CURRENT
+  Python parser instead of stale workbook columns. New `extract_batch.py` (stdin
+  NDJSON → stdout NDJSON) runs `extract_measurements` over the unique comments;
+  the Node builder spawns it (`python3`) and colour-codes from those values.
+  Added Age + Pregnancy-weeks to the displayed measures and to analyze.mjs's
+  captured-number set. (Rebuild now ~3 min: workbooks + one parse per unique
+  comment.)
+- **Review state (correct/incorrect):** flags.json shape changed from
+  `{bad,note}` to `{state:"correct"|"incorrect", note, ts}` (server migrates old
+  flags on load). Two buttons per card; the note box seeds regex tests.
+- **Never re-show reviewed rows:** server `/api/queue` defaults to
+  `status=unreviewed` (excludes any row with a state). Client paginates the id
+  queue locally; marking a row hides it immediately (and persists) without
+  skipping/re-showing others. Status filter can revisit correct / incorrect /
+  all. `/api/rows` is now POST {ids}. Export = state==="incorrect".
+
+**Heads-up:** Dashboard now depends on `python3` being on PATH at BUILD time
+(only the builder, not the server). The 35 previously-flagged rows migrated to
+state "incorrect" and are hidden by default — but their extractions are now the
+FIXED ones, so most are actually correct now; revisit via the "incorrect" filter
+to flip them to "correct" if desired. `dataset.json` extractions are pure
+comment-parse (no structured-field values) — that's intentional for auditing the
+regex. Rerun `npm run extraction-audit:build` after any `step1_intake_utils.py`
+regex change so the dashboard reflects it.
+
+**Open / handoff:** Saved a memory so future audit dashboards include these by
+default. Still open from the 17:40 entry: write-back of corrected measurements to
+workbooks/dev images. Not committed.
+
+## 2026-06-22 17:40 EDT — Claude Code — Improved measurement regex + reran on approved comments
+
+**Did:** Acted on the human's flagged extraction-audit rows (35 flagged comments)
+by hardening `extract_measurements` in the **shared intake parser**
+`data-pipelines/scripts/00_raw_scrape/non_amazon/step1_intake_utils.py` (the
+`.../non-amazon/scripts/step_1_raw_scrape/step1_intake_utils.py` re-export picks
+this up automatically). Changes, all covered by a NEW test
+`test_extract_measurements.py` (32 cases, green):
+- **Age** (`AGE_RE`): now "42 yr old", "30 year old", "age 55", "age of 60+",
+  "58 years old", "y/o".
+- **Body labels** (`WAIST/HIPS/BUST/UNDERBUST/INSEAM_RE` + cm variants): shared
+  `_MSEP/_MADV` fragments add en/em dashes ("Bust – 93 cm"), verbs ("waist
+  measures 27\""), "of/currently/which is", parens ("hips (40\")"), a
+  number-before-label arm ("29\" waist", "40.5\" hip"), and "hips/butt".
+- **cm not eaten as inches** (`(?!\s*cm)`) so "Waist 68cm" converts (was read as
+  68in). **Neighbour-number guard** (`(?![\s:=]*\d)`) so "4'11\" Bust: 34" isn't
+  bust=11 and "41\" Inseam 30\"" isn't inseam=41. **Bra-not-bust** guard so
+  "Bust: 34B" → band34/cupB, not bust=34.
+- **Triple** (`MEASUREMENT_TRIPLE_RE`): commas + inch marks ("32,29,45",
+  "40\"-30\"-40\"").
+- **Bra false positive**: `bra_size_search()` rejects pronoun "I"/article "A"
+  ("Dirty 30 I recently" is no longer a 30I bra). Wired into `extract_measurements`
+  AND `extract_size`.
+- **Height**: feet constrained to `[3-7]` (kills "70's"→0ft); added `5"4`/`5”11`
+  double-quote typo form (`HEIGHT_DQ_RE`).
+- **Weight**: range `#` unit now attaches ("175-180#"). **Pregnancy**: gated soft
+  "N weeks" fallback when current-pregnancy context is present, and no longer
+  bails entirely just because a review also says "pre-pregnancy".
+
+**Reran** on all approved comments: `tools/extraction-audit-dashboard/rerun-extraction.py`
+reads the audit `dataset.json` (26,729 unique approved/commented comments), runs
+the new parser, and writes `FWM_Data/_reports/extraction_audit/reextraction.json`
+(per-comment `old`/`new`/`final` + diff). Result: 10,918 comments improved —
+~5,500 measurements newly filled (braBand +2,346, cup +1,240, weight +450, waist
++370, **age +299**, hips +257, **pregnancy +235**, …), ~8,300 column-shift
+garbage values dropped (inseam paragraphs), valid old values preserved.
+
+**Heads-up:** (1) These regexes are SHARED — Codex's Amazon backfill imports the
+same `extract_measurements`. The new patterns are looser; the `test_…` file is
+the guardrail, run it after any edit. (2) `rerun-extraction.py` `final` is a
+non-destructive MERGE (comment wins, else keep a valid old value) — so a few
+legacy comment-origin false positives (e.g. the "30I" from "Dirty 30") are NOT
+auto-removed by the merge; the `new` column has them right and human flagging
+clears them. (3) Nothing written to workbooks/Supabase — `reextraction.json` is
+a report; write-back is a separate decision.
+
+**Open / handoff:** Next: decide write-back (fill gaps + drop garbage into the
+review workbooks / dev images), and optionally surface `new` vs `old` in the
+audit dashboard so the human can re-confirm. Not committed.
+
+## 2026-06-22 17:05 EDT — Claude Code — Full-set auto-crop detection RUNNING (do not collide)
+
+**Did:** Launched the full YOLO person-detection run for auto-cropping over all
+**45,269** crop-eligible images (those with `clothing_type_id`; per the human we
+skip no-taxonomy images for now). Upgraded `scripts/detect_person_boxes.py` with
+concurrent downloads + batched inference + `--resume`. Worklist persisted at
+`../FWM_Data/_cache/crop_worklist.ndjson`; detections stream to
+`../FWM_Data/_cache/crop_bboxes_full.ndjson`. ETA ~5h.
+
+**Heads-up — IN PROGRESS, avoid collision:** (1) Don't launch a second detection
+run; if it dies, rerun the same command with `--resume` (skips ids already in the
+output). (2) crop_spec is NOT yet written to dev — `scripts/backfill-dev-image-crops.mjs`
+is ready (dry-run default; `--apply` needs the dev guard + write flag + a passed
+crops verify report + `DEV_DATABASE_URL`, which is currently unset in my shell).
+Run it with `--input=../FWM_Data/_cache/crop_bboxes_full.ndjson` once detection
+finishes. (3) Solver/garment/lib + dashboard + frontend `cover-window` branch
+(index.dev.html) + `20260622_dev_16_crop_spec_contract.sql` schema lock are all in
+place from earlier this session. Throwaway CV venv: `../FWM_Data/_venv_cv`.
+
+**Open / handoff:** After detection: backfill dry-run → review dashboard → verify
+→ `--apply`. Only whole_body/garment_priority/garment_partial modes get written
+(head_priority + no-person skipped). NOT committed — working tree only.
+
 ## 2026-06-22 16:10 EDT — Claude Code — Pre-fill from URL (Reddit share links)
 
 **Did:** Implemented item (b) from my 09:50 Reddit-harvester handoff — the
