@@ -73,6 +73,12 @@ const delayMinMs = Math.max(0, numArg("delay-min-ms", 2000));
 const delayMaxMs = Math.max(delayMinMs, numArg("delay-max-ms", 4000));
 const maxRetries = Math.max(0, Math.floor(numArg("max-retries", 5)));
 
+// Skip reasons that are worth re-fetching later (transient throttling / network).
+// http_status_404 and other 4xx are dead pages and are NOT retried.
+const RETRYABLE_SKIPS = new Set(["captcha_or_block", "timeout", "fetch_error", "no_usable_fields"]);
+const retrySkipsOnly = process.argv.includes("--retry-skips"); // retry the skips, don't fetch new pages
+const noAutoRetry = process.argv.includes("--no-auto-retry"); // disable the auto retry sweep after a normal run
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // Deterministic-enough jitter without Math.random gating; fine for politeness.
 function jitterDelay() {
@@ -312,6 +318,24 @@ async function processPage(entry) {
   }
 }
 
+// Re-run the current classifier on a fetched row using its captured fields, so
+// report output reflects classifier improvements without re-fetching. Skipped
+// rows pass through unchanged (no captured fields to classify).
+function reclassifyRow(row) {
+  if (row.skipped) return row;
+  const f = row.extracted_fields_preview || {};
+  const fields = {
+    title: f.title || "",
+    breadcrumb: row.breadcrumb_path || f.breadcrumb || "",
+    description: f.description || "",
+    url_slug: f.url_slug || "",
+    json_ld_product_core: "",
+    json_ld_product_description: "",
+    workbook_fallback: "",
+  };
+  return { ...row, proposed: extractTaxonomy(fields), breadcrumb_path: row.breadcrumb_path || fields.breadcrumb || "" };
+}
+
 function summarize(results) {
   const summary = {
     total: results.length,
@@ -360,25 +384,50 @@ async function main() {
   console.log(`This run:         ${batch.length}${limit ? ` (--limit=${limit})` : ""}`);
   console.log(`Politeness:       ${delayMinMs}-${delayMaxMs}ms between requests, up to ${maxRetries} retries\n`);
 
-  let processed = 0;
-  for (const entry of batch) {
-    const row = await processPage(entry);
-    await appendFile(progressPath, JSON.stringify(row) + "\n", "utf8");
-    done.set(row.product_page_id, row);
-    processed += 1;
-    const tag = row.skipped
-      ? `SKIP ${row.skip_reason}`
-      : row.proposed?.primaryCategory?.mother_category_id
-        ? `${row.proposed.primaryCategory.mother_category_id} (${row.proposed.primaryCategory.category_confidence})`
-        : "no-category";
-    const ts = new Date().toLocaleTimeString("en-US", { hour12: false });
-    console.log(`[${ts}] [${processed}/${batch.length}] ${entry.asin} -> ${tag}`);
-    if (processed < batch.length) await sleep(jitterDelay());
+  const runBatch = async (label, entries) => {
+    let processed = 0;
+    for (const entry of entries) {
+      const row = await processPage(entry);
+      await appendFile(progressPath, JSON.stringify(row) + "\n", "utf8");
+      done.set(row.product_page_id, row); // last write per id wins on the next load
+      processed += 1;
+      const tag = row.skipped
+        ? `SKIP ${row.skip_reason}`
+        : row.proposed?.primaryCategory?.mother_category_id
+          ? `${row.proposed.primaryCategory.mother_category_id} (${row.proposed.primaryCategory.category_confidence})`
+          : "no-category";
+      const ts = new Date().toLocaleTimeString("en-US", { hour12: false });
+      console.log(`[${ts}] [${label} ${processed}/${entries.length}] ${entry.asin} -> ${tag}`);
+      if (processed < entries.length) await sleep(jitterDelay());
+    }
+  };
+
+  if (!retrySkipsOnly) await runBatch("fetch", batch);
+
+  // Retry sweep over transient skips (throttle/timeout/network) — NOT dead 4xx.
+  // Fires automatically once the normal run has cleared all pending pages (or
+  // immediately in --retry-skips mode). A re-fetched success overwrites the prior
+  // skip row, since loadProgress keeps the last line per product_page_id.
+  const clearedAllPending = retrySkipsOnly || batch.length === pending.length;
+  if ((retrySkipsOnly || (!noAutoRetry && clearedAllPending))) {
+    const retryEntries = worklist.filter((e) => {
+      const r = done.get(e.product_page_id);
+      return r && r.skipped && RETRYABLE_SKIPS.has(r.skip_reason);
+    });
+    const retrySlice = limit > 0 ? retryEntries.slice(0, limit) : retryEntries;
+    if (retrySlice.length) {
+      console.log(`\nRetry sweep: re-fetching ${retrySlice.length} transient skip(s) [${[...RETRYABLE_SKIPS].join(", ")}] …`);
+      await runBatch("retry", retrySlice);
+    } else if (retrySkipsOnly) {
+      console.log(`\nNo transient skips to retry.`);
+    }
   }
 
   // Assemble the final audit-shaped report from ALL progress rows (resumable runs
-  // accumulate across invocations).
-  const results = Array.from(done.values());
+  // accumulate across invocations). Re-classify each fetched row with the CURRENT
+  // extractTaxonomy so classifier improvements (e.g. the breadcrumb tie-break)
+  // apply to rows that were fetched under older code — no re-fetch needed.
+  const results = Array.from(done.values()).map(reclassifyRow);
   const stamp = new Date().toISOString();
   const report = {
     generated_at: stamp,
