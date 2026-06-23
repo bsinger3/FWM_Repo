@@ -96,7 +96,7 @@ It takes a few hours. **Or just tell me "resume the detection" and I'll run it.*
 
 ## What we accomplished today
 
-### C. Curvevera full-site review scrape + taxonomy sidecar (Codex — file-only, paused safely)
+### C. Curvevera full-site review scrape + taxonomy sidecar (Codex — file-only, complete)
 
 > This is a separate session from the Reddit, Amazon taxonomy, pre-fill, and
 > extraction-audit notes below. It is **file-only**: nothing was written to dev or
@@ -129,21 +129,27 @@ the same pass so we do not need to refetch product pages later.
   pages for that Shopify product id.
 - It checkpoints after each product and supports resume mode.
 
-**Current saved state after shutdown pause:**
-- Status: `paused_for_shutdown_repaired_checkpoint`
+**Final saved state:**
+- Status: `complete`
 - Products discovered: **465**
-- Products completed: **131**
-- Products remaining: **334**
-- Review rows written: **14,881**
-- Product taxonomy records written: **131**
-- Products with title: **131 / 131**
-- Products with description: **131 / 131**
-- Products with breadcrumb: **0 / 131** (site does not appear to expose breadcrumbs)
-- Last completed product:
-  `https://curvevera.com/products/women-high-waisted-capri-shaper`
-- I interrupted the run for your shutdown request while it was checkpointing. That
-  clipped the JSONL file mid-rewrite, so I repaired it from the CSV and revalidated:
-  **CSV rows = 14,881, JSONL valid rows = 14,881, bad JSONL lines = 0**.
+- Products completed: **465**
+- Products remaining: **0**
+- Review rows written: **30,179**
+- Product taxonomy records written: **465**
+- Products with title: **465 / 465**
+- Products with description: **464 / 465**
+- Products with breadcrumb: **0 / 465** (site does not appear to expose breadcrumbs)
+- CSV/JSONL validation: **CSV rows = 30,179, JSONL valid rows = 30,179,
+  bad JSONL lines = 0**
+- Supabase-qualified review rows under the scraper's strict predicate
+  (customer image URL + product page URL + at least one measurement + `size_display`):
+  **259**
+- Original product you sent:
+  `https://curvevera.com/products/unlined-plunge-balconette-bra-with-underwire`
+  is included with **82** review rows and a saved product taxonomy sidecar record.
+- Historical note: before shutdown, I interrupted the run while it was checkpointing.
+  That clipped the JSONL file mid-rewrite, so I repaired it from the CSV. After
+  resume, the full run completed and validated cleanly.
 
 **Saved files:**
 - Reviews CSV:
@@ -155,13 +161,7 @@ the same pass so we do not need to refetch product pages later.
 - Summary:
   `/Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/curvevera_com/curvevera_com_reviews_matching_intake_schema_summary.json`
 
-**To resume Curvevera when you are back:**
-```bash
-cd /Users/briannasinger/Projects/FWM/FWM_Repo
-python3 data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_curvevera_reviews.py --resume --delay-seconds 0.35 --product-delay-seconds 2
-```
-
-**After it finishes:**
+**Next steps:**
 1. Inspect the summary JSON for `status`, `products_scanned`, `rows_written`, and
    any products where Loox reported reviews but no visible review cards parsed.
 2. Decide whether to load the CSV/JSONL into the raw review intake path.

@@ -33,6 +33,62 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-22 17:28 EDT — Codex — Curvevera archive wrap-up: transcript, S3, git
+
+**Did:** Uploaded this Codex conversation to `codex_chat_transcripts` with chat key
+`codex-curvevera-sitewide-loox-review-scrape-wi-e42fba3db81bc6eb` and verified
+readback. Mirrored Curvevera scrape outputs to S3 under
+`00_raw_scraped_data/curvevera_com/` and archived/synced transcript JSON under
+`_archive/transcripts/fwm_curvevera_codex_transcript_20260622.json`.
+
+**Heads-up:** S3 sync was scoped to the Curvevera output directory plus the transcript
+archive folder. The transcript archive folder already contained an Amazon taxonomy
+transcript, so that existing backup object was also mirrored.
+
+**Open / handoff:** Git commit is being prepared for only the Curvevera scraper and
+Curvevera-specific handoff/log sections; unrelated dirty work remains untouched.
+
+## 2026-06-22 16:54 EDT — Codex — Curvevera review scrape completed
+
+**Did:** Resumed `data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_curvevera_reviews.py`
+with `--resume --delay-seconds 0.35 --product-delay-seconds 2` and completed the
+Curvevera sitemap scan. Final file-only outputs under
+`FWM_Data/00_raw_scraped_data/curvevera_com/`: 465/465 product pages scanned,
+30,179 review rows, 465 product taxonomy sidecar records. The original user URL
+`/products/unlined-plunge-balconette-bra-with-underwire` is included with 82 review
+rows and a sidecar record. Updated `22June2026_NotesForBri.md`.
+
+**Heads-up:** Final validation: CSV rows 30,179, JSONL valid rows 30,179, bad JSONL
+lines 0. Strict Supabase-qualified rows (customer image URL + product page URL +
+measurement + `size_display`) = 259. Curvevera still exposes no usable breadcrumb
+markup, so breadcrumb coverage is 0/465 while title coverage is 465/465 and
+description coverage is 464/465.
+
+**Open / handoff:** No scraper process left running. Next steps are QA anomalies
+where Loox count hints exceed parsed rows, decide raw-review intake load, and run
+taxonomy classification from `curvevera_com_product_taxonomy_signals.json` instead
+of refetching product pages.
+
+## 2026-06-22 ~14:40 EDT — Codex — Curvevera review scrape with taxonomy sidecar paused safely
+
+**Did:** Added `data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_curvevera_reviews.py`
+for public Shopify sitemap + product JSON + public Loox product-review iframe scraping.
+Aligned with the taxonomy intake work by capturing title, description, Shopify
+product id/handle/vendor/type/tags, URL slug, JSON-LD product data, Loox count/rating,
+and breadcrumb/category fields into a product sidecar. Wrote file-only outputs under
+`FWM_Data/00_raw_scraped_data/curvevera_com/`; nothing committed and nothing written
+to Supabase. Updated `22June2026_NotesForBri.md` with the human handoff.
+
+**Heads-up:** Curvevera sampled product pages did not expose usable breadcrumb markup,
+so `products_with_breadcrumb` is currently 0 while title/description coverage is
+complete for scanned products. User requested shutdown mid-run; Ctrl-C landed during
+a checkpoint rewrite, so JSONL was rebuilt from CSV and validated.
+
+**Open / handoff:** Safe paused state is `paused_for_shutdown_repaired_checkpoint`:
+131/465 products complete, 14,881 review rows, 131 product taxonomy records, 334
+products remaining. Resume with:
+`python3 data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_curvevera_reviews.py --resume --delay-seconds 0.35 --product-delay-seconds 2`.
+
 ## 2026-06-22 ~13:30 EDT — Claude Code — Amazon taxonomy backfill: tie-break, retry sweep, breadcrumb retention, review dashboard
 
 **Did (commits c3f3f9d, 3a6e2a7, 09f86b8 on main; earlier bcaad65/05c1d92):**
