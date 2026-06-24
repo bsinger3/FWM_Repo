@@ -33,6 +33,120 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-24 17:30 EDT — Claude Code — High-level (mother) clothing category for search + display
+
+**Did:** Applied two dev migrations to the shared dev DB (gosqgqpftqlawvnyelkt)
+and updated the gitignored `index.dev.html` frontend.
+- `20260624_dev_20_high_level_mother_category.sql`:
+  (1) created `public.clothing_mother_categories` (11-item vocab, `grant select`
+  to anon) so the frontend dropdown has a public source;
+  (2) added `public.images.mother_category_id` + index, backfilled from
+  `staging.product_pages.mother_category_id`;
+  (3) **dropped + recreated `public.match_by_measurements`** — it now filters on
+  and returns `mother_category_id`, and is `SECURITY DEFINER` with pinned
+  `search_path`. The SECURITY DEFINER change also FIXES the prior
+  `permission denied for schema staging` error (dev_19's staging.product_pages
+  dead-page exclusion was failing for anon, so ALL dev search was broken).
+- `20260624_dev_21_drop_legacy_match_overload.sql`: dropped the stale 13-arg
+  (no in_cup_size) overload of `match_by_measurements` that caused PGRST203
+  ambiguity on partial calls.
+- `index.dev.html`: dropdown + result-count header + per-card chip all now use
+  the mother category (e.g. "Found 23 results for Bottoms"; cards show a
+  BOTTOMS/DRESSES/SWIMWEAR chip when no category filter is active).
+
+**Heads-up:**
+- `public.images.clothing_type_id` is now DEPRECATED/unused by the app but
+  intentionally LEFT IN PLACE (per-image extraction was unreliable). Source of
+  truth for clothing type is `staging.product_pages` (mother_category_id). Plan
+  to drop `images.clothing_type_id` in a follow-up once confirmed.
+- **Coverage gap:** only ~20,224 / 47,873 images (~42%) have a non-null
+  `mother_category_id`, because `staging.product_pages.mother_category_id` itself
+  is only ~42% resolved, and it's skewed (bottoms 9.6k, dresses 6.4k, swimwear
+  3.3k, but tops only 295; jumpsuit/romper 0). Newest scraped images tend to be
+  uncategorized, so a measurement-only search can surface all-null-category rows
+  (chips just don't render for those). Improving staging category resolution
+  coverage is the real follow-up.
+- Separately: ~7% of searchable images still have null `crop_spec` (auto-crop
+  backfill gap) — those render uncropped. `npm run dev-images:crops:backfill`.
+
+**Open / handoff:** Codex — if you touch `match_by_measurements`, note it is now
+SECURITY DEFINER and returns an extra `mother_category_id` column. Prod's copy is
+unchanged (separate DB). Migrations dev_20/dev_21 are committed.
+
+## 2026-06-24 — Claude Code — Parser fixes for height/weight outliers found via the dot-plot
+
+**Did:** Used the new height/weight dot-plot to pull the 285 out-of-band dev image
+rows (height ∉ [54,78]in or weight ∉ [80,350]lb), had 5 LLM subagents read the 125
+real-comment ones to establish ground truth + failure category, then hardened the
+**comment parser** `data-pipelines/scripts/00_raw_scrape/non_amazon/step1_intake_utils.py`
+(canonical; the non-amazon re-export runpy-executes it). Fixes, all covered by new
+tests in `test_extract_measurements.py` (now **65 cases, green**):
+- **Reversed feet/inch marks** `5"4'`/`5”4’` → 5'4" (was 48/84/36). New
+  `HEIGHT_REVERSED_RE`, tried before HEIGHT_RE; needs a TRAILING apostrophe so a
+  real inch mark (`5' 4"`) is untouched. Plain `5"11` form stays after HEIGHT_RE.
+- **Feet + adjacent number** `5' 195` / `6ft 160` no longer grabs the weight digits
+  as inches (was 79/88): added `(?!\d)` on the inches group + `(?<!\d)` before feet.
+- **Inches ≥12** (`5 ft 30…`, `5'35"`) → keep feet, drop bogus inches (was 90/95).
+- **Fractional inches** `5'61/2"` → 66.5 (was 121). New `HEIGHT_FRACTION_RE`.
+- **Decimal feet** `5.4ft`/`5.2ft` → 5'4"/5'2" (was 48/24). New `HEIGHT_DECIMAL_FEET_RE`.
+- **Space form** `5 3'` → 5'3" (was 36). New `HEIGHT_SPACE_RE`.
+- **`ft.` + inches** `4 ft. 9 in` → 57 (was 48): `\.?` after the foot word.
+- **Trailing-apostrophe inch** like a `24"` waist written `24'`, or `27's` jeans size,
+  no longer read as 4'/7' (was 48/84): the `(?<!\d)` on HEIGHT_RE.
+- **Weight-change with a hedge word** `lost over 50` / `gained so much weight (60lbs)`
+  / `gained over 50lbs` no longer read as body weight: `WEIGHT_CHANGE_PREFIX_RE` +
+  `parse_weight` now `finditer`s so a real later weight (`…around 110lbs`) is still found.
+- **Non-body lifting** `leg press 400lbs` excluded via `WEIGHT_NONBODY_PREFIX_RE`.
+
+**Verified:** Over the flagged set, **79 heights + 25 weights move back in-band, 0 new
+out-of-band introduced.** Broad regression over 8k in-band height rows + 6k in-band
+weight rows (real comments): 3721/2405 unchanged, 18/0 changed (all still in-band),
+**0 new out-of-band**. Full test suite green.
+
+**Heads-up:** Two classes of flagged rows are **NOT comment-parser bugs** and a
+re-extraction won't touch them: (1) ~49 flagged rows whose `user_comment` is a stored
+**file path** (e.g. a `…/quince_com_reviews…csv` path) — a separate intake-corruption
+bug; (2) rows whose height/weight came from a **structured field, not the comment**
+(e.g. weight 410 on "Soft, pretty top.", and the absurd 135,135,135-lb weight). Under
+a non-destructive merge rerun those keep their old (often bogus) values, so they need a
+post-extraction range clamp or a look at the structured source — flagging for whoever
+owns the rerun/load. Genuinely-correct extremes that must stay (real heavy adults like
+"weigh 355 pounds", children at 4'5") are preserved.
+
+**Open / handoff:** Parser + tests are done and committed-pending (NOT committed). Human
+said they'll trigger the deterministic re-extraction next. Suggest: after rerun, reopen
+the dot-plot (`npm run height-weight-dotplot`) to confirm the comment-derived cluster of
+outliers is gone, and decide on a range clamp for the structured-source stragglers.
+
+## 2026-06-24 — Claude Code — Height×Weight dot-plot dashboard for outlier hunting (dev, read-only)
+
+**Did:** New read-only dashboard `tools/height-weight-dotplot/` (npm
+`height-weight-dotplot`, port 4178; also in `.claude/launch.json`) to eyeball
+height/weight outliers in dev `public.images`.
+- `server.mjs`: dev-guarded (`assertApprovedDevSupabase`, refuses non-dev); pages
+  the REST API for every image row with `height_in_display>0 OR weight_lbs_display>0`
+  (45,316 rows; 30,150 have both), maps a compact point set (h/w + size/cup/waist/
+  hips/bust/band/age/site/brand/comment/image/product), caches in memory, serves
+  `/api/points`. No writes. Treats stored 0/negatives as missing so no fake origin dots.
+- `public/index.html`: dependency-free canvas scatter (X=height in ft'in, Y=weight lb)
+  with pan/zoom, a tunable "plausible band" (default 54–78in / 80–350lb) that flags
+  out-of-band dots red, source-site filter, "only flagged" + "require both" toggles,
+  hover thumbnail tooltip, and a click→detail panel (image + all measurements + flag
+  reason + comment + product/image links). Default view uses a 0.3–99.7 percentile
+  window so one absurd value doesn't flatten the plot; "Fit all" / "Human range" buttons.
+
+**Heads-up:** The data has real garbage this surfaces immediately — a
+`weight_lbs_display` of **135,135,135** lb, heights up to 158" / 90" (7'6") on rows
+whose comment plainly says e.g. 5'0"/100lb (measurement-triple "30 23 34" mis-parsed
+into height). 243 rows fall outside the default band. These are extraction bugs in
+`step1_intake_utils.py` regexes, not display bugs — good candidates for the next
+parser-hardening pass / the extraction-audit dashboard. Verified end-to-end in the
+browser preview (render, filters, click-detail with live image). Read-only — nothing
+written to dev. NOT committed.
+
+**Open / handoff:** Uncommitted: new tool dir + `package.json` + `.claude/launch.json`
+entries. No DB or prod impact.
+
 ## 2026-06-24 15:50 EDT — Claude Code — GA: tag internal traffic (prod) + disable GA on dev preview
 
 **Did:** Two GA changes.
