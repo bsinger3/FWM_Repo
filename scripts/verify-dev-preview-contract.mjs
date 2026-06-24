@@ -74,20 +74,27 @@ async function verifyLocalEntrypoints() {
         has(indexDevHtml, "https://gosqgqpftqlawvnyelkt.supabase.co"),
     },
     {
+      // Crop rendering is a v2 feature that lives only in the dev testbed
+      // (index.dev.html). Prod index.html intentionally does NOT carry it yet —
+      // it has no crop_spec data and its random query omits the column. Only
+      // require the renderer in the dev entrypoint until v2 is promoted to prod.
       name: "crop_renderer_present",
       ok:
-        has(indexHtml, "function applyCropSpec") &&
-        has(indexHtml, "applyCropSpec(img, r.crop_spec)") &&
         has(indexDevHtml, "function applyCropSpec") &&
         has(indexDevHtml, "applyCropSpec(img, r.crop_spec)"),
     },
     {
       name: "crop_renderer_supports_safe_rotation",
       ok:
-        has(indexHtml, "rotationCoverScale") &&
-        has(indexHtml, "[0, 90, 180, 270].includes(normalizedRotation)") &&
         has(indexDevHtml, "rotationCoverScale") &&
         has(indexDevHtml, "[0, 90, 180, 270].includes(normalizedRotation)"),
+    },
+    {
+      // Guard against accidentally porting the crop renderer back into prod
+      // before v2 ships. If/when crop rendering is intentionally promoted to
+      // index.html, remove this check and re-add index.html to the two above.
+      name: "production_index_omits_crop_renderer",
+      ok: !has(indexHtml, "applyCropSpec"),
     },
     {
       name: "production_random_query_omits_dev_only_columns",
