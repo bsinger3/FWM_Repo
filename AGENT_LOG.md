@@ -33,6 +33,31 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-24 15:50 EDT — Claude Code — GA: tag internal traffic (prod) + disable GA on dev preview
+
+**Did:** Two GA changes.
+- `index.html` (committed): the `gtag("config", "G-98WRHGEPZG")` call now sends
+  `traffic_type: "internal"` when a per-browser localStorage flag is set.
+  Visiting the live site with `?internal=1` persists the flag; `?internal=0`
+  clears it. Browser-based (not IP-based), so it follows each laptop across
+  networks; normal visitors are never tagged. Committed as `53329ae` on branch
+  **`ga-internal-traffic-flag`** (NOT merged to main, NOT pushed — by request).
+- `index.dev.html` (NOT committed — this file is gitignored, `.gitignore:40`):
+  removed the GA loader + `gtag("js")`/`gtag("config")` calls so the dev preview
+  no longer pollutes the prod `G-98WRHGEPZG` property with localhost traffic.
+  `gtag` is left as a no-op stub. This edit lives only in the local working tree.
+
+**Heads-up:** The prod internal-traffic exclusion only works because the human
+set GA4 Admin → Data filters → **"Internal Traffic"** to **Active** (matches
+`traffic_type` == `internal`). If that filter is ever paused/deleted, internal
+hits flow back into reports even though the site keeps sending the param. Dev's
+GA-off behavior is local-only and won't survive on another checkout (gitignored).
+Did NOT touch the pre-existing unstaged change in
+`scripts/score-dev-image-prettiness.mjs` (not mine).
+
+**Open / handoff:** Branch `ga-internal-traffic-flag` is unmerged by request —
+do not merge/push without the human's go-ahead.
+
 ## 2026-06-24 12:57 EDT — Codex — Transcript upload for Reddit/Levi/Lulus/SHEIN thread
 
 **Did:** Rebuilt a compact transcript from the full session JSONL
