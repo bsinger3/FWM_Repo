@@ -1,0 +1,8 @@
+status: completed_probe_zero_image
+owner: Codex + Peirce subagent
+started_at: 2026-06-24 02:33 EDT
+completed_at: 2026-06-24 03:04 EDT
+source: Reddit recommended scrape queue Google Sheet
+slug: brastop_com
+result: public Shopify data plus aggregate ratings found; no public raw review/customer-image endpoint found
+output_dir: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/brastop_com

@@ -1,0 +1,8 @@
+status: completed
+owner: Codex + Peirce subagent
+started_at: 2026-06-24 02:33 EDT
+completed_at: 2026-06-24 03:04 EDT
+source: Reddit recommended scrape queue Google Sheet
+slug: natori_com
+result: 114 rows; 6 customer-review image rows and 108 catalog-image review-text joins
+output_dir: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/natori_com

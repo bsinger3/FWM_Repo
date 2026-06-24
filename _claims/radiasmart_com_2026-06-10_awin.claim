@@ -1,8 +1,8 @@
 retailer: radiasmart_com
 site: radiasmart.com
-claimed_at: 2026-06-10T20:25:53Z
-completed_at: 2026-06-10T20:26:01Z
-status: no_public_product_seed
+claimed_at: 2026-06-15T21:15:56Z
+completed_at: 2026-06-15T21:25:37Z
+status: completed
 source: Awin advertiser queue
 programme: Radia Smart
 provider_hint: Yotpo
@@ -10,6 +10,5 @@ why_request: maternity/postpartum gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/radiasmart_com/legacy_pre_2026-06-15/radiasmart_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/radiasmart_com/legacy_pre_2026-06-15/radiasmart_com_reviews_matching_intake_schema_summary.json
-error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/radiasmart_com/radiasmart_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/radiasmart_com/radiasmart_com_reviews_matching_intake_schema_summary.json

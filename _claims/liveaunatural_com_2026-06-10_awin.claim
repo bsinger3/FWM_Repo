@@ -1,7 +1,7 @@
 retailer: liveaunatural_com
 site: liveaunatural.com
-claimed_at: 2026-06-10T18:44:16Z
-completed_at: 2026-06-10T18:44:23Z
+claimed_at: 2026-06-15T21:15:56Z
+completed_at: 2026-06-15T21:19:32Z
 status: completed
 source: Awin advertiser queue
 programme: Au Natural
@@ -10,5 +10,5 @@ why_request: full-bust/lingerie gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/liveaunatural_com/legacy_pre_2026-06-15/liveaunatural_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/liveaunatural_com/legacy_pre_2026-06-15/liveaunatural_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/liveaunatural_com/liveaunatural_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/liveaunatural_com/liveaunatural_com_reviews_matching_intake_schema_summary.json

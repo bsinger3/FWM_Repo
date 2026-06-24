@@ -1,7 +1,7 @@
 retailer: us_oneractive_com
 site: us.oneractive.com
-claimed_at: 2026-06-10T20:31:29Z
-completed_at: 2026-06-10T20:32:59Z
+claimed_at: 2026-06-15T21:47:34Z
+completed_at: 2026-06-15T21:56:36Z
 status: completed
 source: Awin advertiser queue
 programme: Oner Active Global
@@ -10,5 +10,5 @@ why_request: bottoms/activewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/us_oneractive_com/legacy_pre_2026-06-15/us_oneractive_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/us_oneractive_com/legacy_pre_2026-06-15/us_oneractive_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/us_oneractive_com/us_oneractive_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/us_oneractive_com/us_oneractive_com_reviews_matching_intake_schema_summary.json

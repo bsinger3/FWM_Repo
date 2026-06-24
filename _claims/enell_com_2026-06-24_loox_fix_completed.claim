@@ -1,0 +1,9 @@
+status: completed
+owner: Codex
+started_at: 2026-06-24 03:12 EDT
+completed_at: 2026-06-24 03:24 EDT
+source: follow-up from Bri noting ENELL SPORT has image reviews
+slug: enell_com
+result: full Enell catalog Loox scrape wrote 47 customer-review image rows across 19 products
+output_dir: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/enell_com
+script: data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_enell_loox_reviews.py

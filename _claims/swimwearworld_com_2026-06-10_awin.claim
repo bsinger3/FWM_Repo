@@ -1,7 +1,7 @@
 retailer: swimwearworld_com
 site: swimwearworld.com
-claimed_at: 2026-06-10T20:40:50Z
-completed_at: 2026-06-10T20:42:02Z
+claimed_at: 2026-06-15T21:03:16Z
+completed_at: 2026-06-15T21:12:35Z
 status: completed
 source: Awin advertiser queue
 programme: SWORLD Inc
@@ -10,5 +10,5 @@ why_request: swim/shapewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/swimwearworld_com/legacy_pre_2026-06-15/swimwearworld_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/swimwearworld_com/legacy_pre_2026-06-15/swimwearworld_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/swimwearworld_com/swimwearworld_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/swimwearworld_com/swimwearworld_com_reviews_matching_intake_schema_summary.json

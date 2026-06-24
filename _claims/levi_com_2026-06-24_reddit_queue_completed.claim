@@ -1,0 +1,8 @@
+status: completed_probe_blocked
+owner: Codex + Tesla subagent
+started_at: 2026-06-24 02:33 EDT
+completed_at: 2026-06-24 03:04 EDT
+source: Reddit recommended scrape queue Google Sheet
+slug: levi_com
+result: Akamai Access Denied / HTTP 403; no bypass attempted
+output_dir: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/levi_com

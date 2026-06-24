@@ -1,8 +1,8 @@
 retailer: dmoose_com
 site: dmoose.com
-claimed_at: 2026-06-10T20:25:09Z
-completed_at: 2026-06-10T20:25:16Z
-status: no_public_product_seed
+claimed_at: 2026-06-15T21:47:34Z
+completed_at: 2026-06-15T21:56:37Z
+status: completed
 source: Awin advertiser queue
 programme: Dmoose (US)
 provider_hint: Okendo
@@ -10,6 +10,5 @@ why_request: bottoms/activewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/dmoose_com/legacy_pre_2026-06-15/dmoose_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/dmoose_com/legacy_pre_2026-06-15/dmoose_com_reviews_matching_intake_schema_summary.json
-error: No product seed URLs discovered; likely products.json/sitemap unavailable or rate-limited.
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/dmoose_com/dmoose_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/dmoose_com/dmoose_com_reviews_matching_intake_schema_summary.json

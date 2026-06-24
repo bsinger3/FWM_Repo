@@ -1,0 +1,8 @@
+status: completed_probe_blocked
+owner: Codex + Cicero subagent
+started_at: 2026-06-24 02:33 EDT
+completed_at: 2026-06-24 03:04 EDT
+source: Reddit recommended scrape queue Google Sheet
+slug: elomilingerie_com
+result: no public review surface detected; catalog/product media available
+output_dir: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/elomilingerie_com

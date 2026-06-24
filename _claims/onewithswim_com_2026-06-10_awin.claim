@@ -1,7 +1,7 @@
 retailer: onewithswim_com
 site: onewithswim.com
-claimed_at: 2026-06-10T20:49:20Z
-completed_at: 2026-06-10T20:49:33Z
+claimed_at: 2026-06-15T21:03:16Z
+completed_at: 2026-06-15T21:12:14Z
 status: completed
 source: Awin advertiser queue
 programme: onewith
@@ -10,5 +10,5 @@ why_request: swim/shapewear gap
 scope: public product pages and public review/provider feeds only
 stop_conditions: 429/captcha/WAF/auth challenge
 rows_written: 0
-output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/onewithswim_com/legacy_pre_2026-06-15/onewithswim_com_reviews_matching_intake_schema.csv
-summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/onewithswim_com/legacy_pre_2026-06-15/onewithswim_com_reviews_matching_intake_schema_summary.json
+output_csv: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/onewithswim_com/onewithswim_com_reviews_matching_intake_schema.csv
+summary_json: /Users/briannasinger/Projects/FWM/FWM_Data/00_raw_scraped_data/onewithswim_com/onewithswim_com_reviews_matching_intake_schema_summary.json
