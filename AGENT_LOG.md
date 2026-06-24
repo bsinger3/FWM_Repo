@@ -33,6 +33,193 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-24 — Claude Code — Amazon product-page taxonomy COMPLETE in dev (resolved all residuals)
+
+**Did:** Finished the Amazon taxonomy backfill end-to-end in **dev** (commits up to
+`b600d08`). Every Amazon product page now has taxonomy or is marked dead.
+Final dev state: **4,639 Amazon pages → 4,607 categorized, 32 page_not_found, 0
+uncategorized-and-not-dead.** Steps this session:
+- **Promoted main backfill**: `scripts/promote-dev-amazon-backfill.mjs` wrote 4,180 pages
+  (+6,462 clothing-type tags) from the completed backfill sidecar
+  (`amazon_free_http_backfill_v7`). Excludes accessories/shoes by default; runs via
+  `psql -f` (4k+ stmts exceed ARG_MAX). `--sidecar=<path>` to target a specific run.
+- **Ambiguous (266)**: 4 parallel LLM subagents classified them; human approved in a new
+  dashboard; `scripts/apply-dev-ambiguous-resolutions.mjs` applied 252
+  (`llm_ambiguous_resolver_v1`) and deleted 14 human-rejected belts.
+- **Blocked (was 103 → 7 after retry sweep)**: human typed title/breadcrumb in
+  `tools/amazon-blocked-manual-entry/` (:4177); `scripts/apply-dev-blocked-resolutions.mjs`
+  categorized 6, marked 1 dead.
+- **404s (32)**: `scripts/mark-dev-amazon-404-pages.mjs` set source_status='page_not_found'.
+- **Search migration `supabase/dev-migrations/20260623_dev_19_*.sql`** (APPLIED to dev):
+  `match_by_measurements` now excludes images whose page is page_not_found/unavailable.
+- **Deleted 28 non-apparel rows total** (belts+boots): 14 ambiguous-rejected + 14 from the
+  main set, via `scripts/delete-dev-product-pages.mjs` (FK-safe images→reviews→pages,
+  snapshotted).
+- **Re-fetched the 169 stale rows** (they carried unpromoted 2026-06-18 browser-fallback
+  proposals) fresh through the free-HTTP backfill → 169/169 classified, 0 ambiguous,
+  promoted. So NO stale browser-run proposals were trusted.
+
+**Heads-up:**
+- **`clothing-taxonomy.json` is OUT OF SYNC with the dev FK tables.** Mother categories
+  must come from `staging.clothing_mother_categories` (has accessories/activewear/shoes/
+  other; NO pants/skirts/shorts — those fold into `bottoms`); clothing types from
+  `staging.clothing_type_tags`. Map/filter before any taxonomy write or the FKs reject it.
+  The manual-review dashboards populate dropdowns from the JSON, so they show the wrong
+  vocab — fix to read the DB. (LLM also hallucinated tag ids like denim-shorts/midi-dress.)
+- These are all **dev** writes. Reversible: deleted-row snapshots + image baseline restore.
+- **NOT pushed.** `main` is still ahead of origin atop another session's held-back
+  pre-fill commits whose notes say pushing triggers a Cloudflare prod deploy (Bri's call).
+
+**Open / handoff:** Amazon taxonomy is done in dev. Remaining: (1) the push/deploy decision
+(Bri's), (2) optionally point the dashboard dropdowns at the DB vocab, (3) the broader
+"promote to prod" path is untouched — this was all dev.
+
+## 2026-06-24 — Claude Code — Tested pre-fill-from-URL; flagged untested working-tree changes
+
+**Did:** Verified the committed pre-fill-from-URL feature (`prefillFromQuery()` in
+`index.html`, commits 8acce26 + 7d4e8f1) against the local `site` server (port 4322).
+All paths pass: full valid fill + auto-submit, out-of-range clamping per input min/max,
+cup normalization (trim+uppercase), `req=` only checks toggles for fields that got a
+value (disabled toggles skipped), and the no-params path showing the random gallery.
+No console errors. (Auto-submit on the strict height+waist+hips combo returns "0 results"
+— a data outcome, not a bug; random gallery confirmed the DB has data.)
+
+**Heads-up:** The **uncommitted** `index.html` diff (56 lines) is NOT the prefill feature.
+It bundles two separate, still-untested changes: (1) `assertDevPreviewConfig()` that runs
+at page load and *throws* if `window.FWM_ENV==="dev"` and the Supabase URL isn't the
+approved dev project — verify the prod path (FWM_ENV !== "dev") returns early and never
+throws, or it could blank the page; (2) `parseCropSpec`/`applyCropSpec` applying `crop_spec`
+(objectPosition clamp 0–100, zoom→scale clamp 1.6, rotation snap to 0/90/180/270 w/ 4/3
+cover-scale) to product-card images. I unit-checked the transform math (sound) but did NOT
+test it end-to-end on real result cards with a `crop_spec` — needs DB rows that have one.
+
+**Open / handoff:** Before pushing: test the crop-spec render on a real card, confirm the
+dev-config guard's prod path, and decide whether the crop-spec + guard belong in their own
+commit (they're unrelated to the prefill work that's already committed).
+
+---
+
+## 2026-06-24 03:59 EDT — Codex — Levi browser-assisted Bazaarvoice POC
+
+**Did:** Used visible Chrome to load a Levi PDP and trigger the Bazaarvoice review widget.
+Confirmed `?bvstate=pg:N/ct:r` pagination exposes rendered `bv-jsonld-reviews-data`
+without exporting cookies/session headers. Wrote a separate proof-of-concept intake-shaped
+CSV at `FWM_Data/00_raw_scraped_data/levi_com/levi_com_browser_bv_poc_reviews_matching_intake_schema.csv`
+plus summary JSON `levi_com_browser_bv_poc_summary.json`.
+**Heads-up:** POC is real rendered public review data but intentionally not merged into
+the normal `levi_com_reviews_matching_intake_schema.csv` because the reusable file-first
+pipeline still hits Akamai. One PDP (`0057U0007`) produced 35 customer-review image rows
+from 15 image-bearing reviews; 6 rows have parsed measurement signals and 6 meet the
+strict image+product+size+measurement fit-row shape.
+**Open / handoff:** Next implementation path is a browser-assisted Levi scraper/exporter
+that uses sitemap product URLs, opens each PDP in a normal browser session, paginates
+`bvstate`, extracts `bv-jsonld-reviews-data`, and writes intake rows. Keep it separate
+from cookie/session or WAF-token handling.
+
+## 2026-06-24 03:29 EDT — Codex — Levi feasibility and Reddit queue qualified counts
+
+**Did:** Used two Codex subagents per Bri's request. Levi feasibility worker confirmed
+plain HTTP/headless access is still blocked by Akamai/401s, while my logged-in Chrome
+inspection of a Levi PDP showed browser-rendered review content, Bazaarvoice containers
+(`data-bv-product-id="0057U0007-US"`), Pixlee iframe/config (`widget_id=16687894`,
+`api_key=CyVGYdwwaZIui0mzURng`), and rendered customer/review image URLs from
+`photos-us.bazaarvoice.com` / Scene7 `_BV`. Count worker wrote
+`/private/tmp/fwm_reddit_queue_qualified_counts.json` from current raw files.
+**Heads-up:** Levi looks feasible only via browser-observed public data or a sanitized
+HAR/DevTools capture; do not attempt WAF bypass or script with cookies/challenge tokens.
+Across the 15 Reddit queue sources, current raw output totals 524 rows and 410
+customer-review image rows. Qualification is ambiguous: README-style image+product+
+measurement gives 31 rows; the existing summarizer's stricter "Qualified Fit Rows"
+image+product+size+measurement gives 25 rows.
+**Open / handoff:** Next Levi step is to capture the public review/media network calls
+from a normal visible browser session and implement a Levi adapter only if those calls
+use anonymous third-party/public endpoints. Current `levi_com` raw rows remain zero.
+
+## 2026-06-24 03:25 EDT — Codex — Corrected Enell scrape via Loox
+
+**Did:** Added `data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_enell_loox_reviews.py`
+after Bri noticed `https://enell.com/products/enell-sport` has many image reviews.
+The script uses public Shopify product pages plus the public Loox iframe/feed
+(`loox.io/widget/f5GL4jJUwm/reviews/{product_id}`) and writes
+`FWM_Data/00_raw_scraped_data/enell_com/enell_com_reviews_matching_intake_schema.csv`.
+Full catalog run scanned 19 products and wrote 47 customer-review image rows. Updated
+the Google Sheet Enell status row and added `_claims/enell_com_2026-06-24_loox_fix_completed.claim`.
+**Heads-up:** This supersedes the earlier Enell “catalog/product images only” finding;
+that earlier worker missed the Loox iframe path. SPORT contributed 32 image rows, LITE 9,
+RACER 3, and sale products 3 total. No DB writes or production work.
+**Open / handoff:** Levi still needs browser-assisted endpoint discovery because normal
+script requests receive Akamai 403. Use a HAR/network capture from a human-opened Levi PDP
+or a browser-session scraper; do not attempt WAF bypass.
+
+## 2026-06-24 03:04 EDT — Codex — Scraped Reddit recommended retailer queue
+
+**Did:** Used four Codex subagents to scrape/probe the 15 retailers in the
+`FWM Reddit Recommended Scrape Queue URLs 2026-06-24` Google Sheet after Bri added
+the `Manual Check` column. New queue-specific scripts are
+`probe_elomi_freya_goddess_reviews.py`, `scrape_worker_a_reddit_bra_retailers.py`,
+`scrape_worker_c_reddit_retailers.py`, and `scrape_worker_d_reddit_retailers.py`.
+Outputs were written under `FWM_Data/00_raw_scraped_data/<slug>/`. Completed claim
+files were added in `_claims/`; the temporary active queue claims were removed from
+`_active_scrape_claims/`.
+**Heads-up:** Useful customer-review-image outputs: `alexanderjaneboutique_com`
+356 rows/images from corrected URL `https://alexanderjane.com/`, `natori_com`
+114 rows with 6 customer-review images, and `bravissimo_com` 1 smoke row/image.
+`enell_com` and `uniqlo_com` only produced product-image probe rows. `americantall_com`,
+`brastop_com`, and `wacoal_america_com` had public review/ratings evidence but no
+public customer-image rows. `elomilingerie_com`, `freyalingerie_com`, and
+`goddessbra_com` had public catalog/product media but no public review surface.
+`ae_com`, `levi_com`, `madewell_com`, and `panache_lingerie_com` hit 403/access walls;
+no bypass attempted.
+**Open / handoff:** Consider promoting the successful adapters into normal
+per-retailer scripts and deciding whether catalog-only probe rows should remain in
+the raw scrape folders or be quarantined separately before qualification.
+
+## 2026-06-24 01:58 EDT — Codex — Added Reddit retailer scrape triage coverage
+
+**Did:** Updated `data-pipelines/non-amazon/docs/scrape_triage_plan.md` with a new
+`Reddit Fit-Request Retailer Triage Added 2026-06-24` section. It folds in the
+Reddit-derived retailer list from the prior Codex/subagent pass, marks each target as
+scraped or not scraped based on `FWM_Data/00_raw_scraped_data`, and adds a recommended
+first Reddit-derived scrape queue.
+**Heads-up:** No scraper code or Reddit harvester files were edited. Current Reddit
+artifacts still lack author/user flair; the triage section explicitly calls out that
+future exports should carry both `post_flair` and `author_flair`.
+**Open / handoff:** If continuing Reddit retailer extraction, fix the old.reddit
+comment parser to separate OP body echoes from real replies and extend flair enrichment
+before treating the evidence as final recommendation data.
+
+## 2026-06-22 ~19:10 EDT — Claude Code — ⚠️ FOR CODEX: Reddit-post work already exists, read before you start
+
+**Heads-up (this is for you, Codex):** the human says you're about to take on a
+task that involves **looking for certain Reddit posts**. There is already a
+working Reddit harvester in this repo — please **read
+`docs/reddit-harvester-handoff.md` first** so you don't duplicate it or re-hit the
+dead ends I already burned through. Key facts:
+
+- **Reddit's API is DEAD to us.** The 2026 "Responsible Builder Policy" disabled
+  self-serve script-app creation; the human has no grandfathered key; the
+  unauthenticated `www.reddit.com/...json` endpoints return **403**. Do NOT build
+  an OAuth path and ignore the dead `REDDIT_CLIENT_*` keys in `.env.example`.
+- **What works:** the public Atom RSS feed `https://www.reddit.com/r/<sub>/new/.rss`
+  (trailing-slash form; bare `/new.rss` returns empty 200; rate-limited ~1 req/min;
+  needs a real browser-ish User-Agent). Flair is NOT in RSS — scrape it from
+  **old.reddit** HTML (`old.reddit.com/r/<sub>/comments/<id>/` is 200 where `www`
+  `.json` is 403).
+- **Existing assets (scripts in `scripts/`, data in `../FWM_Data/reddit_harvest/`):**
+  `harvest-reddit-posts.mjs` (RSS harvester, subreddit rotation inline),
+  `enrich-reddit-flair.mjs` (flair backfill, resumable), `reparse-and-stats-reddit.mjs`,
+  `build-reddit-review.mjs`. Already harvested **~1,169 posts** with a heuristic
+  measurement parser. These are **uncommitted working-tree changes** — they exist on
+  disk but not in git history yet, so `git status`/your editor will show them as new.
+- **Heads-up on FALSE POSITIVES:** r/curvy and r/petite look like fashion subs but
+  are ~95% NSFW/solicitation — excluded on purpose; keep them out.
+
+**Open / handoff:** If your task overlaps (finding/collecting Reddit posts with
+measurements or photos), please **build on these scripts rather than starting
+fresh**, and coordinate here. If it's genuinely different, still skim the handoff
+doc so you don't waste time rediscovering the API/RSS/flair constraints. Flag in a
+new entry if you change any of the four scripts above so I know on my next session.
+
 ## 2026-06-22 17:28 EDT — Codex — Curvevera archive wrap-up: transcript, S3, git
 
 **Did:** Uploaded this Codex conversation to `codex_chat_transcripts` with chat key
@@ -69,6 +256,71 @@ where Loox count hints exceed parsed rows, decide raw-review intake load, and ru
 taxonomy classification from `curvevera_com_product_taxonomy_signals.json` instead
 of refetching product pages.
 
+## 2026-06-22 20:30 EDT — Claude Code — Corrected measurements ACTUALLY backfilled to dev images (loader couldn't; applied mig 15 + new script)
+
+**Did:** Got the audit-corrected measurements into dev `public.images` for real, and
+found that the loader path I built earlier does NOT do it.
+- **Loader RPC limitation (important):** `dev_upsert_reviewed_image_batch` writes
+  measurement columns ONLY on INSERT. On merge/on-conflict UPDATE it refreshes
+  crop_spec/weeks_pregnant/pregnancy_evidence/linkage — **no measurement columns.**
+  So the human's `load-dev-approved-images.mjs --apply --measurement-overrides` run
+  (images_inserted 1,512 / images_updated 31,209) only put corrected measurements on
+  the 1,512 NEW rows; the 31k existing rows were unchanged. Verified in SQL + a
+  spot-check row.
+- **Dev was missing bust/bra_band columns:** dev-migration
+  `20260620_dev_15_bust_bra_band_columns.sql` had never been applied (the loader's
+  old RPC silently dropped bust_in_display/bra_band_in_display since jsonb_to_recordset
+  ignores unknown keys). **I applied mig 15** (`--only=...`, gated) — adds
+  `bust_in_display` + `bra_band_in_display` and `create or replace`s the loader RPC.
+- **New focused writer** `scripts/backfill-dev-image-measurements.mjs` (npm
+  `dev-images:measurement-backfill`): matches dev images to overrides by
+  `commentId(user_comment)` and UPDATEs ONLY the 8 measurement columns via psql
+  (`DEV_DATABASE_URL`, dev-guarded, dry-run unless `--apply` + `FWM_DEV_DB_WRITE_OK`).
+  Uses the same `toNumberOrNull` as the loader (range weights -> null, no regression).
+- **APPLIED + verified:** updated 21,914 existing dev images. Spot-check row
+  "32,29,45… 5'7… 150lbs" now waist 29 / hips 45 / bust 32. Dev non-null coverage now
+  bust 2,944 / bra_band 2,395 (new) / cup 15,221 / waist 2,506 / hips 2,127.
+
+**Heads-up:** (1) The loader still won't refresh measurements on merge — if that's
+wanted long-term, add the measurement columns to the RPC's two UPDATE SET clauses.
+For now the backfill script is the tool to push new extractions onto existing rows.
+(2) **Age IS now propagated** (update 20:40): added `age_years_display` to the
+override builder COLUMN_MAP + the backfill COLUMNS (sql type `integer`), rebuilt the
+override, re-ran the backfill. 263 comment-bearing dev images now carry age from the
+current regex (8,045 total incl. pre-existing prod-baseline ages). The backfill writes
+age directly via psql, so the loader RPC's lack of age support doesn't matter. (3)
+Pregnancy DID update via the loader (weeks_pregnant is in its merge SET). (4)
+Re-running the loader after mig 15 would now write bust/bra_band on NEW inserts too,
+but the backfill already covered existing rows including the 1,512 inserts.
+
+**Open / handoff:** Measurement backfill is DONE + verified. Uncommitted (working
+tree): `scripts/backfill-dev-image-measurements.mjs`, `package.json`. Mig 15 is now
+applied to dev. Earlier write-back machinery
+(`scripts/build-measurement-overrides.mjs`, loader `--measurement-overrides`) is still
+valid and used by the backfill (it consumes `measurement_overrides.json`).
+
+## 2026-06-22 ~14:15 EDT — Claude Code — Auto-crop detection run PAUSED at user shutdown (resumable)
+
+**Did:** Garment-aware auto-crop pipeline is built (see my earlier auto-crop entries).
+Launched full person-detection over the **45,269 taxonomy-having images**
+(`clothing_type_id not null`) to feed the crops. **Paused at ~2,381/45,269** — no
+detect process is running now. Output is line-buffered ndjson, last line verified valid,
+so `--resume` continues cleanly.
+
+**Heads-up:** All artifacts live OUTSIDE the repo in `../FWM_Data/_cache/`:
+`crop_worklist.ndjson` (45,269), `crop_bboxes_full.ndjson` (partial output),
+`clothing_catalog.json` (clothing_type_id→mother_category, also rebuildable from dev by
+the backfill). CV venv at `../FWM_Data/_venv_cv`, weights `../FWM_Data/_models/yolov8n*.pt`.
+Nothing written to any DB. Crop/prettiness files uncommitted in the working tree.
+`a`+`b` done: `index.dev.html` cover-window render branch + `crop_spec` CHECK/contract
+migration `20260622_dev_16_crop_spec_contract.sql`.
+
+**Open / handoff:** Resume detection (cmd in `22June2026_NotesForBri.md`, my section).
+After it finishes: `build-auto-crop-dashboard.mjs` for review →
+`backfill-dev-image-crops.mjs` dry-run → human OK → `--apply` (writes crop_spec to dev,
+guarded; only whole_body/garment_priority/garment_partial; head_priority + no-taxonomy
+skipped per human). Full human-facing status in `22June2026_NotesForBri.md`.
+
 ## 2026-06-22 ~14:40 EDT — Codex — Curvevera review scrape with taxonomy sidecar paused safely
 
 **Did:** Added `data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_curvevera_reviews.py`
@@ -88,6 +340,40 @@ a checkpoint rewrite, so JSONL was rebuilt from CSV and validated.
 131/465 products complete, 14,881 review rows, 131 product taxonomy records, 334
 products remaining. Resume with:
 `python3 data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_curvevera_reviews.py --resume --delay-seconds 0.35 --product-delay-seconds 2`.
+
+## 2026-06-22 ~18:40 EDT — Claude Code — Reddit harvester: parser fixes, NSFW sub removal, flair backfill
+
+**Did:** Hardened the RSS Reddit harvester (`scripts/harvest-reddit-posts.mjs`) and
+added two helper scripts. All FILE-ONLY — nothing committed, nothing in Supabase.
+- **Parser fixes** in `extractMeasurements`: cm→inch conversion + per-field
+  plausibility bounds (fixes "bust 106 cm" stored as 106"); weight bounds 70–500;
+  bra-size now case-insensitive ("32d"), context-gated (single-letter cups need
+  bra/boobs/breasts/bust context; spaced single letters rejected → kills "F 28 I"→"28I"
+  and age tags "28F").
+- **Removed r/curvy and r/petite from the rotation** — despite the names they are
+  ~95% NSFW/solicitation, not fashion. Purged 198 rows (backup:
+  `posts.ndjson.bak-before-nsfw-purge`). Strengthened `looksOffIntent` blocklist.
+- **Flair:** the Atom RSS `<category>` is ALWAYS the subreddit, never link flair —
+  the old `flair: e.category` was wrong. Harvester now sets `flair: null`; new
+  `scripts/enrich-reddit-flair.mjs` scrapes REAL flair from **old.reddit HTML**
+  (`www` .json is 403; old.reddit `/comments/<id>/` is 200). Flair span class isn't
+  first (`flairrichtext … linkflairlabel`) and titles carry `&quot;` — parser handles both.
+- `scripts/reparse-and-stats-reddit.mjs` re-applies the parser to stored raw_text
+  (no re-fetch) → `posts_clean.ndjson` + stats. `scripts/build-reddit-review.mjs`
+  → `.codex_tmp/reddit_review.html` full-detail review dashboard (sort + flair col).
+
+**Heads-up:** Data lives OUTSIDE the repo in `FWM_Data/reddit_harvest/`
+(`posts.ndjson` raw, `posts_clean.ndjson` cleaned). The `.env.example` Reddit
+OAuth keys are DEAD (2026 policy) — do not build an OAuth path; RSS + old.reddit
+is the only working route. Reddit RSS is rate-limited (~1 req/min); old.reddit
+tolerated ~1.8s spacing (188 ok / 12 no-flair over 200).
+
+**Open / handoff:** Flair backfill was stopped at **~200/1,164** for the human's
+shutdown — RESUMABLE via `_state/flair.json`. Resume:
+`node scripts/enrich-reddit-flair.mjs --delay-ms=1800` then
+`node scripts/reparse-and-stats-reddit.mjs && node scripts/build-reddit-review.mjs`.
+NOT yet loaded to dev `staging.reddit_posts` (migration exists) — human reviews the
+dashboard first. Scripts uncommitted (working tree only).
 
 ## 2026-06-22 ~13:30 EDT — Claude Code — Amazon taxonomy backfill: tie-break, retry sweep, breadcrumb retention, review dashboard
 
