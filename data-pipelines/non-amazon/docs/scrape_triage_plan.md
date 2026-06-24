@@ -1,6 +1,6 @@
 # Non-Amazon Scrape Triage Plan
 
-Last updated: 2026-05-27 America/New_York
+Last updated: 2026-06-24 America/New_York
 
 ## Coordination Rules
 
@@ -104,6 +104,13 @@ Claim files live in:
   - Resume from the unscanned tail rather than restarting the full catalog.
   - Keep public pages/endpoints only; no auth bypass, captcha bypass, WAF bypass, or aggressive retries.
 
+### lulus_com
+
+- Status: workbook-backed conversion exists, but fresh live scraping remains blocked from this environment by PerimeterX/403 behavior.
+- Browser-assisted revisit: use `data-pipelines/docs/browser-assisted-review-scraping-playbook.md` before retrying the old live Nuxt review endpoint.
+- Monetization note: Lulus has an official affiliate page at `https://www.lulus.com/affiliates`; its `Apply Now` path points to Impact. Existing AWIN/Sovrn artifacts do not provide Lulus sponsored links (`no_awin_advertiser_match` in AWIN dry-run candidates), so monetized Lulus links need Impact signup/link-generation work.
+- Detailed notes: `data-pipelines/non-amazon/docs/lulus_scrape_2026-05-05.md`.
+
 ## Next Candidates
 
 After the five queued claim files above:
@@ -191,6 +198,108 @@ Sovrn false positives to avoid:
 - `ventilateurs_plafond_com`: ceiling-fan false positive.
 - `gillettevenus_com`: razor/personal-care false positive.
 - `nuawoman_com`: wellness/content false positive.
+
+## Reddit Fit-Request Retailer Triage Added 2026-06-24
+
+Source artifacts:
+
+- Reddit harvested post corpus: `FWM_Data/reddit_harvest/posts_clean.ndjson`
+- First-pass retailer mention extraction: `/private/tmp/fwm_reddit_retailer_mentions.json`
+- Cross-agent handoff: `docs/reddit-harvester-handoff.md`
+
+Context:
+
+- This list comes from measurement/fit-heavy Reddit request posts and old.reddit comment-page extraction across petite, tall, denim, plus-size, full-bust, bra-fit, and swim contexts.
+- Evidence strength is split into `reply-rec` where a recommendation appeared in a parsed reply, and `op-context` where the retailer was mentioned by the requester or was strong demand/context but not a verified reply recommendation.
+- Current Reddit artifacts have sparse post/link flair and no author/user flair field yet. Future Reddit retailer exports should include both `post_flair` and `author_flair`; extend `scripts/enrich-reddit-flair.mjs` to parse both from old.reddit before using this as a final recommendation-evidence dataset.
+- Treat `Gap` and `Next` as require-context names: `Gap` is often a fit-gap false positive, and `Next` is often ordinary prose unless it appears as `Next.us`, `next.co.uk`, or clear UK retailer context.
+
+Scrape coverage was checked against `FWM_Data/00_raw_scraped_data` on 2026-06-24.
+
+| Retailer / brand | Likely target | Evidence tier | Current scrape status | Existing raw scrape slug(s) / notes |
+|---|---|---|---|---|
+| Bravissimo | `bravissimo.com` | high reply-rec: bras + long-torso swim | not scraped | candidate slug `bravissimo_com` |
+| Elomi | `elomilingerie.com` | high reply-rec: full-bust bras | not scraped | candidate slugs `elomilingerie_com`, `elomi_com` |
+| Panache | `panache-lingerie.com` | high reply-rec: full-bust, sports, strapless bras | not scraped | candidate slugs `panache_lingerie_com`, `panache_com` |
+| Freya | `freyalingerie.com` | high reply-rec: projected/strapless bras | not scraped | candidate slugs `freyalingerie_com`, `freya_com` |
+| Curvy Kate | `curvykate.com` | high reply-rec: full-bust/strapless bras | scraped | `curvykate_com` |
+| Glamorise | `glamorise.com` | reply-rec: large-band/full-cup bras | scraped | `glamorise_com` |
+| Goddess | `goddessbra.com` | reply-rec: large-cup support bras | not scraped | candidate slugs `goddessbra_com`, `goddess_com` |
+| Enell | `enell.com` | reply-rec: compression sports bras | not scraped | candidate slug `enell_com` |
+| Natori | `natori.com` | reply-rec: smaller/postpartum/gapping bras | not scraped | candidate slug `natori_com` |
+| Brastop | `brastop.com` | strategic full-bust retailer / marketplace | not scraped | candidate slug `brastop_com` |
+| Victoria's Secret / PINK | `victoriassecret.com` | bra/swim context, mostly OP/context in this pass | scraped | `vs` |
+| Soma | `soma.com` | bra comfort context, mostly OP/context in this pass | scraped | `soma` |
+| Wacoal | `wacoal-america.com` | bra context, mostly OP/context in this pass | not scraped | candidate slugs `wacoal_america_com`, `wacoal_com` |
+| Aerie / American Eagle | `ae.com` | petite/tall denim + bra/swim context | not scraped | candidate slugs `ae_com`, `aerie_com`, `americaneagle_com` |
+| Old Navy | `oldnavy.gap.com` | tall/petite basics, pants, tees | scraped | `oldnavy_com` |
+| Levi's | `levi.com` | high demand: petite/tall/denim fit | not scraped | candidate slugs `levi_com`, `levis_com` |
+| Uniqlo | `uniqlo.com` | petite jeans, kids-section fit hacks, UV hoodie | not scraped | candidate slug `uniqlo_com` |
+| Madewell | `madewell.com` | petite/tall denim fit and size inconsistency | not scraped | candidate slug `madewell_com` |
+| Target | `target.com` | swim/bra OP-context marketplace | not scraped | broad marketplace; candidate slugs `target_com`, `target` |
+| Walmart | `walmart.com` | swim/bra OP-context marketplace | scraped | `walmart` |
+| Macy's | `macys.com` | formal/plus-size OP-context marketplace | scraped | `macys_com` |
+| Nordstrom | `nordstrom.com` | bra/apparel marketplace context | not scraped | `nordstromrack_com` exists, but main `nordstrom_com` does not |
+| Honeylove | `honeylove.com` | bra/shapewear OP-context | scraped | `honeylove_com` |
+| Shapermint | `shapermint.com` | bra/shapewear OP-context | scraped | `shapermint` |
+| Skims | `skims.com` | bralette/bra context | scraped | `skims_com` |
+| ASOS | `asos.com` | petite skirts/apparel context | not scraped | candidate slug `asos_com`; sheet note previously said reviews were hard to find |
+| Boden | `bodenusa.com` / `boden.co.uk` | petite dresses/apparel context | not scraped | candidate slugs `bodenusa_com`, `boden_co_uk`, `boden_com` |
+| American Tall | `americantall.com` | tall basics, long sleeves, 38-40 inch inseams | not scraped | candidate slug `americantall_com`; previous sheet marked not scrapable, but Reddit demand is strong |
+| Long Tall Sally | `longtallsally.com` | tall women context | not scraped | candidate slug `longtallsally_com`; previous sheet marked not scrapable |
+| TomboyX | `tomboyx.com` | inclusive bras/swim/apparel context | not scraped | candidate slug `tomboyx_com` |
+| Depop | `depop.com` | secondhand discovery context | not scraped | secondhand platform, not normal product-review scrape |
+| Poshmark | `poshmark.com` | secondhand discovery context | not scraped | secondhand platform, not normal product-review scrape |
+| Dockers | `dockers.com` | tall 38-inch inseam / pants context | not scraped | candidate slug `dockers_com` |
+| Abercrombie | `abercrombie.com` | petite apparel / kids recs context | scraped | `abercrombie_com` |
+| Gap | `gap.com` | tall basics context, but noisy false-positive name | scraped | `gap`; count only when explicit retail context is present |
+| Banana Republic | `bananarepublic.gap.com` | tall/petite basics cluster | not scraped | candidate slugs `bananarepublic_com`, `banana_republic` |
+| Eddie Bauer | `eddiebauer.com` | tall basics cluster | not scraped | candidate slug `eddiebauer_com` |
+| Alexander Jane Boutique | `alexanderjaneboutique.com` | TallGirls 40-inch inseam jeans context | not scraped | candidate slug `alexanderjaneboutique_com`; add to retailer dictionary |
+| Reformation | `thereformation.com` | tall/petite dress/denim context | not scraped | candidate slugs `thereformation_com`, `reformation_com` |
+| Mother | `motherdenim.com` | tall/petite denim context | not scraped | candidate slugs `motherdenim_com`, `mother_com` |
+| Next | `next.us` / `next.co.uk` | UK/tall high-street context, noisy name | not scraped | candidate slugs `next_us`, `next_co_uk`, `next`; require explicit retail context |
+| M&S | `marksandspencer.com` | UK/tall high-street context | not scraped | candidate slugs `marksandspencer_com`, `marks_spencer_com` |
+| Zara | `zara.com` | petite skirt/apparel context | not scraped | candidate slug `zara_com` |
+| H&M | `hm.com` | petite/tall apparel context | not scraped | candidate slugs `hm_com`, `h_and_m_com` |
+| LOFT | `loft.com` | petite business casual / styling context | not scraped | candidate slug `loft_com` |
+| Short Story | `shortstorybox.com` | petite subscription-box context | not scraped | candidate slugs `shortstorybox_com`, `short_story`; service-level discovery, not a normal product-review scrape |
+| Wrangler | `wrangler.com` | denim context | scraped | `wrangler` |
+| Ariat | `ariat.com` | denim/tall pants context | not scraped | candidate slug `ariat_com` |
+| Iron Heart | `ironheart.co.uk` / `ironheartamerica.com` | denim niche context | not scraped | candidate slugs `ironheart_co_uk`, `ironheartamerica_com` |
+| Momotaro | `momotaro-jeans.com` | denim niche context | not scraped | candidate slugs `momotaro_jeans_com`, `momotaro_com` |
+| Okayama Denim | `okayamadenim.com` | denim niche context | not scraped | candidate slug `okayamadenim_com` |
+| Redcast Heritage | `redcastheritage.com` | denim niche context | not scraped | candidate slugs `redcastheritage_com`, `redcast` |
+| Bears Tokyo | `bears-tokyo.myshopify.com` | denim niche context | not scraped | candidate slug `bears_tokyo` |
+| Acne Studios | `acnestudios.com` | denim/apparel niche context | not scraped | candidate slug `acnestudios_com` |
+| Poolhouse NY | `poolhousenewyork.com` | denim niche context | not scraped | candidate slugs `poolhousenewyork_com`, `poolhouse_ny` |
+
+Recommended first Reddit-derived scrape queue, excluding already-scraped targets:
+
+1. `bravissimo_com`
+2. `elomilingerie_com`
+3. `panache_lingerie_com`
+4. `freyalingerie_com`
+5. `goddessbra_com`
+6. `enell_com`
+7. `natori_com`
+8. `brastop_com`
+9. `wacoal_america_com`
+10. `ae_com`
+11. `levi_com`
+12. `uniqlo_com`
+13. `madewell_com`
+14. `americantall_com`
+15. `alexanderjaneboutique_com`
+
+Lower-priority or special-handling Reddit-derived targets not yet scraped:
+
+- `target_com`: broad marketplace; only pursue if category-bounded.
+- `nordstrom_com`: main Nordstrom is missing, but `nordstromrack_com` exists and should not be conflated.
+- `asos_com`: prior sheet note says reviews were hard to find; revisit only with a clear public review/photo path.
+- `bodenusa_com` / `boden_co_uk`: likely catalog-model/model-measurement oriented.
+- `longtallsally_com`: prior sheet marked not scrapable; keep as tall-demand reference unless a viable public review path is found.
+- `tomboyx_com`, `depop_com`, `poshmark_com`, `dockers_com`, `bananarepublic_com`, `eddiebauer_com`, `thereformation_com`, `motherdenim_com`, `next_us`, `marksandspencer_com`, `zara_com`, `hm_com`, `loft_com`, `shortstorybox_com`, `ariat_com`, `ironheart_co_uk`, `momotaro_jeans_com`, `okayamadenim_com`, `redcastheritage_com`, `bears_tokyo`, `acnestudios_com`, `poolhousenewyork_com`.
 
 ## Sheet Intake Added 2026-05-06
 

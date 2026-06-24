@@ -17,9 +17,10 @@ from "What's next" whenever you're ready.
 
 ## ★ Auto-crop + prettiness session — image cropping & photo-quality scoring
 
-**One-line status:** Built garment-aware auto-cropping end-to-end; the person-detection
-job that feeds it is **paused at ~2,381 of 45,269 images** and will **resume cleanly**.
-**Nothing was written to any database.** Safe to shut down.
+**One-line status:** Built garment-aware auto-cropping end-to-end. The person-detection
+job that feeds it is **running unattended right now** under an auto-restarting wrapper and
+will finish on its own (**~5,200 of 45,269 done** at last check and climbing). **Nothing
+has been written to any database.** You can let the machine sit.
 
 ### What this is
 So review photos display well in the site's 3:4 cards, we auto-choose a crop per image:
@@ -32,24 +33,34 @@ So review photos display well in the site's 3:4 cards, we auto-choose a crop per
 Alongside it, a deterministic **photo-quality ("prettiness") score** (plan §12) — still
 dry-run, no ML yet; aesthetic/CLIP scoring is a later phase.
 
-### The one thing in flight: the detection run
-A Python YOLO job (`scripts/detect_person_boxes.py`) is detecting the person box + pose
-keypoints for all **45,269** taxonomy-having images. It **paused at ~2,381 done** (no
-process is running now — clean to shut down) and is **resumable** — `--resume` skips
-everything already in the output file.
+### The detection run (running now, unattended)
+A Python YOLO job (`scripts/detect_person_boxes.py`) detects the person box + pose
+keypoints for all **45,269** taxonomy-having images, to feed the crops. It's **currently
+running** under an auto-restart wrapper, `scripts/run-detection-until-complete.sh`, which:
+- re-runs the detector with `--resume` if it gets **killed** (it was killed once by memory
+  pressure — the wrapper now uses a smaller batch, `--batch 4`, and restarts automatically,
+  losing no work since output is written row-by-row);
+- backs off to the lightest batch if a run makes no progress, and **gives up** rather than
+  spinning forever if it truly can't advance;
+- **stops on its own when all 45,269 are done** (the log shows `COMPLETE`).
+`caffeinate` keeps the Mac awake and `nohup` lets it survive closing the terminal.
 
-**To resume when you're back** (runs in the background, survives closing the terminal):
+**Check progress** (zsh-safe — these have no `#` comments, which zsh would mis-read as args):
+```bash
+wc -l < ../FWM_Data/_cache/crop_bboxes_full.ndjson
+tail -3 ../FWM_Data/_cache/detect_run.log
+pgrep -fl run-detection-until-complete
+```
+First = done rows (of 45,269); the log prints `COMPLETE` when finished; the third confirms
+the wrapper is alive. Takes a few hours.
+
+**If it's ever stopped and you need to relaunch** (resumes from wherever it left off):
 ```bash
 cd /Users/briannasinger/Projects/FWM/FWM_Repo
-nohup ../FWM_Data/_venv_cv/bin/python scripts/detect_person_boxes.py \
-  --input ../FWM_Data/_cache/crop_worklist.ndjson \
-  --output ../FWM_Data/_cache/crop_bboxes_full.ndjson \
-  --detect-model ../FWM_Data/_models/yolov8n.pt \
-  --pose-model ../FWM_Data/_models/yolov8n-pose.pt \
-  --resume > ../FWM_Data/_cache/detect_run.log 2>&1 &
+caffeinate -is nohup bash scripts/run-detection-until-complete.sh \
+  >> ../FWM_Data/_cache/detect_run.log 2>&1 &
 ```
-Progress anytime: `wc -l < ../FWM_Data/_cache/crop_bboxes_full.ndjson` (out of 45,269).
-It takes a few hours. **Or just tell me "resume the detection" and I'll run it.**
+**Or just tell me "resume the detection" / "detection's done" and I'll take it from there.**
 
 ### What's next (after detection finishes)
 1. **Review dashboard** over the full set (before/after thumbnails, like the one you
@@ -78,7 +89,8 @@ It takes a few hours. **Or just tell me "resume the detection" and I'll run it.*
 - `scripts/lib/card-crop-geometry.mjs` — crop solver (pure geometry)
 - `scripts/lib/garment-region.mjs` — category → which part of the body to keep
 - `scripts/lib/detection-crop.mjs` — shared decision wrapper
-- `scripts/detect_person_boxes.py` — YOLO detection (the paused job)
+- `scripts/detect_person_boxes.py` — YOLO detection (concurrent + batched + `--resume`)
+- `scripts/run-detection-until-complete.sh` — auto-restart wrapper (the job running now)
 - `scripts/build-auto-crop-dashboard.mjs` — before/after review dashboard
 - `scripts/backfill-dev-image-crops.mjs` — dev writer (dry-run by default)
 - `scripts/score-dev-image-prettiness.mjs` — photo-quality scorer (dry-run)
@@ -89,8 +101,11 @@ It takes a few hours. **Or just tell me "resume the detection" and I'll run it.*
 ### Safety
 - **Nothing written to dev or production DB** — all crop/prettiness work is dry-run.
 - These files are **uncommitted** in the working tree (consistent with this repo's
-  handoff style — see `AGENT_LOG.md`); they survive the shutdown on disk.
-- No background process of mine is running; nothing to stop before you power off.
+  handoff style — see `AGENT_LOG.md`); they survive on disk.
+- The **only** running process is the detection wrapper (intended). It writes only to
+  `../FWM_Data/_cache/` — no DB, no repo files. If you need to stop it before it finishes:
+  `pkill -f run-detection-until-complete && pkill -f detect_person_boxes` (it resumes
+  cleanly next launch).
 
 ---
 
@@ -391,7 +406,7 @@ only the pre-fill commits, or keep waiting. Just tell me.
 - To refresh after any future regex change: **`npm run extraction-audit:build`**
   (needs `python3` on PATH; takes ~3 min).
 
-### 2. Built + verified the write-back of corrected measurements to dev images
+### 2. ✅ Wrote the corrected measurements to dev images (DONE — see the "DONE" section below)
 The improved regexes (from earlier today) corrected **10,918 comments**
 (~5,500 measurements newly filled, ~8,300 column-shift garbage values dropped).
 Today I built the path to push those corrections into dev `public.images`:
@@ -411,36 +426,44 @@ Today I built the path to push those corrections into dev `public.images`:
 
 ---
 
-## What's next (your decision when you're back)
+## ✅ DONE (resolved 2026-06-22 ~20:40) — corrected measurements (incl. AGE) are in dev
 
-**Deciding question:** apply the corrected measurements to the dev database.
-The dry-run showed it would update **~33,000 dev image rows** but quarantine
-**7,000 rows** that have a *pre-existing* duplicate-image-URL conflict (unrelated to
-this work — their corrections won't land until those conflicts are sorted out
-separately). It's reversible on dev (`npm run dev-images:baseline:restore`).
+The corrected, current-regex measurements are now backfilled into dev `public.images`
+and verified in the database. **21,914 existing images updated** — the 8 measurement
+columns **plus `age_years_display`**.
 
-You were mid-answer on this when you had to step away. Three paths:
+How it actually got done (the first attempt did NOT work, FYI):
+- The approved-images **loader was a dead end** here — its RPC only writes measurement
+  columns when it *inserts a new* image; on merge/update of an existing image it never
+  touches measurements. So the `--measurement-overrides` loader run only fixed the
+  ~1,512 brand-new rows, not the ~31k existing ones.
+- Dev was also **missing the `bust_in_display` / `bra_band_in_display` columns**
+  (dev-migration 15 had never been applied). Applied migration 15 (gated, dev-only).
+- Built + ran a focused writer, **`npm run dev-images:measurement-backfill`** (script
+  `scripts/backfill-dev-image-measurements.mjs`), which updates ONLY the measurement
+  columns on existing rows, matched by review comment, **directly via psql** (so the
+  loader RPC's gaps don't matter). Dev-guarded; dry-run unless `--apply` +
+  `FWM_DEV_DB_WRITE_OK=yes-i-understand-this-is-dev`.
+- **Age added in a second pass:** wired `age_years_display` through the override builder
+  + the backfill and re-ran it — 263 comment-bearing images now carry age from the
+  current regex.
+- Verified in the DB: the "32,29,45 / 5'7 / 150lbs" review now reads waist 29 / hips 45
+  / bust 32; a "…age 30" review reads age 30. Dev non-null coverage: bust 2,944 /
+  bra_band 2,395 (brand-new columns) / cup 15,221 / waist 2,506 / hips 2,127 / age 8,045
+  (incl. pre-existing prod-baseline ages; 263 from this backfill).
 
-1. **Apply now (skip the 7,000 conflicts).** Run:
-   ```
-   FWM_DEV_IMAGE_LOAD_SKIP_DUPLICATE_CONFLICTS=yes-reviewed-dry-run \
-   node scripts/load-dev-approved-images.mjs --apply --resolve-workbooks \
-   --measurement-overrides=/Users/briannasinger/Projects/FWM/FWM_Data/_reports/extraction_audit/measurement_overrides.json
-   ```
-   Writes corrected measurements to the ~33k rows; the 7,000 conflicts stay unchanged.
-
-2. **Hold** — leave it staged (current state). Nothing written.
-
-3. **Investigate the 7,000 duplicate conflicts first** so those corrections can land
-   too, instead of being quarantined.
-
-Just tell me which and I'll take it from there.
+**To push future regex improvements to dev** (after editing the parser): re-run
+`npm run extraction-audit:build` → `python3 tools/extraction-audit-dashboard/rerun-extraction.py`
+→ `npm run dev-images:measurement-overrides` → `npm run dev-images:measurement-backfill`
+(add `--apply` + the write flag on the last one). This chain covers all measurement
+fields including age.
 
 ### Smaller follow-ups noted
-- **Age isn't propagated to dev yet.** `public.images.age_years_display` exists, but
-  the loader's database function (RPC) doesn't accept age, so age corrections (+299
-  comments) stop at the override file. Wiring age through needs a small RPC change —
-  separate task if you want it.
+- **✅ Age IS now in dev (done 2026-06-22 ~20:40).** Added `age_years_display` to the
+  override builder + the measurement backfill (`npm run dev-images:measurement-backfill`)
+  and re-ran it. 263 comment-bearing dev images now carry age from the current regex
+  (verified: a "…age 30" review reads age 30). The backfill writes age directly via
+  psql, so the loader RPC not supporting age no longer matters.
 - The "Reviewed: incorrect" cleanup pass on your old 35 flags (see section 1).
 
 ---
@@ -519,3 +542,51 @@ scorer then reads crop windows for the whole set automatically.
   resume-ready (last line verified valid).
 
 Safe to shut down. -- Claude (prettiness/auto-crop thread)
+
+---
+
+### ▶ Resume runbook — exact commands (added after our follow-up chat)
+
+Status unchanged: detection still at **2,381 / 45,269**, nothing running. Only
+**Phase A** must be run by you (it gets killed inside agent sessions); B and C you can
+run yourself OR hand back to me once A finishes.
+
+**Phase A — finish person-detection (your Terminal, ~5h, auto-resumes):**
+```
+cd /Users/briannasinger/Projects/FWM/FWM_Repo
+caffeinate -is nohup ../FWM_Data/_venv_cv/bin/python scripts/detect_person_boxes.py \
+  --input ../FWM_Data/_cache/crop_worklist.ndjson \
+  --output ../FWM_Data/_cache/crop_bboxes_full.ndjson \
+  --detect-model ../FWM_Data/_models/yolov8n.pt \
+  --pose-model ../FWM_Data/_models/yolov8n-pose.pt --resume \
+  > ../FWM_Data/_cache/detect_run.log 2>&1 &
+```
+Monitor: `tail -f ../FWM_Data/_cache/detect_run.log` and
+`wc -l < ../FWM_Data/_cache/crop_bboxes_full.ndjson` (done ~45,269). Safe to re-launch
+the same command if it ever stops — `--resume` skips finished images.
+
+**Phase B — backfill crop windows into dev (after A; dev creds load from `.env`):**
+```
+# 1) Dry-run the full set (no DB writes); note the report path it prints
+node scripts/backfill-dev-image-crops.mjs --input=../FWM_Data/_cache/crop_bboxes_full.ndjson
+# 2) Verify that dry-run report (type auto-detected as "crops"); note the verify path
+node scripts/verify-dev-refresh-report.mjs --report=../FWM_Data/_reports/dev_image_crop_backfill_<TS>.json
+# 3) Apply to dev (needs write flag + the PASSED verify report from step 2)
+FWM_DEV_DB_WRITE_OK=yes-i-understand-this-is-dev \
+node scripts/backfill-dev-image-crops.mjs --apply \
+  --input=../FWM_Data/_cache/crop_bboxes_full.ndjson \
+  --verified-report=../FWM_Data/_reports/dev_refresh_report_verify_crops_<TS>.json
+```
+Replace each `<TS>` with the actual filename printed by the prior step. Reversible via
+`npm run dev-images:baseline:restore`.
+
+**Phase C — re-score prettiness on the cropped cards (optional, no DB writes):**
+```
+npm run dev-images:prettiness:dry-run -- --source=workbook
+```
+The scorer reads the new crop windows from dev automatically — no special flags.
+
+**Known harmless log noise:** the detection log prints PIL
+`DecompressionBombWarning: Image size (108000000 pixels) exceeds limit ...` on a few
+very high-res photos. It's a warning only — PIL still loads the image and detection
+continues; results are unaffected. Decided **not** to silence it for now.

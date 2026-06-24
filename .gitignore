@@ -51,3 +51,6 @@ data-pipelines/products/product_pages_working_copy.ndjson
 # Manual taxonomy review decisions (personal review output; lives in repo but not versioned)
 data-pipelines/products/manual_taxonomy_review/*.ndjson
 data-pipelines/products/manual_taxonomy_review/*.json
+
+# Local Google Analytics exports/snapshots (analysis artifacts; keep out of repo)
+GoogleAnalytics/

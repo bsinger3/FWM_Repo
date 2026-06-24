@@ -65,3 +65,41 @@ Result:
 - Statuses: all 10 live endpoints returned HTTP 403
 
 Direct PDP fetches also returned the PerimeterX CAPTCHA to local `curl`, and an escalated Playwright/Chromium probe returned HTTP 403 with title `Access to this page has been denied`. A fresh local live scrape is therefore blocked from this environment.
+
+## Affiliate Program - 2026-06-24
+
+Lulus has an official affiliate page at `https://www.lulus.com/affiliates`.
+The page says publishers can apply to earn commission on all products and the
+`Apply Now` link points to `app.impact.com`, so this is an Impact opportunity,
+not an AWIN/Sovrn match.
+
+Local affiliate-link artifacts checked on 2026-06-24:
+
+- AWIN dry-run candidates contained 12,370 Lulus rows, all skipped with
+  `no_awin_advertiser_match`.
+- AWIN applied link map, AWIN approved/nonapproved programme matches, and Sovrn
+  tracker/candidate files had no Lulus entries.
+- Current conclusion: Lulus scrape rows can exist, but sponsored links require
+  applying through Impact or adding an Impact link-generation path.
+
+## Revisit Strategy - 2026-06-24
+
+Levi's 2026-06-24 scrape showed a better path for retailers that look blocked
+from direct `curl`/fresh Playwright requests: use a normal visible browser only
+to discover public review-provider configuration, then scrape anonymous public
+provider APIs rather than replaying browser session state.
+
+Before retrying the old Lulus live Nuxt endpoint, use
+`data-pipelines/docs/browser-assisted-review-scraping-playbook.md`:
+
+- open a known Lulus review-photo PDP in a visible browser;
+- trigger reviews and customer-photo UI;
+- inspect public scripts, iframes, DOM attributes, and JSON-LD/page state for
+  provider keys, product ids, review/media endpoints, and photo filters;
+- build a scraper only if the discovered endpoint is anonymous/public;
+- emit both the review intake CSV and a `staging.product_pages` sidecar with
+  taxonomy signals in the same pass.
+
+If the only fresh-live path still requires PerimeterX/session replay, keep the
+workbook-backed conversion as the safe source and leave fresh live scraping
+blocked.
