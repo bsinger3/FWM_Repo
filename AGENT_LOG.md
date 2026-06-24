@@ -33,6 +33,33 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-24 12:57 EDT — Codex — Transcript upload for Reddit/Levi/Lulus/SHEIN thread
+
+**Did:** Rebuilt a compact transcript from the full session JSONL
+`/Users/briannasinger/.codex/sessions/2026/06/23/rollout-2026-06-23T14-03-03-019ef5a6-65e2-77e3-8f80-762421ec92e0.jsonl`
+into `/private/tmp/codex-fwm-reddit-levi-lulus-shein-transcript-2026-06-24.json`, uploaded it with
+`scripts/upload-codex-chat-transcript.mjs ... codex --skip-openai-summary`, and verified the Supabase row in
+`public.codex_chat_transcripts`.
+**Heads-up:** Chat key is `codex-fwm-reddit-retailer-triage-levi-scrape-l-749dd73fb4334fb6`; readback confirmed
+title `FWM Reddit retailer triage, Levi scrape, Lulus/SHEIN affiliate notes, and browser-assisted scraping prompts`,
+328 messages, `2026-06-23T18:03:39.486+00:00` to `2026-06-24T16:57:01.674+00:00`.
+**Open / handoff:** None.
+
+## 2026-06-24 11:48 EDT — Codex — Lulus affiliate triage note
+
+**Did:** Verified Lulus has an official affiliate page at
+`https://www.lulus.com/affiliates` with `Apply Now` pointing to Impact, then
+updated `data-pipelines/non-amazon/docs/lulus_scrape_2026-05-05.md` and
+`data-pipelines/non-amazon/docs/scrape_triage_plan.md` to note that existing
+AWIN/Sovrn outputs do not provide Lulus sponsored links and monetized Lulus
+links need Impact signup/link-generation work.
+**Heads-up:** The local AWIN dry-run had 12,370 Lulus candidates, all skipped
+with `no_awin_advertiser_match`; applied AWIN maps and Sovrn tracker/candidates
+had no Lulus entries. Do not expect AWIN/Sovrn to cover Lulus unless a future
+program/network state changes.
+**Open / handoff:** None. Future Lulus work should pair browser-assisted review
+scraping with a separate Impact monetization path.
+
 ## 2026-06-24 — Claude Code — Amazon product-page taxonomy COMPLETE in dev (resolved all residuals)
 
 **Did:** Finished the Amazon taxonomy backfill end-to-end in **dev** (commits up to
@@ -74,7 +101,7 @@ uncategorized-and-not-dead.** Steps this session:
 (Bri's), (2) optionally point the dashboard dropdowns at the DB vocab, (3) the broader
 "promote to prod" path is untouched — this was all dev.
 
-## 2026-06-24 — Claude Code — Tested pre-fill-from-URL; flagged untested working-tree changes
+## 2026-06-24 — Claude Code — Tested pre-fill-from-URL; reverted crop-renderer from prod index.html
 
 **Did:** Verified the committed pre-fill-from-URL feature (`prefillFromQuery()` in
 `index.html`, commits 8acce26 + 7d4e8f1) against the local `site` server (port 4322).
@@ -85,19 +112,71 @@ No console errors. (Auto-submit on the strict height+waist+hips combo returns "0
 — a data outcome, not a bug; random gallery confirmed the DB has data.)
 
 **Heads-up:** The **uncommitted** `index.html` diff (56 lines) is NOT the prefill feature.
-It bundles two separate, still-untested changes: (1) `assertDevPreviewConfig()` that runs
-at page load and *throws* if `window.FWM_ENV==="dev"` and the Supabase URL isn't the
-approved dev project — verify the prod path (FWM_ENV !== "dev") returns early and never
-throws, or it could blank the page; (2) `parseCropSpec`/`applyCropSpec` applying `crop_spec`
-(objectPosition clamp 0–100, zoom→scale clamp 1.6, rotation snap to 0/90/180/270 w/ 4/3
-cover-scale) to product-card images. I unit-checked the transform math (sound) but did NOT
-test it end-to-end on real result cards with a `crop_spec` — needs DB rows that have one.
+It backports two things from the committed dev preview into prod `index.html`:
+(1) `assertDevPreviewConfig()` and (2) `parseCropSpec`/`applyCropSpec`. Verified:
+- `npm run dev-images:preview:verify` passes 10/10 local + 2/2 tables + RPC (dev).
+- Dev preview (`/index.dev.html`, dev Supabase) renders real `cover-window` crops on
+  all 24 random cards — confirmed via computed styles AND a screenshot of real photos.
+  Dev-config guard happy path runs (FWM_ENV="dev", dev URL → no throw).
+- Prod path of the guard is safe: `config.js` leaves `FWM_ENV` unset, so
+  `assertDevPreviewConfig()` returns early — currently a no-op in prod.
 
-**Open / handoff:** Before pushing: test the crop-spec render on a real card, confirm the
-dev-config guard's prod path, and decide whether the crop-spec + guard belong in their own
-commit (they're unrelated to the prefill work that's already committed).
+**Resolution (per Bri):** crop rendering is a **v2 feature that belongs only in the dev
+testbed `index.dev.html`**, not in prod `index.html` (per docs/architecture-cleanup-plan.md:
+treat index.html as prod, index.dev.html as the next site). So:
+- **Reverted** the uncommitted `index.html` edits (`git checkout -- index.html`). Prod is
+  back to clean HEAD; the prefill feature is committed and unaffected.
+- **Relaxed** `scripts/verify-dev-preview-contract.mjs`: `crop_renderer_present` and
+  `crop_renderer_supports_safe_rotation` now require the renderer only in `index.dev.html`,
+  and added `production_index_omits_crop_renderer` (asserts `index.html` has NO
+  `applyCropSpec`) to stop the renderer from leaking back into prod before v2 ships.
+- Re-ran the contract test: **11/11 local + 2/2 tables + RPC, Passed: true.**
+
+Note for whoever promotes v2 to prod later: `index.dev.html`'s `applyCropSpec` is the
+canonical/complete version (handles `mode==="cover-window"`, the format all 43,661 dev
+`crop_spec` rows use). The earlier prod-port attempt was missing that branch — copy the
+dev version verbatim and remove `production_index_omits_crop_renderer` then.
+
+**Open / handoff:** Only the contract-test file is now modified (index.html is clean).
+Nothing else pending from this session.
 
 ---
+
+## 2026-06-24 11:27 EDT — Codex — Browser-assisted scrape playbook
+
+**Did:** Added `data-pipelines/docs/browser-assisted-review-scraping-playbook.md`
+to preserve the Levi session strategy as a reusable workflow for blocked retailers.
+The playbook covers safety guardrails, browser-as-discovery-not-data-plane,
+Bazaarvoice/Loox/Okendo/Yotpo/provider clues, required review CSV fields, and
+required `staging.product_pages` sidecar fields. Also appended a 2026-06-24
+revisit strategy to `data-pipelines/non-amazon/docs/lulus_scrape_2026-05-05.md`.
+**Heads-up:** The key Levi lesson is to use visible browser inspection to find public
+provider config, then switch to anonymous public APIs such as Bazaarvoice `reviews.json`
+with `hasphotos:eq:true`; do not replay cookies/session/challenge state.
+**Open / handoff:** Lulus should be retried using this playbook before repeating the
+older blocked Nuxt/live endpoint attempts. If only PerimeterX/session replay works,
+keep Lulus fresh-live marked blocked and rely on workbook/manual export.
+
+## 2026-06-24 06:21 EDT — Codex — Levi women-only BV scrape with product-page sidecar
+
+**Did:** Added `data-pipelines/scripts/00_raw_scrape/non_amazon/scrape_levi_women_bv_reviews.py`.
+It uses Levi's public Bazaarvoice API config from `bvapi.js` (`reviews.json` with
+`hasphotos:eq:true`) and the women-only public sitemap queue. Full run completed for
+1,690 `/clothing/women/` PDP URLs with zero errors. Outputs:
+`FWM_Data/00_raw_scraped_data/levi_com/levi_com_women_bazaarvoice_reviews_matching_intake_schema.csv`
+and product-page sidecars `levi_com_women_product_pages_for_staging.csv` / `.jsonl`.
+Validated totals: 61,722 customer-review image rows, 11,425 distinct image URLs,
+6,405 distinct review ids, 26,510 image+product+measurement rows, and 17,779 strict
+image+product+size+measurement rows.
+**Heads-up:** Bri caught that product-page taxonomy data also needed capture. The scraper
+now writes 1,690 product-page rows with normalized URL, source site, brand, product title,
+URL-derived breadcrumb/category path, observed clothing type ids, catalog image URLs,
+BV review/photo counts, and raw metadata for downstream `staging.product_pages` ingestion.
+No production DB writes or deploys.
+**Open / handoff:** Sidecar stores raw taxonomy signals and simple observed clothing-type
+ids; shared `extractTaxonomy()` classification has not been run/promoted into Supabase yet.
+Because BV review pools span variants, review CSV has 61,722 product-linked rows but 11,425
+distinct image URLs.
 
 ## 2026-06-24 03:59 EDT — Codex — Levi browser-assisted Bazaarvoice POC
 
