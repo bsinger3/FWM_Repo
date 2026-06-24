@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Height × Weight — dev image rows</title>
+<style>
+  :root {
+    --bg: #0f1216;
+    --panel: #171b21;
+    --panel2: #1d232b;
+    --line: #2a323d;
+    --text: #e6e9ee;
+    --muted: #95a0ad;
+    --accent: #5aa9ff;
+    --bad: #ff5d5d;
+    --good: #57c98a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  #app { display: grid; grid-template-columns: 280px 1fr 340px;
+    grid-template-rows: minmax(0, 1fr); height: 100vh; }
+  #app > * { min-height: 0; }
+  .col { overflow-y: auto; }
+  #plotwrap { overflow: hidden; }
+  #controls { background: var(--panel); border-right: 1px solid var(--line); padding: 16px; }
+  #detail   { background: var(--panel); border-left: 1px solid var(--line); padding: 16px; }
+  #plotwrap { position: relative; }
+  canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+  h1 { font-size: 15px; margin: 0 0 4px; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+    margin: 20px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  .sub { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+  label { display: block; margin: 8px 0 2px; color: var(--muted); font-size: 12px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { flex: 1; min-width: 0; }
+  input[type="number"], select {
+    width: 100%; background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: inherit; }
+  .check { display: flex; align-items: center; gap: 8px; margin: 8px 0; color: var(--text); cursor: pointer; }
+  .check input { width: auto; flex: none; }
+  button { background: var(--panel2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 7px 10px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #06121f; border-color: var(--accent); font-weight: 600; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .stat { display: flex; justify-content: space-between; padding: 3px 0; }
+  .stat b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .pill { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px;
+    background: var(--panel2); border: 1px solid var(--line); color: var(--muted); }
+  #tooltip { position: absolute; pointer-events: none; z-index: 5; max-width: 230px;
+    background: #0b0e12ee; border: 1px solid var(--line); border-radius: 8px; padding: 8px;
+    box-shadow: 0 8px 30px #000a; display: none; }
+  #tooltip img { width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px;
+    background: #000; margin-bottom: 6px; }
+  #tooltip .t-meas { font-weight: 600; }
+  #tooltip .t-cmt { color: var(--muted); font-size: 11px; margin-top: 4px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  #detail img { width: 100%; max-height: 320px; object-fit: contain; background: #000;
+    border-radius: 8px; border: 1px solid var(--line); }
+  #detail .empty { color: var(--muted); text-align: center; margin-top: 40px; }
+  .kv { display: grid; grid-template-columns: 90px 1fr; gap: 2px 8px; margin: 10px 0; }
+  .kv .k { color: var(--muted); }
+  .kv .v { color: var(--text); word-break: break-word; }
+  .cmt { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px; font-size: 12px; color: var(--text); white-space: pre-wrap; max-height: 220px; overflow: auto; }
+  a { color: var(--accent); }
+  .flag { color: var(--bad); font-weight: 600; }
+  #loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted);
+    background: var(--bg); z-index: 9; }
+  .legend { display: flex; gap: 14px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .hint { color: var(--muted); font-size: 11px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="controls" class="col">
+    <h1>Height × Weight</h1>
+    <p class="sub">Every dev image row with a height and/or weight. Hover a dot to preview, click to inspect. Drag to pan, scroll to zoom.</p>
+
+    <div class="btns">
+      <button id="btn-human" class="primary">Human range</button>
+      <button id="btn-fit">Fit all data</button>
+    </div>
+    <p class="hint">"Fit all" zooms out to include the worst outliers; "Human range" zooms into the normal cluster.</p>
+
+    <h2>Plausible band</h2>
+    <p class="sub">Dots outside this band are flagged as suspect (red). Tune the bounds to your taste.</p>
+    <div class="row">
+      <div><label>Height min (in)</label><input id="h-min" type="number" value="54" step="1"></div>
+      <div><label>Height max (in)</label><input id="h-max" type="number" value="78" step="1"></div>
+    </div>
+    <div class="row">
+      <div><label>Weight min (lb)</label><input id="w-min" type="number" value="80" step="1"></div>
+      <div><label>Weight max (lb)</label><input id="w-max" type="number" value="350" step="1"></div>
+    </div>
+
+    <h2>Filter</h2>
+    <label>Source site</label>
+    <select id="site"><option value="">All sources</option></select>
+    <label class="check"><input type="checkbox" id="only-bad"> Show only flagged (out-of-band) dots</label>
+    <label class="check"><input type="checkbox" id="need-both" checked> Require both height & weight</label>
+
+    <h2>Stats</h2>
+    <div id="stats"></div>
+    <div class="legend">
+      <span><i class="dot" style="background:#5aa9ff"></i> in band</span>
+      <span><i class="dot" style="background:#ff5d5d"></i> flagged</span>
+      <span><i class="dot" style="background:#ffd166"></i> selected</span>
+    </div>
+  </div>
+
+  <div id="plotwrap">
+    <canvas id="cv"></canvas>
+    <div id="tooltip"></div>
+    <div id="loading">Loading image rows…</div>
+  </div>
+
+  <div id="detail" class="col">
+    <div id="detail-body"><div class="empty">Click a dot to inspect the row.</div></div>
+  </div>
+</div>
+
+<script>
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const tooltip = document.getElementById("tooltip");
+const plotwrap = document.getElementById("plotwrap");
+const els = {
+  hMin: document.getElementById("h-min"), hMax: document.getElementById("h-max"),
+  wMin: document.getElementById("w-min"), wMax: document.getElementById("w-max"),
+  site: document.getElementById("site"), onlyBad: document.getElementById("only-bad"),
+  needBoth: document.getElementById("need-both"), stats: document.getElementById("stats"),
+  detail: document.getElementById("detail-body"),
+};
+
+let ALL = [];          // all points from server
+let view = [];         // points passing current filters (drawn)
+let selected = null;
+const PAD = { l: 64, r: 18, t: 18, b: 46 };
+// data-space view window
+let vx = { min: 40, max: 84 }, vy = { min: 60, max: 360 };
+let dpr = 1, W = 0, H = 0;
+
+function band() {
+  return {
+    hMin: +els.hMin.value, hMax: +els.hMax.value,
+    wMin: +els.wMin.value, wMax: +els.wMax.value,
+  };
+}
+function isBad(p, b) {
+  if (p.h != null && (p.h < b.hMin || p.h > b.hMax)) return true;
+  if (p.w != null && (p.w < b.wMin || p.w > b.wMax)) return true;
+  return false;
+}
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const r = plotwrap.getBoundingClientRect();
+  W = r.width; H = r.height;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw();
+}
+
+// data -> screen
+const sx = (h) => PAD.l + (h - vx.min) / (vx.max - vx.min) * (W - PAD.l - PAD.r);
+const sy = (w) => H - PAD.b - (w - vy.min) / (vy.max - vy.min) * (H - PAD.t - PAD.b);
+// screen -> data
+const dx = (px) => vx.min + (px - PAD.l) / (W - PAD.l - PAD.r) * (vx.max - vx.min);
+const dy = (py) => vy.min + (H - PAD.b - py) / (H - PAD.t - PAD.b) * (vy.max - vy.min);
+
+function fmtFtIn(inch) {
+  if (inch == null) return "—";
+  const ft = Math.floor(inch / 12), i = Math.round(inch - ft * 12);
+  return `${inch}" (${ft}'${i}")`;
+}
+
+function niceTicks(min, max, target) {
+  const span = max - min, raw = span / target;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const norm = raw / mag;
+  const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+  const out = [];
+  for (let t = Math.ceil(min / step) * step; t <= max; t += step) out.push(t);
+  return out;
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const b = band();
+
+  // plausible band shading
+  const bx0 = sx(Math.max(b.hMin, vx.min)), bx1 = sx(Math.min(b.hMax, vx.max));
+  const by0 = sy(Math.min(b.wMax, vy.max)), by1 = sy(Math.max(b.wMin, vy.min));
+  ctx.fillStyle = "#5aa9ff12";
+  ctx.fillRect(Math.min(bx0, bx1), Math.min(by0, by1), Math.abs(bx1 - bx0), Math.abs(by1 - by0));
+
+  // grid + axes
+  ctx.strokeStyle = "#2a323d"; ctx.fillStyle = "#95a0ad";
+  ctx.lineWidth = 1; ctx.font = "11px -apple-system, sans-serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  for (const t of niceTicks(vx.min, vx.max, 8)) {
+    const x = sx(t);
+    if (x < PAD.l - 1 || x > W - PAD.r + 1) continue;
+    ctx.beginPath(); ctx.moveTo(x, PAD.t); ctx.lineTo(x, H - PAD.b); ctx.stroke();
+    const ft = Math.floor(t / 12), i = Math.round(t - ft * 12);
+    ctx.fillText(`${ft}'${i}"`, x, H - PAD.b + 6);
+  }
+  ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (const t of niceTicks(vy.min, vy.max, 7)) {
+    const y = sy(t);
+    if (y < PAD.t - 1 || y > H - PAD.b + 1) continue;
+    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
+    ctx.fillText(`${Math.round(t)}`, PAD.l - 8, y);
+  }
+  // axis titles
+  ctx.fillStyle = "#c7cdd6"; ctx.font = "12px -apple-system, sans-serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+  ctx.fillText("height", (PAD.l + W - PAD.r) / 2, H - 4);
+  ctx.save(); ctx.translate(14, (PAD.t + H - PAD.b) / 2); ctx.rotate(-Math.PI / 2);
+  ctx.textBaseline = "top"; ctx.fillText("weight (lb)", 0, 0); ctx.restore();
+
+  // points
+  const both = els.needBoth.checked;
+  for (const p of view) {
+    if (p.h == null || p.w == null) {
+      if (both) continue;
+    }
+    const hx = p.h == null ? null : sx(p.h);
+    const wy = p.w == null ? null : sy(p.w);
+    // rows missing one axis are pinned to the opposite axis edge
+    const x = hx == null ? PAD.l + 2 : hx;
+    const y = wy == null ? H - PAD.b - 2 : wy;
+    if (x < PAD.l - 4 || x > W - PAD.r + 4 || y < PAD.t - 4 || y > H - PAD.b + 4) continue;
+    ctx.beginPath();
+    ctx.arc(x, y, 2.6, 0, 6.2832);
+    ctx.fillStyle = p._bad ? "#ff5d5d" : "#5aa9ff";
+    ctx.globalAlpha = 0.62;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  if (selected) {
+    const x = selected.h == null ? PAD.l + 2 : sx(selected.h);
+    const y = selected.w == null ? H - PAD.b - 2 : sy(selected.w);
+    ctx.beginPath(); ctx.arc(x, y, 6, 0, 6.2832);
+    ctx.strokeStyle = "#ffd166"; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = "#ffd166"; ctx.beginPath(); ctx.arc(x, y, 3, 0, 6.2832); ctx.fill();
+  }
+}
+
+function applyFilters() {
+  const b = band();
+  const site = els.site.value;
+  const onlyBad = els.onlyBad.checked;
+  const both = els.needBoth.checked;
+  let bad = 0;
+  view = [];
+  for (const p of ALL) {
+    if (both && (p.h == null || p.w == null)) continue;
+    if (site && p.site !== site) continue;
+    p._bad = isBad(p, b);
+    if (p._bad) bad++;
+    if (onlyBad && !p._bad) continue;
+    view.push(p);
+  }
+  els.stats.innerHTML =
+    `<div class="stat"><span>Total loaded</span><b>${ALL.length.toLocaleString()}</b></div>` +
+    `<div class="stat"><span>In current view</span><b>${view.length.toLocaleString()}</b></div>` +
+    `<div class="stat"><span class="flag">Flagged (out-of-band)</span><b class="flag">${bad.toLocaleString()}</b></div>`;
+  draw();
+}
+
+function quantile(sorted, q) {
+  if (!sorted.length) return null;
+  const i = (sorted.length - 1) * q;
+  const lo = Math.floor(i), hi = Math.ceil(i);
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+}
+// Default view: robust window from the 0.3rd–99.7th percentile so the main
+// cluster and moderate outliers are readable even when a single absurd value
+// (e.g. a 135,000,000 lb weight) exists. Always covers the human band. Extreme
+// outliers beyond this stay counted as "flagged" and are reachable via Fit all.
+function defaultView(points) {
+  const hs = points.map((p) => p.h).filter((x) => x != null).sort((a, b) => a - b);
+  const ws = points.map((p) => p.w).filter((x) => x != null).sort((a, b) => a - b);
+  const b = band();
+  let hmin = Math.min(quantile(hs, 0.003) ?? 48, b.hMin - 4);
+  let hmax = Math.max(quantile(hs, 0.997) ?? 80, b.hMax + 4);
+  let wmin = Math.min(quantile(ws, 0.003) ?? 70, b.wMin - 10);
+  let wmax = Math.max(quantile(ws, 0.997) ?? 320, b.wMax + 20);
+  vx = { min: hmin, max: hmax };
+  vy = { min: wmin, max: wmax };
+  draw();
+}
+
+function fitTo(points) {
+  let hmin = Infinity, hmax = -Infinity, wmin = Infinity, wmax = -Infinity;
+  for (const p of points) {
+    if (p.h != null) { hmin = Math.min(hmin, p.h); hmax = Math.max(hmax, p.h); }
+    if (p.w != null) { wmin = Math.min(wmin, p.w); wmax = Math.max(wmax, p.w); }
+  }
+  if (!isFinite(hmin)) { hmin = 40; hmax = 84; }
+  if (!isFinite(wmin)) { wmin = 60; wmax = 360; }
+  const hp = (hmax - hmin) * 0.05 || 2, wp = (wmax - wmin) * 0.05 || 10;
+  vx = { min: hmin - hp, max: hmax + hp };
+  vy = { min: wmin - wp, max: wmax + wp };
+  draw();
+}
+
+// ---- interaction ----
+function nearest(px, py) {
+  let best = null, bestD = 14 * 14;
+  const both = els.needBoth.checked;
+  for (const p of view) {
+    if (both && (p.h == null || p.w == null)) continue;
+    const x = p.h == null ? PAD.l + 2 : sx(p.h);
+    const y = p.w == null ? H - PAD.b - 2 : sy(p.w);
+    const d = (x - px) ** 2 + (y - py) ** 2;
+    if (d < bestD) { bestD = d; best = p; }
+  }
+  return best;
+}
+
+let dragging = false, dragMoved = false, lastX = 0, lastY = 0;
+cv.addEventListener("mousedown", (e) => { dragging = true; dragMoved = false; lastX = e.offsetX; lastY = e.offsetY; });
+window.addEventListener("mouseup", () => { dragging = false; });
+cv.addEventListener("mousemove", (e) => {
+  if (dragging) {
+    const ddx = e.offsetX - lastX, ddy = e.offsetY - lastY;
+    if (Math.abs(ddx) + Math.abs(ddy) > 2) dragMoved = true;
+    const kx = (vx.max - vx.min) / (W - PAD.l - PAD.r);
+    const ky = (vy.max - vy.min) / (H - PAD.t - PAD.b);
+    vx = { min: vx.min - ddx * kx, max: vx.max - ddx * kx };
+    vy = { min: vy.min + ddy * ky, max: vy.max + ddy * ky };
+    lastX = e.offsetX; lastY = e.offsetY;
+    draw();
+    tooltip.style.display = "none";
+    return;
+  }
+  const p = nearest(e.offsetX, e.offsetY);
+  if (!p) { tooltip.style.display = "none"; return; }
+  showTooltip(p, e.offsetX, e.offsetY);
+});
+cv.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+cv.addEventListener("click", (e) => {
+  if (dragMoved) return;
+  const p = nearest(e.offsetX, e.offsetY);
+  if (p) { selected = p; showDetail(p); draw(); }
+});
+cv.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const f = e.deltaY < 0 ? 0.85 : 1.18;
+  const ax = dx(e.offsetX), ay = dy(e.offsetY);
+  vx = { min: ax - (ax - vx.min) * f, max: ax + (vx.max - ax) * f };
+  vy = { min: ay - (ay - vy.min) * f, max: ay + (vy.max - ay) * f };
+  draw();
+}, { passive: false });
+
+function measLine(p) {
+  const bits = [];
+  if (p.h != null) { const ft = Math.floor(p.h / 12), i = Math.round(p.h - ft * 12); bits.push(`${ft}'${i}"`); }
+  if (p.w != null) bits.push(`${p.w} lb`);
+  return bits.join(" · ") || "—";
+}
+function showTooltip(p, px, py) {
+  const flag = p._bad ? `<span class="flag">⚠ flagged</span>` : "";
+  tooltip.innerHTML =
+    (p.img ? `<img src="${p.img}" referrerpolicy="no-referrer" loading="lazy">` : "") +
+    `<div class="t-meas">${measLine(p)} ${flag}</div>` +
+    `<div class="pill">${(p.site || "?").replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}</div>` +
+    (p.comment ? `<div class="t-cmt">${escapeHtml(p.comment)}</div>` : "");
+  tooltip.style.display = "block";
+  const tw = 230, th = tooltip.offsetHeight || 180;
+  let left = px + 16, top = py + 16;
+  if (left + tw > W) left = px - tw - 16;
+  if (top + th > H) top = Math.max(8, py - th - 16);
+  tooltip.style.left = left + "px";
+  tooltip.style.top = top + "px";
+}
+
+function showDetail(p) {
+  const site = (p.site || "?").replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+  const reasons = [];
+  const b = band();
+  if (p.h != null && (p.h < b.hMin || p.h > b.hMax)) reasons.push(`height ${p.h}" outside ${b.hMin}–${b.hMax}"`);
+  if (p.w != null && (p.w < b.wMin || p.w > b.wMax)) reasons.push(`weight ${p.w} lb outside ${b.wMin}–${b.wMax} lb`);
+  els.detail.innerHTML =
+    (p.img ? `<a href="${p.img}" target="_blank" rel="noreferrer"><img src="${p.img}" referrerpolicy="no-referrer"></a>` : "") +
+    (reasons.length ? `<p class="flag">⚠ ${reasons.join("; ")}</p>` : "") +
+    `<div class="kv">` +
+    kv("Height", fmtFtIn(p.h)) +
+    kv("Weight", p.w != null ? `${p.w} lb` : "—") +
+    kv("Size", p.size || "—") +
+    kv("Bust", p.bust != null ? `${p.bust}"` : "—") +
+    kv("Bra band", p.band != null ? `${p.band}"` : "—") +
+    kv("Cup", p.cup || "—") +
+    kv("Waist", p.waist != null ? `${p.waist}"` : "—") +
+    kv("Hips", p.hips != null ? `${p.hips}"` : "—") +
+    kv("Age", p.age != null ? p.age : "—") +
+    kv("Brand", p.brand || "—") +
+    kv("Source", site) +
+    `</div>` +
+    `<div class="btns" style="margin:8px 0">` +
+    (p.product ? `<a href="${p.product}" target="_blank" rel="noreferrer"><button>Open product page</button></a>` : "") +
+    (p.img ? `<a href="${p.img}" target="_blank" rel="noreferrer"><button>Open image</button></a>` : "") +
+    `</div>` +
+    `<label>Review comment</label>` +
+    `<div class="cmt">${p.comment ? escapeHtml(p.comment) : "—"}</div>` +
+    `<p class="hint">row id ${p.id}</p>`;
+}
+function kv(k, v) { return `<div class="k">${k}</div><div class="v">${v}</div>`; }
+function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+// ---- wire up controls ----
+for (const id of ["hMin", "hMax", "wMin", "wMax"]) els[id].addEventListener("input", applyFilters);
+els.site.addEventListener("change", applyFilters);
+els.onlyBad.addEventListener("change", applyFilters);
+els.needBoth.addEventListener("change", applyFilters);
+document.getElementById("btn-human").addEventListener("click", () => {
+  vx = { min: 48, max: 80 }; vy = { min: 70, max: 320 }; draw();
+});
+document.getElementById("btn-fit").addEventListener("click", () => fitTo(view.length ? view : ALL));
+window.addEventListener("resize", resize);
+
+async function load() {
+  const res = await fetch("/api/points");
+  const data = await res.json();
+  ALL = data.points;
+  // populate sources sorted by frequency
+  const counts = new Map();
+  for (const p of ALL) if (p.site) counts.set(p.site, (counts.get(p.site) || 0) + 1);
+  const sites = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  for (const [s, n] of sites) {
+    const o = document.createElement("option");
+    o.value = s;
+    o.textContent = `${s.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")} (${n})`;
+    els.site.appendChild(o);
+  }
+  document.getElementById("loading").style.display = "none";
+  resize();
+  applyFilters();
+  defaultView(ALL);
+}
+load().catch((e) => {
+  document.getElementById("loading").textContent = "Failed to load: " + e.message;
+});
+</script>
+</body>
+</html>
