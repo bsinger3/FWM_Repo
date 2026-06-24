@@ -4,6 +4,7 @@
   "scripts": {
     "image-review": "node tools/image-review-dashboard/server.mjs",
     "height-weight-dotplot": "node tools/height-weight-dotplot/server.mjs",
+    "table-health": "node tools/table-health-dashboard/server.mjs",
     "extraction-audit:build": "node tools/extraction-audit-dashboard/build-dataset.mjs",
     "extraction-audit": "node tools/extraction-audit-dashboard/server.mjs",
     "image-review:mobile-bundle": "node tools/image-review-dashboard/build-mobile-bundle.mjs",

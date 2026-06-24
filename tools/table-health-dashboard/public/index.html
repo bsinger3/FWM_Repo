@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Table health — dev public.images</title>
+<style>
+  :root{--bg:#0f1216;--panel:#171b21;--panel2:#1d232b;--line:#2a323d;--text:#e6e9ee;--muted:#95a0ad;
+    --accent:#5aa9ff;--bad:#ff5d5d;--warn:#ffd166;--good:#57c98a;
+    --g-links:#5aa9ff;--g-content:#57c98a;--g-measure:#c08cff;--g-cv:#ffa057;}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font:13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  #app{display:grid;grid-template-columns:320px 1fr;grid-template-rows:minmax(0,1fr);height:100vh}
+  #app>*{min-height:0}
+  #side{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:16px}
+  #main{overflow-y:auto;padding:16px 18px}
+  h1{font-size:15px;margin:0 0 2px}
+  h2{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+    margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+  .sub{color:var(--muted);font-size:12px;margin:0 0 8px}
+  .summary{display:flex;gap:14px;margin:8px 0 4px}
+  .summary .n{font-size:20px;font-weight:700}
+  .summary .l{color:var(--muted);font-size:11px}
+  .barrow{display:flex;align-items:center;gap:8px;margin:3px 0;cursor:pointer;padding:2px 4px;border-radius:5px}
+  .barrow:hover{background:var(--panel2)}
+  .barrow.active{background:#5aa9ff22;outline:1px solid var(--accent)}
+  .barrow .lbl{width:92px;flex:none;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar{flex:1;height:11px;background:#2a323d;border-radius:3px;overflow:hidden;position:relative}
+  .bar > i{display:block;height:100%;border-radius:3px}
+  .barrow .pct{width:38px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:11px}
+  .flag{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 7px;margin:3px 0;
+    border:1px solid var(--line);border-radius:6px;cursor:pointer}
+  .flag:hover{border-color:var(--accent)}
+  .flag.active{background:#ff5d5d18;border-color:var(--bad)}
+  .flag .fl{font-size:12px}
+  .flag .fc{font-variant-numeric:tabular-nums;font-weight:600}
+  .flag.zero{opacity:.5}
+  .flag.zero .fc{color:var(--good)}
+  .flag .fc.hot{color:var(--bad)}
+  button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;
+    padding:6px 10px;font:inherit;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);color:#06121f;border-color:var(--accent);font-weight:600}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin:6px 0}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:9px;height:9px;border-radius:2px;display:inline-block}
+  #matrixWrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
+  canvas{display:block;width:100%}
+  .filterbar{display:flex;align-items:center;gap:10px;margin:14px 0 8px;flex-wrap:wrap}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted)}
+  .chip b{color:var(--text)}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  .gridwrap{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:48vh}
+  th,td{padding:4px 7px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);max-width:170px;overflow:hidden;text-overflow:ellipsis}
+  thead th{position:sticky;top:0;background:var(--panel2);z-index:2;color:var(--muted);font-weight:600;
+    text-transform:none;font-size:11px;cursor:default}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--panel2)}
+  td.missing{background:#ffffff08;color:#566}
+  td.missing::after{content:"—";color:#445}
+  td.flagged{color:var(--bad);font-weight:600}
+  .pager{display:flex;gap:8px;align-items:center;margin:8px 0;color:var(--muted)}
+  #detail{position:fixed;top:0;right:0;width:380px;height:100vh;background:var(--panel);border-left:1px solid var(--line);
+    padding:16px;overflow-y:auto;transform:translateX(100%);transition:transform .15s;z-index:10;box-shadow:-8px 0 30px #0007}
+  #detail.open{transform:none}
+  #detail img{width:100%;max-height:300px;object-fit:contain;background:#000;border:1px solid var(--line);border-radius:8px}
+  .kv{display:grid;grid-template-columns:120px 1fr;gap:2px 8px;margin:10px 0;font-size:12px}
+  .kv .k{color:var(--muted)}.kv .v{word-break:break-word}
+  .kv .v.miss{color:#556}
+  .kv .v.flag{color:var(--bad);font-weight:600}
+  a{color:var(--accent)}
+  #closeD{float:right}
+  #loading{position:fixed;inset:0;display:grid;place-items:center;color:var(--muted);background:var(--bg);z-index:20}
+  .hint{color:var(--muted);font-size:11px;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side">
+    <h1>Table health</h1>
+    <p class="sub">dev <code>public.images</code></p>
+    <div class="summary">
+      <div><div class="n" id="s-total">—</div><div class="l">rows</div></div>
+      <div><div class="n" id="s-flagged">—</div><div class="l">flagged rows*</div></div>
+    </div>
+    <button id="btn-refresh">↻ refresh</button>
+
+    <h2>Column fill rate</h2>
+    <p class="hint">Click a column to list the rows missing it.</p>
+    <div id="cols"></div>
+
+    <h2>Quality flags</h2>
+    <p class="hint">Click a flag to list those rows.</p>
+    <div id="flags"></div>
+  </div>
+
+  <div id="main">
+    <h2>Missingness matrix <span class="sub" style="text-transform:none">— sampled rows (ordered by source) × fields. A gap = that field is empty.</span></h2>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--g-links)"></i>links</span>
+      <span><i class="dot" style="background:var(--g-content)"></i>content</span>
+      <span><i class="dot" style="background:var(--g-measure)"></i>measurements</span>
+      <span><i class="dot" style="background:var(--g-cv)"></i>cv/derived</span>
+      <span><i class="dot" style="background:#2a323d"></i>missing</span>
+    </div>
+    <div id="matrixWrap"><canvas id="matrix"></canvas></div>
+
+    <div class="filterbar">
+      <h2 style="margin:0;border:0">Rows</h2>
+      <span class="chip" id="filterChip">all rows</span>
+      <button id="clearFilter" style="display:none">clear filter</button>
+    </div>
+    <div class="gridwrap"><table id="grid"><thead></thead><tbody></tbody></table></div>
+    <div class="pager">
+      <button id="prev">‹ prev</button>
+      <span id="pageinfo">—</span>
+      <button id="next">next ›</button>
+    </div>
+    <p class="hint">* "flagged rows" counts rows hit by any quality flag (rows can hit several). Click a row to inspect it.</p>
+  </div>
+</div>
+
+<div id="detail"><button id="closeD">✕ close</button><div id="detailBody"></div></div>
+<div id="loading">Loading table health…</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const GROUP_COLOR = { links:"#5aa9ff", content:"#57c98a", measure:"#c08cff", cv:"#ffa057" };
+let HEALTH=null, SAMPLE=null, COLUMNS=[], filter={type:null,key:null}, page=0, pageSize=60, lastRows=null;
+
+function pct(x){ return (x*100).toFixed(x>=0.995?0:1)+"%"; }
+function esc(s){ return String(s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function cleanSite(s){ return String(s||"").replace(/^https?:\/\/(www\.)?/,"").replace(/\/$/,""); }
+
+async function loadHealth(refresh){
+  HEALTH = await (await fetch("/api/health"+(refresh?"?refresh=1":""))).json();
+  COLUMNS = HEALTH.columns;
+  $("s-total").textContent = HEALTH.total.toLocaleString();
+  $("s-flagged").textContent = (HEALTH.flaggedRows||0).toLocaleString();
+  // column bars (sorted by fill ascending so the gaps surface at the top)
+  const cols=[...HEALTH.columns].sort((a,b)=>a.pct-b.pct);
+  $("cols").innerHTML = cols.map(c=>`
+    <div class="barrow" data-col="${c.key}">
+      <span class="lbl" title="${c.key}">${c.label}</span>
+      <span class="bar"><i style="width:${(c.pct*100).toFixed(1)}%;background:${GROUP_COLOR[c.group]}"></i></span>
+      <span class="pct">${pct(c.pct)}</span>
+    </div>`).join("");
+  // flags
+  const flags=[...HEALTH.flags].sort((a,b)=>b.count-a.count);
+  $("flags").innerHTML = flags.map(f=>`
+    <div class="flag ${f.count===0?'zero':''}" data-flag="${f.key}">
+      <span class="fl">${f.label}</span><span class="fc ${f.count>0?'hot':''}">${f.count.toLocaleString()}</span>
+    </div>`).join("");
+  document.querySelectorAll("[data-col]").forEach(el=>el.onclick=()=>setFilter("missing",el.dataset.col));
+  document.querySelectorAll("[data-flag]").forEach(el=>el.onclick=()=>{ if(HEALTH.flags.find(f=>f.key===el.dataset.flag).count>0) setFilter("flag",el.dataset.flag); });
+}
+
+async function loadSample(){
+  SAMPLE = await (await fetch("/api/sample")).json();
+  drawMatrix();
+}
+
+function drawMatrix(){
+  const wrap=$("matrixWrap"), cv=$("matrix");
+  const dpr=window.devicePixelRatio||1;
+  const W = wrap.clientWidth-20;
+  const labelH=64, leftW=4;
+  const nCols=SAMPLE.columns.length, nRows=SAMPLE.rows.length;
+  const plotH = Math.min(Math.max(nRows*0.28, 260), 520);
+  const H = plotH+labelH;
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+"px";
+  const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  const gridW=W-leftW, colW=gridW/nCols, rowH=plotH/nRows;
+  // cells
+  for(let r=0;r<nRows;r++){
+    const bits=SAMPLE.rows[r], y=labelH+r*rowH;
+    for(let c=0;c<nCols;c++){
+      if(bits[c]){ ctx.fillStyle=GROUP_COLOR[SAMPLE.columns[c].group]; ctx.globalAlpha=0.85; }
+      else { ctx.fillStyle="#222a33"; ctx.globalAlpha=1; }
+      ctx.fillRect(leftW+c*colW, y, colW-0.4, Math.max(rowH,0.7));
+    }
+  }
+  ctx.globalAlpha=1;
+  // source boundary lines + labels (left)
+  let prev=null;
+  ctx.font="10px -apple-system,sans-serif";
+  for(let r=0;r<nRows;r++){
+    if(SAMPLE.sources[r]!==prev){
+      const y=labelH+r*rowH;
+      ctx.strokeStyle="#3a4452"; ctx.beginPath(); ctx.moveTo(leftW,y); ctx.lineTo(W,y); ctx.stroke();
+      ctx.fillStyle="#7e8a98"; ctx.textAlign="left"; ctx.fillText(SAMPLE.sources[r], leftW+3, y+10);
+      prev=SAMPLE.sources[r];
+    }
+  }
+  // column labels (rotated)
+  ctx.save();
+  for(let c=0;c<nCols;c++){
+    const x=leftW+c*colW+colW/2;
+    ctx.save(); ctx.translate(x,labelH-6); ctx.rotate(-Math.PI/3.2);
+    ctx.fillStyle=GROUP_COLOR[SAMPLE.columns[c].group]; ctx.textAlign="left"; ctx.font="11px -apple-system,sans-serif";
+    ctx.fillText(SAMPLE.columns[c].label, 0, 0); ctx.restore();
+  }
+  ctx.restore();
+}
+
+function setFilter(type,key){
+  filter={type,key}; page=0;
+  document.querySelectorAll(".barrow").forEach(e=>e.classList.toggle("active",type==="missing"&&e.dataset.col===key));
+  document.querySelectorAll(".flag").forEach(e=>e.classList.toggle("active",type==="flag"&&e.dataset.flag===key));
+  const label = type==="missing" ? `missing: ${key}` : (type==="flag" ? `flag: ${HEALTH.flags.find(f=>f.key===key).label}` : "all rows");
+  $("filterChip").innerHTML = type ? `<b>${esc(label)}</b>` : "all rows";
+  $("clearFilter").style.display = type ? "" : "none";
+  loadRows();
+}
+
+async function loadRows(){
+  const p=new URLSearchParams({limit:String(pageSize),offset:String(page*pageSize)});
+  if(filter.type==="missing") p.set("missing",filter.key);
+  if(filter.type==="flag") p.set("flag",filter.key);
+  const data=await (await fetch("/api/rows?"+p)).json();
+  lastRows=data; renderGrid(data);
+}
+
+const GRID_COLS=["original_url_display","source_site_display","user_comment","size_display","clothing_type_id",
+  "height_in_display","weight_lbs_display","waist_in","cupsize_display","age_years_display","prettiness_score","crop_spec"];
+function renderGrid(data){
+  const thead=$("grid").querySelector("thead"), tbody=$("grid").querySelector("tbody");
+  thead.innerHTML = "<tr>"+GRID_COLS.map(k=>{const c=COLUMNS.find(x=>x.key===k);return `<th>${c?c.label:k}</th>`}).join("")+"</tr>";
+  tbody.innerHTML = data.rows.map((r,i)=>{
+    const flagged = Object.keys(r).some(k=>k.startsWith("flag_")&&r[k]);
+    return "<tr data-i='"+i+"'>"+GRID_COLS.map(k=>{
+      let v=r[k];
+      const miss = v===null||v===undefined||v==="";
+      if(miss) return `<td class="missing"></td>`;
+      if(k==="user_comment") v=String(v).slice(0,60);
+      if(k==="original_url_display") v="🖼 "+String(v).split("/").pop().slice(0,18);
+      if(k==="source_site_display") v=cleanSite(v);
+      if(k==="crop_spec") v="✓";
+      // flag the cell red if a relevant flag is set
+      let cls="";
+      if(k==="age_years_display"&&r.flag_age_lt13) cls="flagged";
+      if(k==="weight_lbs_display"&&(r.flag_weight_zero||r.flag_weight_oob)) cls="flagged";
+      if(k==="height_in_display"&&r.flag_height_oob) cls="flagged";
+      if(k==="cupsize_display"&&r.flag_cup_junk) cls="flagged";
+      if(k==="waist_in"&&r.flag_waist_oob) cls="flagged";
+      if(k==="original_url_display"&&r.flag_bad_image_url) cls="flagged";
+      return `<td class="${cls}" title="${esc(String(r[k]).slice(0,200))}">${esc(String(v))}</td>`;
+    }).join("")+"</tr>";
+  }).join("");
+  tbody.querySelectorAll("tr").forEach(tr=>tr.onclick=()=>showDetail(data.rows[+tr.dataset.i]));
+  const start=page*pageSize;
+  $("pageinfo").textContent = data.count? `${(start+1).toLocaleString()}–${Math.min(start+pageSize,data.count).toLocaleString()} of ${data.count.toLocaleString()}` : "0 rows";
+  $("prev").disabled = page===0;
+  $("next").disabled = (start+pageSize)>=data.count;
+}
+
+function showDetail(r){
+  const flagsHit=HEALTH.flags.filter(f=>r["flag_"+f.key]);
+  const img=r.original_url_display;
+  $("detailBody").innerHTML =
+    (img&&/^https?:/.test(img)?`<a href="${esc(img)}" target="_blank" rel="noreferrer"><img src="${esc(img)}" referrerpolicy="no-referrer"></a>`:`<div class="hint">no valid image url</div>`)+
+    (flagsHit.length?`<p style="color:var(--bad);font-weight:600;margin:8px 0 0">⚠ ${flagsHit.map(f=>esc(f.label)).join("; ")}</p>`:"")+
+    `<div class="kv">`+COLUMNS.map(c=>{
+      let v=r[c.key]; const miss=v===null||v===undefined||v==="";
+      if(v&&typeof v==="object") v="✓ "+JSON.stringify(v).slice(0,80);
+      const flagged = (c.key==="age_years_display"&&r.flag_age_lt13)||(c.key==="cupsize_display"&&r.flag_cup_junk)||
+        (c.key==="weight_lbs_display"&&(r.flag_weight_zero||r.flag_weight_oob))||(c.key==="height_in_display"&&r.flag_height_oob)||
+        (c.key==="original_url_display"&&r.flag_bad_image_url)||(c.key==="waist_in"&&r.flag_waist_oob);
+      return `<div class="k">${c.label}</div><div class="v ${miss?'miss':''} ${flagged?'flag':''}">${miss?'∅ missing':esc(String(v).slice(0,180))}</div>`;
+    }).join("")+`</div>`+
+    `<p class="hint">row id ${esc(r.id)}</p>`;
+  $("detail").classList.add("open");
+}
+$("closeD").onclick=()=>$("detail").classList.remove("open");
+$("clearFilter").onclick=()=>setFilter(null,null);
+$("prev").onclick=()=>{ if(page>0){page--;loadRows();} };
+$("next").onclick=()=>{ page++; loadRows(); };
+$("btn-refresh").onclick=async()=>{ await loadHealth(true); await loadSample(); loadRows(); };
+window.addEventListener("resize",()=>{ if(SAMPLE) drawMatrix(); });
+
+(async()=>{
+  await loadHealth(false);
+  await loadSample();
+  await loadRows();
+  // flagged-rows count = union; approximate by summing distinct via a quick client estimate is wrong,
+  // so just show the largest single flag as a hint is misleading — fetch union count:
+  $("loading").style.display="none";
+})().catch(e=>{ $("loading").textContent="Failed: "+e.message; });
+</script>
+</body>
+</html>
