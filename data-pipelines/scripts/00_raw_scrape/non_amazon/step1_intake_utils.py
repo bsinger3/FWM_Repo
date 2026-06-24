@@ -84,6 +84,8 @@ INTAKE_HEADERS = [
     "product_detail_raw",
     "product_category_raw",
     "product_variant_raw",
+    "weeks_pregnant",
+    "pregnancy_evidence",
 ]
 
 USER_AGENT = (
@@ -109,16 +111,20 @@ CUP_SIZE_RE = re.compile(
 )
 HEIGHT_RE = re.compile(
     r"(?:(?:i\s*(?:am|'m)|im|i’m|i am|height)\s*:?\s*)?"
-    r"(\d)\s*(?:ft|feet|foot|['’])\s*(\d{1,2}(?:\.\d+)?)?\s*(?:in|inches|[\"”])?",
+    r"([3-7])\s*(?:ft|feet|foot|['’])\s*(\d{1,2}(?:\.\d+)?)?\s*(?:in|inches|[\"”])?",
     re.I,
 )
+# Common review typo where the feet/inches mark is a double quote: 5"4 / 5”11
+# means 5'4" / 5'11". Gated to a 3–7 leading digit not preceded by another digit
+# so an inch measurement like waist 34" can't be read as 4 feet.
+HEIGHT_DQ_RE = re.compile(r"(?<!\d)([3-7])\s*[\"”]\s*(\d{1,2})(?!\d)")
 WEIGHT_RE = re.compile(
     r"\b(\d{2,3}(?:\.\d+)?)\s*(?:ish)?\s*(?:lbs?|pounds?|#)\b|"
     r"\b(?:weigh(?:t|s|ed|ing)?|weight)\s*(?:is|:|：)?\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{2,3}(?:\.\d+)?)\s*(?:ish)?\b",
     re.I,
 )
 WEIGHT_RANGE_RE = re.compile(
-    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:-|–|—|to)\s*(\d{2,3}(?:\.\d+)?)\s*(lbs?|pounds?|#)?\b",
+    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:-|–|—|to)\s*(\d{2,3}(?:\.\d+)?)\s*(lbs?|pounds?|#)?(?!\d)",
     re.I,
 )
 WEIGHT_KG_RE = re.compile(
@@ -126,40 +132,95 @@ WEIGHT_KG_RE = re.compile(
     r"\b(?:weigh(?:t|s|ed|ing)?|weight)\s*(?:is|:|：)?\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{2,3}(?:\.\d+)?)\s*(?:kg|kilograms?)\b",
     re.I,
 )
+# Shared connector/adverb/number fragments for the body-measurement labels.
+# `_MSEP` covers the linking word between a label and its number, including
+# en/em dashes ("Bust – 93 cm"), verbs ("waist measures 27\""), and relative
+# clauses ("waist which is 33\""). `_MADV` absorbs hedges ("currently",
+# "about"). The number-before-label alternative ("29\" waist") requires an inch
+# mark or "-ish" so stray numbers next to a label word aren't captured.
+_MSEP = r"(?:is|are|was|were|=|:|：|[-–—]|measures?|measuring|measured|of|which\s+is|that\s+is)?"
+_MADV = r"(?:currently\s+|now\s+|about\s+|approx(?:imately)?\.?\s+|around\s+|roughly\s+|a\s+|an\s+)?"
+_MNUM = r"(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)"
+_MINCH = r'(?:\s*(?:["”]|in(?:ch(?:es)?)?))?'
+
+# `(?!\s*cm)` keeps the inch matcher from eating a centimetre value ("65cm")
+# so the *_CM_RE path can convert it. `(?![\s:=]*\d)` on the number-before-label
+# arm stops a neighbouring measurement's number from being captured
+# ("4'11\" Bust: 34" must not read bust=11; "41\" Inseam 30\"" must not read 41).
+_LABEL_NOT_OWN_NUM = r"(?![\s:=]*\d)"
 WAIST_RE = re.compile(
-    r"\bwaist\s*(?:is|=|:|：|-)?\s*(?:a\s+|an\s+)?(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b",
+    r"\bwaist(?:line)?\s*" + _MSEP + r"\s*" + _MADV + r"\(?\s*" + _MNUM + r"(?!\s*cm)" + _MINCH
+    + r'|(\d{2,3}(?:\.\d+)?)\s*(?:["”]|in(?:ch(?:es)?)?|-?ish)\s*\)?\s*waist(?:line)?\b' + _LABEL_NOT_OWN_NUM,
     re.I,
 )
 HIPS_RE = re.compile(
-    r"\b(?:hips?|hip\s*/\s*butt|hip\/butt)\s*(?:are|is|=|:|：|-)?\s*(?:a\s+|an\s+)?(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b",
+    r"\b(?:hips?(?:\s*/\s*butt)?|hip\s*/\s*butt)\s*" + _MSEP + r"\s*" + _MADV + r"\(?\s*" + _MNUM + r"(?!\s*cm)" + _MINCH
+    + r'|(\d{2,3}(?:\.\d+)?)\s*(?:["”]|in(?:ch(?:es)?)?|-?ish)\s*\)?\s*hips?(?:\s*/\s*butt)?\b' + _LABEL_NOT_OWN_NUM,
     re.I,
 )
+# `(?![A-K](?![A-Za-z]))` rejects a bra size read as a bust circumference:
+# "Bust: 34B" is band 34 / cup B, not a 34-inch bust — but "bust 36 inches"
+# (a space, or "in"/"inches" where the letter continues into a word) is kept.
 BUST_RE = re.compile(
-    r"(?<!under\s)\b(?:bust|chest)\s*(?:is|=|:|：|-)?\s*(?:a\s+|an\s+)?(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b",
+    r"(?<!under\s)\b(?:bust|chest)\s*" + _MSEP + r"\s*" + _MADV + r"\(?\s*" + _MNUM + r"(?![A-K](?![A-Za-z]))(?!\s*cm)" + _MINCH
+    + r'|(\d{2,3}(?:\.\d+)?)\s*(?:["”]|in(?:ch(?:es)?)?)\s*\)?\s*(?:bust|chest)\b' + _LABEL_NOT_OWN_NUM,
     re.I,
 )
 UNDERBUST_RE = re.compile(
     r"\b(?:under\s*bust|underbust|under\s*band|band\s*(?:size)?|rib\s*cage|ribcage)\s*"
-    r"(?:is|=|:|：|-)?\s*(?:a\s+|an\s+)?(\d{2,3}(?:\.\d+)?(?:\s+1/2)?)(?:\s*(?:\"|in(?:ch(?:es)?)?))?\b",
+    + _MSEP + r"\s*" + _MADV + _MNUM + r"(?!\s*cm)" + _MINCH,
     re.I,
 )
-BUST_CM_RE = re.compile(r"\b(?:bust|chest)\s*(?:is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
+BUST_CM_RE = re.compile(r"\b(?:bust|chest)\s*" + _MSEP + r"\s*" + _MADV + r"(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
 HEIGHT_CM_RE = re.compile(
     r"\bheight\s*(?:is|=|:|：|-)?\s*(\d{3}(?:\.\d+)?)\s*cm\b|"
     r"\b(\d{3}(?:\.\d+)?)\s*cm\s*(?:tall|height)\b|"
     r"\b(?:i\s*(?:am|'m)|im|i’m)\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{3}(?:\.\d+)?)\s*cm\b",
     re.I,
 )
-WAIST_CM_RE = re.compile(r"\bwaist\s*(?:is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
-HIPS_CM_RE = re.compile(r"\b(?:hips?|hip\s*/\s*butt|hip\/butt)\s*(?:are|is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
-INSEAM_CM_RE = re.compile(r"\binseam\s*(?:is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
-AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re.I)
-INSEAM_RE = re.compile(
-    r"\binseam\s*(?:is|=|:|：|-)?\s*(\d{2,3}(?:\.\d+)?)\b|"
-    r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ch(?:es)?)?)\s*inseam\b",
+WAIST_CM_RE = re.compile(r"\bwaist\s*" + _MSEP + r"\s*" + _MADV + r"(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
+HIPS_CM_RE = re.compile(r"\b(?:hips?(?:\s*/\s*butt)?|hip\s*/\s*butt)\s*" + _MSEP + r"\s*" + _MADV + r"(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
+INSEAM_CM_RE = re.compile(r"\binseam\s*" + _MSEP + r"\s*" + _MADV + r"(\d{2,3}(?:\.\d+)?)\s*cm\b", re.I)
+# Age: "age 55", "age of 60", "42 yr old", "30 year old", "58 years old", "y/o".
+AGE_RE = re.compile(
+    r"\bage\s*(?:of|is|:|=)?\s*(\d{1,2})\b|"
+    r"\b(\d{1,2})\s*(?:years?|yrs?)\s*old\b|"
+    r"\b(\d{1,2})\s*y\s*/?\s*o\b",
     re.I,
 )
-MEASUREMENT_TRIPLE_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*[-/x]\s*(\d{2,3}(?:\.\d+)?)\s*[-/x]\s*(\d{2,3}(?:\.\d+)?)\b", re.I)
+INSEAM_RE = re.compile(
+    r"\binseam\s*" + _MSEP + r"\s*" + _MADV + r"(\d{2,3}(?:\.\d+)?)(?!\s*cm)\b"
+    + r'|(\d{2,3}(?:\.\d+)?)\s*(?:["”]|in(?:ch(?:es)?)?)\s*inseam\b' + _LABEL_NOT_OWN_NUM,
+    re.I,
+)
+# Bust-waist-hips triple: also accepts comma separators ("32,29,45") and inch
+# marks between numbers ("40\"-30\"-40\""). Still gated by a nearby
+# "measurements"/"bust-waist-hips" context in plausible_bust_waist_hips().
+MEASUREMENT_TRIPLE_RE = re.compile(
+    r"\b(\d{2,3}(?:\.\d+)?)\s*[\"”]?\s*[-/x,]\s*(\d{2,3}(?:\.\d+)?)\s*[\"”]?\s*[-/x,]\s*(\d{2,3}(?:\.\d+)?)\s*[\"”]?",
+    re.I,
+)
+PREGNANCY_NOT_CURRENT_RE = re.compile(
+    r"\b(?:postpartum|after\s+baby|pre[-\s]?pregnancy)\b",
+    re.I,
+)
+PREGNANCY_WEEKS_RE = re.compile(
+    r"\b(\d{1,2})\s*(?:weeks?|wks?)\s+(?:pregnant|along)\b",
+    re.I,
+)
+PREGNANCY_MONTHS_RE = re.compile(
+    r"\b(\d{1,2})\s*months?\s+pregnant\b",
+    re.I,
+)
+# Soft pregnancy-weeks fallback: a bare "N weeks" only counts when it sits next
+# to current-pregnancy language, so reviews that mention "due in 3 weeks" or
+# "20 weeks postpartum" don't get mis-tagged. Used only after the explicit
+# "N weeks pregnant/along" pattern misses.
+PREGNANCY_CONTEXT_RE = re.compile(
+    r"\b(?:pregnan\w*|maternity|trimester|expecting|baby\s*bump|\bbump\b)\b",
+    re.I,
+)
+PREGNANCY_WEEKS_SOFT_RE = re.compile(r"\b(\d{1,2})\s*(?:weeks?|wks?)\b", re.I)
 MEASUREMENT_TRIPLE_CONTEXT_RE = re.compile(
     r"\b(?:measurements?|stats?|my\s+stats|body\s+measurements?|dimensions?|"
     r"bust\s*[-/]\s*waist\s*[-/]\s*hips?|bwh)\b",
@@ -191,6 +252,7 @@ MEASUREMENT_FIELDS = [
     "bust_in_number_display",
     "cupsize_display",
     "weight_lbs_display",
+    "weeks_pregnant",
 ]
 
 
@@ -629,6 +691,26 @@ def normalize_bra_size(value: str) -> str:
     return {"DDE": "DD/E", "DDDF": "DDD/F", "DDDE": "DDD/E"}.get(collapsed, collapsed)
 
 
+def _bra_match_ok(match: re.Match[str]) -> bool:
+    """Reject false bra sizes where the cup is really the article "a" or the
+    pronoun "I" (e.g. "Dirty 30 I recently..." → not a 30I bra). A lone, space-
+    separated A/I cup only counts when followed by "cup"/"bra"."""
+    cup = (match.group(2) or "").upper()
+    whole = (match.group(0) or "").upper()
+    if cup in ("A", "I") and re.search(r"\d\s+[AI]$", whole):
+        tail = (match.string[match.end():match.end() + 6] or "").lower()
+        return bool(re.match(r"\s*(?:cup|bra)\b", tail))
+    return True
+
+
+def bra_size_search(text: str) -> Optional[re.Match[str]]:
+    """First BRA_SIZE_RE match that passes the article/pronoun guard."""
+    for match in BRA_SIZE_RE.finditer(text or ""):
+        if _bra_match_ok(match):
+            return match
+    return None
+
+
 def normalize_generic_size(value: str) -> str:
     size = normalize_whitespace(value).lower()
     mapping = {
@@ -691,14 +773,14 @@ def extract_size(text: str) -> str:
             value = re.sub(r"^us\s*", "US", value, flags=re.I)
             if re.fullmatch(r"(?:US)?\d{1,2}W?|xxs|xs|s|m|l|xl|xxl|xxxl|[2-6]x|[2-6]xl", value, re.I):
                 return normalize_ordered_size(value)
-            bra = BRA_SIZE_RE.search(value)
+            bra = bra_size_search(value)
             if bra:
                 return normalize_bra_size(bra.group(0))
             generic = GENERIC_SIZE_RE.search(value)
             if generic:
                 return normalize_generic_size(generic.group(1))
             continue
-    bra = BRA_SIZE_RE.search(text)
+    bra = bra_size_search(text)
     if bra:
         return normalize_bra_size(bra.group(0))
     return ""
@@ -727,6 +809,12 @@ def parse_height(text: str) -> Tuple[str, str]:
         if re.match(r"\s*(?:-|to|–|—)\s*\d\s*(?:ft|feet|foot|['’])", following, re.I):
             return normalize_whitespace(match.group(0)), ""
         return normalize_whitespace(match.group(0)), numeric_text(feet * 12 + inches)
+    match = HEIGHT_DQ_RE.search(text)
+    if match:
+        feet = int(match.group(1))
+        inches = parse_number_text(match.group(2) or "0")
+        if inches <= 11:
+            return normalize_whitespace(match.group(0)), numeric_text(feet * 12 + inches)
     match = HEIGHT_CM_RE.search(text)
     if match:
         value_text = next((group for group in match.groups() if group), "")
@@ -819,6 +907,31 @@ def plausible_bust_waist_hips(values: Sequence[str], text: str, match: re.Match[
     return bool(MEASUREMENT_TRIPLE_CONTEXT_RE.search(context))
 
 
+def parse_pregnancy(text: str) -> Tuple[str, str]:
+    """Return (pregnancy_evidence, weeks_pregnant_str) or ("", "") if not pregnant."""
+    # Explicit "N weeks/months pregnant" wins even when the review also mentions
+    # a pre-pregnancy weight — those are two different facts in one review.
+    match = PREGNANCY_WEEKS_RE.search(text)
+    if match:
+        return normalize_whitespace(match.group(0)), match.group(1)
+    match = PREGNANCY_MONTHS_RE.search(text)
+    if match:
+        weeks = str(round(float(match.group(1)) * 4.345))
+        return normalize_whitespace(match.group(0)), weeks
+    # Soft fallback: a bare "N weeks" only when current-pregnancy language is
+    # nearby and the number isn't a "postpartum"/"due in" timer.
+    if PREGNANCY_CONTEXT_RE.search(text):
+        for soft in PREGNANCY_WEEKS_SOFT_RE.finditer(text):
+            window = text[max(0, soft.start() - 18): soft.end() + 18].lower()
+            if "postpartum" in window or "post partum" in window:
+                continue
+            if re.search(r"\b(?:due|in|shoot|appointment|delivery|deliver)\b\s*\w*\s*$", text[max(0, soft.start() - 14): soft.start()].lower()):
+                continue
+            if re.search(r"\b(?:along|pregnant|bump|measuring|measure|trimester)\b", window):
+                return normalize_whitespace(soft.group(0)), soft.group(1)
+    return "", ""
+
+
 def extract_measurements(text: str, size_hint: str = "") -> Dict[str, str]:
     height_raw, height_in = parse_height(text)
     weight_raw, weight_lbs = parse_weight(text)
@@ -847,10 +960,11 @@ def extract_measurements(text: str, size_hint: str = "") -> Dict[str, str]:
         if not hips_in:
             hips_raw = triple.group(3)
             hips_in = numeric_text(float(triple.group(3)))
+    pregnancy_evidence, weeks_pregnant = parse_pregnancy(text)
     cup_size = ""
     bra_band_in = underbust_in
     for source in (size_hint, text):
-        match = BRA_SIZE_RE.search(source or "")
+        match = bra_size_search(source or "")
         if match:
             bra_band_in = bra_band_in or match.group(1)
             cup_size = normalize_bra_size(match.group(2))
@@ -877,6 +991,8 @@ def extract_measurements(text: str, size_hint: str = "") -> Dict[str, str]:
         "bra_band_in_display": bra_band_in,
         "bust_in_number_display": legacy_bust_in,
         "cupsize_display": cup_size,
+        "weeks_pregnant": weeks_pregnant,
+        "pregnancy_evidence": pregnancy_evidence,
     }
 
 
@@ -1115,6 +1231,7 @@ def validate_rows(rows: Sequence[Dict[str, str]]) -> Dict[str, object]:
             and row.get("size_display")
             and any(row.get(field) for field in MEASUREMENT_FIELDS)
         ),
+        "rows_with_pregnancy": sum(1 for row in rows if row.get("weeks_pregnant")),
         "rows_with_image_product_and_user_comment": sum(
             1
             for row in rows

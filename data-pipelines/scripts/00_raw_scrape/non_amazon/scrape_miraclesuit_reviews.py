@@ -17,6 +17,7 @@ if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
 
 from pipeline_paths import archive_root, legacy_raw_run_dir, raw_scraped_data_root, reports_root  # noqa: E402
+from step1_intake_utils import extract_measurements, INTAKE_HEADERS
 from typing import Dict, List, Optional, Sequence, Tuple
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urljoin
@@ -46,27 +47,10 @@ class AccessBlockedError(RuntimeError):
     """Raised when the site asks us to stop or slow down."""
 
 
-HEADERS = [
-    "created_at_display", "id", "original_url_display", "image_source_type", "image_source_detail",
-    "product_page_url_display", "monetized_product_url_display",
-    "height_raw", "weight_raw", "user_comment", "date_review_submitted_raw", "height_in_display", "review_date",
-    "source_site_display", "status_code", "content_type", "bytes", "width", "height", "hash_md5", "fetched_at",
-    "updated_at", "brand", "waist_raw_display", "hips_raw", "age_raw", "waist_in", "hips_in_display",
-    "age_years_display", "search_fts", "weight_display_display", "weight_raw_needs_correction", "clothing_type_id",
-    "reviewer_profile_url", "reviewer_name_raw", "inseam_inches_display", "color_canonical", "color_display",
-    "size_display", "bust_in_number_display", "cupsize_display", "weight_lbs_display", "weight_lbs_raw_issue",
-    "product_title_raw", "product_subtitle_raw", "product_description_raw", "product_detail_raw",
-    "product_category_raw", "product_variant_raw",
-]
+HEADERS = INTAKE_HEADERS
 
 TAG_RE = re.compile(r"<[^>]+>")
 WS_RE = re.compile(r"\s+")
-HEIGHT_RE = re.compile(r"\b([4-6])\s*(?:ft|feet|foot|['\u2019])\s*(\d{1,2})?\s*(?:in|inches|[\"\u201d])?", re.I)
-WEIGHT_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:lbs?|pounds?|#)\b", re.I)
-WAIST_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*waist\b", re.I)
-HIPS_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*hips?\b", re.I)
-INSEAM_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*inseam\b", re.I)
-AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re.I)
 BRA_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
 SIZE_TOKEN_RE = re.compile(
     r"\b(?:size|sz|ordered|purchased|bought|wear(?:ing)?|wore|in)\s+"

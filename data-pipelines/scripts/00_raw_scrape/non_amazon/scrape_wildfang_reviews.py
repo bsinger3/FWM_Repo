@@ -17,6 +17,7 @@ if str(PIPELINE_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(PIPELINE_SCRIPTS_DIR))
 
 from pipeline_paths import archive_root, legacy_raw_run_dir, raw_scraped_data_root, reports_root  # noqa: E402
+from step1_intake_utils import extract_measurements, INTAKE_HEADERS
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urljoin
@@ -43,28 +44,10 @@ USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
 )
 
-HEADERS = [
-    "created_at_display", "id", "original_url_display", "product_page_url_display", "monetized_product_url_display",
-    "height_raw", "weight_raw", "user_comment", "date_review_submitted_raw", "height_in_display", "review_date",
-    "source_site_display", "status_code", "content_type", "bytes", "width", "height", "hash_md5", "fetched_at",
-    "updated_at", "brand", "waist_raw_display", "hips_raw", "age_raw", "waist_in", "hips_in_display",
-    "age_years_display", "search_fts", "weight_display_display", "weight_raw_needs_correction", "clothing_type_id",
-    "reviewer_profile_url", "reviewer_name_raw", "inseam_inches_display", "color_canonical", "color_display",
-    "size_display", "bust_in_number_display", "cupsize_display", "weight_lbs_display", "weight_lbs_raw_issue",
-    "product_title_raw", "product_subtitle_raw", "product_description_raw", "product_detail_raw",
-    "product_category_raw", "product_variant_raw",
-]
+HEADERS = INTAKE_HEADERS
 
 TAG_RE = re.compile(r"<[^>]+>")
-WS_RE = re.compile(r"\s+")
-HEIGHT_RE = re.compile(r"\b([4-6])\s*(?:ft|feet|foot|['\u2019])\s*(\d{1,2})?\s*(?:in|inches|[\"\u201d])?", re.I)
-WEIGHT_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:lbs?|pounds?|#)\b", re.I)
-WAIST_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*waist\b", re.I)
-HIPS_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*hips?\b", re.I)
-BUST_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*(?:bust|chest)\b", re.I)
-INSEAM_RE = re.compile(r"\b(\d{2,3}(?:\.\d+)?)\s*(?:\"|in(?:ches)?)?\s*inseam\b", re.I)
-AGE_RE = re.compile(r"\b(?:age\s*:?\s*(\d{1,2})|(\d{1,2})\s*years?\s*old)\b", re.I)
-BRA_SIZE_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
+WS_RE = re.compile(r"\s+")\nSIZE_RE = re.compile(r"\b((?:2[8-9]|3[0-9]|4[0-8])\s*(?:aa|a|b|c|d|dd|ddd|e|f|g|h|i|j|k))\b", re.I)
 SIZE_RE = re.compile(
     r"\b(?:ordered|bought|purchased|got|wearing|wore|in a|size)\s+(?:a\s+|an\s+|the\s+)?"
     r"(?:size\s*)?(xxs|xs|small|s|medium|m|large|l|xl|xlarge|x-large|1x|2x|3x|4x|5x|6x|"
@@ -238,32 +221,6 @@ def maybe_num(value: Optional[float]) -> str:
     return f"{value:.2f}".rstrip("0").rstrip(".")
 
 
-def parse_num(pattern: re.Pattern[str], text: str, max_value: Optional[float] = None) -> Tuple[str, Optional[float]]:
-    match = pattern.search(text)
-    if not match:
-        return "", None
-    value = float(match.group(1))
-    if max_value is not None and value > max_value:
-        return "", None
-    return norm(match.group(0)), value
-
-
-def parse_height(text: str) -> Tuple[str, Optional[float]]:
-    match = HEIGHT_RE.search(text)
-    if not match:
-        return "", None
-    feet = int(match.group(1))
-    inches = int(match.group(2) or 0)
-    if 4 <= feet <= 7 and 0 <= inches <= 11:
-        return norm(match.group(0)), feet * 12 + inches
-    return "", None
-
-
-def parse_age(text: str) -> Tuple[str, str]:
-    match = AGE_RE.search(text)
-    return (norm(match.group(0)), match.group(1) or match.group(2) or "") if match else ("", "")
-
-
 def reviewer_attribute_text(review: Dict[str, object]) -> str:
     reviewer = review.get("reviewer") if isinstance(review.get("reviewer"), dict) else {}
     attrs = reviewer.get("attributes") if isinstance(reviewer, dict) else []
@@ -300,16 +257,6 @@ def extract_size(review: Dict[str, object], text: str) -> str:
         return normalize_size(variant)
     match = SIZE_RE.search(text)
     return normalize_size(match.group(1)) if match else ""
-
-
-def extract_bra_size(text: str) -> Tuple[str, str]:
-    match = BRA_SIZE_RE.search(text)
-    if not match:
-        return "", ""
-    raw = norm(match.group(1)).upper().replace(" ", "")
-    band = re.match(r"\d+", raw)
-    cup = re.search(r"[A-Z]+$", raw)
-    return (band.group(0) if band else "", cup.group(0) if cup else "")
 
 
 def variant_detail(product: Dict[str, object]) -> str:
@@ -409,15 +356,8 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
     attr_text = reviewer_attribute_text(review)
     variant_name = norm(review.get("productVariantName"))
     text = norm(" ".join(part for part in [title, body, attr_text, f"Variant: {variant_name}" if variant_name else ""] if part))
-    height_raw, height_in = parse_height(text)
-    weight_raw, weight = parse_num(WEIGHT_RE, text, 700)
-    waist_raw, waist = parse_num(WAIST_RE, text, 90)
-    hips_raw, hips = parse_num(HIPS_RE, text, 90)
-    bust_raw, bust = parse_num(BUST_RE, text, 70)
-    inseam_raw, inseam = parse_num(INSEAM_RE, text, 45)
-    age_raw, age = parse_age(text)
-    bra_band, cupsize = extract_bra_size(text)
     size_display = extract_size(review, text)
+    m = extract_measurements(text, size_display)
     product_url = canonical_product_url(review.get("productUrl"), product_url_for(product))
     product_title = norm(review.get("productName") or product.get("title"))
     reviewer = review.get("reviewer") if isinstance(review.get("reviewer"), dict) else {}
@@ -428,11 +368,11 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
         "original_url_display": image_url,
         "product_page_url_display": product_url,
         "monetized_product_url_display": product_url,
-        "height_raw": height_raw,
-        "weight_raw": weight_raw,
+        "height_raw": m["height_raw"],
+        "weight_raw": m["weight_raw"],
         "user_comment": text,
         "date_review_submitted_raw": norm(review.get("dateCreated")),
-        "height_in_display": maybe_num(height_in),
+        "height_in_display": m["height_in_display"],
         "review_date": norm(review.get("dateCreated"))[:10],
         "source_site_display": SOURCE_SITE,
         "status_code": "",
@@ -444,25 +384,27 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
         "fetched_at": fetched,
         "updated_at": fetched,
         "brand": BRAND,
-        "waist_raw_display": waist_raw,
-        "hips_raw": hips_raw,
-        "age_raw": age_raw,
-        "waist_in": maybe_num(waist),
-        "hips_in_display": maybe_num(hips),
-        "age_years_display": age,
+        "waist_raw_display": m["waist_raw_display"],
+        "hips_raw": m["hips_raw"],
+        "age_raw": m["age_raw"],
+        "waist_in": m["waist_in"],
+        "hips_in_display": m["hips_in_display"],
+        "age_years_display": m["age_years_display"],
         "search_fts": norm(" ".join([BRAND, product_title, strip_tags(product.get("body_html")), text])),
-        "weight_display_display": maybe_num(weight),
+        "weight_display_display": m["weight_display_display"],
         "weight_raw_needs_correction": "",
         "clothing_type_id": classify(product, review),
         "reviewer_profile_url": "",
         "reviewer_name_raw": norm(reviewer.get("displayName")),
-        "inseam_inches_display": maybe_num(inseam),
+        "inseam_inches_display": m["inseam_inches_display"],
         "color_canonical": "",
         "color_display": "",
         "size_display": size_display,
-        "bust_in_number_display": bra_band or maybe_num(bust),
-        "cupsize_display": cupsize,
-        "weight_lbs_display": maybe_num(weight),
+        "bust_in_display": m["bust_in_display"],
+        "bra_band_in_display": m["bra_band_in_display"],
+        "bust_in_number_display": m["bust_in_number_display"],
+        "cupsize_display": m["cupsize_display"],
+        "weight_lbs_display": m["weight_lbs_display"],
         "weight_lbs_raw_issue": "",
         "product_title_raw": product_title,
         "product_subtitle_raw": title,
@@ -474,7 +416,7 @@ def row_for(product: Dict[str, object], review: Dict[str, object], image_url: st
 
 
 def has_measurement(row: Dict[str, str]) -> bool:
-    fields = ["height_in_display", "weight_lbs_display", "bust_in_number_display", "hips_in_display", "waist_in", "inseam_inches_display"]
+    fields = ["height_in_display", "weight_lbs_display", "bust_in_display", "bra_band_in_display", "bust_in_number_display", "hips_in_display", "waist_in", "inseam_inches_display"]
     return any(norm(row.get(field)) for field in fields)
 
 

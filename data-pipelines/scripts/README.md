@@ -8,8 +8,15 @@ Current canonical entrypoints:
 
 - `00_raw_scrape/non_amazon/`: merchant and affiliate raw review scrapers.
 - `02_qualify_for_supabase/non_amazon/`: measurement coverage, gap ranking, and
-  AWIN lead qualification reports.
+  affiliate monetization gates, AWIN/Sovrn link selection, measurement coverage,
+  gap ranking, and AWIN lead qualification reports.
 - `03_cv_annotate/amazon/build_supabase_image_review_package.py`: Stage 03
   review package generation for CV-annotated pending human review rows.
 - `04_human_review_publish/amazon/ingest_labeled_supabase_review_workbook.py`:
   Stage 04 human-reviewed return ingest.
+
+Relevant runbooks:
+
+- `data-pipelines/docs/affiliate_monetization_gate_runbook.md`: required
+  AWIN/Sovrn monetization gate before new non-Amazon scrape rows are packaged
+  for image approval.
