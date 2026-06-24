@@ -59,7 +59,8 @@ async function main() {
   }
 
   const reportsDir = path.join(fwmDataDir(repoRoot), "_reports");
-  const sidecar = path.join(reportsDir, "amazon_taxonomy_worklist_20260619T182108730Z_progress.ndjson");
+  const sidecarArg = process.argv.find((a) => a.startsWith("--sidecar="))?.slice(10);
+  const sidecar = sidecarArg ? path.resolve(sidecarArg) : path.join(reportsDir, "amazon_taxonomy_worklist_20260619T182108730Z_progress.ndjson");
   const byId = new Map();
   for (const line of (await readFile(sidecar, "utf8")).trim().split("\n")) {
     try {
@@ -117,7 +118,8 @@ on conflict (product_page_id, clothing_type_id) do update set evidence = exclude
   if (badMothers.size) throw new Error(`Unexpected invalid mother categories: ${[...badMothers].join(", ")}`);
 
   await mkdir(reportsDir, { recursive: true });
-  const exclPath = path.join(reportsDir, "amazon_backfill_excluded_accessories_shoes.json");
+  const exclSuffix = sidecarArg ? "_" + path.basename(sidecar).replace(/_progress\.ndjson$/, "").replace(/\.ndjson$/, "") : "";
+  const exclPath = path.join(reportsDir, `amazon_backfill_excluded_accessories_shoes${exclSuffix}.json`);
   await writeFile(exclPath, JSON.stringify(excluded, null, 2) + "\n", "utf8");
 
   console.log(`DB:                ${redactDatabaseUrl(databaseUrl)}`);
