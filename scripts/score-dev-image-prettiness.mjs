@@ -22,6 +22,14 @@ import { loadWorkbookCvIndex } from "./lib/workbook-cv-index.mjs";
 import { loadKeypointIndex, analyzeKeypoints } from "./lib/keypoint-index.mjs";
 import { estimateBodyAfterCrop, estimateBestAchievableCrop, cropWindowFractions } from "./lib/card-crop-geometry.mjs";
 import { computePixelStats } from "./lib/pixel-stats.mjs";
+import {
+  LIGHTING_WEIGHTS,
+  exposureScore,
+  brightnessScore,
+  contrastScore,
+  castScore,
+  lightingScore,
+} from "./lib/lighting-score.mjs";
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const limit = Math.max(1, Number(parseArg("limit", "200")) || 200);
@@ -69,9 +77,9 @@ const DOMAIN_FIT_WEIGHTS = {
 // colorfulness rewards vivid frames; clutter is a coarse whole-frame proxy, so it
 // is weighted lowest.
 const TECHNICAL_WEIGHTS = { lighting: 0.45, colorfulness: 0.25, clutter: 0.3 };
-// Sub-weights inside the lighting component. Brightness is up-weighted because a
-// "light" frame is one of the prettiness goals (see brightnessScore).
-const LIGHTING_WEIGHTS = { exposure: 0.35, brightness: 0.4, contrast: 0.15, cast: 0.1 };
+// Lighting sub-scoring (exposure/brightness/contrast/cast) lives in
+// ./lib/lighting-score.mjs so the calibration dashboard shares the exact logic;
+// LIGHTING_WEIGHTS is re-exported from there and imported above.
 
 function parseArg(name, defaultValue = null) {
   const prefix = `--${name}=`;
@@ -321,29 +329,8 @@ function bodyCardCoverageScore(geom) {
 }
 
 // --- Technical-quality scorers (lighting + coarse clutter), from pixel stats ---
-
-// Penalize crushed shadows + blown highlights. ~15% clipped pixels -> 0.
-function exposureScore(stats) {
-  const clipped = stats.clipped_shadow_frac + stats.clipped_highlight_frac;
-  return clamp01(1 - clipped / 0.15);
-}
-
-// Reward a bright, "light" frame. Per the prettiness goals, the sweet spot leans
-// to the upper-mid range (a touch brighter than neutral) and dark frames are
-// penalized harder than slightly-bright ones; genuinely blown-out frames are
-// still caught by exposureScore (highlight clipping), so this curve only softly
-// rolls off the very-bright end.
-function brightnessScore(mean) {
-  if (mean >= 120 && mean <= 195) return 1; // bright + airy: the target
-  if (mean >= 100 && mean < 120) return 0.9; // pleasantly lit
-  if (mean > 195 && mean <= 215) return 0.85; // bright, edging toward washed out
-  if (mean >= 80 && mean < 100) return 0.7; // a bit dim
-  if (mean > 215 && mean <= 230) return 0.6; // quite bright
-  if (mean >= 60 && mean < 80) return 0.45; // dim
-  if (mean > 230) return 0.4; // near-white / overexposed (exposureScore also bites)
-  if (mean >= 45 && mean < 60) return 0.3; // dark
-  return 0.15; // very dark
-}
+// Lighting sub-scorers (exposure/brightness/contrast/cast) and lightingScore are
+// imported from ./lib/lighting-score.mjs (shared with the calibration dashboard).
 
 // Reward a visible face (YuNet). face_conf is the detector's presence strength;
 // any detected face gets solid credit (floored), graded mildly by confidence.
@@ -363,31 +350,6 @@ const COLORFULNESS_VIVID = 60; // richly colorful
 function colorfulnessScore(stats) {
   if (!stats || !Number.isFinite(stats.colorfulness)) return null;
   return clamp01((stats.colorfulness - COLORFULNESS_DULL) / (COLORFULNESS_VIVID - COLORFULNESS_DULL));
-}
-
-// Reward healthy contrast; penalize flat/foggy and harsh extremes.
-function contrastScore(std) {
-  if (std >= 35 && std <= 75) return 1;
-  if (std >= 25 && std < 35) return 0.8;
-  if (std > 75 && std <= 90) return 0.8;
-  if (std >= 15 && std < 25) return 0.5;
-  if (std > 90 && std <= 110) return 0.5;
-  return 0.25;
-}
-
-// Penalize a strong global color cast (poor white balance).
-function castScore(cast) {
-  return clamp01(1 - cast / 0.25);
-}
-
-function lightingScore(stats) {
-  if (!stats) return null;
-  return weightedMean([
-    [exposureScore(stats), LIGHTING_WEIGHTS.exposure],
-    [brightnessScore(stats.mean_luma), LIGHTING_WEIGHTS.brightness],
-    [contrastScore(stats.contrast_std), LIGHTING_WEIGHTS.contrast],
-    [castScore(stats.color_cast), LIGHTING_WEIGHTS.cast],
-  ]);
 }
 
 // COARSE: whole-frame edge busyness as a clutter proxy. Low busyness -> clean
