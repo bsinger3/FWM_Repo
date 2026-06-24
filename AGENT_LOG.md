@@ -33,6 +33,45 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-24 19:20 EDT — Claude Code — Closed the last 55 null mother categories + product_pages fill-rate audit
+
+**Did:** Audited every column of `staging.product_pages` (dev, 11,874 rows) for
+the human, then filled the final 55 rows with `mother_category_id IS NULL`
+(direct SQL in a transaction against DEV_DATABASE_URL, snapshotted to a TEMP
+`_before`):
+- 53 had a granular type whose id is a **variant not in `staging.clothing_type_tags`**:
+  `swimsuit`→swimwear (21), `tshirt`→tops (21), `culottes`→bottoms (8),
+  `dress`/`romper`→dresses (2). Tagged `category_source_field='clothing_type_alias'`,
+  `category_extractor_version='mother_alias_fill_v1'`, confidence high.
+- 2 petalandpup rows classified from title ("Luna Skirt Set"→sets, "…Mini Dress"
+  →dresses); 1 bloomchic row (no type/title, `page_not_found`) from its
+  unambiguous url slug (…-pullover→tops). Tagged source_field title/url_slug,
+  confidence medium.
+- Propagated to the mirror: `public.images.mother_category_id` for the 169 images
+  on those pages (NULL→resolved). **public.images mother coverage now 47,872 /
+  47,873 (100.00%).** staging.product_pages mother coverage now **11,874 / 11,874**.
+
+**Heads-up:**
+- The variant ids (`swimsuit`/`tshirt`/`culottes`) are still NOT in
+  `staging.clothing_type_tags`, so a future re-run of the granular→mother backfill
+  would re-null these unless the aliases are added to that map. I did the
+  **direct fill only** (human's explicit scope), not the durable map fix.
+- **Audit finding the human cares about — raw-capture columns are heavily empty,
+  but by SOURCE, not a backfill miss:** `product_category_raw` 9,541 empty (80%;
+  but 9,489 of those still have a resolved mother category), `product_title_raw`
+  9,041, `brand` 8,270, `category_breadcrumb_path` 7,304 — concentrated in
+  **Amazon (4,639), RentTheRunway (3,151), Nuuly, Cider**. Verified the data is
+  NOT hiding in `raw_metadata` (Amazon's is just `{"loader":...}`). Filling these
+  requires **re-scraping those sources**, not a DB op. `source_status` is null for
+  11,634 (only Amazon was liveness-checked).
+- 1 `public.images` row (id 40052a4a-…) has NULL `product_page_id` (orphan) so it
+  can't inherit a category — that's the single remaining null image, unrelated to
+  product_pages.
+
+**Open / handoff:** All dev, reversible. If we want raw title/brand/category for
+Amazon/RTR/etc., that's a re-scrape job (separate, outward-facing). Consider adding
+swimsuit/tshirt/culottes aliases to `clothing_type_tags` so the gap can't reopen.
+
 ## 2026-06-24 18:40 EDT — Claude Code — Backfill low-confidence mother categories (LLM + deterministic)
 
 **Did:** Filled in mother_category_id for the 7,202 low-confidence product
@@ -228,11 +267,31 @@ weight-change leftovers) nulled; 2 impossible heights (108") nulled. Policy: a v
 iff out-of-band AND not supported by its comment. **Result: weight>500 44→0, out-of-band weight
 152→32 (all real), impossible height 2→0.** Verified the kept set is all comment-supported.
 
-**Open / handoff:** Dataset is now clean of measurement garbage. Optional remaining: add a
-load-time guard (user_comment not a path; source_file not purely numeric) so an off-by-one
-seed can't re-introduce the file-path corruption. The ~32 remaining out-of-band weights and
-~19 heights are all legitimate (real heavy adults / children). Did NOT touch product_pages
-(another agent writing there concurrently).
+**Open / handoff:** Dataset is now clean of measurement garbage. The ~32 remaining
+out-of-band weights and ~19 heights are all legitimate (real heavy adults / children).
+Did NOT touch product_pages (another agent writing there concurrently).
+
+## 2026-06-24 — Claude Code — Load-time guard against the column-shift corruption (dev migration 23)
+
+**Did:** Added `supabase/dev-migrations/20260624_dev_23_reject_column_shift_corruption.sql`
+(APPLIED to dev via the migration tooling): a BEFORE INSERT OR UPDATE trigger
+`public.reject_column_shift_corruption()` on **public.images AND public.reviews** that
+rejects any write whose `user_comment` looks like a file path (`/Users/%`, or `<dir>/<file>.csv`)
+or that SETS a purely-numeric `source_file`. The source_file check is gated on
+`tg_op='INSERT' OR new.source_file IS DISTINCT FROM old.source_file`, so the ~9,682 legacy
+rows that still carry a numeric source_file (provenance only — I never un-shifted those, they're
+harmless and unused downstream) remain updatable by measurement backfills without tripping it.
+Idempotent (CREATE OR REPLACE + DROP TRIGGER IF EXISTS).
+
+**Verified (psql, all in BEGIN…ROLLBACK):** path→user_comment REJECTED (images+reviews,
+insert+update); numeric→source_file REJECTED (images+reviews); measurement update on a legacy
+numeric-source_file row PASSES; normal comment update PASSES; setting source_file to a real
+path PASSES. So a future off-by-one seed that shifts these columns fails fast at the DB on any
+write path (RPC, ad-hoc seed, direct psql) — it can't silently re-introduce the corruption.
+
+**Heads-up:** This is the only trigger on images/reviews; it runs a couple of LIKE + one regex
+per row write (negligible). Prod does NOT have this trigger (dev-only migration) — worth adding
+to prod's schema if/when the loader path is promoted. Migration committed; NOT pushed.
 
 ## 2026-06-24 — Claude Code — Height×Weight dot-plot dashboard for outlier hunting (dev, read-only)
 
