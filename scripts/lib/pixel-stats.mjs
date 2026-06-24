@@ -1,7 +1,7 @@
 // Deterministic pixel statistics for the prettiness scorer's technical bucket
 // (plan §12, Phase 2 proxy). Decodes an image to a tiny thumbnail and computes
-// luminance/exposure/contrast/color-cast stats plus a WHOLE-FRAME edge-busyness
-// proxy for background clutter.
+// luminance/exposure/contrast/color-cast stats, a Hasler-Susstrunk colorfulness
+// measure, plus a WHOLE-FRAME edge-busyness proxy for background clutter.
 //
 // IMPORTANT: edge_busyness is whole-frame. With no person bbox position in the
 // CV checkpoint we cannot isolate the background, so a busy outfit/pattern reads
@@ -60,6 +60,12 @@ export function statsFromRaw(data, width, height, channels = 3) {
   let sumB = 0;
   let shadowClipped = 0;
   let highlightClipped = 0;
+  // Hasler-Susstrunk opponent channels for colorfulness: rg = R - G,
+  // yb = 0.5(R + G) - B. Accumulate means + variances in one pass.
+  let sumRG = 0;
+  let sumRGSq = 0;
+  let sumYB = 0;
+  let sumYBSq = 0;
 
   for (let i = 0; i < pixelCount; i += 1) {
     const o = i * channels;
@@ -73,6 +79,12 @@ export function statsFromRaw(data, width, height, channels = 3) {
     sumR += r;
     sumG += g;
     sumB += b;
+    const rg = r - g;
+    const yb = 0.5 * (r + g) - b;
+    sumRG += rg;
+    sumRGSq += rg * rg;
+    sumYB += yb;
+    sumYBSq += yb * yb;
     if (y <= SHADOW_CLIP) shadowClipped += 1;
     if (y >= HIGHLIGHT_CLIP) highlightClipped += 1;
   }
@@ -88,6 +100,16 @@ export function statsFromRaw(data, width, height, channels = 3) {
   const colorCast =
     Math.max(Math.abs(meanR - grayMean), Math.abs(meanG - grayMean), Math.abs(meanB - grayMean)) / 255;
 
+  // Colorfulness (Hasler-Susstrunk 2003): sqrt(std_rg^2 + std_yb^2)
+  // + 0.3 * sqrt(mean_rg^2 + mean_yb^2). Higher = more vivid/varied color.
+  // ~0 for grayscale; ~60-110 for vivid frames on the 0..255 channel scale.
+  const meanRG = sumRG / pixelCount;
+  const meanYB = sumYB / pixelCount;
+  const stdRG = Math.sqrt(Math.max(0, sumRGSq / pixelCount - meanRG * meanRG));
+  const stdYB = Math.sqrt(Math.max(0, sumYBSq / pixelCount - meanYB * meanYB));
+  const colorfulness =
+    Math.sqrt(stdRG * stdRG + stdYB * stdYB) + 0.3 * Math.sqrt(meanRG * meanRG + meanYB * meanYB);
+
   return {
     width,
     height,
@@ -96,6 +118,7 @@ export function statsFromRaw(data, width, height, channels = 3) {
     clipped_shadow_frac: shadowClipped / pixelCount,
     clipped_highlight_frac: highlightClipped / pixelCount,
     color_cast: colorCast,
+    colorfulness,
     edge_busyness: edgeBusyness(lumaGrid, width, height),
   };
 }

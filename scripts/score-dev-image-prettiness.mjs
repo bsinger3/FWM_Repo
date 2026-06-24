@@ -38,7 +38,7 @@ const pixelsEnabled = !process.argv.includes("--no-pixels");
 const autoCropsPath = parseArg("auto-crops", null);
 const onlyAutoCrops = process.argv.includes("--only-auto-crops");
 const compareCard = process.argv.includes("--compare-card");
-const PRETTINESS_MODEL_VERSION = pixelsEnabled ? "prettiness_domainfit_technical_v3" : "prettiness_domain_fit_v2";
+const PRETTINESS_MODEL_VERSION = pixelsEnabled ? "prettiness_domainfit_technical_v4" : "prettiness_domain_fit_v2";
 
 // Plan target blend. Aesthetic (CLIP) is still deferred; v3 fills the technical
 // bucket with a deterministic lighting + coarse-clutter proxy. Null components
@@ -52,12 +52,16 @@ const PLAN_BLEND = { aesthetic: 0.55, technical: 0.25, domain_fit: 0.2 };
 const TECHNICAL_INTERIM_CAP = 0.25;
 // Sub-weights inside the domain-fit component (sum to 1). Body-centric because
 // fit-shopping usefulness is the point; null components are skipped + renormalized.
-const DOMAIN_FIT_WEIGHTS = { aspect: 0.2, resolution: 0.15, body_visible: 0.3, body_card_coverage: 0.35 };
+// face_visible (from YuNet) rewards a visible face — part of "is this a nice photo
+// of the person".
+const DOMAIN_FIT_WEIGHTS = { aspect: 0.15, resolution: 0.1, body_visible: 0.3, body_card_coverage: 0.3, face_visible: 0.15 };
 // Sub-weights inside the technical-quality component. Lighting is trustworthy;
-// clutter is a coarse whole-frame proxy, so it is weighted low.
-const TECHNICAL_WEIGHTS = { lighting: 0.65, clutter: 0.35 };
-// Sub-weights inside the lighting component.
-const LIGHTING_WEIGHTS = { exposure: 0.4, brightness: 0.3, contrast: 0.2, cast: 0.1 };
+// colorfulness rewards vivid frames; clutter is a coarse whole-frame proxy, so it
+// is weighted lowest.
+const TECHNICAL_WEIGHTS = { lighting: 0.45, colorfulness: 0.25, clutter: 0.3 };
+// Sub-weights inside the lighting component. Brightness is up-weighted because a
+// "light" frame is one of the prettiness goals (see brightnessScore).
+const LIGHTING_WEIGHTS = { exposure: 0.35, brightness: 0.4, contrast: 0.15, cast: 0.1 };
 
 function parseArg(name, defaultValue = null) {
   const prefix = `--${name}=`;
@@ -284,14 +288,41 @@ function exposureScore(stats) {
   return clamp01(1 - clipped / 0.15);
 }
 
-// Reward mid-range brightness; penalize too-dark and washed-out frames.
+// Reward a bright, "light" frame. Per the prettiness goals, the sweet spot leans
+// to the upper-mid range (a touch brighter than neutral) and dark frames are
+// penalized harder than slightly-bright ones; genuinely blown-out frames are
+// still caught by exposureScore (highlight clipping), so this curve only softly
+// rolls off the very-bright end.
 function brightnessScore(mean) {
-  if (mean >= 90 && mean <= 170) return 1;
-  if (mean >= 70 && mean < 90) return 0.8;
-  if (mean > 170 && mean <= 200) return 0.8;
-  if (mean >= 50 && mean < 70) return 0.5;
-  if (mean > 200 && mean <= 220) return 0.5;
-  return 0.2;
+  if (mean >= 120 && mean <= 195) return 1; // bright + airy: the target
+  if (mean >= 100 && mean < 120) return 0.9; // pleasantly lit
+  if (mean > 195 && mean <= 215) return 0.85; // bright, edging toward washed out
+  if (mean >= 80 && mean < 100) return 0.7; // a bit dim
+  if (mean > 215 && mean <= 230) return 0.6; // quite bright
+  if (mean >= 60 && mean < 80) return 0.45; // dim
+  if (mean > 230) return 0.4; // near-white / overexposed (exposureScore also bites)
+  if (mean >= 45 && mean < 60) return 0.3; // dark
+  return 0.15; // very dark
+}
+
+// Reward a visible face (YuNet). face_conf is the detector's presence strength;
+// any detected face gets solid credit (floored), graded mildly by confidence.
+// has_face === false means a face was looked for and not found.
+function faceVisibleScore(cv) {
+  if (!cv || cv.has_face === null || cv.has_face === undefined) return null;
+  if (cv.has_face === false) return 0;
+  const conf = Number.isFinite(cv.face_conf) ? cv.face_conf : null;
+  return conf === null ? 0.8 : clamp01(0.6 + 0.4 * conf);
+}
+
+// Reward a colorful frame (Hasler-Susstrunk colorfulness from pixel stats).
+// Anchors: <= DULL reads as flat/muted -> 0; >= VIVID reads as fully colorful
+// -> 1. Calibrated to typical 96px-thumb colorfulness (most frames 15..75).
+const COLORFULNESS_DULL = 12; // grayscale-ish / very muted
+const COLORFULNESS_VIVID = 60; // richly colorful
+function colorfulnessScore(stats) {
+  if (!stats || !Number.isFinite(stats.colorfulness)) return null;
+  return clamp01((stats.colorfulness - COLORFULNESS_DULL) / (COLORFULNESS_VIVID - COLORFULNESS_DULL));
 }
 
 // Reward healthy contrast; penalize flat/foggy and harsh extremes.
@@ -335,6 +366,7 @@ function technicalQualityScore(stats) {
   if (!stats) return null;
   return weightedMean([
     [lightingScore(stats), TECHNICAL_WEIGHTS.lighting],
+    [colorfulnessScore(stats), TECHNICAL_WEIGHTS.colorfulness],
     [backgroundClutterScore(stats), TECHNICAL_WEIGHTS.clutter],
   ]);
 }
@@ -423,10 +455,15 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride) {
     resolution_score: resolutionScore(metadata?.width, metadata?.height),
     body_visible_score: bodyVisibleScore(cv),
     body_card_coverage_score: bodyCardCoverageScore(geom),
-    // Technical bucket: deterministic lighting + coarse clutter from pixel stats.
+    face_visible_score: faceVisibleScore(cv),
+    // Technical bucket: deterministic lighting + colorfulness + coarse clutter.
     lighting_score: lightingScore(pixelStats),
+    colorfulness_score: colorfulnessScore(pixelStats),
     background_clutter_score: backgroundClutterScore(pixelStats),
     technical_quality_score: technicalQualityScore(pixelStats),
+    // Smiling needs a face-expression model run over the images; no expression
+    // signal exists in the CV checkpoints, so it stays null (pending), like CLIP.
+    smile_score: null,
     // Aesthetic (CLIP) deferred to Phase 1; recorded null so the blend is transparent.
     aesthetic_score: null,
   };
@@ -435,6 +472,7 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride) {
     [components.resolution_score, DOMAIN_FIT_WEIGHTS.resolution],
     [components.body_visible_score, DOMAIN_FIT_WEIGHTS.body_visible],
     [components.body_card_coverage_score, DOMAIN_FIT_WEIGHTS.body_card_coverage],
+    [components.face_visible_score, DOMAIN_FIT_WEIGHTS.face_visible],
   ]);
   const prettiness = blendPrettiness({
     domainFit,
@@ -464,6 +502,7 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride) {
           area_pct: cv.area_pct,
           body_coverage_pose: cv.body_coverage_pose,
           has_face: cv.has_face,
+          face_conf: cv.face_conf ?? null,
         }
       : null,
   };
@@ -555,7 +594,9 @@ function summarize(results) {
     "resolution_score",
     "body_visible_score",
     "body_card_coverage_score",
+    "face_visible_score",
     "lighting_score",
+    "colorfulness_score",
     "background_clutter_score",
     "technical_quality_score",
   ];
@@ -647,11 +688,11 @@ function card(result) {
       <div class="meta">
         <div>${htmlEscape(result.dimensions?.width)}&times;${htmlEscape(result.dimensions?.height)} ${htmlEscape(result.dimensions?.format || "")}</div>
         <div>aspect ${htmlEscape(c.aspect_score)} &middot; res ${htmlEscape(c.resolution_score)}</div>
-        <div>body ${htmlEscape(c.body_visible_score)} &middot; cardfit ${htmlEscape(c.body_card_coverage_score)}</div>
-        <div>light ${htmlEscape(c.lighting_score)} &middot; clutter ${htmlEscape(c.background_clutter_score)} &middot; tech ${htmlEscape(c.technical_quality_score)}</div>
+        <div>body ${htmlEscape(c.body_visible_score)} &middot; cardfit ${htmlEscape(c.body_card_coverage_score)} &middot; face ${htmlEscape(c.face_visible_score)}</div>
+        <div>light ${htmlEscape(c.lighting_score)} &middot; color ${htmlEscape(c.colorfulness_score)} &middot; clutter ${htmlEscape(c.background_clutter_score)} &middot; tech ${htmlEscape(c.technical_quality_score)}</div>
         ${cmpLine}
         <div>${coverageLine}</div>
-        <div class="site">fullbody=${htmlEscape(result.derived_full_body_visible)}</div>
+        <div class="site">fullbody=${htmlEscape(result.derived_full_body_visible)} &middot; hasface=${htmlEscape(result.cv_metrics?.has_face)}</div>
       </div>
     </article>`;
 }
@@ -764,9 +805,12 @@ function buildCsv(results) {
     "resolution_score",
     "body_visible_score",
     "body_card_coverage_score",
+    "face_visible_score",
     "lighting_score",
+    "colorfulness_score",
     "background_clutter_score",
     "derived_full_body_visible",
+    "has_face",
     "card_coverage",
     "retained_height",
     "width",
@@ -792,9 +836,12 @@ function buildCsv(results) {
       r.components?.resolution_score,
       r.components?.body_visible_score,
       r.components?.body_card_coverage_score,
+      r.components?.face_visible_score,
       r.components?.lighting_score,
+      r.components?.colorfulness_score,
       r.components?.background_clutter_score,
       r.derived_full_body_visible,
+      r.cv_metrics?.has_face,
       r.crop_geometry?.card_coverage,
       r.crop_geometry?.retained_height,
       r.dimensions?.width,
@@ -882,8 +929,18 @@ async function main() {
     blend_note:
       "Aesthetic (CLIP) is not built. While it is null, technical is clamped to its planned 25% share and domain-fit absorbs the orphaned aesthetic weight (~75%), so prettiness = 0.25*technical + 0.75*domain_fit (not the 56% technical that renormalization would give).",
     clutter_note:
-      "background_clutter_score is a COARSE whole-frame edge-busyness proxy. With no person bbox position in the CV checkpoint it cannot isolate the background, so a busy outfit/pattern reads as clutter too. Weighted low (0.35 of technical) and pending the CV re-run that adds a person mask.",
-    pending_components: pixelsEnabled ? ["aesthetic_score"] : ["aesthetic_score", "technical_quality_score"],
+      "background_clutter_score is a COARSE whole-frame edge-busyness proxy. With no person bbox position in the CV checkpoint it cannot isolate the background, so a busy outfit/pattern reads as clutter too. Weighted lowest (0.3 of technical) and pending the CV re-run that adds a person mask.",
+    colorfulness_note:
+      "colorfulness_score is the Hasler-Susstrunk colorfulness of the scored window (card when an autocrop exists), normalized to 0..1. Deterministic, no ML.",
+    face_note:
+      "face_visible_score is NULL/pending: has_face_yunet exists in the checkpoint header but is EMPTY in 100% of the 326k rows (YuNet face detection was never populated). The scorer is wired to use it (visible face -> higher, no face -> 0) the moment a face-detection pass fills it, but today it has no data, so the component is skipped + renormalized.",
+    smile_note:
+      "smile_score is NULL/pending: there is NO smile/expression signal anywhere in the CV checkpoints. Like face_visible, rewarding smiles requires a new face/expression model pass over the images (similar to the YOLO detection run). Tracked as a pending component.",
+    brightness_note:
+      "brightnessScore was retuned to reward a brighter, 'light' frame (sweet spot ~120-195 luma); blown-out frames are still penalized via exposure highlight-clipping.",
+    pending_components: pixelsEnabled
+      ? ["aesthetic_score", "face_visible_score", "smile_score"]
+      : ["aesthetic_score", "technical_quality_score", "face_visible_score", "smile_score"],
     cv_index_meta: cvIndex.meta,
     card_coverage_basis:
       "Without a realized crop_spec, body_card_coverage uses the position-independent best-achievable 3:4 crop (croppability ceiling), since YOLO metrics have no bbox position. Rows with a crop_spec are scored against that realized window.",

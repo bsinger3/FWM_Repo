@@ -16,7 +16,13 @@ const CHECKPOINT_SUBDIR = path.join(
   "cv_gate_checkpoint_parts",
 );
 const CACHE_SUBPATH = path.join("_cache", "workbook_cv_index.json");
-const INDEX_VERSION = "workbook_cv_index_v1";
+// v3: parse has_face_yunet as a float face-presence strength when present. NOTE:
+// in the current 326k-row checkpoints this column is EMPTY in 100% of rows (YuNet
+// face detection was never populated), so has_face/face_conf come out null and the
+// face_visible signal stays pending a face-detection run. The parse is kept
+// forward-compatible for when that column gets filled. (v1 mis-parsed it as a
+// boolean; v2 wrongly treated empty as "no face" = false.)
+const INDEX_VERSION = "workbook_cv_index_v3";
 
 const CV_COLUMNS = {
   review_row_key: "review_row_key",
@@ -66,23 +72,21 @@ function toNumberOrNull(value) {
   return Number.isFinite(num) ? num : null;
 }
 
-function toBoolOrNull(value) {
-  if (value === undefined || value === null || value === "") return null;
-  const lower = String(value).trim().toLowerCase();
-  if (["true", "1", "yes", "t"].includes(lower)) return true;
-  if (["false", "0", "no", "f"].includes(lower)) return false;
-  return null;
-}
-
 function normalizeRow(record) {
   // body_coverage_score_yolo_pose is on a 0..100 scale in the checkpoints.
   const poseRaw = toNumberOrNull(record.body_coverage_pose);
+  // has_face_yunet is a YuNet face-presence strength in 0..1 when populated, NOT a
+  // boolean. It is EMPTY in 100% of the current checkpoints, so this resolves to
+  // null (unknown / not measured) rather than false — an absent column must not be
+  // read as "no face", which would zero out every image's face_visible signal.
+  const faceConf = toNumberOrNull(record.has_face);
   return {
     person_count: toNumberOrNull(record.person_count),
     height_pct: toNumberOrNull(record.height_pct),
     area_pct: toNumberOrNull(record.area_pct),
     body_coverage_pose: poseRaw === null ? null : Math.max(0, Math.min(1, poseRaw / 100)),
-    has_face: toBoolOrNull(record.has_face),
+    face_conf: faceConf === null ? null : Math.max(0, Math.min(1, faceConf)),
+    has_face: faceConf === null ? null : faceConf > 0,
   };
 }
 
@@ -123,7 +127,8 @@ async function scanCheckpoints(checkpointDir) {
 }
 
 // Returns a Map-like object: { byKey, meta }. byKey is a plain object keyed by
-// review_row_key -> { person_count, height_pct, area_pct, body_coverage_pose, has_face }.
+// review_row_key -> { person_count, height_pct, area_pct, body_coverage_pose,
+// face_conf, has_face }.
 export async function loadWorkbookCvIndex({ cwd = process.cwd(), rebuild = false } = {}) {
   const dataDir = fwmDataDir(cwd);
   const cachePath = path.join(dataDir, CACHE_SUBPATH);
