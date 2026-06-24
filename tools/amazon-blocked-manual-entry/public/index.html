@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Amazon blocked — manual data entry</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font: 14px/1.4 -apple-system, system-ui, sans-serif; margin: 0; background: #f4f5f7; color: #1a1a1a; }
+  header { position: sticky; top: 0; z-index: 10; background: #111827; color: #fff; padding: 10px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+  header h1 { font-size: 15px; margin: 0 0 6px; }
+  .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; }
+  .bar .stat { background: #0b1220; padding: 4px 10px; border-radius: 6px; }
+  .bar .out { color: #9ca3af; margin-left: auto; font-family: ui-monospace, monospace; }
+  .hint { font-size: 11px; color: #9ca3af; font-weight: 400; }
+  main { padding: 16px; max-width: 1000px; margin: 0 auto; display: grid; gap: 14px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .card.done { border-left: 5px solid #16a34a; }
+  .card .top { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .03em; background: #fee2e2; color: #991b1b; }
+  .asin { font-family: ui-monospace, monospace; color: #6b7280; }
+  .open { margin-left: auto; font-weight: 600; text-decoration: none; background: #2563eb; color: #fff; padding: 6px 12px; border-radius: 6px; }
+  .open:hover { background: #1d4ed8; }
+  form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 14px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e5e7eb; }
+  .field { display: flex; flex-direction: column; gap: 3px; }
+  .field.wide { grid-column: 1 / -1; }
+  label { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; }
+  select, input[type=text], textarea { font: inherit; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; }
+  select[multiple] { min-height: 84px; }
+  textarea { resize: vertical; min-height: 38px; }
+  .saved { font-size: 11px; color: #16a34a; height: 14px; }
+  .empty { text-align: center; color: #6b7280; padding: 40px; }
+</style></head>
+<body>
+<header>
+  <h1>Amazon blocked — manual data entry <span id="subtitle" class="hint"></span></h1>
+  <div class="bar">
+    <span class="stat" id="progress">…</span>
+    <span class="out" id="out"></span>
+  </div>
+</header>
+<main id="main"><div class="empty">Loading…</div></main>
+<script>
+let DATA = null;
+const el = (t, props={}, kids=[]) => { const e = document.createElement(t); Object.assign(e, props); for (const k of [].concat(kids)) e.append(k); return e; };
+
+async function boot() {
+  DATA = await (await fetch("/api/bootstrap")).json();
+  document.getElementById("subtitle").textContent = "· " + DATA.total + " soft-blocked rows · saves to " + DATA.output_path;
+  render();
+}
+
+function updateProgress() {
+  const saved = DATA.rows.filter(r => DATA.entries[r.product_page_id]).length;
+  const remaining = DATA.total - saved;
+  document.getElementById("progress").textContent = saved + " / " + DATA.total + " entered · " + remaining + " remaining";
+}
+
+function render() {
+  const main = document.getElementById("main");
+  main.innerHTML = "";
+  updateProgress();
+  if (!DATA.rows.length) { main.append(el("div", {className:"empty", textContent:"No blocked rows."})); return; }
+  for (const r of DATA.rows) main.append(card(r));
+}
+
+function card(r) {
+  const d = DATA.entries[r.product_page_id] || {};
+  const c = el("div", { className: "card" + (DATA.entries[r.product_page_id] ? " done" : "") });
+  const top = el("div", { className: "top" }, [
+    el("span", { className: "badge", textContent: "blocked" }),
+    el("span", { className: "asin", textContent: r.asin }),
+  ]);
+  top.append(el("a", { className: "open", href: r.canonical_url, target: "_blank", rel: "noopener", textContent: "Open on Amazon ↗" }));
+  c.append(top);
+
+  const form = el("form");
+  const saved = el("div", { className: "saved" });
+
+  const titleInput = el("input", { type:"text", value: d.title || "", placeholder:"Product title (as shown on Amazon)" });
+  const crumbInput = el("input", { type:"text", value: d.breadcrumb || "", placeholder:"Clothing, Shoes & Jewelry > Women > Clothing > Dresses" });
+
+  const catSel = el("select");
+  catSel.append(el("option",{value:"",textContent:"— pick category —"}));
+  for (const cat of DATA.categories) catSel.append(el("option",{value:cat.id,textContent:cat.label+" ("+cat.id+")",selected:d.mother_category_id===cat.id}));
+
+  const typeSel = el("select", { multiple: true });
+  const fillTypes = () => {
+    typeSel.innerHTML = "";
+    const mc = catSel.value;
+    const tags = DATA.tags.filter(t => !mc || t.mother_category_id === mc);
+    const chosen = new Set(d.clothing_type_ids || []);
+    for (const t of tags) typeSel.append(el("option",{value:t.id,textContent:t.id,selected:chosen.has(t.id)}));
+    if (!tags.length) typeSel.append(el("option",{value:"",textContent:"(pick a category first)",disabled:true}));
+  };
+  fillTypes();
+  catSel.onchange = () => { fillTypes(); save(); };
+
+  const notes = el("textarea", { value: d.notes || "", placeholder:"Optional notes" });
+
+  const mk = (lbl, node, wide) => el("div",{className:"field"+(wide?" wide":"")},[el("label",{textContent:lbl}), node]);
+  form.append(
+    mk("Product title", titleInput, true),
+    mk("Full breadcrumb", crumbInput, true),
+    mk("Mother category", catSel),
+    mk("Clothing type(s) — ⌘/Ctrl-click for multiple", typeSel),
+    mk("Notes", notes, true),
+  );
+  c.append(form);
+  c.append(saved);
+
+  let timer = null;
+  function save() {
+    const payload = {
+      product_page_id: r.product_page_id,
+      asin: r.asin,
+      canonical_url: r.canonical_url,
+      title: titleInput.value.trim(),
+      breadcrumb: crumbInput.value.trim(),
+      mother_category_id: catSel.value || null,
+      clothing_type_ids: [...typeSel.selectedOptions].map(o => o.value).filter(Boolean),
+      notes: notes.value.trim(),
+    };
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      saved.textContent = "saving…";
+      const res = await (await fetch("/api/save", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload) })).json();
+      DATA.entries[r.product_page_id] = { ...payload, saved_at: new Date().toISOString() };
+      c.classList.add("done");
+      saved.textContent = "✓ saved to repo · " + res.saved + " total";
+      document.getElementById("out").textContent = res.saved + " saved";
+      updateProgress();
+    }, 350);
+  }
+  for (const node of [titleInput, crumbInput, typeSel, notes]) { node.addEventListener("change", save); node.addEventListener("input", save); }
+  return c;
+}
+boot();
+</script>
+</body></html>

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Amazon ambiguous — taxonomy approval</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font: 14px/1.4 -apple-system, system-ui, sans-serif; margin: 0; background: #f4f5f7; color: #1a1a1a; }
+  header { position: sticky; top: 0; z-index: 10; background: #111827; color: #fff; padding: 10px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+  header h1 { font-size: 15px; margin: 0 0 6px; }
+  .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; }
+  .bar .stat { background: #0b1220; padding: 4px 10px; border-radius: 6px; }
+  .bar .out { color: #9ca3af; margin-left: auto; font-family: ui-monospace, monospace; }
+  .bar label { color: #9ca3af; font-weight: 600; text-transform: none; letter-spacing: 0; font-size: 12px; }
+  .bar select { font: inherit; font-size: 12px; padding: 3px 6px; border-radius: 6px; border: 1px solid #374151; background: #0b1220; color: #fff; }
+  .bar .chk { display: flex; gap: 4px; align-items: center; }
+  .hint { font-size: 11px; color: #9ca3af; font-weight: 400; }
+  main { padding: 16px; max-width: 1000px; margin: 0 auto; display: grid; gap: 14px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .card.done-approved { border-left: 5px solid #16a34a; }
+  .card.done-overridden { border-left: 5px solid #2563eb; }
+  .card.done-rejected { border-left: 5px solid #6b7280; opacity: .8; }
+  .card .top { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .asin { font-family: ui-monospace, monospace; color: #6b7280; font-weight: 700; }
+  .conf { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .03em; }
+  .conf.low { background: #fee2e2; color: #991b1b; }
+  .conf.medium { background: #fef3c7; color: #92400e; }
+  .conf.high { background: #dcfce7; color: #166534; }
+  .conf.unknown { background: #e5e7eb; color: #374151; }
+  .open { margin-left: auto; font-weight: 600; text-decoration: none; background: #2563eb; color: #fff; padding: 6px 12px; border-radius: 6px; }
+  .open:hover { background: #1d4ed8; }
+  .evidence { margin-top: 10px; font-size: 12.5px; display: grid; gap: 3px; }
+  .evidence .k { color: #6b7280; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: .03em; margin-right: 6px; }
+  .competing { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+  .competing .ct { display: inline-block; background: #f3f4f6; border-radius: 4px; padding: 1px 6px; margin: 1px 3px 1px 0; color: #6b7280; }
+  .proposal { margin-top: 10px; padding: 10px; border-radius: 8px; background: #f8fafc; border: 1px solid #e5e7eb; }
+  .proposal .head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .proposal .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
+  .proposal .cat { font-size: 15px; font-weight: 700; color: #111827; }
+  .proposal .types { color: #2563eb; font-family: ui-monospace, monospace; font-size: 12px; }
+  .proposal .reason { margin-top: 6px; font-size: 12.5px; color: #374151; font-style: italic; }
+  .controls { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e5e7eb; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  button { font: inherit; font-weight: 700; padding: 7px 14px; border-radius: 7px; border: 1px solid transparent; cursor: pointer; }
+  button.approve { background: #16a34a; color: #fff; }
+  button.approve:hover { background: #15803d; }
+  button.reject { background: #fff; color: #991b1b; border-color: #fca5a5; }
+  button.reject:hover { background: #fef2f2; }
+  button.active { box-shadow: 0 0 0 2px #111827; }
+  .override { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .field { display: flex; flex-direction: column; gap: 3px; }
+  label.fl { font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; }
+  select.ov, select.ovtypes { font: inherit; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; }
+  select.ovtypes { min-height: 72px; min-width: 180px; }
+  .saved { font-size: 11px; height: 14px; margin-top: 6px; }
+  .saved.approved { color: #16a34a; }
+  .saved.overridden { color: #2563eb; }
+  .saved.rejected { color: #6b7280; }
+  .empty { text-align: center; color: #6b7280; padding: 40px; }
+  .hide { display: none !important; }
+</style></head>
+<body>
+<header>
+  <h1>Amazon ambiguous — taxonomy approval <span id="subtitle" class="hint"></span></h1>
+  <div class="bar">
+    <span class="stat" id="progress">…</span>
+    <label>Confidence <select id="f-conf"><option value="">all</option><option value="low">low</option><option value="medium">medium</option><option value="high">high</option></select></label>
+    <label>Proposed cat <select id="f-cat"><option value="">all</option></select></label>
+    <span class="chk"><input type="checkbox" id="f-hide"><label for="f-hide">hide reviewed</label></span>
+    <span class="out" id="out"></span>
+  </div>
+</header>
+<main id="main"><div class="empty">Loading…</div></main>
+<script>
+let DATA = null;
+const el = (t, props={}, kids=[]) => { const e = document.createElement(t); Object.assign(e, props); for (const k of [].concat(kids)) if (k != null) e.append(k); return e; };
+const catLabel = id => { const c = (DATA.categories||[]).find(c => c.id === id); return c ? c.label : (id || "—"); };
+
+async function boot() {
+  DATA = await (await fetch("/api/bootstrap")).json();
+  document.getElementById("subtitle").textContent = "· " + DATA.total + " ambiguous rows · low-confidence first · saves to " + DATA.output_path;
+  const fcat = document.getElementById("f-cat");
+  const proposed = [...new Set(DATA.rows.map(r => r.llm_proposal.mother_category_id).filter(Boolean))].sort();
+  for (const id of proposed) fcat.append(el("option", { value: id, textContent: catLabel(id) + " (" + id + ")" }));
+  for (const id of ["f-conf","f-cat","f-hide"]) document.getElementById(id).addEventListener("change", render);
+  render();
+}
+
+function updateProgress() {
+  const saved = DATA.rows.filter(r => DATA.entries[r.product_page_id]).length;
+  const remaining = DATA.total - saved;
+  document.getElementById("progress").textContent = saved + " / " + DATA.total + " reviewed · " + remaining + " remaining";
+}
+
+function render() {
+  const main = document.getElementById("main");
+  main.innerHTML = "";
+  updateProgress();
+  const fConf = document.getElementById("f-conf").value;
+  const fCat = document.getElementById("f-cat").value;
+  const hide = document.getElementById("f-hide").checked;
+  let shown = 0;
+  for (const r of DATA.rows) {
+    if (fConf && r.llm_proposal.confidence !== fConf) continue;
+    if (fCat && r.llm_proposal.mother_category_id !== fCat) continue;
+    if (hide && DATA.entries[r.product_page_id]) continue;
+    main.append(card(r));
+    shown++;
+  }
+  if (!shown) main.append(el("div", { className: "empty", textContent: DATA.rows.length ? "No rows match the current filters." : "No ambiguous rows." }));
+}
+
+function card(r) {
+  const saved = DATA.entries[r.product_page_id] || null;
+  const p = r.llm_proposal;
+  const c = el("div", { className: "card" + (saved ? " done-" + saved.decision : "") });
+
+  // ---- top row: ASIN, confidence, open link
+  const top = el("div", { className: "top" }, [
+    el("span", { className: "asin", textContent: r.asin }),
+    el("span", { className: "conf " + (p.confidence || "unknown"), textContent: p.confidence }),
+  ]);
+  top.append(el("a", { className: "open", href: r.canonical_url, target: "_blank", rel: "noopener", textContent: "Open on Amazon ↗" }));
+  c.append(top);
+
+  // ---- captured evidence
+  const ev = el("div", { className: "evidence" });
+  if (r.title) ev.append(el("div", {}, [el("span", { className: "k", textContent: "Title" }), r.title]));
+  if (r.breadcrumb) ev.append(el("div", {}, [el("span", { className: "k", textContent: "Breadcrumb" }), r.breadcrumb]));
+  if (r.bsr) ev.append(el("div", {}, [el("span", { className: "k", textContent: "BSR" }), r.bsr]));
+  if (r.competing_categories.length) {
+    const comp = el("div", { className: "competing" }, [el("span", { className: "k", textContent: "Competing" })]);
+    for (const cc of r.competing_categories)
+      comp.append(el("span", { className: "ct", textContent: cc.mother_category_id + " · " + cc.evidence_tag + " (" + cc.source_field + ")" }));
+    ev.append(comp);
+  }
+  c.append(ev);
+
+  // ---- LLM proposal
+  const prop = el("div", { className: "proposal" });
+  const head = el("div", { className: "head" }, [
+    el("span", { className: "label", textContent: "LLM proposes" }),
+    el("span", { className: "cat", textContent: catLabel(p.mother_category_id) }),
+  ]);
+  if (p.clothing_type_ids.length) head.append(el("span", { className: "types", textContent: "[" + p.clothing_type_ids.join(", ") + "]" }));
+  prop.append(head);
+  if (p.reasoning) prop.append(el("div", { className: "reason", textContent: "“" + p.reasoning + "”" }));
+  c.append(prop);
+
+  // ---- controls
+  const controls = el("div", { className: "controls" });
+  const approveBtn = el("button", { className: "approve", type: "button", textContent: "✓ Approve" });
+  const rejectBtn = el("button", { className: "reject", type: "button", textContent: "✕ Reject / not-clothing" });
+
+  // override selects, defaulted to the LLM proposal
+  const ovCat = el("select", { className: "ov" });
+  for (const cat of DATA.categories)
+    ovCat.append(el("option", { value: cat.id, textContent: cat.label + " (" + cat.id + ")", selected: (saved && saved.decision === "overridden" ? saved.final_mother_category_id : p.mother_category_id) === cat.id }));
+  const ovTypes = el("select", { className: "ovtypes", multiple: true });
+  const fillTypes = () => {
+    ovTypes.innerHTML = "";
+    const mc = ovCat.value;
+    const tags = DATA.tags.filter(t => t.mother_category_id === mc);
+    const chosen = new Set(saved && saved.decision === "overridden" ? saved.final_clothing_type_ids : p.clothing_type_ids);
+    for (const t of tags) ovTypes.append(el("option", { value: t.id, textContent: t.id, selected: chosen.has(t.id) }));
+    if (!tags.length) ovTypes.append(el("option", { value: "", textContent: "(no types for this category)", disabled: true }));
+  };
+  fillTypes();
+
+  const ovField = el("div", { className: "override" }, [
+    el("div", { className: "field" }, [el("label", { className: "fl", textContent: "Override → mother category" }), ovCat]),
+    el("div", { className: "field" }, [el("label", { className: "fl", textContent: "Clothing type(s) — ⌘/Ctrl-click" }), ovTypes]),
+  ]);
+
+  controls.append(approveBtn, rejectBtn, ovField);
+  c.append(controls);
+
+  const savedEl = el("div", { className: "saved" });
+  c.append(savedEl);
+
+  // ---- save logic
+  let timer = null;
+  function paintState(decision) {
+    c.className = "card done-" + decision;
+    approveBtn.classList.toggle("active", decision === "approved");
+    rejectBtn.classList.toggle("active", decision === "rejected");
+    savedEl.className = "saved " + decision;
+  }
+  if (saved) paintState(saved.decision);
+
+  function persist(decision) {
+    const payload = {
+      product_page_id: r.product_page_id,
+      asin: r.asin,
+      decision,
+      final_mother_category_id: decision === "rejected" ? null : ovCat.value || null,
+      final_clothing_type_ids: decision === "rejected" ? [] : [...ovTypes.selectedOptions].map(o => o.value).filter(Boolean),
+      llm_proposal: p,
+    };
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      savedEl.textContent = "saving…";
+      const res = await (await fetch("/api/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })).json();
+      DATA.entries[r.product_page_id] = { ...payload, saved_at: new Date().toISOString() };
+      paintState(decision);
+      const verb = decision === "approved" ? "✓ approved" : decision === "overridden" ? "✎ overridden" : "✕ rejected";
+      savedEl.textContent = verb + " · saved to repo · " + res.saved + " total";
+      document.getElementById("out").textContent = res.saved + " saved";
+      updateProgress();
+    }, 250);
+  }
+
+  approveBtn.onclick = () => persist("approved");
+  rejectBtn.onclick = () => persist("rejected");
+  ovCat.onchange = () => { fillTypes(); persist("overridden"); };
+  ovTypes.onchange = () => persist("overridden");
+
+  return c;
+}
+boot();
+</script>
+</body></html>
