@@ -83,6 +83,96 @@ CASES = [
     ("reg_postpartum", "20 weeks postpartum and still wearing it.", {"weeks_pregnant": ""}),
     ("reg_prepregnancy", "I bought my pre-pregnancy size.", {"weeks_pregnant": ""}),
     ("reg_pregnant", "I'm 20 weeks pregnant and love it.", {"weeks_pregnant": "20"}),
+
+    # === Height/weight outlier fixes (2026-06-24 dot-plot audit) ===========
+    # Reversed feet/inch marks: 5"4' means 5'4", not 4 feet. Was -> 48/84/36.
+    ("height_reversed_54", "Im 5”4’ and 155lbs with square shape, looks good.",
+     {"height_in_display": "64", "weight_lbs_display": "155"}),
+    ("height_reversed_57", "I am 5\"7' and weigh 160 lbs.",
+     {"height_in_display": "67", "weight_lbs_display": "160"}),
+    ("height_reversed_53", "I’m 5”3’ around 135lbs and the short size is perfect.",
+     {"height_in_display": "63", "weight_lbs_display": "135"}),
+    ("height_reversed_noweight", "My height is 5”4’ and it is perfect for me.",
+     {"height_in_display": "64"}),
+    # A genuine inch mark after the inches ("5' 4"") must NOT be read as feet.
+    ("height_real_inch_mark", "Size 14, 5' 4\" 1 1/2\" heel, no hemming needed.",
+     {"height_in_display": "64"}),
+    ("height_plain_dquote_11", "Tall woman here, I'm 5\"11 and it fits.",
+     {"height_in_display": "71"}),
+
+    # Feet only + adjacent number: inches must NOT come from the weight. -> 79/91/88.
+    ("height_feet_adjacent_5ft195", "Lightweight and elegant. I'm 5' 195 I got a 2xl.",
+     {"height_in_display": "60"}),
+    ("height_feet_adjacent_6feet198", "I'm 6feet 198lbs and ordered an X-Large.",
+     {"height_in_display": "72", "weight_lbs_display": "198"}),
+    ("height_feet_adjacent_6ft160", "I'm 6ft 160 pounds and a medium 37inch inseam is perfect!",
+     {"height_in_display": "72", "weight_lbs_display": "160"}),
+    ("height_feet_adjacent_5ft230", "I’m 5ft 230lbs and it fit well.",
+     {"height_in_display": "60", "weight_lbs_display": "230"}),
+    ("height_feet_adjacent_5foot190", "I am about 170 lbs... I'm 5 foot 190lbs and got an XL.",
+     {"height_in_display": "60"}),
+
+    # Inches >= 12 are not real inches: keep feet, drop the bogus inches. -> 90/95.
+    ("height_inches_ge12_ft30", "I am 5 ft 30 23 34 and got xxs. Height: 5'0\". Weight: 100 lbs.",
+     {"height_in_display": "60", "weight_lbs_display": "100"}),
+    ("height_inches_ge12_535", "I’m 5’35”, 121.25lbs, with 37.40” hips.",
+     {"height_in_display": "60"}),
+
+    # Fractional inches written tight: 5'61/2" = 5'6.5" (66.5). Was -> 121.
+    ("height_fraction_612", "I’m 5’61/2” and 132lbs and it’s tight in my arms.",
+     {"height_in_display": "66.5", "weight_lbs_display": "132"}),
+    ("height_fraction_612_nomark", "Height 5’61/2 weight 130 lbs, size 6 Long.",
+     {"height_in_display": "66.5", "weight_lbs_display": "130"}),
+
+    # Decimal feet used as feet+inches: 5.4ft = 5'4" (64). Was -> 48/24.
+    ("height_decimal_54ft", "I am 5.4’ , 126 pounds, 36C.",
+     {"height_in_display": "64", "weight_lbs_display": "126"}),
+    ("height_decimal_52ft", "I’m a UK 10-12 and 5.2ft. I got a medium.",
+     {"height_in_display": "62"}),
+    ("height_decimal_54ft_lbsfirst", "I'm 146.5 lb ,5.4ft and it fit.",
+     {"height_in_display": "64", "weight_lbs_display": "146.5"}),
+
+    # Space between feet and inch digit before the mark: 5 3' = 5'3" (63). -> 36.
+    ("height_space_53", "I am 5 3’ and 135 pounds I ordered a size 4.",
+     {"height_in_display": "63", "weight_lbs_display": "135"}),
+
+    # ft. with a period before inches: 4 ft. 9 in = 57. Was -> 48.
+    ("height_ft_period", "She is 4 ft. 9 in, 70 lbs with a 22 in waist.",
+     {"height_in_display": "57", "weight_lbs_display": "70"}),
+
+    # A trailing-apostrophe inch measurement must not be read as feet. -> 48/84.
+    ("height_waist_apostrophe", "my waist is like 24’ and hips 34.",
+     {"height_in_display": ""}),
+    ("height_jeans_size_apostrophe", "I originally got the 27’s, then the 28’s.",
+     {"height_in_display": ""}),
+
+    # Weight change with a hedge word between the verb and the number. -> 50/60.
+    ("weight_lost_over", "I recently lost over 50 pounds. I needed new suits. I am 5'4\".",
+     {"weight_lbs_display": "", "height_in_display": "64"}),
+    ("weight_gained_parens", "I'm 5'10\" and 195 lbs. I’ve gained so much weight (60lbs).",
+     {"weight_lbs_display": "195", "height_in_display": "70"}),
+    ("weight_gained_over", "I gained over 50lbs during pregnancy (started around 110lbs).",
+     {"weight_lbs_display": "110"}),
+
+    # Non-body lifting context is not a body weight. -> 400.
+    ("weight_leg_press", "thighs that can leg press 400lbs but still look not great. I'm 5'0\".",
+     {"weight_lbs_display": "", "height_in_display": "60"}),
+
+    # --- Must stay correct: real heavy adults / children / normal forms ----
+    ("preserve_355", "I am 5’3” and weigh 355 pounds. I bought a 6x.",
+     {"height_in_display": "63", "weight_lbs_display": "355"}),
+    ("preserve_child_45", "Height: 4'5\". Weight: 100 lbs. Size purchased: xxs.",
+     {"height_in_display": "53", "weight_lbs_display": "100"}),
+    ("preserve_6ft360", "I'm 360 pounds and I'm 6 ft tall.",
+     {"height_in_display": "72", "weight_lbs_display": "360"}),
+    ("preserve_normal_57", "I'm 5'7\" and 145 lbs, medium fit me well.",
+     {"height_in_display": "67", "weight_lbs_display": "145"}),
+    ("preserve_normal_511", "I'm 5'11\" 170 lbs and the large was perfect.",
+     {"height_in_display": "71", "weight_lbs_display": "170"}),
+    ("preserve_normal_6ft", "I'm 6 ft, 200 lbs and got an XL.",
+     {"height_in_display": "72", "weight_lbs_display": "200"}),
+    ("preserve_normal_5foot5", "I am 5 foot 5 and 130 pounds.",
+     {"height_in_display": "65", "weight_lbs_display": "130"}),
 ]
 
 

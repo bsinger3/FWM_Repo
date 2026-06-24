@@ -111,13 +111,32 @@ CUP_SIZE_RE = re.compile(
 )
 HEIGHT_RE = re.compile(
     r"(?:(?:i\s*(?:am|'m)|im|i’m|i am|height)\s*:?\s*)?"
-    r"([3-7])\s*(?:ft|feet|foot|['’])\s*(\d{1,2}(?:\.\d+)?)?\s*(?:in|inches|[\"”])?",
+    # `(?<!\d)` keeps a trailing-apostrophe inch measurement from being read as
+    # feet, e.g. the 4' in a "24\" waist" written "24'" or the 7' in "27's".
+    # `\.?` after the foot word handles "5 ft. 9 in"; `(?!\d)` on the optional
+    # inches stops it grabbing the leading digits of an adjacent number, so
+    # "5' 195lbs"/"6ft 160" read as 60"/72" (feet only) instead of 79"/88".
+    r"(?<!\d)([3-7])\s*(?:ft|feet|foot|['’])\.?\s*(\d{1,2}(?:\.\d+)?)?(?!\d)\s*(?:in|inches|[\"”])?",
     re.I,
 )
 # Common review typo where the feet/inches mark is a double quote: 5"4 / 5”11
 # means 5'4" / 5'11". Gated to a 3–7 leading digit not preceded by another digit
-# so an inch measurement like waist 34" can't be read as 4 feet.
+# so an inch measurement like waist 34" can't be read as 4 feet. Tried AFTER
+# HEIGHT_RE so a real inch mark ("5' 4"") isn't read as feet.
 HEIGHT_DQ_RE = re.compile(r"(?<!\d)([3-7])\s*[\"”]\s*(\d{1,2})(?!\d)")
+# Fully swapped marks: "5"4'" / "5”4’" means 5'4" (quote and apostrophe swapped,
+# a very common typo). The TRAILING apostrophe distinguishes it from a genuine
+# inch mark like "5' 4"", so this is safe to try before HEIGHT_RE — which would
+# otherwise read the bare "4'" as 4 feet.
+HEIGHT_REVERSED_RE = re.compile(r"(?<!\d)([3-7])\s*[\"”]\s*(\d{1,2})\s*['’]")
+# Fractional inches written tight: "5'6 1/2\"" / "5'61/2”" = 5'6.5".
+HEIGHT_FRACTION_RE = re.compile(r"(?<!\d)([3-7])\s*['’]\s*(\d)\s*1\s*/\s*2\s*[\"”]?")
+# Decimal feet used casually as feet+inches: "5.4ft" / "5.4'" / "5.2 feet" mean
+# 5'4" / 5'2", not 4 or 2 feet. The trailing ft/'/feet keeps it from matching
+# ratings like "5.5 stars". Tried before HEIGHT_RE so "4ft"/"2ft" isn't grabbed.
+HEIGHT_DECIMAL_FEET_RE = re.compile(r"(?<!\d)([3-7])\.(\d{1,2})\s*(?:ft|feet|foot|['’])", re.I)
+# Space between feet and a single inch digit before the mark: "5 3'" = 5'3".
+HEIGHT_SPACE_RE = re.compile(r"(?<!\d)([3-7])\s+(\d)\s*['’](?!\d)")
 WEIGHT_RE = re.compile(
     r"\b(\d{2,3}(?:\.\d+)?)\s*(?:ish)?\s*(?:lbs?|pounds?|#)\b|"
     r"\b(?:weigh(?:t|s|ed|ing)?|weight)\s*(?:is|:|：)?\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{2,3}(?:\.\d+)?)\s*(?:ish)?\b",
@@ -130,6 +149,19 @@ WEIGHT_RANGE_RE = re.compile(
 WEIGHT_KG_RE = re.compile(
     r"\b(\d{2,3}(?:\.\d+)?)\s*(?:kg|kilograms?)\b|"
     r"\b(?:weigh(?:t|s|ed|ing)?|weight)\s*(?:is|:|：)?\s*(?:about|around|approx(?:imately)?\.?)?\s*(\d{2,3}(?:\.\d+)?)\s*(?:kg|kilograms?)\b",
+    re.I,
+)
+# A weight number is a CHANGE, not a body weight, when a lose/gain verb sits
+# just before it — even with hedge words/parens in between: "lost over 50 lbs",
+# "gained so much weight (60lbs)". The filler class excludes digits so it stops
+# at the next number. Applied to the lowercased text preceding the match.
+WEIGHT_CHANGE_PREFIX_RE = re.compile(
+    r"\b(?:gain(?:ed|ing)?|lost|los(?:e|ing)|shed|dropped)\b[\sa-z().,&'’\"”-]{0,32}$",
+    re.I,
+)
+# Non-body lifting context: "thighs that can leg press 400lbs" is not a weight.
+WEIGHT_NONBODY_PREFIX_RE = re.compile(
+    r"\b(?:leg\s*press|squat(?:ted|ting|s)?|dead\s*lift\w*|bench(?:\s*press)?)\b[\sa-z().,&'’\"”-]{0,18}$",
     re.I,
 )
 # Shared connector/adverb/number fragments for the body-measurement labels.
@@ -801,10 +833,41 @@ def parse_number_text(value_text: str) -> float:
 
 
 def parse_height(text: str) -> Tuple[str, str]:
+    # Swapped-mark / decimal / fraction / space forms are tried BEFORE HEIGHT_RE
+    # because HEIGHT_RE would otherwise read the bare "4'"/"4ft" they contain as
+    # 4 feet. The plain double-quote form ("5"11") is tried AFTER HEIGHT_RE so a
+    # genuine inch mark ("5' 4"") still parses as 5'4".
+    match = HEIGHT_REVERSED_RE.search(text)
+    if match:
+        feet = int(match.group(1))
+        inches = parse_number_text(match.group(2) or "0")
+        if inches <= 11:
+            return normalize_whitespace(match.group(0)), numeric_text(feet * 12 + inches)
+    match = HEIGHT_FRACTION_RE.search(text)
+    if match:
+        feet = int(match.group(1))
+        inches = parse_number_text(match.group(2) or "0") + 0.5
+        return normalize_whitespace(match.group(0)), numeric_text(feet * 12 + inches)
+    match = HEIGHT_DECIMAL_FEET_RE.search(text)
+    if match:
+        feet = int(match.group(1))
+        inches = parse_number_text(match.group(2) or "0")
+        if inches <= 11:
+            return normalize_whitespace(match.group(0)), numeric_text(feet * 12 + inches)
+    match = HEIGHT_SPACE_RE.search(text)
+    if match:
+        feet = int(match.group(1))
+        inches = parse_number_text(match.group(2) or "0")
+        if inches <= 11:
+            return normalize_whitespace(match.group(0)), numeric_text(feet * 12 + inches)
     match = HEIGHT_RE.search(text)
     if match:
         feet = int(match.group(1))
         inches = parse_number_text(match.group(2) or "0")
+        # Inches >= 12 means the digits weren't really inches (e.g. an adjacent
+        # number or a "5'35"" typo) — keep the feet, drop the bogus inches.
+        if inches >= 12:
+            inches = 0
         following = text[match.end() : match.end() + 24]
         if re.match(r"\s*(?:-|to|–|—)\s*\d\s*(?:ft|feet|foot|['’])", following, re.I):
             return normalize_whitespace(match.group(0)), ""
@@ -849,21 +912,25 @@ def parse_weight(text: str) -> Tuple[str, str]:
         if (unit or re.search(r"\b(?:weight|weighs?|pounds?|lbs?)\b", context)) and 50 <= low < high <= 700 and high - low <= 150:
             return f"{numeric_text(low)}-{numeric_text(high)} lb", ""
     for pattern, multiplier in ((WEIGHT_RE, 1.0), (WEIGHT_KG_RE, 2.2046226218)):
-        match = pattern.search(text)
-        if not match:
-            continue
-        value_text = next((group for group in match.groups() if group), "")
-        try:
-            value = parse_number_text(value_text)
-        except ValueError:
-            return normalize_whitespace(match.group(0)), value_text
-        prefix = text[max(0, match.start() - 28) : match.start()].lower()
-        if re.search(r"\b(?:gain(?:ed|ing)?|gained|lost|los(?:t|ing)|down|up)\s*$", prefix):
-            continue
-        pounds = value * multiplier
-        if not (50 <= pounds <= 700):
-            continue
-        return normalize_whitespace(match.group(0)), numeric_text(pounds)
+        # Iterate every match (not just the first) so a real body weight after a
+        # change phrase is still found, e.g. "gained 50lbs ... around 110lbs".
+        for match in pattern.finditer(text):
+            value_text = next((group for group in match.groups() if group), "")
+            try:
+                value = parse_number_text(value_text)
+            except ValueError:
+                return normalize_whitespace(match.group(0)), value_text
+            prefix = text[max(0, match.start() - 36) : match.start()].lower()
+            if re.search(r"\b(?:gain(?:ed|ing)?|gained|lost|los(?:t|ing)|down|up)\s*$", prefix):
+                continue
+            if WEIGHT_CHANGE_PREFIX_RE.search(prefix):
+                continue
+            if WEIGHT_NONBODY_PREFIX_RE.search(prefix):
+                continue
+            pounds = value * multiplier
+            if not (50 <= pounds <= 700):
+                continue
+            return normalize_whitespace(match.group(0)), numeric_text(pounds)
     return "", ""
 
 
