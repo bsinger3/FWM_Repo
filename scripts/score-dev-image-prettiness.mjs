@@ -19,6 +19,7 @@ import path from "node:path";
 import { fwmDataDir } from "../tools/image-review-dashboard/paths.mjs";
 import { assertApprovedDevSupabase, callSupabaseRest, printGuardSummary } from "./lib/dev-supabase-guard.mjs";
 import { loadWorkbookCvIndex } from "./lib/workbook-cv-index.mjs";
+import { loadKeypointIndex, analyzeKeypoints } from "./lib/keypoint-index.mjs";
 import { estimateBodyAfterCrop, estimateBestAchievableCrop, cropWindowFractions } from "./lib/card-crop-geometry.mjs";
 import { computePixelStats } from "./lib/pixel-stats.mjs";
 
@@ -27,6 +28,7 @@ const limit = Math.max(1, Number(parseArg("limit", "200")) || 200);
 const timeoutMs = Math.max(1000, Number(parseArg("timeout-ms", "10000")) || 10000);
 const reviewBucketSize = Math.max(1, Number(parseArg("review-bucket", "30")) || 30);
 const rebuildCvCache = process.argv.includes("--rebuild-cv-cache");
+const rebuildKpCache = process.argv.includes("--rebuild-kp-cache");
 const sourceFilter = parseArg("source", "all"); // all | workbook | baseline
 // Pixel decode (lighting + clutter) is on by default; --no-pixels reverts to the
 // v2 header-only domain-fit pass.
@@ -38,7 +40,7 @@ const pixelsEnabled = !process.argv.includes("--no-pixels");
 const autoCropsPath = parseArg("auto-crops", null);
 const onlyAutoCrops = process.argv.includes("--only-auto-crops");
 const compareCard = process.argv.includes("--compare-card");
-const PRETTINESS_MODEL_VERSION = pixelsEnabled ? "prettiness_domainfit_technical_v4" : "prettiness_domain_fit_v2";
+const PRETTINESS_MODEL_VERSION = pixelsEnabled ? "prettiness_domainfit_technical_v5" : "prettiness_domain_fit_v2";
 
 // Plan target blend. Aesthetic (CLIP) is still deferred; v3 fills the technical
 // bucket with a deterministic lighting + coarse-clutter proxy. Null components
@@ -52,9 +54,17 @@ const PLAN_BLEND = { aesthetic: 0.55, technical: 0.25, domain_fit: 0.2 };
 const TECHNICAL_INTERIM_CAP = 0.25;
 // Sub-weights inside the domain-fit component (sum to 1). Body-centric because
 // fit-shopping usefulness is the point; null components are skipped + renormalized.
-// face_visible (from YuNet) rewards a visible face — part of "is this a nice photo
-// of the person".
-const DOMAIN_FIT_WEIGHTS = { aspect: 0.15, resolution: 0.1, body_visible: 0.3, body_card_coverage: 0.3, face_visible: 0.15 };
+// body_visible is keypoint-aware (head/feet must survive the card crop);
+// composition rewards a centered subject with the head/feet in frame; face_visible
+// (from YuNet) rewards a visible face — all "is this a nice photo of the person".
+const DOMAIN_FIT_WEIGHTS = {
+  aspect: 0.12,
+  resolution: 0.08,
+  body_visible: 0.28,
+  body_card_coverage: 0.27,
+  composition: 0.1,
+  face_visible: 0.15,
+};
 // Sub-weights inside the technical-quality component. Lighting is trustworthy;
 // colorfulness rewards vivid frames; clutter is a coarse whole-frame proxy, so it
 // is weighted lowest.
@@ -252,14 +262,44 @@ function resolutionScore(width, height) {
   return 0.15;
 }
 
-// How complete the body is in the SOURCE image (crop-independent), from pose
-// keypoint coverage; penalize multi-person ambiguity.
-function bodyVisibleScore(cv) {
-  if (!cv || cv.person_count === null || cv.person_count === 0) return null;
-  if (cv.body_coverage_pose === null) return null;
-  let score = clamp01(cv.body_coverage_pose);
-  if (cv.person_count > 1) score *= 0.7;
-  return clamp01(score);
+// How well the person's body is shown in the DISPLAYED frame. Base completeness is
+// the pose-coverage score; when per-joint keypoints are available we additionally
+// require the head (nose) and feet (ankles) to actually be IN the card window —
+// the aggregate pose score alone happily rates a headless or head-cropped body ~0.9,
+// which is the bug this fixes. Missing head is penalized hard, missing feet mildly.
+function bodyVisibleScore(cv, kpa) {
+  let base = null;
+  if (cv && cv.person_count !== null && cv.person_count !== 0 && cv.body_coverage_pose !== null) {
+    base = clamp01(cv.body_coverage_pose);
+    if (cv.person_count > 1) base *= 0.7;
+  }
+  if (!kpa) return base; // no keypoints: fall back to source pose coverage
+  let factor = 1;
+  if (!kpa.head_in_frame) factor *= 0.4; // head cut off / absent in the card -> big hit
+  if (!kpa.feet_in_frame) factor *= 0.8; // feet cut -> mild (many fine shots crop at the knee)
+  return clamp01((base === null ? 1 : base) * factor);
+}
+
+// Composition: reward a centered subject whose head and feet are inside the frame
+// with sensible headroom. Keypoint-only (null without pose keypoints).
+function compositionScore(kpa) {
+  if (!kpa) return null;
+  const parts = [];
+  // Horizontal centering of the torso.
+  if (kpa.subject_cx !== null && kpa.subject_cx !== undefined) {
+    parts.push([clamp01(1 - Math.abs(kpa.subject_cx - 0.5) / 0.35), 0.4]);
+  }
+  // Head + feet in frame (not cut off).
+  parts.push([kpa.head_in_frame ? 1 : 0, 0.3]);
+  parts.push([kpa.feet_in_frame ? 1 : kpa.head_in_frame ? 0.6 : 0, 0.15]);
+  // Headroom: head not jammed at the very top, not floating with too much space above.
+  if (kpa.headroom !== null && kpa.headroom !== undefined) {
+    const hr = kpa.headroom; // nose y in 0..1 card space
+    const head =
+      hr < 0.02 ? 0.2 : hr <= 0.18 ? 1 : hr <= 0.32 ? 0.7 : 0.4;
+    parts.push([head, 0.15]);
+  }
+  return weightedMean(parts);
 }
 
 // Reward the body filling a healthy share of the card without being cut off.
@@ -390,9 +430,13 @@ function blendPrettiness({ domainFit, technical, aesthetic }) {
   return clamp01(tShare * technical + (1 - tShare) * domainFit);
 }
 
-// Restore the plan section 11 full_body_visible boolean conservatively (report
-// only here; the scorer never writes). Head + feet implied by high pose coverage.
-function deriveFullBodyVisible(cv) {
+// full_body_visible for the DISPLAYED card (report only; the scorer never writes).
+// When keypoints are available this is exact: head (nose) AND feet (an ankle) must
+// both fall inside the card window. The old aggregate-pose heuristic (pose >= 0.9)
+// wrongly marked headless / head-cropped bodies as full-body, so it is only a
+// fallback for rows with no keypoints.
+function deriveFullBodyVisible(cv, kpa) {
+  if (kpa) return kpa.full_body_in_frame;
   if (!cv || cv.person_count === null) return null;
   if (cv.person_count === 0) return false;
   const pose = cv.body_coverage_pose;
@@ -414,7 +458,7 @@ function weightedMean(parts) {
   return clamp01(valueSum / weightSum);
 }
 
-function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride) {
+function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride, kpa) {
   const cropSpec = cropSpecOverride !== undefined ? cropSpecOverride : parseCropSpec(row.crop_spec);
   // A realized crop (manual now, auto later) carries a position, so score the
   // actual displayed window. Without one, score the position-independent
@@ -453,8 +497,9 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride) {
   const components = {
     aspect_score: aspectScore(metadata?.width, metadata?.height),
     resolution_score: resolutionScore(metadata?.width, metadata?.height),
-    body_visible_score: bodyVisibleScore(cv),
+    body_visible_score: bodyVisibleScore(cv, kpa),
     body_card_coverage_score: bodyCardCoverageScore(geom),
+    composition_score: compositionScore(kpa),
     face_visible_score: faceVisibleScore(cv),
     // Technical bucket: deterministic lighting + colorfulness + coarse clutter.
     lighting_score: lightingScore(pixelStats),
@@ -472,6 +517,7 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride) {
     [components.resolution_score, DOMAIN_FIT_WEIGHTS.resolution],
     [components.body_visible_score, DOMAIN_FIT_WEIGHTS.body_visible],
     [components.body_card_coverage_score, DOMAIN_FIT_WEIGHTS.body_card_coverage],
+    [components.composition_score, DOMAIN_FIT_WEIGHTS.composition],
     [components.face_visible_score, DOMAIN_FIT_WEIGHTS.face_visible],
   ]);
   const prettiness = blendPrettiness({
@@ -484,7 +530,17 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride) {
     technical_quality_score: round(components.technical_quality_score),
     prettiness_score: round(prettiness),
     components: Object.fromEntries(Object.entries(components).map(([k, v]) => [k, round(v)])),
-    derived_full_body_visible: deriveFullBodyVisible(cv),
+    derived_full_body_visible: deriveFullBodyVisible(cv, kpa),
+    keypoint_frame: kpa
+      ? {
+          head_in_frame: kpa.head_in_frame,
+          feet_in_frame: kpa.feet_in_frame,
+          head_present: kpa.head_present,
+          feet_present: kpa.feet_present,
+          subject_cx: round(kpa.subject_cx),
+          headroom: round(kpa.headroom),
+        }
+      : null,
     crop_geometry: geom
       ? {
           crop_basis: cropBasis,
@@ -508,8 +564,9 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride) {
   };
 }
 
-function scoreRow(row, cvIndex, autoCropMap) {
+function scoreRow(row, cvIndex, autoCropMap, kpIndex) {
   const cv = row.review_row_key ? cvIndex[row.review_row_key] || null : null;
+  const kpEntry = kpIndex ? kpIndex[String(row.id)] || null : null;
   // Effective crop_spec: a loaded autocrop window overrides the DB value.
   const autoSpec = autoCropMap ? autoCropMap.get(String(row.id)) || null : null;
   const cropSpec = autoSpec || parseCropSpec(row.crop_spec);
@@ -528,6 +585,9 @@ function scoreRow(row, cvIndex, autoCropMap) {
       // rather than dropping the whole row.
       const cropWindow = cropSpec ? cropWindowFractions(metadata.width, metadata.height, cropSpec) : null;
       const scoreOnCard = Boolean(cropWindow && cropWindow.mode !== "centered-cover");
+      // Head/feet/composition analysis is done in the SAME frame the pixels are
+      // measured in: the card window when we score the card, else the full source.
+      const kpa = kpEntry ? analyzeKeypoints(kpEntry, scoreOnCard ? cropWindow : null) : null;
       let pixelStats = null;
       let fullPixelStats = null;
       let pixelError = null;
@@ -539,7 +599,7 @@ function scoreRow(row, cvIndex, autoCropMap) {
           pixelError = String(error?.message || error);
         }
       }
-      const scored = scoreOne(row, metadata, cv, pixelStats, cropSpec);
+      const scored = scoreOne(row, metadata, cv, pixelStats, cropSpec, kpa);
       const compare =
         compareCard && fullPixelStats
           ? {
@@ -594,6 +654,7 @@ function summarize(results) {
     "resolution_score",
     "body_visible_score",
     "body_card_coverage_score",
+    "composition_score",
     "face_visible_score",
     "lighting_score",
     "colorfulness_score",
@@ -615,6 +676,19 @@ function summarize(results) {
   }
   const fullBody = { true: 0, false: 0, null: 0 };
   for (const r of scored) fullBody[String(r.derived_full_body_visible)] = (fullBody[String(r.derived_full_body_visible)] || 0) + 1;
+  // Keypoint framing diagnostics: how often the displayed card actually shows the
+  // head and feet. head_cut = head present in source but not inside the card.
+  const kpRows = scored.filter((r) => r.keypoint_frame);
+  const headCut = kpRows.filter((r) => r.keypoint_frame.head_present && !r.keypoint_frame.head_in_frame).length;
+  const feetCut = kpRows.filter((r) => r.keypoint_frame.feet_present && !r.keypoint_frame.feet_in_frame).length;
+  const keypointFraming = {
+    rows_with_keypoints: kpRows.length,
+    head_in_frame: kpRows.filter((r) => r.keypoint_frame.head_in_frame).length,
+    feet_in_frame: kpRows.filter((r) => r.keypoint_frame.feet_in_frame).length,
+    head_present_but_cut_by_card: headCut,
+    feet_present_but_cut_by_card: feetCut,
+    full_body_in_frame: kpRows.filter((r) => r.keypoint_frame.head_in_frame && r.keypoint_frame.feet_in_frame).length,
+  };
   return {
     scanned: results.length,
     scored: scored.length,
@@ -625,6 +699,7 @@ function summarize(results) {
     pixel_stats_ok: scored.filter((r) => r.pixel_stats_ok).length,
     pixel_stats_failed: scored.filter((r) => r.pixel_stats_ok === false).length,
     derived_full_body_visible_counts: fullBody,
+    keypoint_framing: keypointFraming,
     score_distribution: {
       min: scores.length ? round(scores[0]) : null,
       p10: round(quantile(scores, 0.1)),
@@ -688,11 +763,11 @@ function card(result) {
       <div class="meta">
         <div>${htmlEscape(result.dimensions?.width)}&times;${htmlEscape(result.dimensions?.height)} ${htmlEscape(result.dimensions?.format || "")}</div>
         <div>aspect ${htmlEscape(c.aspect_score)} &middot; res ${htmlEscape(c.resolution_score)}</div>
-        <div>body ${htmlEscape(c.body_visible_score)} &middot; cardfit ${htmlEscape(c.body_card_coverage_score)} &middot; face ${htmlEscape(c.face_visible_score)}</div>
+        <div>body ${htmlEscape(c.body_visible_score)} &middot; cardfit ${htmlEscape(c.body_card_coverage_score)} &middot; comp ${htmlEscape(c.composition_score)} &middot; face ${htmlEscape(c.face_visible_score)}</div>
         <div>light ${htmlEscape(c.lighting_score)} &middot; color ${htmlEscape(c.colorfulness_score)} &middot; clutter ${htmlEscape(c.background_clutter_score)} &middot; tech ${htmlEscape(c.technical_quality_score)}</div>
         ${cmpLine}
         <div>${coverageLine}</div>
-        <div class="site">fullbody=${htmlEscape(result.derived_full_body_visible)} &middot; hasface=${htmlEscape(result.cv_metrics?.has_face)}</div>
+        <div class="site">fullbody=${htmlEscape(result.derived_full_body_visible)} &middot; head=${htmlEscape(result.keypoint_frame?.head_in_frame)} feet=${htmlEscape(result.keypoint_frame?.feet_in_frame)}</div>
       </div>
     </article>`;
 }
@@ -805,11 +880,14 @@ function buildCsv(results) {
     "resolution_score",
     "body_visible_score",
     "body_card_coverage_score",
+    "composition_score",
     "face_visible_score",
     "lighting_score",
     "colorfulness_score",
     "background_clutter_score",
     "derived_full_body_visible",
+    "head_in_frame",
+    "feet_in_frame",
     "has_face",
     "card_coverage",
     "retained_height",
@@ -836,11 +914,14 @@ function buildCsv(results) {
       r.components?.resolution_score,
       r.components?.body_visible_score,
       r.components?.body_card_coverage_score,
+      r.components?.composition_score,
       r.components?.face_visible_score,
       r.components?.lighting_score,
       r.components?.colorfulness_score,
       r.components?.background_clutter_score,
       r.derived_full_body_visible,
+      r.keypoint_frame?.head_in_frame,
+      r.keypoint_frame?.feet_in_frame,
       r.cv_metrics?.has_face,
       r.crop_geometry?.card_coverage,
       r.crop_geometry?.retained_height,
@@ -883,6 +964,20 @@ async function main() {
     `CV index: ${cvIndex.meta.indexed_keys ?? Object.keys(cvIndex.byKey).length} keys (${cvIndex.meta.cache_hit ? "cache" : "rebuilt"}).`,
   );
 
+  console.log(rebuildKpCache ? "Rebuilding keypoint index..." : "Loading keypoint index...");
+  let kpIndex = null;
+  let kpMeta = null;
+  try {
+    const loaded = await loadKeypointIndex({ cwd: repoRoot, rebuild: rebuildKpCache });
+    kpIndex = loaded.byId;
+    kpMeta = loaded.meta;
+    console.log(
+      `Keypoint index: ${kpMeta.indexed_ids ?? Object.keys(kpIndex).length} ids (${kpMeta.cache_hit ? "cache" : "rebuilt"}).`,
+    );
+  } catch (error) {
+    console.warn(`Keypoint index unavailable (${error.message || error}); head/feet/composition will be null.`);
+  }
+
   let autoCropMap = null;
   let autoCropModel = null;
   if (autoCropsPath) {
@@ -896,7 +991,7 @@ async function main() {
 
   const rows = await fetchCandidateRows(guard, restrictIds);
   const results = [];
-  for (const row of rows) results.push(await scoreRow(row, cvIndex.byKey, autoCropMap));
+  for (const row of rows) results.push(await scoreRow(row, cvIndex.byKey, autoCropMap, kpIndex));
 
   const summary = summarize(results);
   const buckets = reviewBuckets(results);
@@ -938,6 +1033,11 @@ async function main() {
       "smile_score is NULL/pending: there is NO smile/expression signal anywhere in the CV checkpoints. Like face_visible, rewarding smiles requires a new face/expression model pass over the images (similar to the YOLO detection run). Tracked as a pending component.",
     brightness_note:
       "brightnessScore was retuned to reward a brighter, 'light' frame (sweet spot ~120-195 luma); blown-out frames are still penalized via exposure highlight-clipping.",
+    body_visible_note:
+      "body_visible_score and derived_full_body_visible are now KEYPOINT-AWARE: head (nose) and feet (ankles) must fall inside the displayed card window. The old aggregate body_coverage_pose alone rated a headless or head-cropped body ~0.9 and marked it full-body (the bug). A head cut off by the card now penalizes body_visible hard (x0.4) and sets full_body_visible=false.",
+    composition_note:
+      "composition_score (keypoint-only) rewards a horizontally centered subject with head + feet in frame and sensible headroom. Modest weight (0.1 of domain-fit).",
+    keypoint_index_meta: kpMeta,
     pending_components: pixelsEnabled
       ? ["aesthetic_score", "face_visible_score", "smile_score"]
       : ["aesthetic_score", "technical_quality_score", "face_visible_score", "smile_score"],
