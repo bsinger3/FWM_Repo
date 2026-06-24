@@ -216,11 +216,23 @@ dominated by genuinely-correct heavy adults AND the PRE-EXISTING structured-sour
 comment and needs a separate look at the intake `weight_raw`/structured source + a range
 clamp. That's the one real remaining follow-up.
 
-**Open / handoff:** (1) The structured-source garbage weights (410/418/440…) are the last
-outlier class — investigate intake `weight_raw` provenance + add a range clamp. (2) Add a
+**Structured garbage — DEALT WITH (later same session):** `scripts/clamp-dev-measurement-garbage.mjs`
+(NEW, dev-guarded, reversible plan at `FWM_Data/_reports/measurement_garbage_plan.json`).
+Characterized the 152 out-of-band weights: 25 comment-supported real heavy adults (e.g.
+"weigh 355 pounds") KEPT; 44 **Rent-The-Runway concatenated ranges** ("165-170"→"165170",
+all `source_file=production_baseline_pg_dump`, i.e. inherited from the PROD baseline — no RTR
+scraper exists in this repo, so it's legacy prod data, not a fixable code path) — **38
+recovered** by splitting into plausible chunks (midpoint + "lo-hi lb" display), 6 unsplittable
+nulled; 82 implausible-and-unsupported weights (410 on "belt is cute", leg-press 400, 1/10 lb,
+weight-change leftovers) nulled; 2 impossible heights (108") nulled. Policy: a value is garbage
+iff out-of-band AND not supported by its comment. **Result: weight>500 44→0, out-of-band weight
+152→32 (all real), impossible height 2→0.** Verified the kept set is all comment-supported.
+
+**Open / handoff:** Dataset is now clean of measurement garbage. Optional remaining: add a
 load-time guard (user_comment not a path; source_file not purely numeric) so an off-by-one
-seed can't re-introduce this. (3) New scripts are UNCOMMITTED. Did NOT touch product_pages
-(another agent is writing there concurrently).
+seed can't re-introduce the file-path corruption. The ~32 remaining out-of-band weights and
+~19 heights are all legitimate (real heavy adults / children). Did NOT touch product_pages
+(another agent writing there concurrently).
 
 ## 2026-06-24 — Claude Code — Height×Weight dot-plot dashboard for outlier hunting (dev, read-only)
 
