@@ -10,8 +10,37 @@
       function gtag() {
         dataLayer.push(arguments);
       }
+      // Internal-traffic tagging. Visit the live site once per browser with
+      // ?internal=1 to persist a flag in localStorage (use ?internal=0 to
+      // clear it). When set, every hit from that browser carries
+      // traffic_type=internal, which GA4's built-in "Internal Traffic" data
+      // filter can exclude from reports. This is browser-based (not IP-based),
+      // so it follows each laptop across any network.
+      (function () {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          if (params.has("internal")) {
+            if (params.get("internal") === "0") {
+              localStorage.removeItem("fwm_internal_traffic");
+            } else {
+              localStorage.setItem("fwm_internal_traffic", "1");
+            }
+          }
+        } catch (e) {}
+      })();
+      var FWM_IS_INTERNAL = (function () {
+        try {
+          return localStorage.getItem("fwm_internal_traffic") === "1";
+        } catch (e) {
+          return false;
+        }
+      })();
       gtag("js", new Date());
-      gtag("config", "G-98WRHGEPZG");
+      gtag(
+        "config",
+        "G-98WRHGEPZG",
+        FWM_IS_INTERNAL ? { traffic_type: "internal" } : {},
+      );
     </script>
     <title>
       FriendsWithMeasurements • Find looks that match your measurements
