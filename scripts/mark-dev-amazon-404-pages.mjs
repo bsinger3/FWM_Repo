@@ -53,6 +53,11 @@ const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "
 await loadDotEnv({ cwd: repoRoot });
 
 const apply = process.argv.includes("--apply");
+// As of dev migration 20260623_dev_19, search excludes images by
+// source_status='page_not_found' directly, so the dead_link image_reports inserts are
+// redundant (and would reuse the manual-review anon_id). Pass --no-image-reports to set
+// only source_status. Default keeps both for environments without that migration.
+const skipImageReports = process.argv.includes("--no-image-reports");
 const CHECKER_VERSION = "amazon_free_http_404_backfill_v1";
 
 function parseArg(name, fallback = "") {
@@ -199,7 +204,7 @@ async function main() {
   const [pagesFound, pagesAlreadyDead, imagesLinked, imagesToHide] = probe;
 
   const pageSql = pageUpdateSql(ids);
-  const reportSql = imageReportInsertSql(ids);
+  const reportSql = skipImageReports ? "" : imageReportInsertSql(ids);
   const txn = `begin;\n${pageSql}\n${reportSql}\ncommit;`;
 
   console.log(`Source:                 ${sourcePath}`);
@@ -208,7 +213,11 @@ async function main() {
   console.log(`  found in DB:          ${pagesFound}`);
   console.log(`  already page_not_found:${pagesAlreadyDead}`);
   console.log(`Images linked to them:  ${imagesLinked}`);
-  console.log(`Images that would hide: ${imagesToHide}  (dead_link reports, anon_id=${anonId})`);
+  if (skipImageReports) {
+    console.log(`Hiding mechanism:       source_status='page_not_found' (search excludes via 20260623_dev_19); no image_reports written`);
+  } else {
+    console.log(`Images that would hide: ${imagesToHide}  (dead_link reports, anon_id=${anonId})`);
+  }
 
   const outReport = {
     generated_at_note: "stamp added by caller; Date.now intentionally avoided in libs",
