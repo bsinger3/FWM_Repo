@@ -641,7 +641,7 @@ function card(result) {
     ? `<div class="cmp">card vs full: tech ${htmlEscape(result.technical_quality_score)} vs ${htmlEscape(cmp.technical_full)} (${cmp.technical_card_minus_full >= 0 ? "+" : ""}${htmlEscape(cmp.technical_card_minus_full)}) &middot; clutter ${htmlEscape(c.background_clutter_score)} vs ${htmlEscape(cmp.clutter_full)}</div>`
     : "";
   return `
-    <article class="card">
+    <article class="card" data-score="${htmlEscape(result.prettiness_score ?? 0)}">
       <div class="frame">${frameImg(result)}</div>
       <div class="score">${htmlEscape(result.prettiness_score)} <span class="src">${htmlEscape(result.crop_source)}</span></div>
       <div class="meta">
@@ -656,9 +656,10 @@ function card(result) {
     </article>`;
 }
 
-function buildReviewHtml(report, buckets) {
+function buildReviewHtml(report, buckets, gallery) {
   const section = (title, rows) =>
     `<section><h2>${htmlEscape(title)} (${rows.length})</h2><div class="grid">${rows.map(card).join("")}</div></section>`;
+  const gallerySection = `<section id="gallery"><h2>All scored (sorted, ${gallery.length}) &mdash; <span id="visibleCount">${gallery.length}</span> shown</h2><div class="grid">${gallery.map(card).join("")}</div></section>`;
   return `<!doctype html>
 <html>
 <head>
@@ -679,18 +680,62 @@ function buildReviewHtml(report, buckets) {
     .meta { font-size: 11px; color: #52606d; padding: 2px 8px 8px; }
     .site { color: #9aa5b1; overflow-wrap: anywhere; }
     pre { white-space: pre-wrap; font-size: 11px; background: #f8fafc; padding: 8px; }
+    .slider-bar { position: sticky; top: 0; z-index: 10; background: #fff; border-bottom: 1px solid #d9e2ec;
+      padding: 12px 0; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .slider-bar input[type=range] { flex: 1; min-width: 220px; max-width: 480px; }
+    .slider-bar .thresh { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 3.2em; }
+    .slider-bar label { font-size: 14px; }
+    .card.hidden { display: none; }
+    section.empty { display: none; }
   </style>
 </head>
 <body>
   <header>
     <h1>FWM Dev Prettiness Score Dry-Run</h1>
     <p>Generated ${htmlEscape(report.generated_at)}. Model: ${htmlEscape(report.prettiness_model_version)} (${report.pixels_enabled ? "domain-fit + technical proxy; aesthetic pending" : "domain-fit only; aesthetic + technical pending"}).</p>
-    <p>CV matched ${htmlEscape(report.summary.cv_matched)} / unmatched ${htmlEscape(report.summary.cv_unmatched)}. Without a crop_spec, card coverage uses the best-achievable 3:4 crop (croppability ceiling).</p>
+    <p>CV matched ${htmlEscape(report.summary.cv_matched)} / unmatched ${htmlEscape(report.summary.cv_unmatched)}. Cards with a DB crop_spec are scored on the post-autocrop card window; without one, card coverage uses the best-achievable 3:4 crop (croppability ceiling).</p>
     <pre>${htmlEscape(JSON.stringify(report.summary, null, 2))}</pre>
   </header>
+  <div class="slider-bar">
+    <label for="prettySlider">Min prettiness</label>
+    <input type="range" id="prettySlider" min="0" max="1" step="0.01" value="0">
+    <span class="thresh" id="threshLabel">0.00</span>
+    <span id="shownLabel"></span>
+  </div>
+  ${gallerySection}
   ${section("Top scores", buckets.top)}
   ${section("Middle scores", buckets.middle)}
   ${section("Bottom scores", buckets.bottom)}
+  <script>
+    (function () {
+      var slider = document.getElementById("prettySlider");
+      var threshLabel = document.getElementById("threshLabel");
+      var shownLabel = document.getElementById("shownLabel");
+      var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
+      var sections = Array.prototype.slice.call(document.querySelectorAll("section"));
+      function apply() {
+        var t = parseFloat(slider.value);
+        threshLabel.textContent = t.toFixed(2);
+        var total = cards.length;
+        var shown = 0;
+        cards.forEach(function (c) {
+          var s = parseFloat(c.getAttribute("data-score")) || 0;
+          var hide = s < t;
+          c.classList.toggle("hidden", hide);
+          if (!hide) shown++;
+        });
+        shownLabel.textContent = shown + " / " + total + " images at or above this score";
+        var vc = document.getElementById("visibleCount");
+        sections.forEach(function (sec) {
+          var visible = sec.querySelectorAll(".card:not(.hidden)").length;
+          sec.classList.toggle("empty", visible === 0);
+          if (sec.id === "gallery" && vc) vc.textContent = visible;
+        });
+      }
+      slider.addEventListener("input", apply);
+      apply();
+    })();
+  </script>
 </body>
 </html>
 `;
@@ -851,7 +896,8 @@ async function main() {
     results,
   };
   await writeFile(reportPath, JSON.stringify(report, null, 2) + "\n", "utf8");
-  await writeFile(reviewHtmlPath, buildReviewHtml(report, buckets), "utf8");
+  const gallery = results.filter((r) => !r.skipped).sort((a, b) => (b.prettiness_score ?? 0) - (a.prettiness_score ?? 0));
+  await writeFile(reviewHtmlPath, buildReviewHtml(report, buckets, gallery), "utf8");
   await writeFile(reviewCsvPath, buildCsv(results), "utf8");
 
   console.log(`Wrote prettiness score dry-run report: ${reportPath}`);
