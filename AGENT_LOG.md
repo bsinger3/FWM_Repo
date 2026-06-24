@@ -33,6 +33,43 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-24 18:40 EDT — Claude Code — Backfill low-confidence mother categories (LLM + deterministic)
+
+**Did:** Filled in mother_category_id for the 7,202 low-confidence product
+pages that yesterday's categorization deliberately left null (confidence='low').
+NOTE: these were NOT unprocessed — they were the held-back low-confidence queue;
+6,613 already had granular observed_clothing_type_ids.
+- Bucket split by best signal: 4,329 tag-only pages resolved deterministically
+  via staging.clothing_type_tags; 2,773 titled pages classified by 37 LLM
+  sub-agents (Workflow) from product_title_raw; 49 title-less pages by 5 LLM
+  sub-agents from the product URL slug/web.
+- Applied via `scripts/backfill-low-confidence-categories.mjs --apply`: 7,150
+  product pages categorized (only still-null rows touched), images re-backfilled
+  → public.images.mother_category_id coverage 20,224 → **47,703 / 47,873 (99.6%)**.
+  55 product pages remain null (granular tag not in the clothing_type_tags map).
+- Dead-page rule: liveness-checked the 49 title-less URLs; 1 confirmed 404 →
+  source_status='page_not_found' (excluded from category). 33 were bloomchic.com
+  HTTP 429 (IP throttling, NOT dead) so left categorized from slug.
+- Migration `20260624_dev_22_sync_public_mother_vocab.sql`: dev_20 hand-seeded
+  public.clothing_mother_categories WRONG ('jumpsuit' singular, 'romper', and
+  missing activewear/shoes/accessories). dev_22 mirrors it from the authoritative
+  staging.clothing_mother_categories (13 ids, 'jumpsuits' plural). The backfill
+  script folds jumpsuit/romper -> jumpsuits to satisfy the FK.
+
+**Heads-up:**
+- ~1,087 pages are now mother='other' (mostly tag-only pages the granular
+  classifier itself marked 'other', no title to improve) — candidates for a
+  later web-search pass. Not addressed.
+- Working artifacts (shards, proposals, result files, liveness) are in
+  $FWM_DATA_DIR/category-backfill (outside the repo).
+- staging.product_pages.mother_category_id FK -> staging.clothing_mother_categories;
+  public copy is kept in sync by dev_22. If you add a mother category, add it to
+  BOTH or the public dropdown drifts.
+
+**Open / handoff:** 55 null pages + 1,087 'other' could use a follow-up pass.
+Backfilled categories use category_source_field='llm_backfill',
+category_extractor_version='llm_backfill_v1'.
+
 ## 2026-06-24 17:30 EDT — Claude Code — High-level (mother) clothing category for search + display
 
 **Did:** Applied two dev migrations to the shared dev DB (gosqgqpftqlawvnyelkt)
@@ -113,10 +150,77 @@ post-extraction range clamp or a look at the structured source — flagging for 
 owns the rerun/load. Genuinely-correct extremes that must stay (real heavy adults like
 "weigh 355 pounds", children at 4'5") are preserved.
 
-**Open / handoff:** Parser + tests are done and committed-pending (NOT committed). Human
-said they'll trigger the deterministic re-extraction next. Suggest: after rerun, reopen
-the dot-plot (`npm run height-weight-dotplot`) to confirm the comment-derived cluster of
-outliers is gone, and decide on a range clamp for the structured-source stragglers.
+**Open / handoff:** Parser + tests committed (`dc5ad90`, NOT pushed). Re-extraction +
+dev update DONE this session (see next entry).
+
+## 2026-06-24 — Claude Code — Ran re-extraction → dev update; investigated file-path-in-comment bug
+
+**Did (re-extraction + dev write):** Ran the established pipeline with the new parser:
+`tools/extraction-audit-dashboard/rerun-extraction.py` (223 heights corrected, 10 filled;
+4 weights corrected, 32 filled) → `npm run dev-images:measurement-overrides` →
+`npm run dev-images:measurement-backfill --apply` (**21,866 dev images updated**) + a
+6-comment gap-patch for rows not in the audit snapshot (custom `--measurement-overrides`).
+Dev out-of-band **heights 141→63, weights 145→136**. Hollister 5-ft-30 row now 60"/100.
+Weight barely moved because weight outliers are mostly genuinely-correct heavy adults
+(355–400 lb, stated in-comment) or structured-source values the merge preserves — NOT
+comment-parser bugs. NOTE the merge policy (`comment wins; else keep valid old`) means a
+few "drop to empty" fixes (leg-press, lost/gained-N) keep the old number.
+
+**Investigated (file-path-in-user_comment bug) — root cause found, NOT yet fixed:**
+- **Scope: 9,693 dev `public.images` rows (~20%)**, not the 111 the dot-plot showed (it only
+  surfaced the ones that also went out-of-band). 65 source sites.
+- **Shape:** a clean one-column LEFT shift of the trailing provenance columns. 9,679 rows:
+  `user_comment` = the source-CSV path, `source_file` = the source row-number,
+  `source_row_number` = null — **the real review text is dropped.** 14 rows: only
+  `user_comment` overwritten with the path (source_file/source_row_number intact).
+- **Recoverable:** the real comment still exists in the source intake CSVs and the
+  `review_row_key` embeds the source id (`nonamazon::https://www.quince.com/::quince-690278-0`
+  ↔ id `quince-690278-0`, CSV row 41692 → "No hemming necessary, yes!!…"). Backfill can
+  restore every one by joining review_row_key→source CSV id→user_comment.
+- **NOT from prod:** the 2026-06-16 prod baseline (15,247 rows, ref kmomndloorvrjzmiexxl)
+  contains **zero** path-comments. Dev-only load.
+- **Built by:** `data-pipelines/scripts/03_cv_annotate/amazon/build_supabase_image_review_package.py`
+  (`nonamazon::{site}::{id}` branch, line 391) + its amazon `manual_chunks` branch; the paths
+  are **old pre-2026-06-15 layout**, so the loaded package predates the reorg.
+- **Current code is NOT the culprit / won't recur:** today's `base_output_row` (312-314),
+  `build_awin_image_review_package.py` (191-193), the RPC `dev_upsert_reviewed_image_batch`
+  (jsonb_to_recordset → maps by key) and `load-dev-approved-images.mjs` (reads workbook by
+  header) all map the three columns correctly — verified the current
+  `awin_supabase_qualified_linked_20260616` package has correct columns. The bad rows came
+  from an OLDER/ad-hoc 2026-06-16 dev seed that consumed a misaligned (off-by-one) package;
+  that exact script isn't pinned in the current tree (likely a pre-reorg version).
+
+**RECOVERY DONE (later same session):** Restored all 9,693 user_comments.
+- `scripts/restore-dev-corrupted-user-comments.mjs` (NEW, dev-guarded, reversible): joins
+  each row's `review_row_key` → source intake CSV `id` (nonamazon) / row-number (amazon),
+  pulls the real `user_comment`, and UPDATEs `public.images` (9,693) + `public.reviews`
+  (3,315). 100% recovery. Reversible backup with old values:
+  `FWM_Data/_reports/corrupted_user_comment_recovery.json`. Verified: **0 path-comments
+  remain in images OR reviews.** (Plus 2 orphan reviews with no image, patched directly.)
+- **Re-extraction — IMPORTANT lesson:** my first pass re-extracted from the recovered
+  COMMENT only and OVERWROTE measurement columns — which WRONGLY cleared ~1,415 real
+  heights + weights. Root cause: Quince-style scrapers capture height/weight as STRUCTURED
+  reviewer attributes (`height_raw="I am 5ft4in"`) that are NOT in the free-text comment;
+  the measurement columns were never corrupted by the shift (only user_comment was). Fixed
+  with `scripts/fix-recovered-image-measurements.mjs` (NEW, one-off): re-set the 9 measure
+  columns to the MERGE of new-parser(comment) over the authoritative intake `*_display`
+  values (structured preserved, comment false-positives like `26'`→72 dropped where the
+  new parser drops them). Verified vs intake on a 303-row sample: 0 real mismatches.
+  Net: recovering these comments unlocked measurements for ~6,557 previously-blank reviews.
+
+**Final dev state:** 0 path-comments. height>0 43,618 / weight>0 29,655 (net down from
+43,931 / 31,535 = new-parser false positives correctly removed + range weights live in
+`weight_display_display` not the numeric col). out-of-band height 21 / weight 152 — now
+dominated by genuinely-correct heavy adults AND the PRE-EXISTING structured-source garbage
+(e.g. `weight_lbs_display=410` ×21 on generic comments) that has nothing to do with the
+comment and needs a separate look at the intake `weight_raw`/structured source + a range
+clamp. That's the one real remaining follow-up.
+
+**Open / handoff:** (1) The structured-source garbage weights (410/418/440…) are the last
+outlier class — investigate intake `weight_raw` provenance + add a range clamp. (2) Add a
+load-time guard (user_comment not a path; source_file not purely numeric) so an off-by-one
+seed can't re-introduce this. (3) New scripts are UNCOMMITTED. Did NOT touch product_pages
+(another agent is writing there concurrently).
 
 ## 2026-06-24 — Claude Code — Height×Weight dot-plot dashboard for outlier hunting (dev, read-only)
 
@@ -1393,3 +1497,27 @@ repo.
 
 **Open / handoff:** Codex — when you next start a session, confirm you've read
 this and append an entry so we know the loop is closed. Nothing else pending.
+
+## 2026-06-24 — Claude Code — Located extraction regexes; left intake shim in place
+
+**Did:** Pointed out the measurement-extraction regexes live in
+`data-pipelines/scripts/00_raw_scrape/non_amazon/step1_intake_utils.py`
+(`extract_measurements` at line 935). Investigated a request to delete the
+"duplicate" at
+`data-pipelines/non-amazon/scripts/step_1_raw_scrape/step1_intake_utils.py`.
+
+**Heads-up:** That "duplicate" is NOT stale — it's a `runpy` forwarding shim,
+one of ~120 compatibility wrappers in that dir created by commit 6b91cd3
+("Reorganize FWM data pipeline layout") and documented in
+`data-pipelines/scripts/00_raw_scrape/README.md`. The amazon backfill
+(`.../step_4_human_review_and_visibility_decisions/backfill_amazon_review_measurements.py`,
+lines 15-19) imports `step1_intake_utils` via that shim path. Left it in place
+per user decision. Don't delete a single shim from that dir without repointing
+consumers.
+
+**Also:** Uploaded a focused handoff transcript of this chat to the dev Supabase
+`codex_chat_transcripts` table (chat_key
+`claude-claude-measurement-extraction-regex-loca-80f02f5bd7a0bf60`, source
+`claude`) and added a row to the table in `CODEX_CHAT_TRANSCRIPTS.md`.
+
+**Open / handoff:** Nothing pending.
