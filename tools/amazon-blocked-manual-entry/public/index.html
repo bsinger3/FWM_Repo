@@ -23,9 +23,14 @@
   .field { display: flex; flex-direction: column; gap: 3px; }
   .field.wide { grid-column: 1 / -1; }
   label { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; }
-  select, input[type=text], textarea { font: inherit; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; }
+  select, input[type=text], textarea { font: inherit; color: #111827; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; color-scheme: light; }
   select[multiple] { min-height: 84px; }
   textarea { resize: vertical; min-height: 38px; }
+  .btn404 { font: inherit; cursor: pointer; padding: 6px 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #991b1b; font-weight: 600; }
+  .btn404:hover { background: #fef2f2; }
+  .card.is404 { border-color: #ef4444; background: #fff5f5; }
+  .card.is404 .btn404 { background: #991b1b; color: #fff; border-color: #991b1b; }
+  .card.is404 form { opacity: .45; pointer-events: none; }
   .saved { font-size: 11px; color: #16a34a; height: 14px; }
   .empty { text-align: center; color: #6b7280; padding: 40px; }
 </style></head>
@@ -64,12 +69,21 @@ function render() {
 
 function card(r) {
   const d = DATA.entries[r.product_page_id] || {};
-  const c = el("div", { className: "card" + (DATA.entries[r.product_page_id] ? " done" : "") });
+  let is404 = !!d.is_404;
+  const c = el("div", { className: "card" + (DATA.entries[r.product_page_id] ? " done" : "") + (is404 ? " is404" : "") });
   const top = el("div", { className: "top" }, [
     el("span", { className: "badge", textContent: "blocked" }),
     el("span", { className: "asin", textContent: r.asin }),
   ]);
   top.append(el("a", { className: "open", href: r.canonical_url, target: "_blank", rel: "noopener", textContent: "Open on Amazon ↗" }));
+  const btn404 = el("button", { type: "button", className: "btn404", textContent: is404 ? "✓ Marked as 404 — undo" : "Treat as 404 (dead page)" });
+  btn404.onclick = () => {
+    is404 = !is404;
+    c.classList.toggle("is404", is404);
+    btn404.textContent = is404 ? "✓ Marked as 404 — undo" : "Treat as 404 (dead page)";
+    save();
+  };
+  top.append(btn404);
   c.append(top);
 
   const form = el("form");
@@ -118,6 +132,7 @@ function card(r) {
       mother_category_id: catSel.value || null,
       clothing_type_ids: [...typeSel.selectedOptions].map(o => o.value).filter(Boolean),
       notes: notes.value.trim(),
+      is_404: is404,
     };
     clearTimeout(timer);
     timer = setTimeout(async () => {

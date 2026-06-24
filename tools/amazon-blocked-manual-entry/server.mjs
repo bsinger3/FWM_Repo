@@ -136,6 +136,7 @@ const server = createServer(async (req, res) => {
         mother_category_id: body.mother_category_id || null,
         clothing_type_ids: Array.isArray(body.clothing_type_ids) ? body.clothing_type_ids : [],
         notes: body.notes || "",
+        is_404: Boolean(body.is_404),
         saved_at: new Date().toISOString(),
       };
       await persistEntries();
