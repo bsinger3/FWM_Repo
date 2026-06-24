@@ -218,6 +218,33 @@ async function verifyAttributes(report) {
   return checks;
 }
 
+async function verifyCrops(report) {
+  const writable = new Set(["whole_body", "garment_priority", "garment_partial"]);
+  const planned = Array.isArray(report.planned_writes) ? report.planned_writes : [];
+  let badMode = 0;
+  let badWindow = 0;
+  let badSpec = 0;
+  for (const w of planned) {
+    if (!writable.has(w.mode)) badMode += 1;
+    const c = w.crop_spec || {};
+    if (c.mode !== "cover-window" || c.source !== "auto") badSpec += 1;
+    for (const k of ["windowXPct", "windowYPct", "windowWPct", "windowHPct"]) {
+      const v = Number(c[k]);
+      if (!Number.isFinite(v) || v < 0 || v > 100) badWindow += 1;
+    }
+  }
+  return [
+    ...verifyTarget(report),
+    ok("crops_is_dry_run_or_apply", ["dry-run", "apply"].includes(report.mode), report.mode),
+    ok("crops_has_model_version", Boolean(report.crop_model_version), report.crop_model_version),
+    ok("crops_has_planned_writes", planned.length > 0, planned.length),
+    ok("crops_only_writable_modes", badMode === 0, { badMode, rule: report.skip_rule }),
+    ok("crops_specs_are_cover_window_auto", badSpec === 0, { badSpec }),
+    ok("crops_window_pcts_in_range", badWindow === 0, { badWindow }),
+    ok("crops_head_priority_skipped", !(report.skips && report.skips.mode_head_priority > 0 && badMode > 0), report.skips),
+  ];
+}
+
 async function main() {
   const guard = await assertApprovedDevSupabase({ cwd: repoRoot, requireServiceRoleKey: true });
   printGuardSummary(guard, { prefix: "Dev refresh report verifier guard" });
@@ -227,8 +254,8 @@ async function main() {
   const report = JSON.parse(await readFile(resolvedReportPath, "utf8"));
   const inferredType =
     reportType ||
-    (report.extractor_version ? "taxonomy" : report.orientation_model_version ? "orientation" : report.browser_checker_version ? "browser-status" : report.checker_version ? "status" : report.estimator_version ? "measurement-estimate" : report.full_body_reset_version ? "attributes" : null);
-  if (!inferredType) throw new Error("Could not infer report type. Pass --type=taxonomy, --type=orientation, --type=status, --type=browser-status, --type=measurement-estimate, or --type=attributes.");
+    (report.extractor_version ? "taxonomy" : report.orientation_model_version ? "orientation" : report.browser_checker_version ? "browser-status" : report.checker_version ? "status" : report.estimator_version ? "measurement-estimate" : report.full_body_reset_version ? "attributes" : report.crop_model_version ? "crops" : null);
+  if (!inferredType) throw new Error("Could not infer report type. Pass --type=taxonomy, --type=orientation, --type=status, --type=browser-status, --type=measurement-estimate, --type=attributes, or --type=crops.");
 
   let checks;
   if (inferredType === "taxonomy") checks = await verifyTaxonomy(report);
@@ -237,6 +264,7 @@ async function main() {
   else if (inferredType === "browser-status") checks = await verifyBrowserStatus(report);
   else if (inferredType === "measurement-estimate") checks = await verifyMeasurementEstimate(report);
   else if (inferredType === "attributes") checks = await verifyAttributes(report);
+  else if (inferredType === "crops") checks = await verifyCrops(report);
   else throw new Error(`Unsupported report type: ${inferredType}`);
 
   const passed = checks.every((check) => check.ok);

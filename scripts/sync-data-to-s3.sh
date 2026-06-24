@@ -33,4 +33,7 @@ fi
 
 aws --profile "${FWM_AWS_PROFILE}" s3 sync "${FWM_DATA_DIR}" "${FWM_S3_BUCKET}" \
   --exclude ".DS_Store" \
-  --exclude "**/.DS_Store"
+  --exclude "**/.DS_Store" \
+  --exclude "_venv_cv/*" \
+  --exclude "**/__pycache__/*" \
+  --exclude "**/*.pyc"

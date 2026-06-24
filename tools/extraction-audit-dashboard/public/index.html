@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Extraction Audit — FWM</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="title">
+        <h1>Measurement Extraction Audit</h1>
+        <p id="summary">Loading…</p>
+      </div>
+      <div class="legend">
+        <span class="chip num-captured">number — captured</span>
+        <span class="chip num-missed">number — not extracted</span>
+        <span class="chip kw">measurement word</span>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <select id="status" title="Which rows to show">
+        <option value="unreviewed">Unreviewed only</option>
+        <option value="incorrect">Reviewed: incorrect</option>
+        <option value="correct">Reviewed: correct</option>
+        <option value="all">All (incl. reviewed)</option>
+      </select>
+      <select id="site"><option value="">All sites</option></select>
+      <select id="minSuspicion">
+        <option value="0">Any suspicion</option>
+        <option value="2">Suspicion ≥ 2</option>
+        <option value="6">Suspicion ≥ 6</option>
+        <option value="10">Suspicion ≥ 10</option>
+      </select>
+      <select id="commented">
+        <option value="">All</option>
+        <option value="commented">Only rows I commented on</option>
+      </select>
+      <input id="q" type="search" placeholder="search comment / brand / type…" />
+      <span class="spacer"></span>
+      <button id="export">⬇ Export flagged</button>
+    </div>
+
+    <main id="list"></main>
+
+    <nav class="pager">
+      <button id="prev">‹ Prev</button>
+      <span id="pageInfo">—</span>
+      <button id="next">Next ›</button>
+    </nav>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

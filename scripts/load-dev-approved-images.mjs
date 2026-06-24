@@ -17,9 +17,21 @@ import {
   fwmDataDir,
 } from "../tools/image-review-dashboard/paths.mjs";
 import { parseWeeksPregnant } from "./lib/pregnancy-parser.mjs";
+import { commentId } from "../tools/extraction-audit-dashboard/lib/analyze.mjs";
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const apply = process.argv.includes("--apply");
+// Optional corrected-measurement overrides (from the extraction audit), joined to
+// each row by commentId(user_comment). When present, these replace the workbook's
+// measurement columns so current-regex values land in dev images. See
+// scripts/build-measurement-overrides.mjs.
+const measurementOverridesPath = process.argv
+  .find((arg) => arg.startsWith("--measurement-overrides="))
+  ?.split("=")[1];
+const measurementOverrides = measurementOverridesPath
+  ? JSON.parse(await readFile(measurementOverridesPath, "utf8")).overrides
+  : null;
+let measurementOverrideHits = 0;
 const resolveWorkbooks = process.argv.includes("--resolve-workbooks");
 const sampleLimit = Number(process.argv.find((arg) => arg.startsWith("--sample-limit="))?.split("=")[1] || 20);
 const fetchDevUrls = process.argv.includes("--fetch-dev-urls") || resolveWorkbooks;
@@ -470,13 +482,24 @@ async function planApprovedRows({ approvals, packageDirs, guard, latestReport })
         weeks_pregnant: pregnancy.weeks_pregnant,
         pregnancy_evidence: pregnancy.pregnancy_evidence,
         baseline_match: imageUrl ? devImageUrls.get(imageUrl) || null : null,
-        measurements: {
-          height_in_display: toNumberOrNull(row.height_in_display),
-          weight_lbs_display: toNumberOrNull(row.weight_lbs_display || row.weight_lb),
-          waist_in: toNumberOrNull(row.waist_in),
-          hips_in_display: toNumberOrNull(row.hips_in_display),
-          inseam_inches_display: toNumberOrNull(row.inseam_inches_display),
-        },
+        measurements: (() => {
+          // Override the workbook's measurement columns with corrected values
+          // when this comment has an audit override; otherwise use the workbook.
+          const ov = measurementOverrides ? measurementOverrides[commentId(row.user_comment)] : null;
+          if (ov) measurementOverrideHits += 1;
+          const m = ov ? { ...row, ...ov } : row;
+          return {
+            height_in_display: toNumberOrNull(m.height_in_display),
+            weight_lbs_display: toNumberOrNull(m.weight_lbs_display || m.weight_lb),
+            waist_in: toNumberOrNull(m.waist_in),
+            hips_in_display: toNumberOrNull(m.hips_in_display),
+            inseam_inches_display: toNumberOrNull(m.inseam_inches_display),
+            bust_in_display: toNumberOrNull(m.bust_in_display),
+            bra_band_in_display: toNumberOrNull(m.bra_band_in_display),
+            bust_in_number_display: toNumberOrNull(m.bust_in_number_display),
+            cupsize_display: m.cupsize_display || null,
+          };
+        })(),
       });
     }
   }
@@ -628,6 +651,10 @@ function reviewedImagePayloadFromAction(action) {
     waist_in: row.measurements.waist_in,
     hips_in_display: row.measurements.hips_in_display,
     inseam_inches_display: row.measurements.inseam_inches_display,
+    bust_in_display: row.measurements.bust_in_display,
+    bra_band_in_display: row.measurements.bra_band_in_display,
+    bust_in_number_display: row.measurements.bust_in_number_display,
+    cupsize_display: row.measurements.cupsize_display,
     size_display: row.row.size_display || "unknown",
   };
 }
@@ -761,6 +788,8 @@ async function main() {
       duplicate_conflict_samples: plan.duplicate_conflict_samples,
       missing_source_samples: plan.missing_source_rows.slice(0, 50),
       missing_required_samples: plan.missing_required_rows.slice(0, 50),
+      measurement_override_file: measurementOverridesPath || null,
+      measurement_override_rows_applied: measurementOverrideHits,
     };
     summary.sample_rows = plan.planned_actions.slice(0, Math.max(0, sampleLimit)).map(({ action, row }) => ({
       action,
@@ -776,6 +805,7 @@ async function main() {
       crop_spec: row.crop_spec,
       weeks_pregnant: row.weeks_pregnant,
       pregnancy_evidence: row.pregnancy_evidence,
+      measurements: row.measurements,
     }));
   }
 

@@ -1,0 +1,179 @@
+:root {
+  --bg: #0f1115;
+  --panel: #181b22;
+  --panel-2: #1f232c;
+  --border: #2a2f3a;
+  --text: #e6e9ef;
+  --muted: #9aa3b2;
+  --accent: #6ea8fe;
+  --captured: #1f6f43;
+  --captured-text: #b7f7cf;
+  --missed: #7a2230;
+  --missed-text: #ffc3cd;
+  --kw: #314a6e;
+  --kw-text: #cfe2ff;
+  --bad: #ff6b6b;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+header h1 { margin: 0; font-size: 18px; }
+header #summary { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+.legend { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { font-size: 11px; padding: 3px 8px; border-radius: 999px; }
+.chip.num-captured { background: var(--captured); color: var(--captured-text); }
+.chip.num-missed { background: var(--missed); color: var(--missed-text); }
+.chip.kw { background: var(--kw); color: var(--kw-text); }
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 5;
+  flex-wrap: wrap;
+}
+.toolbar .spacer { flex: 1; }
+.toolbar select,
+.toolbar input,
+.toolbar button {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.toolbar input { min-width: 220px; }
+.toolbar button { cursor: pointer; }
+.toolbar button:hover { border-color: var(--accent); }
+
+main { padding: 16px 18px 80px; display: flex; flex-direction: column; gap: 14px; }
+
+.card {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) 260px;
+  gap: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+@media (max-width: 1080px) {
+  .card { grid-template-columns: 180px minmax(0, 1fr); }
+  .card .right { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .card { grid-template-columns: 1fr; }
+}
+.card.reviewed-incorrect { border-color: var(--bad); box-shadow: 0 0 0 1px var(--bad) inset; }
+.card.reviewed-correct { border-color: #2f7d4f; box-shadow: 0 0 0 1px #2f7d4f inset; opacity: .7; }
+.card.removing { transition: opacity .2s, transform .2s; opacity: 0; transform: translateX(12px); }
+
+.thumb {
+  width: 200px;
+  height: 266px;
+  background: var(--panel-2);
+  border-radius: 8px;
+  object-fit: contain;
+  display: block;
+}
+.thumb-wrap { display: flex; flex-direction: column; gap: 6px; }
+.thumb-wrap a { color: var(--accent); font-size: 11px; word-break: break-all; }
+.thumb-missing {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 12px; text-align: center; padding: 8px;
+}
+
+.mid .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.tag {
+  font-size: 11px; color: var(--muted);
+  background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 7px;
+}
+.tag.susp { color: #ffd27a; }
+.tag.dup { color: #9ec5ff; border-color: #314a6e; }
+.tag.dec-APPROVE { color: #9be7b4; }
+.tag.dec-DISAPPROVE { color: #ffb0b0; }
+
+.comment {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow: auto;
+}
+.comment mark { padding: 0 2px; border-radius: 3px; font-weight: 600; }
+.comment mark.num-captured { background: var(--captured); color: var(--captured-text); }
+.comment mark.num-missed { background: var(--missed); color: var(--missed-text); }
+.comment mark[class*="kw-"] { background: var(--kw); color: var(--kw-text); font-weight: 500; }
+
+.review-note {
+  margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+  background: #2b2410; border: 1px solid #5a4a16; color: #ffe6a3; font-size: 13px;
+}
+.review-note b { color: #ffd27a; }
+
+.measures table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.measures th {
+  text-align: left; color: var(--muted); font-weight: 600;
+  font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+  padding-bottom: 4px;
+}
+.measures td { padding: 3px 0; border-top: 1px solid var(--border); vertical-align: top; }
+.measures td.k { color: var(--muted); width: 90px; }
+.measures td.v { color: var(--text); word-break: break-word; }
+.measures td.v.empty { color: #5a6172; font-style: italic; }
+.measures td.v .long { color: #ffb0b0; }
+
+.review { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.review-buttons { display: flex; gap: 8px; }
+.review-buttons button {
+  flex: 1; cursor: pointer; font: inherit; font-weight: 600;
+  border-radius: 6px; padding: 8px 6px; border: 1px solid var(--border);
+  background: var(--panel-2); color: var(--text);
+}
+.btn-correct:hover { border-color: #2f7d4f; }
+.btn-correct.on { background: #1f6f43; color: #d7ffe7; border-color: #2f7d4f; }
+.btn-incorrect:hover { border-color: var(--bad); }
+.btn-incorrect.on { background: #7a2230; color: #ffd7dd; border-color: var(--bad); }
+.review textarea {
+  margin-top: 8px; width: 100%; min-height: 52px; resize: vertical;
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font: inherit;
+}
+
+.pager {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; gap: 14px; align-items: center; justify-content: center;
+  padding: 10px; background: var(--panel); border-top: 1px solid var(--border);
+}
+.pager button {
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; cursor: pointer;
+}
+.pager button:disabled { opacity: .4; cursor: default; }
+#pageInfo { color: var(--muted); min-width: 240px; text-align: center; }
+.empty-state { color: var(--muted); text-align: center; padding: 40px; }
