@@ -18,6 +18,7 @@
     "dev-images:loader:dry-run": "node scripts/load-dev-approved-images.mjs",
     "dev-images:measurement-overrides": "node scripts/build-measurement-overrides.mjs",
     "dev-images:measurement-backfill": "node scripts/backfill-dev-image-measurements.mjs",
+    "dev-images:dimensions": "node scripts/backfill-dev-image-dimensions.mjs",
     "dev-images:baseline:export": "node scripts/export-prod-images-baseline.mjs",
     "dev-images:baseline:manifest": "node scripts/dev-images-baseline-manifest.mjs",
     "dev-images:baseline:restore": "node scripts/restore-dev-images-baseline.mjs",

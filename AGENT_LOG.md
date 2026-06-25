@@ -33,6 +33,70 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 14:30 EDT — Claude Code — Server-side low-res image gate (backfill source dims → RPC filter)
+
+**Did:** Built the end-to-end system to hide low-resolution images from dev search
+server-side (was client-only via index.dev.html thumbSharpnessRatio/hideCardIfLowRes).
+- **Migration `20260625_dev_26_image_source_dimensions.sql` (APPLIED to dev):** added
+  numeric `source_width_px`, `source_height_px`, `dimensions_checked_at`,
+  `dimensions_source` to `public.images`. Did NOT touch the legacy empty text
+  `width`/`height` columns (import provenance) — confirmed 0/47,873 usable there.
+- **`scripts/backfill-dev-image-dimensions.mjs` + `scripts/lib/image-dimensions.mjs`**
+  (`npm run dev-images:dimensions`): resumable header-prefix fetch (Range 0-1MB,
+  JPEG/PNG/WebP/GIF magic-byte parse — no full decode) → appends to a JSONL stage
+  file in `$FWM_DATA/_reports/dev_image_source_dimensions.jsonl`. Default = FETCH
+  (no writes); `--apply` (gated by FWM_DEV_DB_WRITE_OK + dev ref) batches
+  UPDATE...FROM(VALUES) in 1k chunks. **Ran it: 47,760/47,873 (99.76%) images now
+  have real source dims** in dev. The 113 NULLs are persistent fetch failures
+  (dead URLs, 403/404, and 5 rows whose `original_url_display` has a stray UTF-8 BOM
+  prefix — data-quality bug worth fixing at intake). NULL dims are FAIL-OPEN (kept).
+- **Migration `20260625_dev_27_hide_low_res_images_from_search.sql` (APPLIED to dev):**
+  rebuilt `public.searchable_images` to precompute `min_thumb_sharpness` (mirrors the
+  client formula: min(srcW*windowWPct/100 / (360*scale), srcH*windowHPct/100 / (480*scale)),
+  i.e. a 180x240 card @ dpr 2; NULL when source dims unknown). Added ONE predicate to
+  `match_by_measurements`: `and coalesce(s.min_thumb_sharpness, 1e9) >= 0.9`. Threshold
+  is a LIVE literal in the function body (retune by re-applying, no MV refresh).
+- Updated the index.dev.html comment (it claimed "Source resolution is not stored in
+  the DB" — now false). Kept the client check as the per-device (exact dpr) layer.
+
+**Heads-up / verified:**
+- **Impact is surgical: 728 / 46,087 searchable rows (1.6%) gated as low-res**; 107
+  NULL-sharpness kept; most of the catalog has sharpness >2.0. Not nuking results.
+- Verified live: broad RPC page (200 rows) returns 0 rows below 0.9; total_count drops
+  46,070→45,342 (=728) with the gate; a specific eligible 0.839-sharpness image is
+  absent from its category search. RPC warm time ~335ms (well under anon 3s timeout).
+- **Built on dev_25's shape** (broad image_reports anti-join + total_count) — preserved
+  verbatim, only the low-res predicate added. Return type unchanged → plain CREATE OR
+  REPLACE (no drop needed for the function; matview dropped+recreated as in dev_24).
+- **Production untouched** — every write went through dev-ref-guarded paths / the
+  dev-linked CLI; no PROD_DATABASE_URL was used anywhere.
+
+**⚠ Collision/regression I hit + fixed (important):** At session start the working tree
+ALREADY had untracked `20260625_dev_26_image_source_dimensions.sql`, `dev_27_hide_low_res…`,
+`scripts/backfill-dev-image-dimensions.mjs`, `scripts/lib/image-dimensions.mjs` — a PRIOR
+session had built this same feature. My Writes overwrote those (couldn't diff; they were
+untracked). Net DB state is correct + verified, but the prior file contents are gone.
+ALSO: there's a separate untracked `20260625_dev_26_search_pagination_tiebreaker.sql` (NOT
+mine — adds `, s.id` to ORDER BY to stop duplicate cards on scroll). My dev_27 rebuilds the
+WHOLE function from the dev_25 base, so applying it LAST **wiped the tiebreaker** from the
+live function. Caught it, folded `, s.id` into dev_27's ORDER BY, re-applied. Verified live:
+function now has BOTH the low-res gate AND the tiebreaker; page1(off 0)∩page2(off 24)=0 overlap.
+**Lesson for whoever owns the tiebreaker migration: dev_27 supersedes it — keep dev_27 last,
+or any future full-function rebuild must carry every prior fix.** Two `dev_26`-numbered
+migrations now coexist (image_source_dimensions + search_pagination_tiebreaker) — a numbering
+smell, but order-safe since dev_27 carries the tiebreaker regardless.
+
+**Open / handoff:** Committed my files on branch `dev-low-res-image-gate` (dev_26 +
+dev_27 migrations, backfill script + lib, package.json `dev-images:dimensions`, this log).
+NOT committed (not mine, left untracked): `dev_26_search_pagination_tiebreaker.sql`,
+`build-reddit-prospect-drafts.mjs`, `reclassify-dev-other-categories.mjs`. index.dev.html is
+gitignored (local-only) so its comment edit stays local. Follow-ups: (1) when new
+images load OR crop_spec changes, re-run `dev-images:dimensions` then
+`refresh materialized view concurrently public.searchable_images` to pick up new dims +
+recompute sharpness; (2) consider porting dims-backfill + the gate to prod; (3) fix the
+BOM-prefixed `original_url_display` rows at scrape intake; (4) `width`/`height` text
+columns remain empty — left as-is (provenance), new numeric columns are the source of truth.
+
 ## 2026-06-25 13:35 EDT — Claude Code — POLICY: any flagged image hidden from all dev searches (RPC)
 
 **Did:** New dev migration `supabase/dev-migrations/20260625_dev_25_hide_flagged_images_from_search.sql`,
