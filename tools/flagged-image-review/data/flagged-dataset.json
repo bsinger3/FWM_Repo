@@ -1,0 +1,2520 @@
+{
+  "generatedAt": "2026-06-25T16:57:18.974Z",
+  "counts": {
+    "prodReports": 62,
+    "devReports": 12,
+    "flaggedImages": 71,
+    "presentInDev": 71,
+    "missingFromDev": 0
+  },
+  "reasonLabels": {
+    "image_not_helpful": "Image not helpful",
+    "dead_link": "Dead link",
+    "duplicate_image": "Duplicate image",
+    "incorrect_data": "Incorrect measurements/category/size",
+    "sold_out": "Sold out",
+    "other_link_problem": "Other link problem"
+  },
+  "entries": [
+    {
+      "image_id": "96431b20-47b2-4fde-870f-340460ccf842",
+      "in_dev_images": true,
+      "report_count": 2,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-22T12:59:40.069039+00:00"
+        },
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-05-20T15:37:42.340183+00:00"
+        }
+      ],
+      "image": {
+        "id": "96431b20-47b2-4fde-870f-340460ccf842",
+        "original_url_display": "https://m.media-amazon.com/images/I/51Z+E+yZLLL.jpg",
+        "product_page_url_display": "https://www.amazon.com/FISCLOSIN-Classic-Skinny-Stretch-Medium/dp/B0B8PF231J/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FFISCLOSIN-Classic-Skinny-Stretch-Medium%2Fdp%2FB0B8PF231J%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Bad quality Terrible quality. The belt loop broke right off, wasn't even stiched on all the way. Fits bigger  than expected.  Very long and too loose on the ankles. Not colombian jeans. I have many many colombian jeans, this is not it.",
+        "size_display": "medium",
+        "brand": null,
+        "color_display": "black",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "4b9872b5-377f-4534-a7d7-2678c010d47b",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-25T02:08:41.361595+00:00"
+        }
+      ],
+      "image": {
+        "id": "4b9872b5-377f-4534-a7d7-2678c010d47b",
+        "original_url_display": "https://img.shopcider.com/app/review/16569243_1722149563128_74.png",
+        "product_page_url_display": "https://www.shopcider.com/goods/illusion-floral-ruched-midi-dress?style_id=117234&gaListId=117030&gaListName=All%2520Bestsellers&ciderListId=2&ciderListName=All%20Bestsellers&selectSkuIndex=0&moduleTitle=1&p=1017631&shopPage=36&shopIndex=714&navTitle=All%2520Bestsellers&navId=117030&listSource=product_detail-collar-solid-button-long-sleeve-blouse-100145153%3Bcollection_117030%3B2&listSort=&listId=117030&listAttribute=&operationContent=Bestsellers&operationImage=&linkUrl=https%253A%252F%252Fwww.shopcider.com%252Fproduct%252Flist%253Fcollection_id%253D117030&operationpageTitle=%2Fgoods%2Fcollar-solid-button-long-sleeve-blouse-100145153&operationPosition=2&operationType=category&productPosition=715&strategyNameList=&businessTracking=eyJmaXJzdEltYWdlVHlwZSI6IiIsIml0ZW1UeXBlIjowLCJsaXN0SWQiOjExNzAzMCwibGlzdFRpdGxlIjoiQWxsIEJlc3RzZWxsZXJzIiwibGlzdFR5cGUiOjIsIm1vZHVsZUlkIjoxLCJwcm9kdWN0UHJpbWFyeUltYWdlRmxhZyI6ZmFsc2UsInNhbGVQcmljZSI6MjguMDAsInNrY0ZpcnN0SW1nIjoiMTY1MjkzODk0MjAwMC0ya3BXM1ouanBnIiwic3B1IjoxMDE3NjMxLCJzcHVDb2RlIjoiQ0QyMDIyMDQwODgzNTMyTEQiLCJ0cmFja2luZ0lkIjoiY2JmMjNiMmYtZGNiZi00ZWI2LWI4NzUtMjIxMzhmZmJhMTdkIn0%3D&listType=2&listTitle=All%20Bestsellers",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.shopcider.com%2Fgoods%2Fillusion-floral-ruched-midi-dress%3Fstyle_id%3D117234%26gaListId%3D117030%26gaListName%3DAll%252520Bestsellers%26ciderListId%3D2%26ciderListName%3DAll%2520Bestsellers%26selectSkuIndex%3D0%26moduleTitle%3D1%26p%3D1017631%26shopPage%3D36%26shopIndex%3D714%26navTitle%3DAll%252520Bestsellers%26navId%3D117030%26listSource%3Dproduct_detail-collar-solid-button-long-sleeve-blouse-100145153%253Bcollection_117030%253B2%26listSort%3D%26listId%3D117030%26listAttribute%3D%26operationContent%3DBestsellers%26operationImage%3D%26linkUrl%3Dhttps%25253A%25252F%25252Fwww.shopcider.com%25252Fproduct%25252Flist%25253Fcollection_id%25253D117030%26operationpageTitle%3D%252Fgoods%252Fcollar-solid-button-long-sleeve-blouse-100145153%26operationPosition%3D2%26operationType%3Dcategory%26productPosition%3D715%26strategyNameList%3D%26businessTracking%3DeyJmaXJzdEltYWdlVHlwZSI6IiIsIml0ZW1UeXBlIjowLCJsaXN0SWQiOjExNzAzMCwibGlzdFRpdGxlIjoiQWxsIEJlc3RzZWxsZXJzIiwibGlzdFR5cGUiOjIsIm1vZHVsZUlkIjoxLCJwcm9kdWN0UHJpbWFyeUltYWdlRmxhZyI6ZmFsc2UsInNhbGVQcmljZSI6MjguMDAsInNrY0ZpcnN0SW1nIjoiMTY1MjkzODk0MjAwMC0ya3BXM1ouanBnIiwic3B1IjoxMDE3NjMxLCJzcHVDb2RlIjoiQ0QyMDIyMDQwODgzNTMyTEQiLCJ0cmFja2luZ0lkIjoiY2JmMjNiMmYtZGNiZi00ZWI2LWI4NzUtMjIxMzhmZmJhMTdkIn0%253D%26listType%3D2%26listTitle%3DAll%2520Bestsellers",
+        "source_site_display": "https://www.shopcider.com",
+        "user_comment": "",
+        "size_display": "size: small",
+        "brand": null,
+        "color_display": "violet",
+        "clothing_type_id": "other",
+        "height_in_display": 62,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "731e5a64-917d-45ee-9ea4-a0cb0c2674f8",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-22T13:01:54.692846+00:00"
+        }
+      ],
+      "image": {
+        "id": "731e5a64-917d-45ee-9ea4-a0cb0c2674f8",
+        "original_url_display": "https://images-na.ssl-images-amazon.com/images/I/91Nc2Af5RdL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Chic-Classic-Collection-Original-Stonewash/dp/B01K580U0Q/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FChic-Classic-Collection-Original-Stonewash%2Fdp%2FB01K580U0Q%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Not the normal Chic pants. These are women’s pants but the legs are too tight. No mention of them being skinny legged pants. They are petite fit from crotch to waistband like they should be. The top of them fit fine. I have been wearing this brand for years but this material is not good. Very rough feeling and although washed in cold water they faded to almost a gray/black. Don’t know if you can tell in the pictures but the ends of the legs and top of the waistband look like they have been washed and worn many times and I’ve never worn them because of the tight legs. Since I’ve already washed them I will not try to return them but would not recommend these.\nUPDATE: I stand corrected. I started wearing these casually and found that they do stretch out a bit as you wear them and they wash and dry very well. I have since bought three other exact pair. Just know to not think black like dress slacks and they are a slimmer fit in the calves than normal. Each pair I have since purchased have been a slightly different shade between black and dark gray. For everyday and casual wear they are perfect and I will continue to order them as needed.",
+        "size_display": "12",
+        "brand": null,
+        "color_display": "black denim",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "0448cc77-825a-4c8e-8326-fcd015cf1dec",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-22T13:01:51.058952+00:00"
+        }
+      ],
+      "image": {
+        "id": "0448cc77-825a-4c8e-8326-fcd015cf1dec",
+        "original_url_display": "https://m.media-amazon.com/images/I/71Y1N7mZ0hL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Ewedoos-Jeggings-Control-Stretchy-Waisted/dp/B0DKXNZ5TK/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FEwedoos-Jeggings-Control-Stretchy-Waisted%2Fdp%2FB0DKXNZ5TK%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Aceptable Muy bueno .. estira",
+        "size_display": "large",
+        "brand": null,
+        "color_display": "new black",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "17029f46-4350-4ef5-8ad7-e1702c603433",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-22T13:01:45.589313+00:00"
+        }
+      ],
+      "image": {
+        "id": "17029f46-4350-4ef5-8ad7-e1702c603433",
+        "original_url_display": "https://m.media-amazon.com/images/I/61vjRcNqu6L.jpg",
+        "product_page_url_display": "https://www.amazon.com/Lee-Womens-Legendary-Bootcut-Rivers/dp/B0C7MXWHMJ/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FLee-Womens-Legendary-Bootcut-Rivers%2Fdp%2FB0C7MXWHMJ%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Not mad at it. I’m 5’10 1/2, they fall perfectly on me so wouldn’t recommend for someone taller than 5’11. I will say as someone with thicker thighs they fit a bit more snug around the thighs and are a little too loose around the waist for my liking they don’t have a BUNCH of stretch but they are good quality!",
+        "size_display": "16",
+        "brand": null,
+        "color_display": "compass",
+        "clothing_type_id": "jeans",
+        "height_in_display": 70,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "5a896cd0-0adf-4346-8be5-caa9c2a5fd54",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-22T13:01:41.007008+00:00"
+        }
+      ],
+      "image": {
+        "id": "5a896cd0-0adf-4346-8be5-caa9c2a5fd54",
+        "original_url_display": "https://m.media-amazon.com/images/I/71sEgfeIgGL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Astylish-Bootcut-Trousers-Stretchy-Vintage/dp/B0F43W9L6X/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FAstylish-Bootcut-Trousers-Stretchy-Vintage%2Fdp%2FB0F43W9L6X%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Great Jeans but on shorter side I think these jeans are great and are made just as well as those you find in department stores. Material has medium thickness, is soft and has right amount of stretch making them very comfortable. Only downside is the length and color. Black is not a true black and has variations of gray throughout. Length is shorter than a 32 inseam.  I’m almost 5’10 and they were slightly below my ankle and this was prior to washing.  For reference 185lbs and purchased a 12 which fit perfectly except for the length.Product came well packaged and didn’t contain a smell.",
+        "size_display": "12",
+        "brand": null,
+        "color_display": "black",
+        "clothing_type_id": "jeans",
+        "height_in_display": 70,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "33fd974d-d5b5-4bd8-918b-9bcb12cd1b72",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-22T13:01:37.240917+00:00"
+        }
+      ],
+      "image": {
+        "id": "33fd974d-d5b5-4bd8-918b-9bcb12cd1b72",
+        "original_url_display": "https://m.media-amazon.com/images/I/51WwZHHj3lL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Lee-Womens-Regular-Straight-Anchor/dp/B089CPC4ZM/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FLee-Womens-Regular-Straight-Anchor%2Fdp%2FB089CPC4ZM%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "I need to order these in more colours! - Update - I did Update in September 2024:\n\nWell, I did buy them in two more colours. And I'm not particularly glad I did. The worst were the Ecru ones. A total disaster. Otherwise, I wouldn't have knocked off a star, but if it weren't for the blue ones, I might have knocked off two! I think my ecru pair is defective. All three pairs I ordered were 12 Long. In the first two new pictures, I aligned the crotch of my original blue pair with the ecru. The latter are lower in the waist (not a plus, for me) and so much shorter in the legs I would think they weren't \"Long\", although it is written on the labels. They barely touch the top of my foot, which definitely doesn't work with this cut! There is a lot more stretch in the ecru ones, which makes them sort of clingy. On the positive side, they are not see-through, in the sense that they are opaque. But you can see the outline of every bump and dimple on my knees. and the fabric clings so much that the ankles flare out, although when I laid them on the other jeans, I could see they are also cut that way. The blue ones have a slight taper, which makes them look straight on the body, since most people have larger calves than ankles. The ecru ones actually flare out a tiny bit at the very bottom, and it looks terrible on (you'll have to trust me, I have not taken a photo and have already gotten rid of the jeans!). Sadly for me, I live overseas and sending the jeans back would probably cost as mush as the price of the jeans, so I have given them to a much shorter woman in hopes she can cut them off above the weird little flare and get some wear out of them. I also think one leg is longer than the other. It looked like it on, and it looked ike it when I laid them on the bed. They were definitely new and had all the tags on, but there was a small brown spot on the back on one leg. I think it will wash out, but I didn't bother with it because the jeans were so hopeless. I think it might be fly p**.\n\nI also bought the Washed Black. I have kept them and I think I will wear them. Thankfully, since they cost $48 US, which is quite a bit for an ordinary pair of jeans. They are also smaller than my blue pair, but I can wear them. They are longer than the ecru pair, a smidge shorter than the blue. The colour is nice and they fit better than Ecru (I forgot to mention that the ecru pair comes up higher in the front than the back!!!). As they should be, they are higher in the back than the front, where they are about two inches below my belly button (of course, I am tall, but then again, these are supposed to be long). They are also stretchier, more synthetic than the blue ones, but less than the ecru ones (synthetic jeans are not a good thing in my book). But they are okay. I think Anchor two years ago rates a 4.5, Washed Black in 2024 rates a 3.5 or maybe 4, and the Ecru ones I received on the same day rate a solid 2!!!!!!!!!!!\n\nOn the plus side:\nThese are my jeans. They fit very well and are very comfortable. Most of the time, Lee jeans in size 12 Long are as good as it gets on me. I need a 34\" inseam and these, hmm, they might be 33\", but they are okay. (I'm 5'11\") Although I prefer a high rise, and these are mid rise, they are okay and do not give me a muffin top. They are straight leg, but pretty narrow. Just that little bit of extra fabric at the ankles so you can tell they're not jeggings. Actually, they're nothing like jeggings, because the fabric is fairly thick, although nice and soft and doesn't stifle you like plastic (it's 30 degrees Celsius/86 fahrenheit where I am right now, so that's important).\n\nThe colour is Anchor and pulling it out of the package, I thought it was darker than expected. Then I realized they have those fake wear marks down the front. The faded part goes to below the knee, so that it looks like I have really long thighs and short calves, whereas I am the exact opposite. But it's not a deal breaker. And there is a little whiskering on top, although not too much. I would prefer an even colour all over (hey, I'm on the far side of 55) but it isn't too bad. I really like these quite a bit, so I am going to go back and look at other colours.\n\nHope this helps!",
+        "size_display": "12",
+        "brand": null,
+        "color_display": "anchor",
+        "clothing_type_id": "jeans",
+        "height_in_display": 71,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "755c9278-2d96-4e6e-a6be-e6aea8161009",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-17T17:38:51.410357+00:00"
+        }
+      ],
+      "image": {
+        "id": "755c9278-2d96-4e6e-a6be-e6aea8161009",
+        "original_url_display": "https://r-ap.rtrcdn.com/reviewimages/996/1902326-cropped.jpg",
+        "product_page_url_display": "https://www.renttherunway.com/shop/designers/thakoon_collective/sleeveless_romper",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.renttherunway.com%2Fshop%2Fdesigners%2Fthakoon_collective%2Fsleeveless_romper",
+        "source_site_display": "https://www.renttherunway.com",
+        "user_comment": "",
+        "size_display": "size: 4",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "romper",
+        "height_in_display": 62,
+        "weight_lbs_display": 130,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "1a993822-bda2-4fad-ae20-722bdd7197d0",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-17T17:38:40.523642+00:00"
+        }
+      ],
+      "image": {
+        "id": "1a993822-bda2-4fad-ae20-722bdd7197d0",
+        "original_url_display": "https://r-ap.rtrcdn.com/reviewimages/26c/1825589-cropped.jpg",
+        "product_page_url_display": "https://www.renttherunway.com/shop/designers/caara/canosa_romper",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.renttherunway.com%2Fshop%2Fdesigners%2Fcaara%2Fcanosa_romper",
+        "source_site_display": "https://www.renttherunway.com",
+        "user_comment": "",
+        "size_display": "size: small",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "romper",
+        "height_in_display": 65,
+        "weight_lbs_display": 130,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "e2d4573b-68b2-4b2f-b19c-3160fb659bcb",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-17T17:38:11.411181+00:00"
+        }
+      ],
+      "image": {
+        "id": "e2d4573b-68b2-4b2f-b19c-3160fb659bcb",
+        "original_url_display": "https://r-ap.rtrcdn.com/reviewimages/5bc/1885420-cropped.jpg",
+        "product_page_url_display": "https://www.renttherunway.com/shop/designers/thakoon/black_floral_romper",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.renttherunway.com%2Fshop%2Fdesigners%2Fthakoon%2Fblack_floral_romper",
+        "source_site_display": "https://www.renttherunway.com",
+        "user_comment": "",
+        "size_display": "size: 4",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "romper",
+        "height_in_display": 66,
+        "weight_lbs_display": 140,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "dab4339e-40b6-4768-9cb4-cb4015e323d7",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-17T17:37:32.934065+00:00"
+        }
+      ],
+      "image": {
+        "id": "dab4339e-40b6-4768-9cb4-cb4015e323d7",
+        "original_url_display": "https://r-ap.rtrcdn.com/reviewimages/83f/1844341-cropped.jpg",
+        "product_page_url_display": "https://www.renttherunway.com/shop/designers/joie/luray_romper",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.renttherunway.com%2Fshop%2Fdesigners%2Fjoie%2Fluray_romper",
+        "source_site_display": "https://www.renttherunway.com",
+        "user_comment": "",
+        "size_display": "size: small",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "romper",
+        "height_in_display": 66,
+        "weight_lbs_display": 140,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "bfe54736-36a5-4b89-9f94-3d484ba4e1a8",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-08T19:36:11.501185+00:00"
+        }
+      ],
+      "image": {
+        "id": "bfe54736-36a5-4b89-9f94-3d484ba4e1a8",
+        "original_url_display": "https://r-ap.rtrcdn.com/reviewimages/bad/1746959-cropped.jpg",
+        "product_page_url_display": "https://www.renttherunway.com/shop/designers/marine_layer/lucy_resort_tee",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.renttherunway.com%2Fshop%2Fdesigners%2Fmarine_layer%2Flucy_resort_tee",
+        "source_site_display": "https://www.renttherunway.com",
+        "user_comment": "",
+        "size_display": "size: large",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "tshirt",
+        "height_in_display": 67,
+        "weight_lbs_display": 190,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "687e80d1-f0e9-48de-a2f0-26210ea81d22",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-05-21T20:21:39.770641+00:00"
+        }
+      ],
+      "image": {
+        "id": "687e80d1-f0e9-48de-a2f0-26210ea81d22",
+        "original_url_display": "https://r-ap.rtrcdn.com/reviewimages/91d/1983065-cropped.jpg",
+        "product_page_url_display": "https://www.renttherunway.com/shop/designers/proenza_schouler_white_label/rumbled_button_front_dress",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.renttherunway.com%2Fshop%2Fdesigners%2Fproenza_schouler_white_label%2Frumbled_button_front_dress",
+        "source_site_display": "https://www.renttherunway.com",
+        "user_comment": "",
+        "size_display": "size: 12",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "dress",
+        "height_in_display": 64,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "a524f8be-97f1-44b4-b572-e6e8a5918fd3",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-05-20T15:39:42.62942+00:00"
+        }
+      ],
+      "image": {
+        "id": "a524f8be-97f1-44b4-b572-e6e8a5918fd3",
+        "original_url_display": "https://m.media-amazon.com/images/I/712pLTa5ahL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Chic-Classic-Collection-Original-Stonewash/dp/B01K580U0Q/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FChic-Classic-Collection-Original-Stonewash%2Fdp%2FB01K580U0Q%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Everyday Jeans These jeans fit as expected from the size chart and are comfortable.  After washing the inseam on the 6P was 25 ½ inches, which is longer than the Laura Scott ones I used to buy. Bottom hems come to the top of my shoes, and are not so long that I’m stepping on them [I’m 5-1].  Washed well and went through the drier on the casual cycle.  Probably would not pass inspection by my fashion police nieces, but are a good choice when doing household and yard chores.  They have side pockets.  They don’t have back pockets and don’t have any metal studs.  I’m giving 4 stars because they do not have a choice of rise, and although the size 4 is on the chart, they aren’t listed as available.",
+        "size_display": "6",
+        "brand": null,
+        "color_display": "destruction blue denim",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "0cc21bb6-7cf2-4eca-afe3-964d2e3176da",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-05-20T15:38:06.919491+00:00"
+        }
+      ],
+      "image": {
+        "id": "0cc21bb6-7cf2-4eca-afe3-964d2e3176da",
+        "original_url_display": "https://m.media-amazon.com/images/I/71473CdZJ1L.jpg",
+        "product_page_url_display": "https://www.amazon.com/No-nonsense-Classic-Denim-Leggings/dp/B01LI0GF40/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FNo-nonsense-Classic-Denim-Leggings%2Fdp%2FB01LI0GF40%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Very comfortable. I bought these because I would be traveling in a car for several days and wanted to be comfortable. I was very comfortable. I wore them for 4 straight days. I know that's a long time, but no one pointed to me and said \" lady do you ever change your pants?\". Very comfy walking on the Appalachian trail ( gotta brag as I'm 62yrs. young). As you see in photo the thread is a little loose. I'll just put a drop off clear nail polish or frey check on it for now instead of returning them. I did wash them when I got home inside out and air dried. They look fine. Size was good. I'm five' 5\" feet and 130 pounds. I wore them with sandles as I was traveling from FL. to CO. Savannah, GE was wonderful!! If you go stay on the river in the Marriott with the balcony! Any way, these jeggings were great for travel. My daughter said they are good for old people like me. I took her out of my Will. Try these, you won't be disappointed.\n\nUpdate! These jeggings hold up to falls!! I was running on loose rocks when my daughter's dog ( who is no longer in my Will ) cut me off and I fell. I was wearing my jeggings at the time. I landed on one knee and wrist very hard while landing on my side. My knee did not tear the jegging material yet my knee was cut and bruised. I fell hard, broke three toes, and injured my shoulder, but the jeggings are fine! There is just a little place where my knee hit the rocks that made the fabric a little lighter blue but not noticeable to not wear it again. I'm wearing an orthopedic boot for my broken toes for a few months, but I think the jeggings will look cute with the boot when I go to Maine to hike a little bit on the Appalachian Trail. I have good insurance. So again, I would recommend these, although I wouldn't recommend running on rocks with a large dog thinking it's playtime. And I question why would a husband ask \"Are you O.K.\" when finding you bleeding and laying down on rocks?",
+        "size_display": "medium",
+        "brand": null,
+        "color_display": "dark denim",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "5b08a0c8-c8bd-476d-88b7-db57c82b0431",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-05-20T15:38:01.55044+00:00"
+        }
+      ],
+      "image": {
+        "id": "5b08a0c8-c8bd-476d-88b7-db57c82b0431",
+        "original_url_display": "https://m.media-amazon.com/images/I/81PSQ03RFqL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Lee-Womens-Legendary-Bootcut-Rivers/dp/B0C7MXWHMJ/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FLee-Womens-Legendary-Bootcut-Rivers%2Fdp%2FB0C7MXWHMJ%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Nice style The pants came in good condition. Accurate fitting. The camera makes it look brighter red but it's kinda burgundish red",
+        "size_display": "4",
+        "brand": null,
+        "color_display": "dark glicia",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "ad1718da-123e-4ab2-b161-1405ccba713d",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-05-20T15:37:57.101413+00:00"
+        }
+      ],
+      "image": {
+        "id": "ad1718da-123e-4ab2-b161-1405ccba713d",
+        "original_url_display": "https://m.media-amazon.com/images/I/71A6abyq1uL.jpg",
+        "product_page_url_display": "https://www.amazon.com/DGRPI-Waisted-Distressed-Stretchy-Boyfriend/dp/B0C1MSZWZ3/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FDGRPI-Waisted-Distressed-Stretchy-Boyfriend%2Fdp%2FB0C1MSZWZ3%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Hit and miss with the size Love the feel of the jeans. When the size is right, its nice and snug. Sizes arent the same though. Ordered two, both size 8, and there was an obvious difference.",
+        "size_display": "8",
+        "brand": null,
+        "color_display": "002-blue",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "41590166-a700-4bed-8b01-d7c167dcfcf6",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-05-20T15:37:38.401413+00:00"
+        }
+      ],
+      "image": {
+        "id": "41590166-a700-4bed-8b01-d7c167dcfcf6",
+        "original_url_display": "https://m.media-amazon.com/images/I/51NwwREnvZL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Wrangler-Womens-High-Rise-Stockton/dp/B092JMXY6P/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FWrangler-Womens-High-Rise-Stockton%2Fdp%2FB092JMXY6P%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Great fitting, poorly constructed Ordered a 4L, they fit like a dream on my 34” inseam. However, the button on the fly was broken and they had to be returned. Of course they’re no longer available 👎🏼",
+        "size_display": "4-34",
+        "brand": null,
+        "color_display": "carmine",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "db1ceb10-3cdb-4a34-95e4-0ac839a91051",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-05-20T15:37:32.423421+00:00"
+        }
+      ],
+      "image": {
+        "id": "db1ceb10-3cdb-4a34-95e4-0ac839a91051",
+        "original_url_display": "https://m.media-amazon.com/images/I/71+qCi0FCjL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Levis-Womens-Superlow-Jeans-Regular/dp/B0DJWMYN35/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FLevis-Womens-Superlow-Jeans-Regular%2Fdp%2FB0DJWMYN35%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Low waisted loose on legs Exactly what I wanted but size up by 1-2 inches I wear 26 and ordered 26 and it was Snug.Im 117 and 5,5 got regular length",
+        "size_display": "26",
+        "brand": null,
+        "color_display": "abraided art",
+        "clothing_type_id": "jeans",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "892aa038-1068-4375-a306-5928b98e8263",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-04-28T22:31:17.305033+00:00"
+        }
+      ],
+      "image": {
+        "id": "892aa038-1068-4375-a306-5928b98e8263",
+        "original_url_display": "https://m.media-amazon.com/images/I/71DIwtRkCXL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Amazon-Essentials-Stretch-Jegging-Regular/dp/B07CMBKGW7/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FAmazon-Essentials-Stretch-Jegging-Regular%2Fdp%2FB07CMBKGW7%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Nice fitting comfortable stretchy jeans with quality fabric and stitching 5'7\", 115 lobs, 28 w 30\" inseam; bought small/long and they fit me perfectly.\n\nLove the color and slightly \"worn\" look - excellent fabric weight that is not at all transparent.\n\nGreat stretch and very soft. Fabric is thicker like regular jeans but not heavy, and not thin like some jeggings.\nOpaque fabric for those of us who are modest, but cotton/poly/elastane blend is breathable and comfortable.\n\nNO SMELL which is super important to me. Labels says made in India and I've often gotten clothing made there that smells skunky. These only have typical new clothing smell and I always wash new clothes before wearing.\n\nNot sure what the front \"tummy control\" panel on the inside is all about. Seems rather pointless to me.\n\nWhy only 4 stars rather than 5:\n\nThe so-called tummy control is a stretchy nylon piece barely stitched into the inside of the jeans which actually shows through a little if you look closely.\n\nYou can see by the photos that the hip area bells out a little bit. I remember back in the late 70s/early 80s slacks often had that feature in women's sizes and I called them saddle bags. I don't have much of a figure so this part \"bags out\" a tiny bit on me. There's also a bit of slack just below my rear end. Again, I don't have much of a butt so if you're a normal sized girl this may not be an issue. I'm hoping when I wash them this will smooth out a bit.\n\nPockets in front and zipper placket are non-functional. Don't really see the point of that either. The back pockets are not very deep. Personally, I wouldn't feel comfortable putting a wallet or phone in them as they are too shallow and risk of falling out might be an issue. The dreaded toilet phone bath...\n\nOverall, they are very nice jeans, I'm happy with the purchase and would buy them again. In fact, I think I did buy a pair similar to this years ago on Amazon. Price for the quality is very good.\n\nCleo the Grey is a very curious girl. And likes a selfie.\n\nUpdate: after washing, the jeans did not shrink at all. Still fit like a glove. Unfortunately the \"saddlebag puckers\" and under-bottom wrinkles did not go away. Leaving at 4 stars. Ladies with hips and butts will probably be better suited for this style.",
+        "size_display": "small",
+        "brand": null,
+        "color_display": "medium wash",
+        "clothing_type_id": "jeans",
+        "height_in_display": 67,
+        "weight_lbs_display": 115,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "36aedc87-c994-4cbe-91b5-42452176e470",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "image_not_helpful",
+          "created_at": "2026-04-20T00:27:10.653348+00:00"
+        }
+      ],
+      "image": {
+        "id": "36aedc87-c994-4cbe-91b5-42452176e470",
+        "original_url_display": "https://m.media-amazon.com/images/I/81KnWWucoAL.jpg",
+        "product_page_url_display": "https://www.amazon.com/Sidefeel-Waisted-Stretchy-Straight-Zimbaplatinum/dp/B0F13JW1NF/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2FSidefeel-Waisted-Stretchy-Straight-Zimbaplatinum%2Fdp%2FB0F13JW1NF%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Way too long! These are really long! I love the fit around the hip, I was able to get a size smaller than I usually wear and they were still loose which I like, but I'm short as in 5'1\" short and these pants are 5 1/2 inches longer than my usual jeans!  The attached photo shows my regular jeans on top of these jeans. I really wish that someone would make jeans for short people! I used to get the perfect fit at Blairs, but they went out of business, and I haven't been able to find a pair since. They're either too long or too tight. You used to be able to buy any jeans in a certain size, and they would all fit the same, but now it's a guessing game as to ones even the same brand and size! I can try on three pairs of pants in the same size and brand, and they will all fit differently. Guess I will be sending these back.",
+        "size_display": "10",
+        "brand": null,
+        "color_display": "vintage dark blue",
+        "clothing_type_id": "jeans",
+        "height_in_display": 61,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "79e010c0-7ad0-452f-b47e-2ef4b1f0cf55",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-25T16:17:10.447649+00:00"
+        }
+      ],
+      "image": {
+        "id": "79e010c0-7ad0-452f-b47e-2ef4b1f0cf55",
+        "original_url_display": "https://judgeme.imgix.net/popflex/1712642336__img_4369__original.jpeg?auto=format&w=1024",
+        "product_page_url_display": "https://popflexactive.com/products/crisscross-hourglass-legging-with-pockets-black-1",
+        "monetized_product_url_display": null,
+        "source_site_display": "https://popflexactive.com/",
+        "user_comment": "Overall wonderful!! I love it! The compression is nice, hugs me and not hurts me lol I followed their sizing chart and got an XL. I have a bit of a weird body shape, in between an inverted triangle and a rectangular body with a round tummy when bloated haha. For reference, I am: 5’5 76kg / 167lbs waist: 34” / 87-88 cm With my body and its short torso, it does get pulled down a bit from the waist, but it’s not so bad. I wish I got their pet hair resistant version too. I’m personally not fond with any material where it’s a lint magnet :’( Also gonna save up for their sculpting one once my size is back in stock :) Bottomline is.. I would totally recommend buying this leggings!!",
+        "size_display": "x-large",
+        "brand": "POPFLEX®",
+        "color_display": null,
+        "clothing_type_id": "leggings",
+        "height_in_display": 65,
+        "weight_lbs_display": 167,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "558d698e-9c67-4398-ba05-8c0fd6dbb26d",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-25T16:15:09.267641+00:00"
+        }
+      ],
+      "image": {
+        "id": "558d698e-9c67-4398-ba05-8c0fd6dbb26d",
+        "original_url_display": "https://review-images.onequince.com/2143/81077_7589285888170_44f4c05c_2b86_4c4a_89b5_d8ba72cc69c1.jpg",
+        "product_page_url_display": "https://www.quince.com/women/100-european-linen-tapered-ankle-pant",
+        "monetized_product_url_display": null,
+        "source_site_display": "https://www.quince.com/",
+        "user_comment": "Almost! This style and cut might look better on a taller, more slim frame. With my height (5’1”/1.5m), the length hit my ankles and the rise was too low. Also bought the wide leg and regular linen pants as a comparison. Fit: Slightly large; Length: True size; Typical Size: M; Size Purchased: S",
+        "size_display": "S",
+        "brand": "Quince",
+        "color_display": null,
+        "clothing_type_id": "pants",
+        "height_in_display": 61,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "aa1ecd34-3c3f-498c-aaf1-b416eee56e43",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T21:06:10.063479+00:00"
+        }
+      ],
+      "image": {
+        "id": "aa1ecd34-3c3f-498c-aaf1-b416eee56e43",
+        "original_url_display": "https://images-na.ssl-images-amazon.com/images/I/715qa54uU1L.jpg",
+        "product_page_url_display": "https://www.amazon.com/dp/B016X1351A/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com/?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2Fdp%2FB016X1351A%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Cute, comfortable, perfect fit! I just received these and they fit perfect! I usually wear DressBarn secret agent straight leg pants in 2 petite. They haven’t had khaki since last year when I was still losing weight and I was in petite 4. They only have black, charcoal, and navy in the similar straight leg DressBarn petite pants. I was on a mission to find comparable pants and I searched every where! I found these and I was so excited! I waited a while and I finally decided to purchase. I could probably fit a 2 but they are for work and I don’t want them skin tight. These have a nice stretch and nice thickish fabric. I ordered these in 4 short! For reference I’m 5’0 and weigh 120 lbs. I’m worried I may put them in the dryer by mistake but I’m taking the risk! I already can’t wait to order them in more colors!! EDIT: I bought these in April 2019, its now August and I've been wearing every week and washing and drying along with all of my other clothes and have not had any issues with the seams at all!! *knock on wood* I would definitely recommend these to anyone looking for comfortable pants that work with a business casual dress code.",
+        "size_display": "4 short",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "pants",
+        "height_in_display": 60,
+        "weight_lbs_display": 120,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "9681435a-1fab-464d-a050-4bd0f4ddcd49",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T21:06:03.790823+00:00"
+        }
+      ],
+      "image": {
+        "id": "9681435a-1fab-464d-a050-4bd0f4ddcd49",
+        "original_url_display": "https://m.media-amazon.com/images/I/61HHcjElOaL.jpg",
+        "product_page_url_display": "https://www.amazon.com/dp/B0D816JJ7R/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com/?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2Fdp%2FB0D816JJ7R%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Really cool design Wanted this for so long but was afraid to chance the online hit-or-miss quality. However, i shud have bought this sooner as it is really cool! It's a fantastic lounge style that can switch between being a pants or skirt. Very soft fabric...and lots of it to hide any personal flaws. I'm 5'-5\" and about 137lbs and the fit is pretty good. Its a little pricey but its worth it, if the item doesn't fall apart after future washing/wearing.",
+        "size_display": "one size tall",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "pants",
+        "height_in_display": 60,
+        "weight_lbs_display": 137,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "2a5e458e-519c-4c1f-aa65-426e0ed05295",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T21:06:01.795318+00:00"
+        }
+      ],
+      "image": {
+        "id": "2a5e458e-519c-4c1f-aa65-426e0ed05295",
+        "original_url_display": "https://m.media-amazon.com/images/I/61SrMbyWdcL.jpg",
+        "product_page_url_display": "https://www.amazon.com/dp/B0D816JJ7R/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com/?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2Fdp%2FB0D816JJ7R%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Really cool design Wanted this for so long but was afraid to chance the online hit-or-miss quality. However, i shud have bought this sooner as it is really cool! It's a fantastic lounge style that can switch between being a pants or skirt. Very soft fabric...and lots of it to hide any personal flaws. I'm 5'-5\" and about 137lbs and the fit is pretty good. Its a little pricey but its worth it, if the item doesn't fall apart after future washing/wearing.",
+        "size_display": "one size tall",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "pants",
+        "height_in_display": 60,
+        "weight_lbs_display": 137,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "dc8e5d0b-86f0-4552-8755-6a7bd7b83ccb",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T21:05:52.648899+00:00"
+        }
+      ],
+      "image": {
+        "id": "dc8e5d0b-86f0-4552-8755-6a7bd7b83ccb",
+        "original_url_display": "https://m.media-amazon.com/images/I/61r8ULpwHeL.jpg",
+        "product_page_url_display": "https://www.amazon.com/dp/B0FP99FVR2/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com/?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2Fdp%2FB0FP99FVR2%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Buy it! Worth it. My favorite pair of leggings at the moment. I Got 29” inseam because I’m petite 5’0 147lbs in size M. FITS AMAZING can probably pull off size S 👀. There snug on top and flares after the thigh nice wide leg. They are stretchy and comfortable. They do ride up when I’m in the stairmaster but nothing you can’t just adjust by simply pinching it. Been eyeing the ONER ACTIVE so these are the best dupes out there. Shapes you in all the right places perfect for gym and running errands gives you that cute look every girl should go for if you look good you feel good🙂‍↔️",
+        "size_display": "medium",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "pants",
+        "height_in_display": 60,
+        "weight_lbs_display": 147,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "d4fd5e80-affc-4abe-a2d7-9c3d40b91be6",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T21:01:36.181857+00:00"
+        }
+      ],
+      "image": {
+        "id": "d4fd5e80-affc-4abe-a2d7-9c3d40b91be6",
+        "original_url_display": "https://m.media-amazon.com/images/I/61cBMSY1xBL.jpg",
+        "product_page_url_display": "https://www.amazon.com/dp/B0B3DDD1N5/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com/?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2Fdp%2FB0B3DDD1N5%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Lovely blue denim shirt. It's lightweight and not too restrictive. Seems to be well made. The sizing is correct. Not too fitted so works well for those of us who have that little extra roll of fat around the waist. This will definitely become a wardrobe staple. I'm 5'9 / 45-45-50 wearing size XXL. Hope this review helps with your purchasing decision!",
+        "size_display": "xx-large",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "jeans",
+        "height_in_display": 69,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "3cc37519-eb1b-4576-96ed-68a24166e822",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T20:02:12.251693+00:00"
+        }
+      ],
+      "image": {
+        "id": "3cc37519-eb1b-4576-96ed-68a24166e822",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86aG9sbGlzdGVy/337db3be-5c23-5574-bbbd-a2ab09592b8c",
+        "product_page_url_display": "https://www.hollisterco.com/shop/us/p/icon-henley-61448350",
+        "monetized_product_url_display": null,
+        "source_site_display": "https://www.hollisterco.com/",
+        "user_comment": "Blue Striped Henley It’s giving cute sailor Height: 4'11\". Weight: 141-160 lbs. Size purchased: XL. Rating: 5.",
+        "size_display": "XL",
+        "brand": "Hollister",
+        "color_display": null,
+        "clothing_type_id": "top",
+        "height_in_display": 59,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "bde33be2-a466-4638-b3f9-ebab14832151",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T20:02:06.923963+00:00"
+        }
+      ],
+      "image": {
+        "id": "bde33be2-a466-4638-b3f9-ebab14832151",
+        "original_url_display": "https://m.media-amazon.com/images/I/71fVkWbLRyL.jpg",
+        "product_page_url_display": "https://www.amazon.com/dp/B0DBZWP83Z/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com/?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2Fdp%2FB0DBZWP83Z%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Not exactly \"linen-looking\" or \"linen-feeling\"...especially for $35!!! Not a huge fan of these pants. 1. They are not what you would consider linen. When you think of linen you think of a thin, \"flowy\", wrinkly, lightweight, and breathable summer pant. These are none of these things...they are more like rather stiff chinos with texture. The description pictures definitely paints the picture of linen but it is deceiving and misleading in my opinion. 2. The pants went all the way down to the ground when I thought they would be above the ankles per the description picture (again, very misleading...this model must have been 5'11\" or taller!!). I had to roll them 4 times to get them \"cropped\" looking and then they just looked weird. I am 5'6\" and 190 pounds so I am not super short and I got size Large. I expected more for pants that are $35. I will wear them to work but they won't be my go to summer beach pant sadly :(",
+        "size_display": "large",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "pants",
+        "height_in_display": 71,
+        "weight_lbs_display": 190,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "3cc5c055-2419-4e2f-adef-f055a9ad0e3d",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T19:47:27.669299+00:00"
+        }
+      ],
+      "image": {
+        "id": "3cc5c055-2419-4e2f-adef-f055a9ad0e3d",
+        "original_url_display": "https://m.media-amazon.com/images/I/715ToCf6bCL.jpg",
+        "product_page_url_display": "https://www.amazon.com/dp/B082NK4Y5X/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com/?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2Fdp%2FB082NK4Y5X%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Beautiful and comfortable dress - very flattering! Absolutely love this dress! I actually ordered dark green first And loved the look and fit so much that I also ordered black! I typically wear a size large so to me this is very true to size . I’m 5’4 and wish it was a little shorter but that’s just personal preference . It’s very very comfy and flattering . I love that the straps are adjustable as I’m very small chested and this helps it fit much better so it doesn’t look or feel that I’m not fitting into the bust. Wish it was a little cheaper priced but love it anyway !",
+        "size_display": "large",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "dress",
+        "height_in_display": 64,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "3cf559eb-9c30-4ec6-bab8-9fa6bcc1e1bd",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "image_not_helpful"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "image_not_helpful",
+          "created_at": "2026-06-24T19:44:20.852728+00:00"
+        }
+      ],
+      "image": {
+        "id": "3cf559eb-9c30-4ec6-bab8-9fa6bcc1e1bd",
+        "original_url_display": "https://images-na.ssl-images-amazon.com/images/I/71r-wKFaR9L.jpg",
+        "product_page_url_display": "https://www.amazon.com/dp/B0BFGCLQHC/ref=cm_cr_arp_d_product_top?ie=UTF8",
+        "monetized_product_url_display": "http://redirect.viglink.com/?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.amazon.com%2Fdp%2FB0BFGCLQHC%2Fref%3Dcm_cr_arp_d_product_top%3Fie%3DUTF8",
+        "source_site_display": "https://www.amazon.com/",
+        "user_comment": "Beautiful color and great fit. This is a really pretty dress. The dark purple/ eggplant color is rich. Fabric is soft and shiny. I am a true 24 and this fit right off the hanger. With a large bust, the gathered top and empire-like waist is very flattering. The rhinestone embellishment is sewn on piece by piece so it isn't rigid. I am also 5'5\" and with small heels, the length is just right.",
+        "size_display": "24 plus",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "dress",
+        "height_in_display": 65,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "9e67d25c-466a-4ae4-9976-2ce1b890d885",
+      "in_dev_images": true,
+      "report_count": 3,
+      "reasons": [
+        "duplicate_image"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "duplicate_image",
+          "created_at": "2026-05-21T20:40:59.276912+00:00"
+        },
+        {
+          "origin": "prod",
+          "reason": "duplicate_image",
+          "created_at": "2026-05-21T20:40:50.408988+00:00"
+        },
+        {
+          "origin": "prod",
+          "reason": "duplicate_image",
+          "created_at": "2026-05-21T20:40:42.646381+00:00"
+        }
+      ],
+      "image": {
+        "id": "9e67d25c-466a-4ae4-9976-2ce1b890d885",
+        "original_url_display": "https://judgeme.imgix.net/commense/1718716546__ef8b3fa4-49a1-47ea-b92b-dc6c7853aad2__original.jpeg",
+        "product_page_url_display": "https://thecommense.com/collections/best-sellers/products/cotton-backless-button-front-short-dress",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fthecommense.com%2Fcollections%2Fbest-sellers%2Fproducts%2Fcotton-backless-button-front-short-dress",
+        "source_site_display": "thecommense.com",
+        "user_comment": "",
+        "size_display": "XS",
+        "brand": "Commense",
+        "color_display": null,
+        "clothing_type_id": "dress",
+        "height_in_display": 66,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "44d57419-8fa1-460e-aa46-8f42944ff1d0",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "44d57419-8fa1-460e-aa46-8f42944ff1d0",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/625206c8-b1cc-567f-819f-30e198fa3645",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126614?page=womens-llbean-24/7-sweats-dress-stripe-womens-plus&bc=12-27-506213&feat=506213-GN3&csp=f&pos=13&imgt=41",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126614%3Fpage%3Dwomens-llbean-24%2F7-sweats-dress-stripe-womens-plus%26bc%3D12-27-506213%26feat%3D506213-GN3%26csp%3Df%26pos%3D13%26imgt%3D41",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 62,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "37095e75-5ad0-4c96-abe1-f449692476c6",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "37095e75-5ad0-4c96-abe1-f449692476c6",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/be43c152-0972-59f5-96c9-8739014dc817",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126037?page=womens-supersoft-waffle-turtleneck-sweater-womens-regular&bc=12-27&feat=27-GN0&csp=a&pos=11&imgt=41",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126037%3Fpage%3Dwomens-supersoft-waffle-turtleneck-sweater-womens-regular%26bc%3D12-27%26feat%3D27-GN0%26csp%3Da%26pos%3D11%26imgt%3D41",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 67,
+        "weight_lbs_display": 155,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "fd19fd8a-5358-498b-adc6-3747994efa1c",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "fd19fd8a-5358-498b-adc6-3747994efa1c",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/cb9f0931-f66f-5a0f-9514-da2d03329582",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126284?page=womens-softflex-crewneck-dolman-sleeve-pullover-womens-regular&bc=12-27-509757&feat=509757-GN0&csp=f&attrValue_0=6958&pos=20",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126284%3Fpage%3Dwomens-softflex-crewneck-dolman-sleeve-pullover-womens-regular%26bc%3D12-27-509757%26feat%3D509757-GN0%26csp%3Df%26attrValue_0%3D6958%26pos%3D20",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 64,
+        "weight_lbs_display": 185,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "e77b3da6-7939-4126-b6f2-9db4ec372e78",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "e77b3da6-7939-4126-b6f2-9db4ec372e78",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/96b415f2-4a49-5bc6-bfb8-8c972099a437",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/122031?page=coastline-cover-up-hooded-tunic-misses-regular&bc=12-27-624&feat=624-GN0&csp=f&attrValue_0=33344&pos=6",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F122031%3Fpage%3Dcoastline-cover-up-hooded-tunic-misses-regular%26bc%3D12-27-624%26feat%3D624-GN0%26csp%3Df%26attrValue_0%3D33344%26pos%3D6",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "size: : medium",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 69,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "290b1b8d-f6fb-45f3-8e90-869112cc7f49",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "290b1b8d-f6fb-45f3-8e90-869112cc7f49",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/b403ff45-e695-5032-bae6-71f512d674f8",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/124459?page=womens-llbean-1912-full-zip-hooded-sweatshirt-womens-regular&bc=12-27&feat=27-GN0&csp=a&attrValue_0=34664&pos=47",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F124459%3Fpage%3Dwomens-llbean-1912-full-zip-hooded-sweatshirt-womens-regular%26bc%3D12-27%26feat%3D27-GN0%26csp%3Da%26attrValue_0%3D34664%26pos%3D47",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 62,
+        "weight_lbs_display": 155,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "0488ec4b-2d00-4ae8-b7d5-fdcfb7274b03",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "0488ec4b-2d00-4ae8-b7d5-fdcfb7274b03",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/38bb9799-73d5-58df-bb6a-e7ccab397e4c",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/128910?page=womens-bonded-fleece-robe-womens-regular&bc=12-27-613&feat=613-GN0&csp=f&attrValue_0=44600&pos=28",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F128910%3Fpage%3Dwomens-bonded-fleece-robe-womens-regular%26bc%3D12-27-613%26feat%3D613-GN0%26csp%3Df%26attrValue_0%3D44600%26pos%3D28",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "size: height: 5'0\": medium",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 60,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "180f3a52-3c2a-40df-aac9-24613f111cdc",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "180f3a52-3c2a-40df-aac9-24613f111cdc",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/1231a349-ab07-5bca-bba3-088487431bc0",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/23794?page=double-l-jeans-relaxed-flannel-lined&bc=12-27-513283&feat=513283-GN3&csp=f&attrValue_0=2483&pos=32",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F23794%3Fpage%3Ddouble-l-jeans-relaxed-flannel-lined%26bc%3D12-27-513283%26feat%3D513283-GN3%26csp%3Df%26attrValue_0%3D2483%26pos%3D32",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "2711245c-1b0b-4c35-b7ba-525abd0ecd38",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "2711245c-1b0b-4c35-b7ba-525abd0ecd38",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/6545155b-682b-5288-b88a-44c92f0be31d",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/84842?page=beans-sweater-fleece-coat&bc=12-27-509757&feat=509757-GN0&csp=f&attrValue_0=38935&pos=30",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F84842%3Fpage%3Dbeans-sweater-fleece-coat%26bc%3D12-27-509757%26feat%3D509757-GN0%26csp%3Df%26attrValue_0%3D38935%26pos%3D30",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 62,
+        "weight_lbs_display": 135,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "acec40e8-74de-498c-bd9a-f730e366b4a9",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "acec40e8-74de-498c-bd9a-f730e366b4a9",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/eff536b5-ec29-5149-ab8d-64d1094f2dbb",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126037?page=womens-supersoft-waffle-turtleneck-sweater-womens-regular&bc=12-27&feat=27-GN0&csp=a&pos=11&imgt=41",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126037%3Fpage%3Dwomens-supersoft-waffle-turtleneck-sweater-womens-regular%26bc%3D12-27%26feat%3D27-GN0%26csp%3Da%26pos%3D11%26imgt%3D41",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "size: small",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 64,
+        "weight_lbs_display": 135,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "635ee206-7204-4987-ab8f-cd38deb515a4",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "635ee206-7204-4987-ab8f-cd38deb515a4",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/2f9bc54c-0295-5c76-b164-d2894bc3ed2a",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/111154?page=womens-sunwashed-pant-denim&bc=12-27-622&feat=622-GN0&csp=f&attrValue_0=992&pos=32",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F111154%3Fpage%3Dwomens-sunwashed-pant-denim%26bc%3D12-27-622%26feat%3D622-GN0%26csp%3Df%26attrValue_0%3D992%26pos%3D32",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 66,
+        "weight_lbs_display": 155,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "175f1973-dab7-4457-8ea5-b67fbe8fbb5b",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "175f1973-dab7-4457-8ea5-b67fbe8fbb5b",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/93863893-a47c-506c-8073-3df337bdd39b",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/22383?page=double-l-jeans-relaxed&bc=12-27-513283&feat=513283-GN3&csp=f&attrValue_0=33074&pos=17",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F22383%3Fpage%3Ddouble-l-jeans-relaxed%26bc%3D12-27-513283%26feat%3D513283-GN3%26csp%3Df%26attrValue_0%3D33074%26pos%3D17",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 67,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "db10357a-e00d-4803-9f82-bca1e221edaa",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "db10357a-e00d-4803-9f82-bca1e221edaa",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/3b352090-a8a0-50e5-92c0-ba7d78248d87",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/84842?page=beans-sweater-fleece-coat&bc=12-27-509757&feat=509757-GN0&csp=f&attrValue_0=38935&pos=30",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F84842%3Fpage%3Dbeans-sweater-fleece-coat%26bc%3D12-27-509757%26feat%3D509757-GN0%26csp%3Df%26attrValue_0%3D38935%26pos%3D30",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 60,
+        "weight_lbs_display": 115,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "2b43e7cb-0780-4403-87ef-6b76e99256b8",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "2b43e7cb-0780-4403-87ef-6b76e99256b8",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/a7c37756-930a-505a-be7c-168bf3fe151a",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/111154?page=womens-sunwashed-pant-denim&bc=12-27-622&feat=622-GN0&csp=f&attrValue_0=992&pos=32",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F111154%3Fpage%3Dwomens-sunwashed-pant-denim%26bc%3D12-27-622%26feat%3D622-GN0%26csp%3Df%26attrValue_0%3D992%26pos%3D32",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "163f624f-6fe2-4a06-9a86-8bdcf1359e82",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "163f624f-6fe2-4a06-9a86-8bdcf1359e82",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/ea4394b5-3ccb-5eb6-8d54-06cb09ee622d",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126766?page=womens-the-overshirt-long-sleeve-shirt-womens-plus&bc=12-27&feat=27-GN0&csp=a&attrValue_0=46126&pos=33",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126766%3Fpage%3Dwomens-the-overshirt-long-sleeve-shirt-womens-plus%26bc%3D12-27%26feat%3D27-GN0%26csp%3Da%26attrValue_0%3D46126%26pos%3D33",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": null,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "503634ca-eb96-40c4-9bd0-2a283f2622b1",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "503634ca-eb96-40c4-9bd0-2a283f2622b1",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/6d664b6e-95ae-5019-8d0f-4d003c6f8938",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/124458?page=womens-llbean-1912-crewneck-sweatshirt-logo-womens-regular&bc=12-27&feat=27-GN0&csp=a&attrValue_0=54601&pos=29",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F124458%3Fpage%3Dwomens-llbean-1912-crewneck-sweatshirt-logo-womens-regular%26bc%3D12-27%26feat%3D27-GN0%26csp%3Da%26attrValue_0%3D54601%26pos%3D29",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 67,
+        "weight_lbs_display": 145,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "aa96d62f-3a23-41b2-9661-d0c101edf185",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "aa96d62f-3a23-41b2-9661-d0c101edf185",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/93f1999a-63ca-5740-b124-bad0042ad37f",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126614?page=womens-llbean-24/7-sweats-dress-stripe-womens-plus&bc=12-27-506213&feat=506213-GN3&csp=f&pos=13&imgt=41",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126614%3Fpage%3Dwomens-llbean-24%2F7-sweats-dress-stripe-womens-plus%26bc%3D12-27-506213%26feat%3D506213-GN3%26csp%3Df%26pos%3D13%26imgt%3D41",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 63,
+        "weight_lbs_display": 175,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "02970afe-9908-4de3-a5b1-62438a01cf0a",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "02970afe-9908-4de3-a5b1-62438a01cf0a",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/05462b65-9873-5036-b6d4-0308e8677497",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/124459?page=womens-llbean-1912-full-zip-hooded-sweatshirt-womens-regular&bc=12-27&feat=27-GN0&csp=a&attrValue_0=34664&pos=47",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F124459%3Fpage%3Dwomens-llbean-1912-full-zip-hooded-sweatshirt-womens-regular%26bc%3D12-27%26feat%3D27-GN0%26csp%3Da%26attrValue_0%3D34664%26pos%3D47",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "size: : extra -large",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 67,
+        "weight_lbs_display": 205,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "d39f74c5-f434-4370-be34-f56135246725",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "d39f74c5-f434-4370-be34-f56135246725",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/6761096b-6123-57df-a5ec-e40b7cb745d5",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/23794?page=double-l-jeans-relaxed-flannel-lined&bc=12-27-513283&feat=513283-GN3&csp=f&attrValue_0=2483&pos=32",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F23794%3Fpage%3Ddouble-l-jeans-relaxed-flannel-lined%26bc%3D12-27-513283%26feat%3D513283-GN3%26csp%3Df%26attrValue_0%3D2483%26pos%3D32",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 62,
+        "weight_lbs_display": 155,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "29229b5d-3f62-4e08-a31f-57e4ded1094f",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "29229b5d-3f62-4e08-a31f-57e4ded1094f",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/0aa6f5da-9718-525e-bfaa-49d539dce93d",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126284?page=womens-softflex-crewneck-dolman-sleeve-pullover-womens-regular&bc=12-27-509757&feat=509757-GN0&csp=f&attrValue_0=6958&pos=20",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126284%3Fpage%3Dwomens-softflex-crewneck-dolman-sleeve-pullover-womens-regular%26bc%3D12-27-509757%26feat%3D509757-GN0%26csp%3Df%26attrValue_0%3D6958%26pos%3D20",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "size: : extra -large",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 67,
+        "weight_lbs_display": 205,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "f1ed4c64-9fa5-4521-9210-53f8d6ad5a70",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "f1ed4c64-9fa5-4521-9210-53f8d6ad5a70",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/9b7e2b78-362c-572a-9e0b-e3a5a8060c98",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/122031?page=coastline-cover-up-hooded-tunic-misses-regular&bc=12-27-624&feat=624-GN0&csp=f&attrValue_0=33344&pos=6",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F122031%3Fpage%3Dcoastline-cover-up-hooded-tunic-misses-regular%26bc%3D12-27-624%26feat%3D624-GN0%26csp%3Df%26attrValue_0%3D33344%26pos%3D6",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 70,
+        "weight_lbs_display": 125,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "6afcd1c7-b99b-4342-899b-3076318b0e92",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "6afcd1c7-b99b-4342-899b-3076318b0e92",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/92d17796-0500-551a-b0cc-7fcf262b5388",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/124458?page=womens-llbean-1912-crewneck-sweatshirt-logo-womens-regular&bc=12-27&feat=27-GN0&csp=a&attrValue_0=54601&pos=29",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F124458%3Fpage%3Dwomens-llbean-1912-crewneck-sweatshirt-logo-womens-regular%26bc%3D12-27%26feat%3D27-GN0%26csp%3Da%26attrValue_0%3D54601%26pos%3D29",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 71,
+        "weight_lbs_display": 155,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "386f5de9-2d13-4af2-be19-e757e2a866d5",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "386f5de9-2d13-4af2-be19-e757e2a866d5",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/b6924187-548d-5fa2-bd3d-d01b3aa7fd34",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/84842?page=beans-sweater-fleece-coat&bc=12-27-509757&feat=509757-GN0&csp=f&attrValue_0=38935&pos=30",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F84842%3Fpage%3Dbeans-sweater-fleece-coat%26bc%3D12-27-509757%26feat%3D509757-GN0%26csp%3Df%26attrValue_0%3D38935%26pos%3D30",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 64,
+        "weight_lbs_display": 155,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "ddae3ad2-9188-445a-83ba-cbcc698f40bd",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "ddae3ad2-9188-445a-83ba-cbcc698f40bd",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/e459170b-d147-548a-8b80-073ac2dc4ce7",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/124460?page=pima-open-cardigan-with-pockets-womens-regular&bc=12-27&feat=27-GN0&csp=a&attrValue_0=32584&pos=25",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F124460%3Fpage%3Dpima-open-cardigan-with-pockets-womens-regular%26bc%3D12-27%26feat%3D27-GN0%26csp%3Da%26attrValue_0%3D32584%26pos%3D25",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 63,
+        "weight_lbs_display": 135,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "a4762e3d-2ecd-4d5d-8403-30099ffc11e3",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "a4762e3d-2ecd-4d5d-8403-30099ffc11e3",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/65f076b1-e446-5257-a399-7f5d9b25912a",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/23794?page=double-l-jeans-relaxed-flannel-lined&bc=12-27-513283&feat=513283-GN3&csp=f&attrValue_0=2483&pos=32",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F23794%3Fpage%3Ddouble-l-jeans-relaxed-flannel-lined%26bc%3D12-27-513283%26feat%3D513283-GN3%26csp%3Df%26attrValue_0%3D2483%26pos%3D32",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 64,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "6f314635-8d50-44e9-b798-967657fa7e9d",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "6f314635-8d50-44e9-b798-967657fa7e9d",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/76474bcd-0dbb-57be-bf19-6974a5ae75d2",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/124464?page=womens-beanflex-pull-on-jean-womens-regular&bc=12-27-513283&feat=513283-GN3&csp=f&attrValue_0=34405&pos=31",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F124464%3Fpage%3Dwomens-beanflex-pull-on-jean-womens-regular%26bc%3D12-27-513283%26feat%3D513283-GN3%26csp%3Df%26attrValue_0%3D34405%26pos%3D31",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 64,
+        "weight_lbs_display": 175,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "3f129120-6b12-4e70-a8c9-b3d3bae60411",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "3f129120-6b12-4e70-a8c9-b3d3bae60411",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/d37e356d-cb8a-599f-bcbc-a66533f4f125",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/122031?page=coastline-cover-up-hooded-tunic-misses-regular&bc=12-27-624&feat=624-GN0&csp=f&attrValue_0=33344&pos=6",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F122031%3Fpage%3Dcoastline-cover-up-hooded-tunic-misses-regular%26bc%3D12-27-624%26feat%3D624-GN0%26csp%3Df%26attrValue_0%3D33344%26pos%3D6",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "size: : large",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 67,
+        "weight_lbs_display": 145,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "ac0fe3dc-f933-4fad-a98c-4b087117626e",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "ac0fe3dc-f933-4fad-a98c-4b087117626e",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/62a655d4-be4e-5d92-8f8a-d3687f19a338",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126593?page=womens-comfort-trail-skort-dwr-womens-plus&bc=12-27-513280&feat=513280-GN3&csp=f&attrValue_0=112&pos=12",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126593%3Fpage%3Dwomens-comfort-trail-skort-dwr-womens-plus%26bc%3D12-27-513280%26feat%3D513280-GN3%26csp%3Df%26attrValue_0%3D112%26pos%3D12",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 63,
+        "weight_lbs_display": 155,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "e1fe8420-ea47-480a-bc16-0ecac60ec226",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "e1fe8420-ea47-480a-bc16-0ecac60ec226",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/fd19f7d7-11ae-5c39-988c-13ccb2e28f40",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/34032?page=bayside-twill-pants-original-fit-plain-front-comfort-waist&bc=12-27-622&feat=622-GN0&csp=f&attrValue_0=140&pos=7",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F34032%3Fpage%3Dbayside-twill-pants-original-fit-plain-front-comfort-waist%26bc%3D12-27-622%26feat%3D622-GN0%26csp%3Df%26attrValue_0%3D140%26pos%3D7",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": null,
+        "weight_lbs_display": 115,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "29f977ba-eb39-457f-9a4a-91f8d1a62464",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "29f977ba-eb39-457f-9a4a-91f8d1a62464",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/3d7e4e9a-4c43-5517-8b4c-c80aa6ac5340",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126614?page=womens-llbean-24/7-sweats-dress-stripe-womens-plus&bc=12-27-506213&feat=506213-GN3&csp=f&pos=13&imgt=41",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126614%3Fpage%3Dwomens-llbean-24%2F7-sweats-dress-stripe-womens-plus%26bc%3D12-27-506213%26feat%3D506213-GN3%26csp%3Df%26pos%3D13%26imgt%3D41",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 64,
+        "weight_lbs_display": 135,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "426e05c9-5da5-4462-89d7-778bea7ff0fd",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "426e05c9-5da5-4462-89d7-778bea7ff0fd",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/d4a4745d-0ba6-55b4-a95e-fc228b762693",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/128062?page=womens-slimming-swimwear-blouson-tanksuit-womens-regular&bc=12-27-624&feat=624-GN0&csp=f&attrValue_0=1&pos=36",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F128062%3Fpage%3Dwomens-slimming-swimwear-blouson-tanksuit-womens-regular%26bc%3D12-27-624%26feat%3D624-GN0%26csp%3Df%26attrValue_0%3D1%26pos%3D36",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "size: : 12",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 65,
+        "weight_lbs_display": 175,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "6ac76ef5-369f-4d18-8e90-aabc737b4dd7",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "6ac76ef5-369f-4d18-8e90-aabc737b4dd7",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/a5b2db6a-2e0f-5204-b8ec-0a4ed6644e6e",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/84842?page=beans-sweater-fleece-coat&bc=12-27-509757&feat=509757-GN0&csp=f&attrValue_0=38935&pos=30",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F84842%3Fpage%3Dbeans-sweater-fleece-coat%26bc%3D12-27-509757%26feat%3D509757-GN0%26csp%3Df%26attrValue_0%3D38935%26pos%3D30",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 63,
+        "weight_lbs_display": 105,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "17a6b23e-3bcc-40cf-a8b1-65ffde89abe2",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "17a6b23e-3bcc-40cf-a8b1-65ffde89abe2",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/cc713d61-bb6f-568d-b799-25497e42dc0f",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/71542?page=double-l-jeans-relaxed-comfort-waist-flannel-lined&bc=12-27-513283&feat=513283-GN3&csp=f&attrValue_0=2483&pos=26",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F71542%3Fpage%3Ddouble-l-jeans-relaxed-comfort-waist-flannel-lined%26bc%3D12-27-513283%26feat%3D513283-GN3%26csp%3Df%26attrValue_0%3D2483%26pos%3D26",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "unknown",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 61,
+        "weight_lbs_display": 135,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "e3350ff2-69f9-4751-8d15-1a644690b5cd",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "e3350ff2-69f9-4751-8d15-1a644690b5cd",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/d040c747-5cbd-5c08-a72b-1c1ea2d9d579",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/126591?page=womens-comfort-trail-dwr-womens-plus&bc=12-27-509757&feat=509757-GN0&csp=f&attrValue_0=112&pos=14",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F126591%3Fpage%3Dwomens-comfort-trail-dwr-womens-plus%26bc%3D12-27-509757%26feat%3D509757-GN0%26csp%3Df%26attrValue_0%3D112%26pos%3D14",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "inseam: petite, size: 6",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 62,
+        "weight_lbs_display": 115,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "3e226e1e-2032-45e0-b1ea-d81ce6ce49d6",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "dead_link"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "dead_link",
+          "created_at": "2026-05-20T17:00:39.062075+00:00"
+        }
+      ],
+      "image": {
+        "id": "3e226e1e-2032-45e0-b1ea-d81ce6ce49d6",
+        "original_url_display": "https://photos-us.bazaarvoice.com/photo/2/cGhvdG86bGxiZWFu/edc2ea18-c819-5176-b4c1-d70255a24223",
+        "product_page_url_display": "https://www.llbean.com/llb/shop/124464?page=womens-beanflex-pull-on-jean-womens-regular&bc=12-27-513283&feat=513283-GN3&csp=f&attrValue_0=34405&pos=31",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.llbean.com%2Fllb%2Fshop%2F124464%3Fpage%3Dwomens-beanflex-pull-on-jean-womens-regular%26bc%3D12-27-513283%26feat%3D513283-GN3%26csp%3Df%26attrValue_0%3D34405%26pos%3D31",
+        "source_site_display": "www.llbean.com",
+        "user_comment": "",
+        "size_display": "inseam: regular,: 14",
+        "brand": "llbean",
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 66,
+        "weight_lbs_display": 175,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "5e9f0881-4a67-4a8c-966a-732202942401",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "incorrect_data"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "incorrect_data",
+          "created_at": "2026-04-29T15:08:04.8296+00:00"
+        }
+      ],
+      "image": {
+        "id": "5e9f0881-4a67-4a8c-966a-732202942401",
+        "original_url_display": "https://r-ap.rtrcdn.com/reviewimages/814/1938346-cropped.jpg",
+        "product_page_url_display": "https://www.renttherunway.com/shop/designers/jason_wu_collective/faux_leather_trousers",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.renttherunway.com%2Fshop%2Fdesigners%2Fjason_wu_collective%2Ffaux_leather_trousers",
+        "source_site_display": "https://www.renttherunway.com",
+        "user_comment": "",
+        "size_display": "size: 2",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "pants",
+        "height_in_display": 66,
+        "weight_lbs_display": 118,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "b61dfe05-8077-4527-9a1b-b1914506d6c6",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "duplicate_image"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "duplicate_image",
+          "created_at": "2026-04-28T22:36:22.088103+00:00"
+        }
+      ],
+      "image": {
+        "id": "b61dfe05-8077-4527-9a1b-b1914506d6c6",
+        "original_url_display": "https://r-ap.rtrcdn.com/reviewimages/6ba/1828326-cropped.jpg",
+        "product_page_url_display": "https://www.renttherunway.com/shop/designers/adam_lippes_collective/emerald_green_jumpsuit",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.renttherunway.com%2Fshop%2Fdesigners%2Fadam_lippes_collective%2Femerald_green_jumpsuit",
+        "source_site_display": "https://www.renttherunway.com",
+        "user_comment": "",
+        "size_display": "size: 0",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "jumpsuit",
+        "height_in_display": 68,
+        "weight_lbs_display": 110,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "6cdee31b-70cf-4cfa-873d-d4179df73400",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "sold_out"
+      ],
+      "origins": [
+        "prod"
+      ],
+      "reports": [
+        {
+          "origin": "prod",
+          "reason": "sold_out",
+          "created_at": "2026-04-28T14:19:15.908849+00:00"
+        }
+      ],
+      "image": {
+        "id": "6cdee31b-70cf-4cfa-873d-d4179df73400",
+        "original_url_display": "https://s7d2.scene7.com/is/image/nu/30800bd5-50ee-497c-943b-cca25c521e4d-1685195911?$ugc-regular$",
+        "product_page_url_display": "https://www.nuuly.com/rent/products/colette-cropped-wide-leg-corduroy-pants2?color=009",
+        "monetized_product_url_display": "https://redirect.viglink.com?key=2aba39b05bc3c8c85f46f6f98c7c728d&u=https%3A%2F%2Fwww.nuuly.com%2Frent%2Fproducts%2Fcolette-cropped-wide-leg-corduroy-pants2%3Fcolor%3D009",
+        "source_site_display": "https://www.nuuly.com",
+        "user_comment": "",
+        "size_display": "size: 26 p",
+        "brand": null,
+        "color_display": null,
+        "clothing_type_id": "other",
+        "height_in_display": 61,
+        "weight_lbs_display": null,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    },
+    {
+      "image_id": "bdf1a62c-4cc4-46fd-a36d-f127d7de4dd8",
+      "in_dev_images": true,
+      "report_count": 1,
+      "reasons": [
+        "other_link_problem"
+      ],
+      "origins": [
+        "dev"
+      ],
+      "reports": [
+        {
+          "origin": "dev",
+          "reason": "other_link_problem",
+          "created_at": "2026-06-24T19:47:21.034934+00:00"
+        }
+      ],
+      "image": {
+        "id": "bdf1a62c-4cc4-46fd-a36d-f127d7de4dd8",
+        "original_url_display": "https://cdn.shopify.com/s/files/1/0510/7171/3450/files/8a7c3c7ac0c07d0d4079f8cc7a3de269_1770048129580.webp?v=1770048340",
+        "product_page_url_display": "https://bloomchic.com/products/stripes-patchwork-tie-knot-cross-straps-swim-dress",
+        "monetized_product_url_display": null,
+        "source_site_display": "https://bloomchic.com/",
+        "user_comment": "Fits super well. Beautiful color. Very confortable. Ajustable straps. I wear 3xl.",
+        "size_display": "22-24/3X",
+        "brand": "BloomChic",
+        "color_display": null,
+        "clothing_type_id": "dress",
+        "height_in_display": 65,
+        "weight_lbs_display": 279,
+        "prettiness_score": null,
+        "full_body_visible": null
+      },
+      "already_removed": false
+    }
+  ]
+}

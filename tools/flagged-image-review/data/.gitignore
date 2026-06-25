@@ -1,0 +1,6 @@
+# Reversibility snapshots from apply-dev-flagged-removals.mjs (large, regenerated).
+applied_snapshot_*.json
+
+# Keep the dataset + decisions tracked so the other agent can see review state.
+!flagged-dataset.json
+!decisions.json

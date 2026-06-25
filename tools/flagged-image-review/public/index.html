@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Flagged images — review (dev)</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header id="top">
+    <div class="titles">
+      <h1>Flagged images <span class="env">dev review</span></h1>
+      <p class="sub" id="sub">Loading…</p>
+    </div>
+    <div class="tallies">
+      <div class="tally remove"><span class="n" id="tRemove">0</span><span class="l">to remove</span></div>
+      <div class="tally keep"><span class="n" id="tKeep">0</span><span class="l">keep</span></div>
+      <div class="tally undecided"><span class="n" id="tUndecided">0</span><span class="l">undecided</span></div>
+    </div>
+  </header>
+
+  <nav id="filters">
+    <div class="fgroup" id="reasonFilters"></div>
+    <div class="fgroup right">
+      <label class="seg" id="decisionSeg">
+        <button data-dec="all" class="active">All</button>
+        <button data-dec="undecided">Undecided</button>
+        <button data-dec="remove">Remove</button>
+        <button data-dec="keep">Keep</button>
+      </label>
+      <span class="hint">Decisions auto-save to <code>data/decisions.json</code></span>
+    </div>
+  </nav>
+
+  <main id="grid"></main>
+
+  <footer id="foot">
+    <span id="applyHint"></span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
