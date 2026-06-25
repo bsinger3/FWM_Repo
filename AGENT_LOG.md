@@ -33,6 +33,41 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 13:35 EDT — Claude Code — POLICY: any flagged image hidden from all dev searches (RPC)
+
+**Did:** New dev migration `supabase/dev-migrations/20260625_dev_25_hide_flagged_images_from_search.sql`,
+**applied to dev** (`npm run dev-images:migrations --only=… --apply`). Broadened the LIVE anti-join
+in `public.match_by_measurements` from the narrow 2026-05-20 sweep
+(`reason='dead_link' AND anon_id='manual_product_category_review_2026_05_20'`) to **any row in
+public.image_reports for the image** — so a flag from the operator OR any anon user, any reason,
+hides the image from every search immediately (no MV refresh; row never deleted). Backed by the
+existing `idx_image_reports_image_id`.
+
+**Heads-up / gotchas (verify these):**
+- **The committed dev_24 file was NOT a safe template.** Live `match_by_measurements` returns an
+  EXTRA column `total_count bigint` (`count(*) over()`). My first dev_25 attempt omitted it →
+  `CREATE OR REPLACE` **cannot change return type**, so it **silently no-op'd** (supabase db query
+  still printed `rows:[]` success). I only caught it via `pg_get_functiondef` of the LIVE function.
+  **Always diff against the live function before CREATE OR REPLACE on this RPC.** dev_25 now
+  reproduces the live signature verbatim (incl. total_count) with only the anti-join changed.
+- Verified live: same flagged image + identical search params returns 0 while flagged, 1 when its
+  report is removed, 0 again when restored. Broad-search set fully excludes all flagged images.
+- **image_reports in dev is now 17 rows / 17 distinct images** (was 12 at session start). The 5 new
+  ones are real dev-site flags from anon `763c0bae-def1-4d80-aa5b-370888e2d29f` placed during the
+  session (17:11–17:14 UTC) — NOT test artifacts; left in place (policy hides them, as intended).
+  My verification did delete+restore one report (`bdf1a62c…`); its **PK `id` was regenerated** (content
+  identical: other_link_problem, original anon/created_at). No `image_reports.id` FKs exist, so
+  harmless. No `verify_live_test` rows remain (cleaned).
+- **Production `match_by_measurements` is unchanged** (still narrow dead_link-only) — per "dev only".
+- The previous session's `removed_at`/soft-hide column + `apply-dev-flagged-removals.mjs` was NEVER
+  applied (column doesn't exist). This policy supersedes it for hide-from-search; the
+  flagged-image-review dashboard (snapshot still says 12) is now better thought of as a
+  "review what's auto-hidden / un-flag false positives" tool.
+
+**Open / handoff:** Uncommitted: dev_25 migration. Follow-ups: (1) consider applying the same broadened
+policy to prod's `match_by_measurements`; (2) add an un-flag/restore path if false-positive flags need
+reversing — no UI for that yet; (3) optionally rebuild the flagged-review dataset to reflect 17.
+
 ## 2026-06-25 13:10 EDT — Claude Code — Flagged-image review dashboard + dev soft-hide procedure
 
 **Did:** New tool `tools/flagged-image-review/` to triage images users 🚩-flagged via the
