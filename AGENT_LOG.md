@@ -1949,3 +1949,22 @@ appears, refit the thresholds in `scripts/lib/lighting-score.mjs` against the la
 dashboard. Her labels persist in browser localStorage, so the server being down is
 fine; restart it with `preview_start reports` (or `node scripts/lighting-label-server.mjs`)
 when she's ready to Save. Nothing written to prod; dev only.
+
+### 2026-06-25 follow-up — Claude Code — Lighting recalibrated; prettiness scorer allowlisted
+
+- **Lighting recalibrated** against Bri's 47 labels (commit `69b23c2`). On the
+  labeled set: bad-image mean lighting 0.82->0.66, separation 0.13->0.29, good/great
+  held at 0.96. Re-ran prettiness v5 — dim/bad-lit images now rank lower overall
+  (lighting p10 0.75->0.56) while the well-lit median barely moved. ~10 of the 44
+  "bad" images are pixel-identical to good ones (bright, unclipped) and stay high —
+  the global-pixel-stats ceiling; needs a spatial/face-region lighting feature later.
+- **Allowlist (local only, .claude/settings.local.json is gitignored):** added
+  `node scripts/score-dev-image-prettiness.mjs *` (scorer is dry-run only, never writes
+  DB). The dev guard auto-loads .env, so invoke the scorer WITHOUT a `set -a;. ./.env`
+  prefix or the compound command still prompts. Also added preview screenshot/console_logs/
+  resize to `.claude/settings.json` (also gitignored).
+- **Still pending:** face_visible + smile both need the face/expression detection pass
+  (plan in `data-pipelines/docs/face_smile_detection_pass_plan.md`). Optionally more
+  good/great lighting labels to refine the upper end.
+- **No server left running** (stopped the localhost:8791 reports/save-server for relaunch).
+  Restart it with `node scripts/lighting-label-server.mjs` when Bri wants the dashboards.
