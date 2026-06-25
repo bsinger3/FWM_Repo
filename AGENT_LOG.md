@@ -33,6 +33,69 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 18:55 EDT — Claude Code — Search header: "matches" vs "close matches" split (dev)
+
+**Did:** New migration `20260625_dev_29_match_vs_close_match_counts.sql` (APPLIED to
+dev) — **function-only rebuild** on top of dev_28 (matview unchanged) + local
+index.dev.html UI (uncommitted, iterating).
+- The measurement inputs (height/weight/bust/waist/hips) only RANK the catalog, so
+  the old `total_count` = whole catalog and the header overstated matches. dev_29
+  adds two outputs: per-row `matches_any` (true when within tolerance of ≥1 entered
+  measurement — height/waist/hips/bust ±2, weight ±10) and `match_count`
+  (= rows matching ≥1). Results now `order by matches_any desc, <closeness>, …` so
+  the within-tolerance matches sort first, then the ranked remainder. `total_count`
+  kept.
+- **⚠ dev_29 SUPERSEDES dev_28 as the latest full-function rebuild.** Return shape
+  grew (matches_any, match_count) → the prior 14- and 18-arg signatures are dropped
+  first. Preserves every earlier fix verbatim (low-res gate, broad anti-join,
+  tiebreaker, sparse hard filters, total_count). Any future rebuild → dev_30+, last,
+  carrying all of these.
+- Frontend (index.dev.html): top header shows `match_count` ("Found 1 result in
+  Bottoms"); a full-width `.close-matches-divider` is inserted in the grid at the
+  matches→remainder edge ("19,060 close matches in Bottoms"); with no measurements
+  it falls back to `total_count` (no divider). Verified live (height 7'0": match 1 /
+  total 45,321; category + no-measurement cases; anon <3s; no console errors).
+
+**Open / handoff:** dev_29 + this entry committed. index.dev.html intentionally
+uncommitted (human is iterating).
+
+## 2026-06-25 18:40 EDT — Claude Code — APPLIED: cleared the 'other' bucket to 0 (dev) via dashboard + Codex
+
+**Did:** Finished and **applied** the 'other'-category cleanup to dev. The `other` mother
+bucket is now **0** (was 145). Path: human approved 52 in the dashboard (48 recategorize +
+4 remove); the remaining 93 untitled/uncategorized rows (92 L.L.Bean numeric `/llb/shop/<id>`
+URLs + 1 Cider) were outsourced to **Codex** via a generated brief
+(`tools/other-category-approval/codex-uncategorized-product-pages.txt`, built by
+`build-codex-uncategorized-list.mjs`). Codex returned
+`codex-uncategorized-product-pages.result.ndjson` (93 rows; validated: all parse, ids match
+exactly, no `other`, all valid vocab, urls match). `merge-codex-results.mjs` folded those in
+(82 recategorize w/ scraped titles + 11 remove). Then
+`scripts/apply-dev-other-category-approvals.mjs --apply`:
+- **Re-categorized 130** product pages (incl. **83 product_title_raw backfills** from the
+  scrape) — bottoms 45, tops 39, jumpsuits 16, dresses 8, swimwear 8, outerwear 6,
+  intimates 4, bodysuits 2, sets 1, accessories 1. Propagated mother_category_id to public.images.
+- **Deleted 15** rows FK-safe (images→reviews→product_pages): 26 images + 26 reviews. 11 are
+  L.L.Bean "Page Not Available" dead pages (Codex confirmed absent from LLBean sitemaps); 4 are
+  the human's not-clothing picks (flip-flops, 2 yoga mats, a shipping add-on).
+- Refreshed `public.searchable_images`.
+
+**Heads-up / verified:** Post-apply DB checks — `other`=0; staging.product_pages total
+11,874→**11,859** (−15, reconciles); **0 orphan images**; LLBean `/111152` now
+"Women's True Shape Jeans…" → bottoms. **Reversible snapshot** (full before-state of all 130
+updated rows + every deleted page/image/review):
+`FWM_Data/_reports/other_category_approvals_20260625T223819_before.json`. category_source_field
+on recat rows = `manual_other_category_approval`, confidence `high`. Codex categories were NOT
+re-verified by me — they're its scrape (high conf on live pages, low only on the 11 dead ones).
+`clothing_type_id` left null for Codex rows (its observed_item_type is free-text). **Note for
+the dev_28 author (entry below):** my `refresh materialized view concurrently
+public.searchable_images` ran AFTER your dev_28 rebuild, so it repopulated YOUR matview
+definition — no structural conflict, just data refresh.
+
+**Open / handoff:** Uncommitted: the merge/generator scripts, the Codex brief + result NDJSON,
+this log; decisions.json (gitignored). Earlier tool commit was `d3a47d8`. 1 row went to
+`accessories` (the Belly Bandit C-section wrap) — human OK'd it but flagged maybe-`intimates`/
+remove later. Prod untouched.
+
 ## 2026-06-25 17:45 EDT — Claude Code — Sparse 'less common' search filters: inseam / bust-in / weeks-pregnant / age (dev)
 
 **Did:** New migration `20260625_dev_28_sparse_metric_filters.sql` (APPLIED to dev) +
