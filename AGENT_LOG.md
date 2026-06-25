@@ -1592,3 +1592,46 @@ consumers.
 `claude`) and added a row to the table in `CODEX_CHAT_TRANSCRIPTS.md`.
 
 **Open / handoff:** Nothing pending.
+
+## 2026-06-24 — Claude Code — Prettiness scorer v3→v5, lighting calibration dashboard
+
+**Did (all committed; not pushed):**
+- Prettiness scorer (`scripts/score-dev-image-prettiness.mjs`) now scores the
+  post-autocrop CARD window using `crop_spec` from dev (full crop backfill landed:
+  ~43.6k images have cover-window crops). Added a min-score slider + sorted gallery
+  to the review HTML.
+- v4: added `colorfulness_score` (Hasler-Susstrunk, `scripts/lib/pixel-stats.mjs`),
+  retuned brightness to reward "light" frames. `face_visible_score`/`smile_score`
+  wired but NULL/pending — see face/smile note below.
+- v5: fixed a real bug (full-body marked true with the head cut off). New
+  `scripts/lib/keypoint-index.mjs` builds per-image YOLO keypoints from
+  `../FWM_Data/_cache/crop_bboxes_full.ndjson`; `body_visible`/`derived_full_body_visible`
+  are now keypoint + card-aware (head=nose & feet=ankle must be INSIDE the crop
+  window). Added `composition_score`. On 250 imgs, full-body true dropped 167→116.
+- Extracted lighting logic into `scripts/lib/lighting-score.mjs` (single source of
+  truth shared by the scorer + the new lighting dashboard).
+- New `scripts/build-lighting-label-dashboard.mjs`: read-only dashboard to label TRUE
+  lighting quality (bad/ok/good/great) so I can refit thresholds. Lighting score is
+  bunched way too high (median ~0.93 over 300 imgs) — that's the recalibration target.
+- New `scripts/lighting-label-server.mjs`: tiny localhost server (port 8791) serving
+  `../FWM_Data/_reports/` + `POST /save-labels` that writes `lighting_labels_<ts>.json`
+  into that dir (so labels don't get stuck in ~/Downloads, which the agent can't read).
+
+**Key finding (verify, don't trust blindly):** `has_face_yunet` exists in the CV-gate
+checkpoint header but is EMPTY across all 326,058 rows (YuNet face detection never
+populated). There is NO smile/expression column anywhere. So face_visible AND smile
+both need a NEW face/expression detection pass — scoped in
+`data-pipelines/docs/face_smile_detection_pass_plan.md` (recommend YuNet via cv2 +
+a cv2.dnn smile ONNX; current `_venv_cv` is Python 3.14, cv2-only).
+
+**Heads-up on `.claude/launch.json` (gitignored, local only):** I repointed the
+`reports` entry from a python http.server to `node scripts/lighting-label-server.mjs`
+so the dashboard's Save button works. Port 8791.
+
+**Open / handoff to next Claude session:** Bri is labeling lighting quality in the
+dashboard. Awaiting a saved `../FWM_Data/_reports/lighting_labels_*.json` — when it
+appears, refit the thresholds in `scripts/lib/lighting-score.mjs` against the labels
+(human_target bands: bad .2 / ok .55 / good .78 / great .93) and re-run the prettiness
+dashboard. Her labels persist in browser localStorage, so the server being down is
+fine; restart it with `preview_start reports` (or `node scripts/lighting-label-server.mjs`)
+when she's ready to Save. Nothing written to prod; dev only.
