@@ -99,6 +99,7 @@ The handoff transcript should include the user requests, major assistant actions
 
 | File | Date | Scope |
 | --- | --- | --- |
+| `claude-fwm-low-res-image-gate-transcript-2026-06-25.json` | 2026-06-25 | Claude session: built the server-side low-res image gate. Added numeric `source_width_px`/`source_height_px` to `public.images` (dev_26), backfilled 47,760/47,873 via a resumable header-probe script (`backfill-dev-image-dimensions.mjs` + `lib/image-dimensions.mjs`), and added a precomputed `min_thumb_sharpness` + tunable `>=0.9` gate to `match_by_measurements`/`searchable_images` (dev_27, carrying the dev_25 anti-join + dev_26 pagination tiebreaker). Caught+fixed a regression where dev_27 wiped the tiebreaker; a concurrent session resolved the duplicate-`dev_26` numbering by deleting the redundant tiebreaker migration. Documented the tracked-dev-preview deploy hazard in README. |
 | `codex-swimoutlet-scrape-resume-transcript-2026-05-07.json` | 2026-05-07 | SwimOutlet checkpointed non-Amazon scrape resume: products.json boundary, sitemap discovery, Okendo store-review checkpoint, final bounded CSV/summary, and claim update. |
 | `codex-nonamazon-liverpool-vs-aliava-transcript-2026-05-06.json` | 2026-05-06 | Liverpool Style refresh, Victoria's Secret workbook conversion, blocked-site triage, and Aliava catalog-model scrape. |
 
