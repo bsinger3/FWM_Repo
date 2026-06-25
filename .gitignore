@@ -36,8 +36,12 @@ _preserved_local_before_sync_*/
 .env
 .env.*
 !.env.example
-config.dev.js
-index.dev.html
+
+# NOTE: index.dev.html + config.dev.js (the dev-database preview) are now tracked
+# so the frontend work has version history and is shareable. They must be kept
+# OUT of the Cloudflare Pages deploy (they point at the dev DB) via a Pages build
+# command that strips them, e.g. `rm -f index.dev.html config.dev.js`. Until that
+# is configured, do not push to main expecting them to stay private.
 
 # Codex transcript artifacts are uploaded to Supabase, not stored in Git.
 codex-*.json

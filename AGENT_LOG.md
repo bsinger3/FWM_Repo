@@ -33,6 +33,38 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 15:10 EDT — Claude Code — Track index.dev.html in git; drop redundant tiebreaker migration
+
+**Did:**
+- **Un-ignored + committing `index.dev.html` + `config.dev.js`** (removed from .gitignore).
+  Rationale: all the dev-storefront frontend work now has version history and is
+  shareable instead of living only in an untracked file. config.dev.js holds only the
+  public dev anon key (RLS-protected) + empty Sovrn keys — same exposure class as the
+  already-tracked prod `config.js`. **Committed on branch `dev-low-res-image-gate`, NOT
+  main, so it does NOT deploy** (Cloudflare Pages only auto-deploys main).
+- **⚠ Before merging this to main / deploying:** index.dev.html + config.dev.js point at
+  the DEV database and must be kept OUT of the Cloudflare Pages output, or they'll be
+  live at `/index.dev.html`. Simplest: a Pages build command `rm -f index.dev.html
+  config.dev.js` (note added in .gitignore). There is currently NO build step, so this
+  is a required dashboard change before main deploys with these files present.
+- **Deleted my redundant `20260625_dev_26_search_pagination_tiebreaker.sql`** — its only
+  change (`, s.id` ORDER BY tiebreaker) is already folded into the committed
+  `dev_27_hide_low_res_images_from_search.sql`. This also clears the duplicate-`dev_26`
+  numbering smell. Verified live function has BOTH the low-res gate and the tiebreaker;
+  page1∩page2 overlap = 0.
+- index.dev.html frontend fixes captured by this commit: (1) `guardCropDistortion()` —
+  on image load, if a cover-window crop's true aspect strays >12% from 3:4 (e.g. EXIF
+  orientation), fall back to object-fit:cover so it doesn't stretch; (2) result header
+  now shows the true `total_count` + category ("Found N results in Bottoms" / "in all
+  clothing categories"); (3) earlier: client low-res hide, sidebar fit, mother-category UX.
+
+**Heads-up:** index.dev.html is now a TRACKED file — your future edits to it will show in
+`git status` (no longer ignored). The crop-window stretch is a small subset; root-cause fix
+is EXIF-aware crop_spec recompute in the crop pipeline (not done here).
+
+**Open / handoff:** none blocking. If/when this branch heads to main, set the Pages
+exclusion first.
+
 ## 2026-06-25 14:30 EDT — Claude Code — Server-side low-res image gate (backfill source dims → RPC filter)
 
 **Did:** Built the end-to-end system to hide low-resolution images from dev search
