@@ -216,7 +216,7 @@ function buildHtml(report) {
 </head>
 <body>
   <h1>Lighting calibration &mdash; label the TRUE lighting quality</h1>
-  <p class="hint">Each card shows the model's lighting score, its sub-scores, and the raw pixel stats. Click bad / ok / good / great for what the lighting actually looks like (or hover a card and press 1&ndash;4). Sort by model score to find disagreements. Then <b>Export</b> and send me the file &mdash; I'll refit the thresholds. Labels are saved in your browser automatically.</p>
+  <p class="hint">Each card shows the model's lighting score, its sub-scores, and the raw pixel stats. Click bad / ok / good / great for what the lighting actually looks like (or hover a card and press 1&ndash;4). Sort by model score to find disagreements. Labels save in your browser automatically. When done: <b>Copy JSON</b> and paste it to Claude (simplest), or <b>Export</b> &mdash; which downloads <code>lighting_labels_&hellip;.json</code> to your <b>Downloads</b> folder; move that file into <code>FWM_Data/_reports/</code> so Claude can read it. Then I refit the thresholds.</p>
   <div class="bar">
     <span><span class="count" id="done">0</span> / ${rows.length} labeled</span>
     <label>sort <select id="sort">
