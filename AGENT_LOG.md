@@ -33,6 +33,19 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 19:05 EDT — Claude Code — Tightened the "matches" tolerances (dev)
+
+**Did:** `20260625_dev_30_tighter_match_tolerances.sql` (APPLIED to dev) — plain
+CREATE OR REPLACE (same signature + return shape as dev_29, no drop). Tightened the
+`matches_any` tolerances that drive `match_count` + the matches-first sort:
+height/bust/waist/hips **±1.5″** (was ±2), weight **±7 lb** (was ±10). The require-*
+hard filters keep their own tolerances (unchanged). Effect: e.g. height=64 match_count
+25,588→16,704; total_count unchanged. **dev_30 is now the latest function body** —
+a future full rebuild must start from it (or re-apply dev_30 last) or it regresses.
+No frontend change (UI just reads match_count).
+
+**Open / handoff:** dev_30 committed. index.dev.html still uncommitted (iterating).
+
 ## 2026-06-25 18:55 EDT — Claude Code — Search header: "matches" vs "close matches" split (dev)
 
 **Did:** New migration `20260625_dev_29_match_vs_close_match_counts.sql` (APPLIED to
