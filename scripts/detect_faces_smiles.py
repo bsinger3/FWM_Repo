@@ -144,19 +144,19 @@ class OnnxSmile:
 
 
 def mouth_occlusion_dist(bgr, landmarks):
-    """How far the nose+mouth region is from forehead skin (color L2). A phone or
-    hand over the centre of the face makes the nose stop looking like skin — a real
-    nose always matches the forehead. Returns (nose_dist, mouth_dist) or None when
-    landmarks are unavailable. The nose distance is the reliable occlusion tell;
-    mouth distance alone is fooled by open-mouth smiles (teeth)."""
+    """How far the nose+mouth region is from cheek skin (colour L2). A phone or hand
+    over the centre of the face makes the nose stop looking like skin — a real nose
+    always matches the cheeks. The skin reference is the median of the two under-eye
+    cheeks: reliably skin, away from the hair/hairline that fool a forehead sample
+    and away from the face centre where a covering phone sits. Returns (nose_dist,
+    mouth_dist) or None when landmarks are unavailable. Nose distance is the reliable
+    occlusion tell; mouth distance alone is fooled by open-mouth smiles (teeth)."""
     if not landmarks:
         return None
     (rex, rey), (lex, ley), (nx, ny), (rmx, rmy), (lmx, lmy) = landmarks
-    eyex, eyey = (rex + lex) / 2, (rey + ley) / 2
     mcx, mcy = (rmx + lmx) / 2, (rmy + lmy) / 2
     span = abs(lmx - rmx)
     rr = max(3.0, span * 0.35)
-    foreheady = eyey - (mcy - eyey) * 0.6
 
     def patch(cx, cy, r):
         h, w = bgr.shape[:2]
@@ -165,7 +165,10 @@ def mouth_occlusion_dist(bgr, landmarks):
         p = bgr[y1:y2, x1:x2]
         return p.reshape(-1, 3).mean(0).astype(float) if p.size else np.zeros(3)
 
-    skin = patch(eyex, foreheady, rr)
+    # Under-eye cheeks, ~halfway from each eye toward its mouth corner.
+    rcheek = patch(rex, rey + (rmy - rey) * 0.45, rr * 0.6)
+    lcheek = patch(lex, ley + (lmy - ley) * 0.45, rr * 0.6)
+    skin = np.median([rcheek, lcheek], axis=0)
     nose_d = float(np.linalg.norm(patch(nx, ny, rr * 0.7) - skin))
     mouth_d = float(np.linalg.norm(patch(mcx, mcy, rr * 0.8) - skin))
     return round(nose_d, 1), round(mouth_d, 1)
@@ -196,9 +199,11 @@ def main():
     ap.add_argument(
         "--occlusion-nose-dist",
         type=float,
-        default=80.0,
-        help="if the nose-vs-forehead colour distance exceeds this, treat the mouth as "
-        "covered (phone/hand over face) and zero the smile. YuNet only. 0 disables.",
+        default=60.0,
+        help="if the nose-vs-cheek colour distance exceeds this, treat the mouth as "
+        "covered (phone/hand over face) and zero the smile. YuNet only. 0 disables. "
+        "Calibrated on a tiny sample (covered ~92, everything else <=38) — tune from "
+        "the full-set review.",
     )
     ap.add_argument("--resume", action="store_true")
     args = ap.parse_args()
