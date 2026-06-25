@@ -33,6 +33,34 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 17:45 EDT — Claude Code — Sparse 'less common' search filters: inseam / bust-in / weeks-pregnant / age (dev)
+
+**Did:** New migration `20260625_dev_28_sparse_metric_filters.sql` (APPLIED to dev) +
+local index.dev.html UI (uncommitted — under active iteration).
+- **dev_28 rebuilds `searchable_images` + `match_by_measurements`** on top of dev_27.
+  Adds `i.bust_in_display` to the matview (filter-only, NOT in the return shape) and
+  four optional params to the function: `in_inseam`, `in_bust_inches`,
+  `in_weeks_pregnant`, `in_age`. Each is a **HARD filter** when provided (row must
+  HAVE the metric and be within tolerance: inseam ±2in, bust ±2in, weeks ±4, age ±5).
+  Param list changed → DROP the old 14-arg signature first, then create the 18-arg one.
+- **⚠ dev_28 is now the latest full-function rebuild — it SUPERSEDES dev_27.** It
+  preserves every prior fix verbatim (low-res `min_thumb_sharpness>=0.9` gate, broad
+  image_reports anti-join, total_count, `, s.id` tiebreaker). Any future rebuild must
+  carry all of these PLUS the four new params, and be numbered dev_29+ (applied last).
+- **Coverage / why these are a hidden "More measurements" disclosure:** inseam 1.5%,
+  bust_in_display 2.1%, weeks_pregnant 0.5%, age 17.4% of public.images. The dev UI
+  warns matches will be limited.
+- Verified live (anon 3s): baseline 45,338; weeks~30→81, inseam~30→360, bust~36→312,
+  age~30→3,668. No regression to the existing search.
+
+**Heads-up:** `bust_in_inches` targets `bust_in_display` (the sparse 2.1% numeric col),
+deliberately SEPARATE from the existing `in_bust`→`bust_in_number_display` (27%) used by
+the "Bra size > Underbust" field. If you intended one bust column, reconcile.
+
+**Open / handoff:** UI (collapsible section, wiring, Clear reset) lives in the
+gitignored-no-longer **tracked** index.dev.html, left uncommitted per the human (rapid
+iteration). dev_28 + this entry committed.
+
 ## 2026-06-25 17:25 EDT — Claude Code — Approval dashboard to re-categorize the 145 'other' product pages (dev)
 
 **Did:** Built `tools/other-category-approval/` — an interactive dashboard to clear the
