@@ -115,6 +115,30 @@ class HaarSmile:
         return s >= 0.5, s
 
 
+class OnnxSmile:
+    """FER+ emotion classifier (cv2.dnn). smile_score = P(happiness) over the whole
+    face crop. FER+ emotion order: neutral, happiness, surprise, sadness, anger,
+    disgust, fear, contempt -> happiness is index 1."""
+
+    HAPPY_IDX = 1
+
+    def __init__(self, model_path):
+        self.net = cv2.dnn.readNetFromONNX(model_path)
+
+    def score(self, gray, face):
+        x, y, w, h, _ = face
+        roi = gray[y : y + h, x : x + w]
+        if roi.size == 0:
+            return False, 0.0
+        face64 = cv2.resize(roi, (64, 64), interpolation=cv2.INTER_AREA).astype(np.float32)
+        self.net.setInput(face64.reshape(1, 1, 64, 64))
+        logits = self.net.forward().flatten()
+        ex = np.exp(logits - logits.max())
+        probs = ex / ex.sum()
+        happy = float(probs[self.HAPPY_IDX])
+        return bool(int(np.argmax(probs)) == self.HAPPY_IDX), round(happy, 4)
+
+
 def in_person_box(face, person_box, img_w, img_h):
     """True if the face center sits inside the person bbox (xyxy in source px)."""
     if not person_box:
@@ -140,12 +164,12 @@ def main():
     ap.add_argument("--resume", action="store_true")
     args = ap.parse_args()
 
-    face_det = YuNetFace(args.face_model) if args.face_backend == "yunet" else HaarFace()
     if args.face_backend == "yunet" and not args.face_model:
         ap.error("--face-backend yunet requires --face-model")
-    if args.smile_backend == "onnx":
-        ap.error("--smile-backend onnx not wired yet; use haar for the smoke test")
-    smile_det = HaarSmile()
+    if args.smile_backend == "onnx" and not args.smile_model:
+        ap.error("--smile-backend onnx requires --smile-model")
+    face_det = YuNetFace(args.face_model) if args.face_backend == "yunet" else HaarFace()
+    smile_det = OnnxSmile(args.smile_model) if args.smile_backend == "onnx" else HaarSmile()
 
     rows = []
     with open(args.input) as fh:
