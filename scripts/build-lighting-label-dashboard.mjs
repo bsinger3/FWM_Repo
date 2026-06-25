@@ -216,7 +216,7 @@ function buildHtml(report) {
 </head>
 <body>
   <h1>Lighting calibration &mdash; label the TRUE lighting quality</h1>
-  <p class="hint">Each card shows the model's lighting score, its sub-scores, and the raw pixel stats. Click bad / ok / good / great for what the lighting actually looks like (or hover a card and press 1&ndash;4). Sort by model score to find disagreements. Labels save in your browser automatically. When done: <b>Copy JSON</b> and paste it to Claude (simplest), or <b>Export</b> &mdash; which downloads <code>lighting_labels_&hellip;.json</code> to your <b>Downloads</b> folder; move that file into <code>FWM_Data/_reports/</code> so Claude can read it. Then I refit the thresholds.</p>
+  <p class="hint">Each card shows the model's lighting score, its sub-scores, and the raw pixel stats. Click bad / ok / good / great for what the lighting actually looks like (or hover a card and press 1&ndash;4). Sort by model score to find disagreements. Labels save in your browser automatically. When done, click <b>Save to _reports</b> &mdash; it writes your labels straight into <code>FWM_Data/_reports/</code> where Claude reads them (no Downloads detour, when served by scripts/lighting-label-server.mjs). <b>Copy JSON</b> (paste to Claude) and <b>Download JSON</b> are fallbacks. Then I refit the thresholds.</p>
   <div class="bar">
     <span><span class="count" id="done">0</span> / ${rows.length} labeled</span>
     <label>sort <select id="sort">
@@ -226,7 +226,8 @@ function buildHtml(report) {
       <option value="luma_asc">mean luma ↑</option>
     </select></label>
     <label><input type="checkbox" id="unlabeled"> unlabeled only</label>
-    <button id="export" class="primary">Export labels (JSON)</button>
+    <button id="save" class="primary">Save to _reports</button>
+    <button id="export">Download JSON</button>
     <button id="copy">Copy JSON</button>
     <button id="clear">Clear all</button>
   </div>
@@ -321,6 +322,21 @@ function buildHtml(report) {
       });
       return JSON.stringify(out, null, 2);
     }
+    document.getElementById("save").addEventListener("click", function () {
+      if (!Object.keys(labels).length) { alert("No labels yet."); return; }
+      var btn = this; btn.disabled = true; btn.textContent = "Saving…";
+      fetch("/save-labels", { method: "POST", headers: { "Content-Type": "application/json" }, body: buildExport() })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          btn.disabled = false; btn.textContent = "Save to _reports";
+          if (j.ok) { alert("Saved " + (j.count != null ? j.count + " " : "") + "labels to:\\n" + j.path + "\\n\\nTell Claude it's saved — it can read that folder."); }
+          else { alert("Save failed: " + j.error + "\\nUse Download JSON or Copy JSON instead."); }
+        })
+        .catch(function (e) {
+          btn.disabled = false; btn.textContent = "Save to _reports";
+          alert("Save server not reachable (" + e.message + ").\\nThis button needs the page served by scripts/lighting-label-server.mjs. Use Download JSON or Copy JSON instead.");
+        });
+    });
     document.getElementById("export").addEventListener("click", function () {
       var blob = new Blob([buildExport()], { type: "application/json" });
       var a = document.createElement("a");
