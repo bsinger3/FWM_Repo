@@ -33,6 +33,59 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 17:25 EDT — Claude Code — Approval dashboard to re-categorize the 145 'other' product pages (dev)
+
+**Did:** Built `tools/other-category-approval/` — an interactive dashboard to clear the
+remaining `staging.product_pages` rows bucketed as `mother_category_id='other'` on DEV.
+- **`build-dataset.mjs`** (`npm run other-category-review:build`, dev-guarded, read-only):
+  pulls all **145** 'other' rows with every taxonomy signal (title, brand, raw category,
+  breadcrumb, observed_clothing_type_ids, url/slug) and attaches a SUGGESTED mother category
+  (other than 'other'). Deterministic `extractTaxonomy()` resolves **0** of these (they're
+  exactly the residue the prior url-slug pass couldn't crack), so suggestions come from a
+  hand-reviewed file **`data/llm-suggestions.json`** (52 classifiable non-LLBean rows →
+  **47 real suggestions**; 5 junk like yoga mats / "Free Return Shipping" left unsuggested).
+  The other **93 are LLBean numeric URLs** (`/llb/shop/120060`) + bare-id rows with zero
+  signal — genuinely need a re-scrape, no suggestion offered.
+- **`server.mjs`** (`npm run other-category-review`, port 4196, dev-guarded, **NO DB writes**):
+  table of product+taxonomy, suggested category w/ confidence+evidence, a per-row dropdown of
+  the existing mother vocab **plus a free-text "type a new category"** option, approve
+  checkboxes, **"Select all with a suggestion"** + "Select all (filtered)" bulk buttons,
+  filters (suggestion/approved/source/search). Decisions autosave to
+  **`tools/other-category-approval/data/decisions.json`** (in the repo, not Downloads).
+  Writes are serialized with a promise-chain lock so rapid bulk clicks can't drop each other.
+- **`scripts/apply-dev-other-category-approvals.mjs`** (`npm run other-category-review:apply`,
+  **dry-run by default**; `--apply` needs `FWM_DEV_DB_WRITE_OK`): reads decisions.json, sets
+  `mother_category_id` only where still 'other', propagates to `public.images`, snapshots the
+  before-state to `FWM_Data/_reports/other_category_approvals_*_before.json`, and
+  `refresh materialized view concurrently public.searchable_images`. **Any brand-new category**
+  typed in the UI is inserted into BOTH `staging.clothing_mother_categories` (FK target) and
+  `public.clothing_mother_categories` (frontend dropdown mirror) before the row updates.
+- Registered npm scripts + `.claude/launch.json` entry (port 4196).
+- **Follow-up additions (same session):** (1) each row now has an explicit **"Open product ↗"**
+  link (target=_blank) so the human can eyeball the real PDP; (2) a per-row **"🗑 Not clothing /
+  remove"** toggle for rows that are non-apparel or don't belong in the DB at all. A `remove`
+  decision is a distinct shape in decisions.json (`{decision:"remove"}`, mutually exclusive
+  with approval). The apply script splits recategorize vs remove and does an **FK-safe delete**
+  (`public.images` → `reviews` → `staging.product_pages`, same order as
+  `scripts/delete-dev-product-pages.mjs`), with the full deleted rows captured in the
+  reversible snapshot. Verified the dry-run plans both (e.g. 3 recat + 2 delete incl. images
+  + reviews) with no writes.
+
+**Heads-up / verified:** Verified end-to-end in the preview — render, bulk select-all (47
+saved), suggested rows pre-fill their dropdown, new-category typing persists
+`is_new_category:true`, server merges (doesn't replace) on save, and the apply **dry-run**
+correctly plans 48 updates + the new `loungewear` category with no writes. **NOTHING applied
+to the DB** — decisions.json reset to `{}` for the human to drive. The 47 suggestions are my
+review, not page-fetched: ~16 are shortalls/overalls→**jumpsuits** (defensibly could be
+bottoms — flagged medium-confidence, easy to bulk-override in the dropdown). When applied,
+confidence is stamped `high` (human-approved), source_field `manual_other_category_approval`,
+extractor `other_category_dashboard_v1`.
+
+**Open / handoff:** Waiting on the human to approve in the dashboard, then run the apply with
+`--apply`. The 93 LLBean/bare-id rows can't be resolved here — they need a re-scrape for
+titles (same conclusion as the 2026-06-24 reclassify entry). Uncommitted: whole tool dir,
+the apply script, package.json + launch.json edits.
+
 ## 2026-06-25 15:30 EDT — Claude Code — Document the dev-preview-files deploy hazard in README
 
 **Did:** Asked to "deal with the renumbering" — found a concurrent session had already

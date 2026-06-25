@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Re-categorize "other" product pages — dev</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#272b35; --txt:#e6e8ee; --mut:#9aa3b2;
+          --accent:#4f9dff; --good:#2ecc71; --warn:#e0a64a; --new:#b07bff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); }
+  header { position:sticky; top:0; z-index:5; background:var(--panel); border-bottom:1px solid var(--line);
+           padding:12px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:16px; margin:0; }
+  .stat { color:var(--mut); font-size:13px; }
+  .stat b { color:var(--txt); }
+  .spacer { flex:1; }
+  button { font:inherit; color:var(--txt); background:#222734; border:1px solid var(--line); border-radius:7px;
+           padding:7px 12px; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#06122a; font-weight:600; }
+  button.ghost { background:transparent; }
+  .toolbar { padding:10px 18px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+             border-bottom:1px solid var(--line); background:#13161d; position:sticky; top:49px; z-index:4; }
+  .toolbar select, .toolbar input { font:inherit; color:var(--txt); background:#0e1117; border:1px solid var(--line);
+             border-radius:7px; padding:6px 9px; }
+  .pill { font-size:12px; color:var(--mut); border:1px solid var(--line); border-radius:999px; padding:2px 9px; }
+  main { padding:14px 18px 80px; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { position:sticky; top:97px; background:#0e1117; z-index:3; color:var(--mut); font-weight:600; font-size:12px;
+       text-transform:uppercase; letter-spacing:.04em; }
+  tr.approved { background:rgba(46,204,113,.07); }
+  .name { font-weight:600; }
+  .meta { color:var(--mut); font-size:12px; margin-top:3px; word-break:break-word; }
+  .meta a { color:var(--accent); text-decoration:none; }
+  .tags { margin-top:4px; display:flex; gap:5px; flex-wrap:wrap; }
+  .tag { font-size:11px; background:#222734; border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--mut); }
+  .sug { font-weight:600; }
+  .sug.none { color:var(--mut); font-weight:400; font-style:italic; }
+  .conf { font-size:11px; padding:1px 6px; border-radius:5px; margin-left:6px; }
+  .conf.high { background:rgba(46,204,113,.18); color:var(--good); }
+  .conf.medium { background:rgba(224,166,74,.18); color:var(--warn); }
+  .conf.low, .conf.none { background:#222734; color:var(--mut); }
+  .ev { color:var(--mut); font-size:11px; margin-top:3px; }
+  .choice { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .choice select, .choice input { font:inherit; color:var(--txt); background:#0e1117; border:1px solid var(--line);
+             border-radius:7px; padding:6px 8px; min-width:140px; }
+  .choice input.newcat { min-width:130px; }
+  .newbadge { color:var(--new); font-size:11px; }
+  td.approve { text-align:center; white-space:nowrap; }
+  td.approve input { width:18px; height:18px; cursor:pointer; }
+  .colcat { width:230px; }
+  .colchoice { width:300px; }
+  .colapp { width:130px; }
+  a.open { display:inline-block; margin-top:5px; font-size:12px; color:var(--accent); text-decoration:none;
+           border:1px solid var(--line); border-radius:6px; padding:3px 9px; }
+  a.open:hover { border-color:var(--accent); background:#10243f; }
+  tr.removed { background:rgba(229,90,90,.10); }
+  tr.removed td.choice, tr.removed .sug, tr.removed td.approve .appbox { opacity:.35; pointer-events:none; }
+  .removed-note { color:#e08a8a; font-size:12px; font-weight:700; display:block; margin-bottom:6px; }
+  button.rm { margin-top:8px; font-size:11px; padding:4px 9px; background:transparent; border-color:#5a3030; color:#e08a8a; display:block; width:100%; }
+  button.rm:hover { border-color:#e05a5a; }
+  button.rm.active { background:#e05a5a; border-color:#e05a5a; color:#2a0c0c; font-weight:600; }
+  footer { position:fixed; bottom:0; left:0; right:0; background:var(--panel); border-top:1px solid var(--line);
+           padding:10px 18px; display:flex; gap:14px; align-items:center; }
+  .hint { color:var(--mut); font-size:12px; }
+  code { background:#0e1117; border:1px solid var(--line); border-radius:5px; padding:1px 5px; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Re-categorize "other" product pages</h1>
+  <span class="pill" id="devref">dev</span>
+  <span class="stat"><b id="s-total">0</b> rows</span>
+  <span class="stat"><b id="s-sug">0</b> suggested</span>
+  <span class="stat"><b id="s-app">0</b> approved</span>
+  <span class="stat"><b id="s-rm">0</b> to remove</span>
+  <div class="spacer"></div>
+  <span class="hint">No DB writes — decisions saved to <code id="decpath">data/decisions.json</code></span>
+</header>
+
+<div class="toolbar">
+  <button id="approveAllSug" class="primary">✓ Select all with a suggestion</button>
+  <button id="approveAllVisible" class="ghost">Select all (filtered)</button>
+  <button id="clearAll" class="ghost">Clear all</button>
+  <span class="spacer"></span>
+  <label class="hint">Filter:
+    <select id="filter">
+      <option value="all">All rows</option>
+      <option value="suggested">Has suggestion</option>
+      <option value="nosug">No suggestion</option>
+      <option value="approved">Approved</option>
+      <option value="unapproved">Not approved</option>
+      <option value="remove">Marked for removal</option>
+    </select>
+  </label>
+  <label class="hint">Source:
+    <select id="sourceFilter"><option value="all">All sources</option></select>
+  </label>
+  <input id="search" placeholder="Search name / url…" />
+</div>
+
+<main>
+  <table>
+    <thead>
+      <tr>
+        <th class="colcat">Product & taxonomy</th>
+        <th>Suggested category</th>
+        <th class="colchoice">Approve as…</th>
+        <th class="colapp">Approve</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</main>
+
+<footer>
+  <button id="saveBtn" class="primary">Save decisions</button>
+  <span class="hint" id="saveStatus">All changes auto-save as you click. Bulk actions save on apply.</span>
+</footer>
+
+<script>
+let DATA = null;
+let CATS = [];
+const state = new Map(); // product_page_id -> {approved, chosen, isNew, typeId}
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+async function boot() {
+  const r = await fetch("/api/bootstrap");
+  DATA = await r.json();
+  if (DATA.error) { document.body.innerHTML = "<pre style='padding:20px;color:#e88'>"+esc(DATA.error)+"</pre>"; return; }
+  CATS = DATA.categories.filter((c) => c !== "other");
+  $("devref").textContent = "dev: " + DATA.dev_ref;
+  $("decpath").textContent = DATA.decisions_path;
+  $("s-total").textContent = DATA.total;
+  $("s-sug").textContent = DATA.with_suggestion;
+
+  for (const it of DATA.items) {
+    const prev = DATA.decisions[it.product_page_id];
+    if (prev && prev.decision === "remove") {
+      state.set(it.product_page_id, { approved:false, removed:true, chosen:it.suggested_mother_category_id || "", isNew:false, typeId:it.suggested_clothing_type_id || null });
+    } else if (prev) {
+      state.set(it.product_page_id, { approved:true, removed:false, chosen:prev.chosen_mother_category_id, isNew:prev.is_new_category, typeId:prev.clothing_type_id });
+    } else {
+      state.set(it.product_page_id, { approved:false, removed:false, chosen:it.suggested_mother_category_id || "", isNew:false, typeId:it.suggested_clothing_type_id || null });
+    }
+  }
+
+  const sources = [...new Set(DATA.items.map((i) => i.source_site))].sort();
+  for (const s of sources) {
+    const o = document.createElement("option"); o.value = s; o.textContent = s; $("sourceFilter").appendChild(o);
+  }
+  render();
+}
+
+function categoryOptions(selected) {
+  const opts = ['<option value="">— pick —</option>'];
+  for (const c of CATS) opts.push(`<option value="${esc(c)}"${c===selected?" selected":""}>${esc(c)}</option>`);
+  const isNewSel = selected && !CATS.includes(selected) && selected !== "";
+  opts.push(`<option value="__new__"${isNewSel?" selected":""}>+ type a new category…</option>`);
+  return opts.join("");
+}
+
+function visibleItems() {
+  const f = $("filter").value, src = $("sourceFilter").value, q = $("search").value.trim().toLowerCase();
+  return DATA.items.filter((it) => {
+    const st = state.get(it.product_page_id);
+    if (src !== "all" && it.source_site !== src) return false;
+    if (f === "suggested" && !it.suggested_mother_category_id) return false;
+    if (f === "nosug" && it.suggested_mother_category_id) return false;
+    if (f === "approved" && !st.approved) return false;
+    if (f === "unapproved" && (st.approved || st.removed)) return false;
+    if (f === "remove" && !st.removed) return false;
+    if (q) {
+      const hay = (it.product_title || "") + " " + it.url + " " + it.url_slug + " " + (it.brand || "");
+      if (!hay.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function render() {
+  const tbody = $("rows");
+  tbody.innerHTML = "";
+  const items = visibleItems();
+  for (const it of items) {
+    const st = state.get(it.product_page_id);
+    const tr = document.createElement("tr");
+    tr.className = st.removed ? "removed" : (st.approved ? "approved" : "");
+
+    const name = it.product_title || it.url_slug || "(no name)";
+    const tags = [];
+    if (it.brand) tags.push(`<span class="tag">${esc(it.brand)}</span>`);
+    for (const t of (it.observed_clothing_type_ids || [])) tags.push(`<span class="tag">type: ${esc(t)}</span>`);
+    if (it.category_breadcrumb_path) tags.push(`<span class="tag">${esc(it.category_breadcrumb_path)}</span>`);
+    if (it.product_category_raw) tags.push(`<span class="tag" title="${esc(it.product_category_raw)}">raw cat ⋯</span>`);
+
+    const sug = it.suggested_mother_category_id;
+    const sugHtml = sug
+      ? `<span class="sug">${esc(sug)}</span><span class="conf ${esc(it.suggested_confidence||"")}">${esc(it.suggested_confidence||"")}</span>`
+        + (it.suggested_clothing_type_id ? ` <span class="tag">${esc(it.suggested_clothing_type_id)}</span>` : "")
+        + (it.suggested_evidence ? `<div class="ev">${esc(it.suggested_evidence)}</div>` : "")
+      : `<span class="sug none">no suggestion${it.suggested_evidence ? " — "+esc(it.suggested_evidence) : ""}</span>`;
+
+    let selVal;
+    if (st.isNew) selVal = "__new__";
+    else if (CATS.includes(st.chosen)) selVal = st.chosen;
+    else if (st.chosen) selVal = "__new__";
+    else selVal = sug || "";
+    const showNew = selVal === "__new__";
+    if (showNew) st.isNew = true;
+
+    const choiceCell = st.removed
+      ? `<span class="removed-note">Will be deleted (row + its images)</span>`
+      : `<select data-id="${esc(it.product_page_id)}" class="catsel">${categoryOptions(selVal === "__new__" ? "__new__" : (st.chosen || sug || ""))}</select>
+         <input class="newcat" data-id="${esc(it.product_page_id)}" placeholder="new category" value="${showNew?esc(st.chosen):""}" style="display:${showNew?"inline-block":"none"}" />
+         ${showNew?'<span class="newbadge">new</span>':""}`;
+
+    tr.innerHTML = `
+      <td>
+        <div class="name">${esc(name)}</div>
+        <div class="meta"><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${esc(it.url)}</a></div>
+        <a class="open" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">Open product ↗</a>
+        <div class="tags">${tags.join("")}</div>
+      </td>
+      <td>${sugHtml}</td>
+      <td class="choice">${choiceCell}</td>
+      <td class="approve">
+        <input type="checkbox" data-id="${esc(it.product_page_id)}" class="appbox" ${st.approved?"checked":""} ${st.removed?"disabled":""} />
+        <button class="rm ${st.removed?"active":""}" data-id="${esc(it.product_page_id)}">${st.removed?"↩ Undo remove":"🗑 Not clothing / remove"}</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+  bindRows();
+  updateCounts();
+}
+
+function bindRows() {
+  document.querySelectorAll(".catsel").forEach((sel) => {
+    sel.onchange = () => {
+      const id = sel.dataset.id, st = state.get(id);
+      if (sel.value === "__new__") { st.isNew = true; st.chosen = st.chosen && !CATS.includes(st.chosen) ? st.chosen : ""; }
+      else { st.isNew = false; st.chosen = sel.value; }
+      render();
+    };
+  });
+  document.querySelectorAll(".newcat").forEach((inp) => {
+    inp.oninput = () => { const st = state.get(inp.dataset.id); st.chosen = inp.value; st.isNew = true; };
+    inp.onchange = () => { if (state.get(inp.dataset.id).approved) persist([inp.dataset.id]); };
+  });
+  document.querySelectorAll(".appbox").forEach((box) => {
+    box.onchange = () => {
+      const id = box.dataset.id, st = state.get(id);
+      st.approved = box.checked;
+      if (st.approved && !st.chosen) {
+        const it = DATA.items.find((i) => i.product_page_id === id);
+        st.chosen = it.suggested_mother_category_id || "";
+      }
+      persist([id]); render();
+    };
+  });
+  document.querySelectorAll("button.rm").forEach((btn) => {
+    btn.onclick = () => {
+      const id = btn.dataset.id, st = state.get(id);
+      st.removed = !st.removed;
+      if (st.removed) st.approved = false; // removal and approval are mutually exclusive
+      persist([id]); render();
+    };
+  });
+}
+
+function updateCounts() {
+  let n = 0, r = 0;
+  for (const st of state.values()) {
+    if (st.removed) r++;
+    else if (st.approved && st.chosen && st.chosen !== "other") n++;
+  }
+  $("s-app").textContent = n;
+  $("s-rm").textContent = r;
+}
+
+async function persist(ids) {
+  const decisions = ids.map((id) => {
+    const st = state.get(id);
+    if (st.removed) return { product_page_id: id, decision: "remove" };
+    return {
+      product_page_id: id, decision: "recategorize", approved: st.approved,
+      chosen_mother_category_id: st.chosen, chosen_mother_category_label: st.chosen,
+      is_new_category: st.isNew || (st.chosen && !CATS.includes(st.chosen)), clothing_type_id: st.typeId,
+    };
+  });
+  const r = await fetch("/api/save", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ decisions }) });
+  const j = await r.json();
+  if (j.ok) { $("saveStatus").textContent = `Saved — ${j.total_decisions} approvals in ${DATA.decisions_path}`; }
+  updateCounts();
+}
+
+$("approveAllSug").onclick = () => {
+  const ids = [];
+  for (const it of DATA.items) {
+    if (!it.suggested_mother_category_id) continue;
+    const st = state.get(it.product_page_id);
+    if (st.removed) continue;
+    st.approved = true; if (!st.chosen) st.chosen = it.suggested_mother_category_id;
+    ids.push(it.product_page_id);
+  }
+  persist(ids); render();
+};
+$("approveAllVisible").onclick = () => {
+  const ids = [];
+  for (const it of visibleItems()) {
+    const st = state.get(it.product_page_id);
+    if (st.removed) continue;
+    if (!st.chosen) st.chosen = it.suggested_mother_category_id || "";
+    if (!st.chosen || st.chosen === "other") continue; // can't approve without a real category
+    st.approved = true; ids.push(it.product_page_id);
+  }
+  persist(ids); render();
+};
+$("clearAll").onclick = () => {
+  const ids = [];
+  for (const it of DATA.items) {
+    const st = state.get(it.product_page_id);
+    if (st.approved || st.removed) { st.approved = false; st.removed = false; ids.push(it.product_page_id); }
+  }
+  persist(ids); render();
+};
+$("saveBtn").onclick = () => persist([...state.keys()].filter((id) => { const st = state.get(id); return st.approved || st.removed; }));
+["filter","sourceFilter","search"].forEach((id) => $(id).addEventListener("input", render));
+
+boot();
+</script>
+</body>
+</html>
