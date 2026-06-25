@@ -59,13 +59,14 @@ class HaarFace:
         self.cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
     def detect(self, gray):
-        """Return list of (x, y, w, h, conf) faces, best-first by area."""
+        """Return list of (x, y, w, h, conf, landmarks) faces, best-first by area.
+        Haar gives no landmarks, so the 6th element is None (no occlusion check)."""
         faces, _rej, weights = self.cascade.detectMultiScale3(
             gray, scaleFactor=1.1, minNeighbors=5, minSize=(28, 28), outputRejectLevels=True
         )
         out = []
         for (x, y, w, h), wt in zip(faces, weights if len(weights) else [1.0] * len(faces)):
-            out.append((int(x), int(y), int(w), int(h), squash(wt[0] if hasattr(wt, "__len__") else wt)))
+            out.append((int(x), int(y), int(w), int(h), squash(wt[0] if hasattr(wt, "__len__") else wt), None))
         out.sort(key=lambda f: f[2] * f[3], reverse=True)
         return out
 
@@ -84,7 +85,10 @@ class YuNetFace:
         if faces is not None:
             for f in faces:
                 x, y, fw, fh = (int(v) for v in f[:4])
-                out.append((x, y, fw, fh, round(float(f[-1]), 4)))
+                # f[4:14] are 5 landmarks: right eye, left eye, nose, right & left
+                # mouth corner — used for the mouth-occlusion check.
+                lmk = [(float(f[4 + 2 * i]), float(f[5 + 2 * i])) for i in range(5)]
+                out.append((x, y, fw, fh, round(float(f[-1]), 4), lmk))
         out.sort(key=lambda f: f[2] * f[3], reverse=True)
         return out
 
@@ -95,7 +99,7 @@ class HaarSmile:
 
     def score(self, gray, face):
         """Smile on the lower half of the face ROI. Returns (smile_bool, score)."""
-        x, y, w, h, _ = face
+        x, y, w, h = face[:4]
         roi = gray[y + h // 2 : y + h, x : x + w]
         if roi.size == 0:
             return False, 0.0
@@ -126,7 +130,7 @@ class OnnxSmile:
         self.net = cv2.dnn.readNetFromONNX(model_path)
 
     def score(self, gray, face):
-        x, y, w, h, _ = face
+        x, y, w, h = face[:4]
         roi = gray[y : y + h, x : x + w]
         if roi.size == 0:
             return False, 0.0
@@ -139,11 +143,39 @@ class OnnxSmile:
         return bool(int(np.argmax(probs)) == self.HAPPY_IDX), round(happy, 4)
 
 
+def mouth_occlusion_dist(bgr, landmarks):
+    """How far the nose+mouth region is from forehead skin (color L2). A phone or
+    hand over the centre of the face makes the nose stop looking like skin — a real
+    nose always matches the forehead. Returns (nose_dist, mouth_dist) or None when
+    landmarks are unavailable. The nose distance is the reliable occlusion tell;
+    mouth distance alone is fooled by open-mouth smiles (teeth)."""
+    if not landmarks:
+        return None
+    (rex, rey), (lex, ley), (nx, ny), (rmx, rmy), (lmx, lmy) = landmarks
+    eyex, eyey = (rex + lex) / 2, (rey + ley) / 2
+    mcx, mcy = (rmx + lmx) / 2, (rmy + lmy) / 2
+    span = abs(lmx - rmx)
+    rr = max(3.0, span * 0.35)
+    foreheady = eyey - (mcy - eyey) * 0.6
+
+    def patch(cx, cy, r):
+        h, w = bgr.shape[:2]
+        x1, y1 = max(0, int(cx - r)), max(0, int(cy - r))
+        x2, y2 = min(w, int(cx + r)), min(h, int(cy + r))
+        p = bgr[y1:y2, x1:x2]
+        return p.reshape(-1, 3).mean(0).astype(float) if p.size else np.zeros(3)
+
+    skin = patch(eyex, foreheady, rr)
+    nose_d = float(np.linalg.norm(patch(nx, ny, rr * 0.7) - skin))
+    mouth_d = float(np.linalg.norm(patch(mcx, mcy, rr * 0.8) - skin))
+    return round(nose_d, 1), round(mouth_d, 1)
+
+
 def in_person_box(face, person_box, img_w, img_h):
     """True if the face center sits inside the person bbox (xyxy in source px)."""
     if not person_box:
         return True
-    x, y, w, h, _ = face
+    x, y, w, h = face[:4]
     cx, cy = x + w / 2, y + h / 2
     x1, y1, x2, y2 = person_box
     return x1 <= cx <= x2 and y1 <= cy <= y2
@@ -161,6 +193,13 @@ def main():
     ap.add_argument("--timeout", type=float, default=20.0)
     ap.add_argument("--workers", type=int, default=12)
     ap.add_argument("--person-only", action="store_true", help="only keep faces inside the person bbox")
+    ap.add_argument(
+        "--occlusion-nose-dist",
+        type=float,
+        default=80.0,
+        help="if the nose-vs-forehead colour distance exceeds this, treat the mouth as "
+        "covered (phone/hand over face) and zero the smile. YuNet only. 0 disables.",
+    )
     ap.add_argument("--resume", action="store_true")
     args = ap.parse_args()
 
@@ -216,8 +255,16 @@ def main():
             rec.update(has_face=False, face_count=0, smile=None, smile_score=None, backend=args.face_backend)
             return rec
         best = faces[0]
-        x, y, fw, fh, conf = best
+        x, y, fw, fh, conf = best[:5]
+        landmarks = best[5] if len(best) > 5 else None
         smile_bool, smile_score = smile_det.score(gray, best)
+        # Mouth-occlusion gate: a phone/hand over the centre of the face makes the
+        # nose stop looking like skin; FER+ still confidently calls "happy" off the
+        # eyes/cheeks, so zero the smile when the mouth can't actually be seen.
+        occ = mouth_occlusion_dist(bgr, landmarks)
+        mouth_occluded = bool(occ and args.occlusion_nose_dist and occ[0] > args.occlusion_nose_dist)
+        if mouth_occluded:
+            smile_bool, smile_score = False, 0.0
         rec.update(
             has_face=True,
             face_count=len(faces),
@@ -226,6 +273,9 @@ def main():
             face_frac=round((fw * fh) / float(w * h), 4),
             smile=smile_bool,
             smile_score=smile_score,
+            mouth_occluded=mouth_occluded,
+            nose_skin_dist=occ[0] if occ else None,
+            mouth_skin_dist=occ[1] if occ else None,
             backend=f"{args.face_backend}+{args.smile_backend}",
         )
         return rec
