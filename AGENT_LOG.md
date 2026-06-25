@@ -33,6 +33,121 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 13:10 EDT — Claude Code — Flagged-image review dashboard + dev soft-hide procedure
+
+**Did:** New tool `tools/flagged-image-review/` to triage images users 🚩-flagged via the
+site's report button (writes to `public.image_reports`: image_id, reason, anon_id, created_at).
+- `build-dataset.mjs` (`npm run flagged-review:build`) reads **both** report tables —
+  PROD_DATABASE_URL (read-only, prod-ref-guarded) + DEV_DATABASE_URL — unions by image_id,
+  joins dev `images` preview fields, writes `data/flagged-dataset.json`. Current snapshot:
+  **62 prod + 12 dev reports = 71 distinct flagged images, all 71 present in dev images**
+  (prod-flagged ∩ dev-flagged = 0). Reasons: dead_link 34, image_not_helpful 32 (22 prod +
+  ~10 dev — note 11 of the 12 dev reports are not-helpful), duplicate 2/4, etc.
+- `server.mjs` (`npm run flagged-review`, port 4187, **dev-guarded, no DB writes**) serves the
+  dataset + a card grid; each Keep/Remove click POSTs to `data/decisions.json` (local to repo,
+  NOT Downloads, per the human's ask). Registered in `.claude/launch.json`.
+- `scripts/apply-dev-flagged-removals.mjs` (`npm run flagged-review:apply`) is the dev-only
+  procedure: **soft-hide** (human chose this over hard delete). Dry-run by default;
+  `--apply` + `FWM_DEV_DB_WRITE_OK` + service-role required. Adds `removed_at timestamptz` +
+  `removed_reason text` to `public.images` (ADD COLUMN IF NOT EXISTS), sets them for "remove"
+  decisions, clears them for "keep" (undo). Snapshots affected rows first → `data/applied_snapshot_*.json`.
+
+**Heads-up:**
+- Verified the dashboard + decision persistence + dry-run apply in the preview. **No DB writes
+  were made** — I left `data/decisions.json` = `{}` (reset a test decision).
+- The `removed_at` column does **not exist yet** — it's created on first `--apply`. **The dev
+  frontend (index.dev.html) does NOT yet filter `removed_at is null`**, so a soft-hidden image
+  would still show until that filter is added. That's the one remaining wiring step.
+- Reading prod is gated: the auto-mode classifier blocked it until the human explicitly
+  authorized prod read for this task. build-dataset uses `assertProductionDatabaseUrl` (read-only).
+
+**Open / handoff:** Uncommitted: the whole `tools/flagged-image-review/` tree,
+`scripts/apply-dev-flagged-removals.mjs`, package.json + .claude/launch.json edits. Follow-ups:
+(1) add `removed_at is null` filter to index.dev.html (and the search matview if it backs dev);
+(2) decide whether soft-hidden images should also drop out of `searchable_images`.
+
+## 2026-06-25 12:55 EDT — Claude Code — Fixed search timeout via searchable_images matview (dev)
+
+**Did:** Searches in the dev storefront were failing with "canceling statement due
+to statement timeout" — the `anon` role has `statement_timeout=3s`, and
+`public.match_by_measurements` took ~2.0–2.7s warm (worse cold) because every
+call full-seq-scanned `public.images` (~46k rows), ran `regexp_replace` on
+`waist_in` twice per row, and anti-joined `staging.product_pages` +
+`image_reports`. The measurement inputs only feed the ordering score, never a
+selective WHERE, so no index helped.
+- New dev migration `supabase/dev-migrations/20260625_dev_24_searchable_images_matview.sql`:
+  creates materialized view `public.searchable_images` (46,087 rows) that bakes
+  the static eligibility + the dead `staging.product_pages` exclusion + precomputes
+  `waist_in_numeric` / `cupsize_display_normalized`. Unique index on `id` (enables
+  CONCURRENTLY refresh) + index on `mother_category_id`.
+- Rewrote `match_by_measurements` to read from the matview. Kept the
+  `image_reports` `dead_link` anti-join INSIDE the function so flagging still hides
+  an image immediately (no refresh needed). **Applied to dev** via psql.
+- The function's return shape gained a `total_count bigint` column (via
+  `count(*) over()`, computed over the full filtered set before LIMIT/OFFSET). The
+  dev storefront now shows the TRUE total of matches instead of "loaded-so-far +":
+  header reads e.g. "Found 19,212 results in Bottoms" / "...in all clothing categories".
+- Result: empty/height-only/full/clothing-type searches now run 85–215ms (height-only
+  was the one timing out → 161ms). Verified end-to-end in the frontend (returned
+  results, correct totals, no error).
+
+**Heads-up:** `public.searchable_images` is **stale-on-write** for everything except
+dead_link flags. After you load images or change `product_pages.source_status`
+(category/liveness backfills), run `refresh materialized view concurrently
+public.searchable_images;` or search won't see the new/changed rows. The matview is
+intentionally NOT granted to anon (stays off the PostgREST API; the SECURITY DEFINER
+function reads it as owner). This is dev-only; prod's `match_by_measurements` still
+has the old slow body and will hit the same wall — port this fix there when prod
+search matters.
+
+**Open / handoff:** Committed dev_24 + this AGENT_LOG entry to `main` (not pushed).
+The prior entry's open question — whether soft-hidden (`removed_at`) images should
+drop out of `searchable_images` — still applies: when that column exists, add a
+`removed_at is null` predicate to the matview's WHERE and refresh. A separate task
+chip was spawned for a server-side "mark low-res images, exclude from RPC" system.
+
+---
+
+## 2026-06-24 22:10 EDT — Claude Code — Reclassified 942 mother='other' product pages from URL slugs (dev)
+
+**Did:** The 1,087 dev `staging.product_pages` rows with `mother_category_id='other'`
+turned out to have **no usable titles** (only 5 had `product_title_raw`, and those
+were non-apparel/junk — yoga mats, a C-section wrap, "Free Return Shipping"); 1,080
+carried `observed_clothing_type_ids={other}`. The real signal is the **URL slug**
+(`hugo_flared_pants`, `asymmetrical-neck-ruched-bodysuit`, `oversized-collared-faux-fur-coats`).
+- New script `scripts/reclassify-dev-other-categories.mjs` (dev-guarded, dry-run by
+  default; `--apply` needs `FWM_DEV_DB_WRITE_OK`). Reuses the canonical
+  `extractTaxonomy()` from `audit-dev-product-page-taxonomy.mjs` against the deslugified
+  URL path (+ title/category_raw fallback). One input normalization: strips CMS dedup
+  digit suffixes (`jeans2`→`jeans`) so word-boundary rules still match. Folds the
+  non-FK `romper` mother → `jumpsuits`.
+- **Applied: 942 of 1,087 reclassified** (all medium-confidence, source_field=url_slug;
+  `category_extractor_version='other_reclassify_url_slug_v1'`), propagated
+  `mother_category_id` to the 942 pages' `public.images` rows. Spot-checked 18 across
+  all sources — 100% correct. `other` bucket **1,087 → 145**. New distribution:
+  bottoms 4,316 / dresses 3,231 / tops 2,240 / swimwear 875 / jumpsuits 537 /
+  outerwear 222 / intimates 163 / **other 145** / sets 75 / bodysuits 62 /
+  activewear 6 / accessories 2. images mirror verified consistent (0 mismatches).
+
+**Heads-up:**
+- Reversible: per-run proposal + `_before.json` full-row snapshot in
+  `FWM_Data/_reports/other_category_reclassification_*`. To revert, restore those ids.
+- Confidence is **medium** for all 942 (url_slug-derived), not high — these were not
+  page-fetched. Fine for the mother bucket; don't treat as authoritative item tags.
+  Each reclassified row's `observed_clothing_type_ids` was replaced ({other} → the one
+  resolved type id, e.g. `pants`/`dress`); those ids come from `extractTaxonomy`'s
+  CONTROLLED_ITEM_TAGS and are NOT guaranteed to exist in `staging.clothing_type_tags`.
+- **145 still 'other':** 92 are **L.L.Bean** numeric URLs (`/llb/shop/120060`) with no
+  title/slug signal — genuinely unresolvable without a re-scrape. The other ~53 are
+  resolvable-but-skipped: compound words the `\b` rules miss (`joggers`, `shortalls`,
+  `overcoat`, `shirtdress`), genuine 2-way ties (bag+pants, boot+jeans, bustier+bodysuit),
+  and a couple junk rows. Candidates for an LLM pass or a targeted rule patch.
+
+**Open / handoff:** Uncommitted: `scripts/reclassify-dev-other-categories.mjs`. Dev-only,
+reversible. Optional follow-ups: (1) LLM/rule pass for the ~53 resolvable remainders,
+(2) re-scrape L.L.Bean for titles, (3) consider promoting medium→high after a page-fetch
+confirm if these feed search ranking.
+
 ## 2026-06-24 19:20 EDT — Claude Code — Closed the last 55 null mother categories + product_pages fill-rate audit
 
 **Did:** Audited every column of `staging.product_pages` (dev, 11,874 rows) for
