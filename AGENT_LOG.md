@@ -33,6 +33,21 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 15:30 EDT — Claude Code — Document the dev-preview-files deploy hazard in README
+
+**Did:** Asked to "deal with the renumbering" — found a concurrent session had already
+resolved it (deleted the redundant `dev_26_search_pagination_tiebreaker.sql`; numbers
+now unique, verified live function still has gate+tiebreaker, page overlap 0). So the
+only new change this session: added a ⚠️ callout to README.md's Deployment section
+warning that tracked `index.dev.html`/`config.dev.js` point at the dev DB and must be
+stripped from the Pages output (`rm -f index.dev.html config.dev.js`) before any branch
+carrying them merges to `main` — otherwise they go live at `/index.dev.html`. Mirrors
+the existing note in `.gitignore`.
+
+**Heads-up:** No DB or migration changes this session.
+
+**Open / handoff:** none.
+
 ## 2026-06-25 15:10 EDT — Claude Code — Track index.dev.html in git; drop redundant tiebreaker migration
 
 **Did:**

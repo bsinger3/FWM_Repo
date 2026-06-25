@@ -8,6 +8,8 @@ Live site: https://friendswithmeasurements.com
 
 This is a static site hosted on Cloudflare Pages, connected to the GitHub repo [bsinger3/FWM_Repo](https://github.com/bsinger3/FWM_Repo). Deployments happen automatically when changes are pushed to the `main` branch. There is no build step — Cloudflare Pages serves the raw HTML, JS, and CSS files directly.
 
+> **⚠️ Before merging dev-preview files to `main`:** `index.dev.html` and `config.dev.js` are tracked in git but point at the **dev** database. Because there is no build step, anything on `main` is served verbatim — so if these files reach `main` they will be live at `https://friendswithmeasurements.com/index.dev.html`, exposing the dev storefront publicly. They currently live only on the `dev-low-res-image-gate` branch. **Before that branch (or any branch carrying them) merges to `main`, add a Pages build command that strips them**, e.g. `rm -f index.dev.html config.dev.js`. See the matching note in [`.gitignore`](.gitignore).
+
 ## Data
 
 Scraped data and generated pipeline artifacts are stored outside this repo in the sibling `FWM_Data` directory so the GitHub repo stays lightweight. The canonical data layout is lifecycle-based (`00_raw_scraped_data` through `04_human_reviewed_ready_to_publish`), with Amazon vs non-Amazon represented as metadata rather than top-level architecture. See [DATA.md](DATA.md) for the local data layout and [AWS_BACKUP_SETUP.md](AWS_BACKUP_SETUP.md) for the current S3 backup and login workflow.
