@@ -609,6 +609,220 @@
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 10px;
         }
+        .review-modal {
+          padding: 18px 16px 22px;
+        }
+        .review-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ---- Submit-your-own-review ---------------------------------------- */
+      .submit-review-btn {
+        width: 100%;
+        margin-top: 10px;
+        padding: 9px 10px;
+        background: #fff;
+        color: #111;
+        border: 1.5px solid #111;
+        border-radius: 6px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .submit-review-btn:hover {
+        background: #111;
+        color: #fff;
+      }
+      .review-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: flex-start;
+        justify-content: center;
+        z-index: 500;
+        overflow-y: auto;
+        padding: 24px 16px;
+      }
+      .review-overlay.open {
+        display: flex;
+      }
+      .review-modal {
+        background: #fff;
+        border-radius: 12px;
+        width: min(620px, 100%);
+        padding: 22px 24px 26px;
+        box-sizing: border-box;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+      }
+      .review-modal h2 {
+        margin: 0 0 4px;
+        font-size: 19px;
+      }
+      .review-modal .modal-intro {
+        margin: 0 0 16px;
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+      }
+      .review-modal-close {
+        float: right;
+        width: auto;
+        margin: 0;
+        padding: 2px 8px;
+        background: transparent;
+        color: #888;
+        border: none;
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+      }
+      .review-modal-close:hover {
+        background: transparent;
+        color: #111;
+      }
+      .review-section {
+        margin: 0 0 16px;
+      }
+      .review-section-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #999;
+        margin: 0 0 8px;
+      }
+      .review-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 12px;
+      }
+      .review-field {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .review-field.full {
+        grid-column: 1 / -1;
+      }
+      .review-field label {
+        font-size: 12px;
+        color: #555;
+        font-weight: 500;
+      }
+      .review-field .req {
+        color: #c0392b;
+      }
+      .review-field input,
+      .review-field select,
+      .review-field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 7px 8px;
+        font-size: 13px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin: 0;
+        background: #fff;
+        color: #111;
+      }
+      .review-field textarea {
+        resize: vertical;
+        min-height: 56px;
+        font-family: inherit;
+      }
+      .review-inline {
+        display: flex;
+        gap: 8px;
+      }
+      .review-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 13px;
+        color: #444;
+        font-weight: 500;
+      }
+      .review-checkbox input {
+        width: auto;
+        margin: 0;
+      }
+      .photo-drop {
+        border: 1.5px dashed #bbb;
+        border-radius: 8px;
+        padding: 14px;
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        cursor: pointer;
+        background: #fafafa;
+      }
+      .photo-drop:hover {
+        border-color: #111;
+        color: #111;
+      }
+      .photo-previews {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .photo-thumb {
+        position: relative;
+        width: 72px;
+        height: 96px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+      }
+      .photo-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .photo-thumb button {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        border: none;
+        font-size: 13px;
+        line-height: 1;
+        cursor: pointer;
+        margin: 0;
+      }
+      .review-submit-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 4px;
+      }
+      .review-submit-row button[type="submit"] {
+        flex: 1;
+        background: #111;
+        color: #fff;
+      }
+      .review-submit-row button[type="submit"]:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .review-status {
+        font-size: 13px;
+        margin-top: 10px;
+        min-height: 18px;
+        line-height: 1.45;
+      }
+      .review-status.error {
+        color: #c0392b;
+      }
+      .review-status.success {
+        color: #1e8e3e;
       }
     </style>
   </head>
@@ -737,6 +951,10 @@
         </div>
       </form>
 
+      <button type="button" class="submit-review-btn" id="open-review-modal">
+        ✎ Submit your own review
+      </button>
+
       <p style="font-size: 12px; color: #666; margin-top: 8px">
         <a href="/about.html" class="norewrite nooptimize" style="color: inherit">About</a> •
         <a href="/privacy.html" class="norewrite nooptimize" style="color: inherit">Privacy</a> •
@@ -750,6 +968,154 @@
     <div class="main-content" id="main">
       <div id="result-count-container"></div>
       <div id="out" class="grid"></div>
+    </div>
+
+    <!-- "Submit your own review" form. Hidden until the sidebar button opens it. -->
+    <div
+      class="review-overlay"
+      id="review-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-title"
+    >
+      <div class="review-modal">
+        <button type="button" class="review-modal-close" id="review-close" aria-label="Close">×</button>
+        <h2 id="review-title">Submit your own review</h2>
+        <p class="modal-intro">
+          Share a product you bought, your measurements, and up to 5 photos.
+          Submissions are reviewed before they appear on the site.
+        </p>
+        <form id="review-form">
+          <div class="review-section">
+            <div class="review-section-title">Photos <span class="req">*</span></div>
+            <div class="photo-drop" id="photo-drop">
+              Click to add photos (up to 5). Big images are shrunk automatically before upload.
+            </div>
+            <input id="review-photos" type="file" accept="image/*" multiple hidden />
+            <div class="photo-previews" id="photo-previews"></div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-title">The product</div>
+            <div class="review-grid">
+              <div class="review-field">
+                <label>Size purchased <span class="req">*</span></label>
+                <input id="review-size" type="text" placeholder="M, 8, 32, etc." />
+              </div>
+              <div class="review-field">
+                <label>Category</label>
+                <select id="review-category">
+                  <option value="">Choose…</option>
+                </select>
+              </div>
+              <div class="review-field">
+                <label>Brand</label>
+                <input id="review-brand" type="text" placeholder="e.g. Levi's" />
+              </div>
+              <div class="review-field">
+                <label>Color</label>
+                <input id="review-color" type="text" placeholder="e.g. Indigo" />
+              </div>
+              <div class="review-field full">
+                <label>Product page URL</label>
+                <input id="review-url" type="url" placeholder="https://…" />
+              </div>
+              <div class="review-field">
+                <label>Retailer / site</label>
+                <input id="review-site" type="text" placeholder="e.g. Nordstrom" />
+              </div>
+              <div class="review-field">
+                <label>Price paid</label>
+                <input id="review-price" type="text" placeholder="e.g. $48" />
+              </div>
+            </div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-title">Your measurements</div>
+            <div class="review-grid">
+              <div class="review-field">
+                <label>Height</label>
+                <div class="review-inline">
+                  <input id="review-h-ft" type="number" min="4" max="7" step="1" placeholder="5 ft" />
+                  <input id="review-h-in" type="number" min="0" max="11" step="1" placeholder="2 in" />
+                </div>
+              </div>
+              <div class="review-field">
+                <label>Weight (lb)</label>
+                <input id="review-weight" type="number" min="70" max="400" step="1" placeholder="160" />
+              </div>
+              <div class="review-field">
+                <label>Bra band — underbust (in)</label>
+                <input id="review-band" type="number" min="20" max="60" step="0.5" placeholder="34" />
+              </div>
+              <div class="review-field">
+                <label>Cup size</label>
+                <input
+                  id="review-cup"
+                  type="text"
+                  placeholder="DD"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                />
+              </div>
+              <div class="review-field">
+                <label>Full bust (in)</label>
+                <input id="review-bust" type="number" min="25" max="60" step="0.5" placeholder="36" />
+              </div>
+              <div class="review-field">
+                <label>Waist (in)</label>
+                <input id="review-waist" type="number" min="20" max="70" step="0.5" placeholder="32" />
+              </div>
+              <div class="review-field">
+                <label>Hips (in)</label>
+                <input id="review-hips" type="number" min="20" max="70" step="0.5" placeholder="44" />
+              </div>
+              <div class="review-field">
+                <label>Inseam (in)</label>
+                <input id="review-inseam" type="number" min="20" max="40" step="0.5" placeholder="30" />
+              </div>
+              <div class="review-field">
+                <label>Age</label>
+                <input id="review-age" type="number" min="13" max="90" step="1" placeholder="30" />
+              </div>
+              <div class="review-field">
+                <label>Weeks pregnant</label>
+                <input id="review-weeks" type="number" min="1" max="42" step="1" placeholder="—" />
+              </div>
+              <div class="review-field full">
+                <label class="review-checkbox">
+                  <input id="review-fullbody" type="checkbox" /> These photos show my full body
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-title">About you (optional)</div>
+            <div class="review-grid">
+              <div class="review-field">
+                <label>Name or handle</label>
+                <input id="review-name" type="text" placeholder="Shown with your review" />
+              </div>
+              <div class="review-field">
+                <label>Email</label>
+                <input id="review-email" type="email" placeholder="Follow-up only — never shown" />
+              </div>
+              <div class="review-field full">
+                <label>Review / notes</label>
+                <textarea id="review-comment" placeholder="How did it fit? True to size?"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-submit-row">
+            <button type="submit" id="review-submit">Submit review</button>
+          </div>
+          <div class="review-status" id="review-status"></div>
+        </form>
+      </div>
     </div>
 
     <script src="./config.dev.js"></script>
@@ -1082,12 +1448,20 @@
 
         if (!error && data) {
           const select = document.getElementById("clothing-type");
+          const reviewSelect = document.getElementById("review-category");
           data.forEach((ct) => {
             clothingTypeLabels[ct.id] = ct.label;
             const option = document.createElement("option");
             option.value = ct.id;
             option.textContent = ct.label;
             select.appendChild(option);
+            // The submit-a-review modal reuses the same high-level categories.
+            if (reviewSelect) {
+              const reviewOption = document.createElement("option");
+              reviewOption.value = ct.id;
+              reviewOption.textContent = ct.label;
+              reviewSelect.appendChild(reviewOption);
+            }
           });
         }
       }
@@ -2364,6 +2738,226 @@
       document.addEventListener("click", () => {
         document.querySelectorAll(".report-dropdown.open").forEach((d) => d.classList.remove("open"));
       });
+
+      // ===================================================================
+      // "Submit your own review" modal: client-side photo resize, upload to
+      // the review-uploads bucket, then insert a pending user_review_submissions
+      // row. No server: the browser does the resize, supabase-js does the rest.
+      // ===================================================================
+      (() => {
+        const overlay = document.getElementById("review-overlay");
+        const openBtn = document.getElementById("open-review-modal");
+        const closeBtn = document.getElementById("review-close");
+        const form = document.getElementById("review-form");
+        const drop = document.getElementById("photo-drop");
+        const fileInput = document.getElementById("review-photos");
+        const previews = document.getElementById("photo-previews");
+        const statusEl = document.getElementById("review-status");
+        const submitBtn = document.getElementById("review-submit");
+        if (!overlay || !form) return;
+
+        const MAX_PHOTOS = 5;
+        const MAX_EDGE = 1600; // px — longest side after downscale
+        const JPEG_QUALITY = 0.8;
+        let photos = []; // [{ blob, url }]
+
+        function openModal() {
+          overlay.classList.add("open");
+          document.body.style.overflow = "hidden";
+        }
+        function closeModal() {
+          overlay.classList.remove("open");
+          document.body.style.overflow = "";
+        }
+        openBtn?.addEventListener("click", openModal);
+        closeBtn?.addEventListener("click", closeModal);
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) closeModal();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && overlay.classList.contains("open")) closeModal();
+        });
+
+        function setStatus(msg, kind) {
+          statusEl.textContent = msg;
+          statusEl.className = "review-status" + (kind ? " " + kind : "");
+        }
+
+        drop.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", async () => {
+          const files = Array.from(fileInput.files || []);
+          fileInput.value = ""; // let the same file be re-picked later
+          for (const file of files) {
+            if (photos.length >= MAX_PHOTOS) {
+              setStatus(`Up to ${MAX_PHOTOS} photos — extras were skipped.`, "error");
+              break;
+            }
+            if (!file.type.startsWith("image/")) continue;
+            try {
+              const blob = await downscaleImage(file);
+              photos.push({ blob, url: URL.createObjectURL(blob) });
+            } catch (err) {
+              console.error("image resize failed", err);
+              setStatus("One photo couldn't be processed — try a different file.", "error");
+            }
+          }
+          renderPreviews();
+        });
+
+        function renderPreviews() {
+          previews.innerHTML = "";
+          photos.forEach((p, i) => {
+            const thumb = document.createElement("div");
+            thumb.className = "photo-thumb";
+            const img = document.createElement("img");
+            img.src = p.url;
+            const rm = document.createElement("button");
+            rm.type = "button";
+            rm.textContent = "×";
+            rm.title = "Remove";
+            rm.addEventListener("click", () => {
+              URL.revokeObjectURL(p.url);
+              photos.splice(i, 1);
+              renderPreviews();
+            });
+            thumb.appendChild(img);
+            thumb.appendChild(rm);
+            previews.appendChild(thumb);
+          });
+        }
+
+        // Downscale to a max long edge and re-encode JPEG so uploads stay small.
+        function downscaleImage(file) {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objUrl = URL.createObjectURL(file);
+            img.onload = () => {
+              URL.revokeObjectURL(objUrl);
+              const scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height));
+              const w = Math.max(1, Math.round(img.width * scale));
+              const h = Math.max(1, Math.round(img.height * scale));
+              const canvas = document.createElement("canvas");
+              canvas.width = w;
+              canvas.height = h;
+              canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+              canvas.toBlob(
+                (blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))),
+                "image/jpeg",
+                JPEG_QUALITY,
+              );
+            };
+            img.onerror = () => {
+              URL.revokeObjectURL(objUrl);
+              reject(new Error("image load failed"));
+            };
+            img.src = objUrl;
+          });
+        }
+
+        function val(id) {
+          const el = document.getElementById(id);
+          const v = el ? el.value.trim() : "";
+          return v === "" ? null : v;
+        }
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          setStatus("", "");
+
+          const size = val("review-size");
+          if (!size) {
+            setStatus("Size purchased is required.", "error");
+            return;
+          }
+          if (photos.length === 0) {
+            setStatus("Please add at least one photo.", "error");
+            return;
+          }
+
+          submitBtn.disabled = true;
+          setStatus("Uploading photos…", "");
+
+          try {
+            // Unguessable per-submission folder so objects can't be enumerated.
+            const folder =
+              (crypto.randomUUID && crypto.randomUUID()) ||
+              String(Date.now()) + "-" + Math.round(Math.random() * 1e9);
+            const imagePaths = [];
+            for (let i = 0; i < photos.length; i++) {
+              const path = `${folder}/${i}.jpg`;
+              const { error: upErr } = await sb.storage
+                .from("review-uploads")
+                .upload(path, photos[i].blob, {
+                  contentType: "image/jpeg",
+                  upsert: false,
+                });
+              if (upErr) throw upErr;
+              imagePaths.push(path);
+            }
+
+            setStatus("Saving your review…", "");
+
+            const band = num(val("review-band"));
+            const ft = num(val("review-h-ft"));
+            const inch = num(val("review-h-in"));
+            const heightTotal =
+              ft !== null || inch !== null ? (ft || 0) * 12 + (inch || 0) : null;
+            const cup = val("review-cup");
+
+            const payload = {
+              status: "pending",
+              anon_id: FWM_ANON_ID,
+              session_id: FWM_SESSION_ID,
+              reviewer_name: val("review-name"),
+              reviewer_email: val("review-email"),
+              height_in_total: heightTotal,
+              weight_lbs: num(val("review-weight")),
+              bra_band_in: band,
+              bust_in_number: band !== null ? Math.round(band) : null,
+              cup_size: cup ? cup.toUpperCase() : null,
+              bust_full_in: num(val("review-bust")),
+              waist_in: num(val("review-waist")),
+              hips_in: num(val("review-hips")),
+              inseam_in: num(val("review-inseam")),
+              age_years: num(val("review-age")),
+              weeks_pregnant: num(val("review-weeks")),
+              full_body_visible: document.getElementById("review-fullbody").checked,
+              brand: val("review-brand"),
+              product_page_url: val("review-url"),
+              source_site: val("review-site"),
+              size_purchased: size,
+              color: val("review-color"),
+              price: val("review-price"),
+              mother_category_id: val("review-category"),
+              user_comment: val("review-comment"),
+              image_paths: imagePaths,
+            };
+
+            const { error: insErr } = await sb
+              .from("user_review_submissions")
+              .insert(payload);
+            if (insErr) throw insErr;
+
+            setStatus(
+              "Thanks! Your review was submitted and will appear after a quick check.",
+              "success",
+            );
+            photos.forEach((p) => URL.revokeObjectURL(p.url));
+            photos = [];
+            renderPreviews();
+            form.reset();
+            setTimeout(closeModal, 2400);
+          } catch (err) {
+            console.error("review submission failed", err);
+            setStatus(
+              "Something went wrong submitting your review. Please try again.",
+              "error",
+            );
+          } finally {
+            submitBtn.disabled = false;
+          }
+        });
+      })();
     </script>
   </body>
 </html>

@@ -55,9 +55,30 @@ Nothing in search reads the submissions table, so a self-set status is inert.
 promotion insert fails. Client downscales photos to a few hundred KB (canvas) before upload; the 2 MB
 bucket limit is just an abuse backstop.
 
-**Open / handoff:** Still to build (in progress this session): the button + modal form + client-side
-resize/upload/insert in `index.dev.html`, and `scripts/approve-review-submission.mjs` (promotes
-pending → live rows). Not yet ported to prod.
+**Frontend (done, verified):** `index.dev.html` now has a "✎ Submit your own review" button in the
+sidebar that opens a modal: up to 5 photos (downscaled client-side via canvas to ≤1600px / JPEG 0.8
+before upload — no server), all measurement + product fields, reuses the mother-category list. Uploads
+to the `review-uploads` bucket then inserts a pending `user_review_submissions` row via the anon key.
+
+**Approval script (done, verified):** `scripts/approve-review-submission.mjs` — `list` /
+`approve <id> [--apply]` / `reject <id> --reason "…" [--apply]`. Dry-run default, gated by
+`FWM_DEV_DB_WRITE_OK`. One transaction: find-or-create `staging.product_pages` (by
+`normalize_product_url`), insert 1 `public.reviews` (identity key `user_submission:<id>`), 1
+`public.images` per photo (`is_fwm_user_content=true`), mark submission approved, refresh
+`searchable_images`.
+
+**Verified end-to-end against dev:** browser form → 2 photos in bucket → pending row → approve →
+reviews+product_pages+2 flagged images → both appeared in `searchable_images`. All test data + storage
+objects then deleted; dev is clean (0 submissions / 0 user images / 0 objects).
+
+**Heads-up #2:** approval-script result parsing originally grabbed psql's `COMMIT` status line (with
+`--tuples-only`) instead of the SELECT row — fixed to pick the 4-field pipe-delimited line. If you add
+more trailing statements, keep that in mind. Storage objects can't be deleted via SQL
+(`storage.protect_delete`) — use the Storage API with the service-role key.
+
+**Open / handoff:** NOT yet ported to prod (`index.html` + a prod migration + the prod
+`review-uploads` bucket). The dev_31/dev_32 SQL is dev-only; prod needs its own apply. Reviewer-email
+is stored on the submission row only (not copied to `public.reviews`, which has no contact column).
 
 ## 2026-06-26 12:35 EDT — Claude Code — Data audit + dev cleanup (orphans, dead images) + crop backfill
 
