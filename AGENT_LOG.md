@@ -33,6 +33,32 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-26 16:10 EDT — Claude Code — User-submitted reviews: plumbing (table + storage bucket)
+
+**Did:** Started the "Submit your own review" feature. Two dev migrations, applied to dev + verified:
+- **`dev_31_user_review_submissions.sql`** — new `public.user_review_submissions` holding-pen
+  table (33 cols: all measurement + product fields that map onto `images`/`staging.product_pages`,
+  plus `image_paths text[]` capped at 5, attribution, moderation bookkeeping). RLS mirrors
+  `image_reports`: anon may INSERT **only as `status='pending'`** (WITH CHECK), service_role reads/updates.
+  Also added `images.is_fwm_user_content boolean NOT NULL DEFAULT false` + `images.user_submission_id uuid`
+  for provenance.
+- **`dev_32_review_uploads_bucket.sql`** — `review-uploads` storage bucket (public, 2 MB limit,
+  jpeg/png/webp) + `storage.objects` policies: anon INSERT-only into the bucket, anyone SELECT.
+  Public bucket = unguessable-UUID paths fetchable pre-moderation; un-approved photos are never
+  surfaced in search regardless. Flip private + signed URLs later if desired (no schema change).
+
+**Design:** submission → on approval → 1 `public.reviews` row + N `images` rows (`is_fwm_user_content=true`,
+one per photo) + 1 `staging.product_pages` row (confidence='low', needs_manual_review=true).
+Nothing in search reads the submissions table, so a self-set status is inert.
+
+**Heads-up:** `images.size_display` is NOT NULL — the submission form REQUIRES "size purchased" or the
+promotion insert fails. Client downscales photos to a few hundred KB (canvas) before upload; the 2 MB
+bucket limit is just an abuse backstop.
+
+**Open / handoff:** Still to build (in progress this session): the button + modal form + client-side
+resize/upload/insert in `index.dev.html`, and `scripts/approve-review-submission.mjs` (promotes
+pending → live rows). Not yet ported to prod.
+
 ## 2026-06-26 12:35 EDT — Claude Code — Data audit + dev cleanup (orphans, dead images) + crop backfill
 
 **Did:** Audited dev data quality, then acted on it.
