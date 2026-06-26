@@ -1,0 +1,2 @@
+# Codex's local scrape cache — large (multi-GB), transient, regenerable. Never commit.
+.title-scrape-cache/

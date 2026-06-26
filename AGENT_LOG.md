@@ -33,6 +33,44 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-26 12:35 EDT — Claude Code — Data audit + dev cleanup (orphans, dead images) + crop backfill
+
+**Did:** Audited dev data quality, then acted on it.
+- **Orphan/dead-row cleanup** via new `scripts/cleanup-dev-orphan-rows.mjs` (dry-run default,
+  `--apply`+`FWM_DEV_DB_WRITE_OK`, reversible snapshot). Deleted **114 images** (1 fully-orphan
+  Nuuly image that was both the null-`product_page_id` AND null-`review_id` row + 113 dead-fetch
+  images that never got source dimensions — 107 were fail-open broken thumbnails in search),
+  **21 reviews**, and **17 staging.product_pages** that ended up image-less (the 9 already empty +
+  8 whose only images were the dead ones). FK-safe order images→reviews→pages; tags/reports/vectors
+  cascade. Verified after: null product_page_id 0, null review_id 0, missing-dimensions 0,
+  zero-image pages 0, orphan images/reviews 0. Snapshot:
+  `FWM_Data/_reports/orphan_cleanup_20260625T231015_before.json`.
+- **Crop backfill for null crop_spec.** The cached detections wrote 0 new (all already cropped);
+  the 4,201 nulls were 1,551 detected-but-non-writable (head/no-person/fetch) + 2,650 never
+  detected. Ran `detect_person_boxes.py` (YOLOv8n + pose, FWM_Data venv) over the 2,650 →
+  `/tmp/crop_bboxes_nulls.ndjson`; then `backfill-dev-image-crops.mjs` dry-run → verify (9/9) →
+  `--apply` wrote **2,327 cover-window crops**. **null crop_spec 4,201 → 1,837** (remainder is
+  by-design: head-only/no-person/dead-fetch, render uncropped). Refreshed `searchable_images`.
+- New dev totals: images **47,733**, product_pages **11,842**, reviews **36,565**, searchable 45,969.
+
+**Heads-up:**
+- **Audit findings still open (NOT fixed):** (1) the dev_28 sparse hard-filters sit on thin data —
+  inseam 625 / bust 987 / weeks-pregnant 213 / waist 2,262 / hips 1,921 of 46k searchable, so
+  toggling them collapses results (your filters — coordinate); (2) **monetized_product_url empty on
+  ~26%** (whole merchants: Hollister/Quince/Spanx/etc — zero affiliate coverage); (3) **source_status
+  null on 98%** of product_pages (link liveness unverified); (4) `prettiness_score` and
+  `full_body_visible` are **100% null** (feature columns never populated). Integrity is otherwise
+  clean (0 dup image URLs/hashes/pages).
+- **Missing-title scrape:** generated a Codex brief (`tools/missing-title-scrape/`) for the 8,904
+  untitled product pages; **Codex completed it** — `codex-missing-titles.result.ndjson` (8,904 rows)
+  is committed, NOT yet loaded to the DB (awaiting validation). Its `.title-scrape-cache/` (**2.1 GB**,
+  4,509 files) is now gitignored — do not commit it; it belongs under FWM_Data, not the repo tree.
+- **'other'-bucket Codex run** (`tools/other-category-approval/`): 93-row result also committed.
+
+**Open / handoff:** Validate + load `codex-missing-titles.result.ndjson` into product_title_raw
+(reviewed step, no blind DB write). The audit's monetization/liveness/sparse-filter items are
+untouched. Concurrent smile/prettiness session's files left uncommitted (not mine). Prod untouched.
+
 ## 2026-06-25 19:15 EDT — Claude Code — Committed index.dev.html frontend work (pre-compaction)
 
 **Did:** Committed `index.dev.html` (was uncommitted all session) so the dev-storefront
