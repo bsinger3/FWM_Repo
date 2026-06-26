@@ -20,6 +20,7 @@ import { fwmDataDir } from "../tools/image-review-dashboard/paths.mjs";
 import { assertApprovedDevSupabase, callSupabaseRest, printGuardSummary } from "./lib/dev-supabase-guard.mjs";
 import { loadWorkbookCvIndex } from "./lib/workbook-cv-index.mjs";
 import { loadKeypointIndex, analyzeKeypoints } from "./lib/keypoint-index.mjs";
+import { loadFaceSmileIndex } from "./lib/face-smile-index.mjs";
 import { estimateBodyAfterCrop, estimateBestAchievableCrop, cropWindowFractions } from "./lib/card-crop-geometry.mjs";
 import { computePixelStats } from "./lib/pixel-stats.mjs";
 import {
@@ -48,6 +49,11 @@ const pixelsEnabled = !process.argv.includes("--no-pixels");
 const autoCropsPath = parseArg("auto-crops", null);
 const onlyAutoCrops = process.argv.includes("--only-auto-crops");
 const compareCard = process.argv.includes("--compare-card");
+// Face/smile overlay from scripts/detect_faces_smiles.py; joined by image id to
+// populate face_visible_score + smile_score. --only-face-smile restricts the run
+// to ids present in the overlay (handy for validating the join on a sample).
+const faceSmilePath = parseArg("face-smile", null);
+const onlyFaceSmile = process.argv.includes("--only-face-smile");
 const PRETTINESS_MODEL_VERSION = pixelsEnabled ? "prettiness_domainfit_technical_v5" : "prettiness_domain_fit_v2";
 
 // Plan target blend. Aesthetic (CLIP) is still deferred; v3 fills the technical
@@ -66,12 +72,13 @@ const TECHNICAL_INTERIM_CAP = 0.25;
 // composition rewards a centered subject with the head/feet in frame; face_visible
 // (from YuNet) rewards a visible face — all "is this a nice photo of the person".
 const DOMAIN_FIT_WEIGHTS = {
-  aspect: 0.12,
-  resolution: 0.08,
-  body_visible: 0.28,
-  body_card_coverage: 0.27,
+  aspect: 0.1,
+  resolution: 0.07,
+  body_visible: 0.25,
+  body_card_coverage: 0.25,
   composition: 0.1,
-  face_visible: 0.15,
+  face_visible: 0.13,
+  smile: 0.1,
 };
 // Sub-weights inside the technical-quality component. Lighting is trustworthy;
 // colorfulness rewards vivid frames; clutter is a coarse whole-frame proxy, so it
@@ -332,14 +339,22 @@ function bodyCardCoverageScore(geom) {
 // Lighting sub-scorers (exposure/brightness/contrast/cast) and lightingScore are
 // imported from ./lib/lighting-score.mjs (shared with the calibration dashboard).
 
-// Reward a visible face (YuNet). face_conf is the detector's presence strength;
-// any detected face gets solid credit (floored), graded mildly by confidence.
-// has_face === false means a face was looked for and not found.
-function faceVisibleScore(cv) {
-  if (!cv || cv.has_face === null || cv.has_face === undefined) return null;
-  if (cv.has_face === false) return 0;
-  const conf = Number.isFinite(cv.face_conf) ? cv.face_conf : null;
+// Reward a visible face. Prefers the face/smile overlay (YuNet) when present, else
+// the workbook CV has_face. A detected face gets solid credit (floored), graded
+// mildly by confidence; has_face === false means a face was looked for and not found.
+function faceVisibleScore(cv, fs) {
+  const src = fs && fs.has_face !== null && fs.has_face !== undefined ? fs : cv;
+  if (!src || src.has_face === null || src.has_face === undefined) return null;
+  if (src.has_face === false) return 0;
+  const conf = Number.isFinite(src.face_conf) ? src.face_conf : null;
   return conf === null ? 0.8 : clamp01(0.6 + 0.4 * conf);
+}
+
+// Reward a smile (FER+ happiness probability from the overlay). Occluded mouths
+// already arrive as 0 from the detector. Null (no overlay / no face) -> skipped.
+function smileScore(fs) {
+  if (!fs || fs.has_face !== true) return null;
+  return Number.isFinite(fs.smile_score) ? clamp01(fs.smile_score) : null;
 }
 
 // Reward a colorful frame (Hasler-Susstrunk colorfulness from pixel stats).
@@ -420,7 +435,7 @@ function weightedMean(parts) {
   return clamp01(valueSum / weightSum);
 }
 
-function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride, kpa) {
+function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride, kpa, fs) {
   const cropSpec = cropSpecOverride !== undefined ? cropSpecOverride : parseCropSpec(row.crop_spec);
   // A realized crop (manual now, auto later) carries a position, so score the
   // actual displayed window. Without one, score the position-independent
@@ -462,15 +477,14 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride, kpa) {
     body_visible_score: bodyVisibleScore(cv, kpa),
     body_card_coverage_score: bodyCardCoverageScore(geom),
     composition_score: compositionScore(kpa),
-    face_visible_score: faceVisibleScore(cv),
+    face_visible_score: faceVisibleScore(cv, fs),
+    // Smile from the face/smile overlay (FER+); null when no overlay/face (skipped).
+    smile_score: smileScore(fs),
     // Technical bucket: deterministic lighting + colorfulness + coarse clutter.
     lighting_score: lightingScore(pixelStats),
     colorfulness_score: colorfulnessScore(pixelStats),
     background_clutter_score: backgroundClutterScore(pixelStats),
     technical_quality_score: technicalQualityScore(pixelStats),
-    // Smiling needs a face-expression model run over the images; no expression
-    // signal exists in the CV checkpoints, so it stays null (pending), like CLIP.
-    smile_score: null,
     // Aesthetic (CLIP) deferred to Phase 1; recorded null so the blend is transparent.
     aesthetic_score: null,
   };
@@ -481,6 +495,7 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride, kpa) {
     [components.body_card_coverage_score, DOMAIN_FIT_WEIGHTS.body_card_coverage],
     [components.composition_score, DOMAIN_FIT_WEIGHTS.composition],
     [components.face_visible_score, DOMAIN_FIT_WEIGHTS.face_visible],
+    [components.smile_score, DOMAIN_FIT_WEIGHTS.smile],
   ]);
   const prettiness = blendPrettiness({
     domainFit,
@@ -526,9 +541,14 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride, kpa) {
   };
 }
 
-function scoreRow(row, cvIndex, autoCropMap, kpIndex) {
+function scoreRow(row, cvIndex, autoCropMap, kpIndex, faceSmileIndex) {
   const cv = row.review_row_key ? cvIndex[row.review_row_key] || null : null;
   const kpEntry = kpIndex ? kpIndex[String(row.id)] || null : null;
+  const fs = faceSmileIndex
+    ? faceSmileIndex.byId[String(row.id)] ||
+      (row.review_row_key ? faceSmileIndex.byKey[String(row.review_row_key)] : null) ||
+      null
+    : null;
   // Effective crop_spec: a loaded autocrop window overrides the DB value.
   const autoSpec = autoCropMap ? autoCropMap.get(String(row.id)) || null : null;
   const cropSpec = autoSpec || parseCropSpec(row.crop_spec);
@@ -561,7 +581,7 @@ function scoreRow(row, cvIndex, autoCropMap, kpIndex) {
           pixelError = String(error?.message || error);
         }
       }
-      const scored = scoreOne(row, metadata, cv, pixelStats, cropSpec, kpa);
+      const scored = scoreOne(row, metadata, cv, pixelStats, cropSpec, kpa, fs);
       const compare =
         compareCard && fullPixelStats
           ? {
@@ -618,6 +638,7 @@ function summarize(results) {
     "body_card_coverage_score",
     "composition_score",
     "face_visible_score",
+    "smile_score",
     "lighting_score",
     "colorfulness_score",
     "background_clutter_score",
@@ -725,7 +746,7 @@ function card(result) {
       <div class="meta">
         <div>${htmlEscape(result.dimensions?.width)}&times;${htmlEscape(result.dimensions?.height)} ${htmlEscape(result.dimensions?.format || "")}</div>
         <div>aspect ${htmlEscape(c.aspect_score)} &middot; res ${htmlEscape(c.resolution_score)}</div>
-        <div>body ${htmlEscape(c.body_visible_score)} &middot; cardfit ${htmlEscape(c.body_card_coverage_score)} &middot; comp ${htmlEscape(c.composition_score)} &middot; face ${htmlEscape(c.face_visible_score)}</div>
+        <div>body ${htmlEscape(c.body_visible_score)} &middot; cardfit ${htmlEscape(c.body_card_coverage_score)} &middot; comp ${htmlEscape(c.composition_score)} &middot; face ${htmlEscape(c.face_visible_score)} &middot; smile ${htmlEscape(c.smile_score)}</div>
         <div>light ${htmlEscape(c.lighting_score)} &middot; color ${htmlEscape(c.colorfulness_score)} &middot; clutter ${htmlEscape(c.background_clutter_score)} &middot; tech ${htmlEscape(c.technical_quality_score)}</div>
         ${cmpLine}
         <div>${coverageLine}</div>
@@ -844,6 +865,7 @@ function buildCsv(results) {
     "body_card_coverage_score",
     "composition_score",
     "face_visible_score",
+    "smile_score",
     "lighting_score",
     "colorfulness_score",
     "background_clutter_score",
@@ -878,6 +900,7 @@ function buildCsv(results) {
       r.components?.body_card_coverage_score,
       r.components?.composition_score,
       r.components?.face_visible_score,
+      r.components?.smile_score,
       r.components?.lighting_score,
       r.components?.colorfulness_score,
       r.components?.background_clutter_score,
@@ -948,12 +971,26 @@ async function main() {
     autoCropModel = loaded.model;
     console.log(`Auto-crop map: ${autoCropMap.size} crop_specs from ${autoCropsPath} (model ${autoCropModel}).`);
   }
-  const restrictIds = onlyAutoCrops && autoCropMap ? [...autoCropMap.keys()] : null;
-  if (restrictIds) console.log(`Restricting to ${restrictIds.length} autocropped ids.`);
+
+  let faceSmileIndex = null;
+  if (faceSmilePath) {
+    faceSmileIndex = await loadFaceSmileIndex(faceSmilePath);
+    console.log(
+      `Face/smile overlay: ${faceSmileIndex.meta.rows} rows (${faceSmileIndex.meta.with_face} with a face) from ${faceSmilePath}.`,
+    );
+  }
+
+  let restrictIds = onlyAutoCrops && autoCropMap ? [...autoCropMap.keys()] : null;
+  if (onlyFaceSmile && faceSmileIndex) {
+    restrictIds = Object.keys(faceSmileIndex.byId);
+    console.log(`Restricting to ${restrictIds.length} face/smile overlay ids.`);
+  } else if (restrictIds) {
+    console.log(`Restricting to ${restrictIds.length} autocropped ids.`);
+  }
 
   const rows = await fetchCandidateRows(guard, restrictIds);
   const results = [];
-  for (const row of rows) results.push(await scoreRow(row, cvIndex.byKey, autoCropMap, kpIndex));
+  for (const row of rows) results.push(await scoreRow(row, cvIndex.byKey, autoCropMap, kpIndex, faceSmileIndex));
 
   const summary = summarize(results);
   const buckets = reviewBuckets(results);
@@ -989,10 +1026,12 @@ async function main() {
       "background_clutter_score is a COARSE whole-frame edge-busyness proxy. With no person bbox position in the CV checkpoint it cannot isolate the background, so a busy outfit/pattern reads as clutter too. Weighted lowest (0.3 of technical) and pending the CV re-run that adds a person mask.",
     colorfulness_note:
       "colorfulness_score is the Hasler-Susstrunk colorfulness of the scored window (card when an autocrop exists), normalized to 0..1. Deterministic, no ML.",
-    face_note:
-      "face_visible_score is NULL/pending: has_face_yunet exists in the checkpoint header but is EMPTY in 100% of the 326k rows (YuNet face detection was never populated). The scorer is wired to use it (visible face -> higher, no face -> 0) the moment a face-detection pass fills it, but today it has no data, so the component is skipped + renormalized.",
-    smile_note:
-      "smile_score is NULL/pending: there is NO smile/expression signal anywhere in the CV checkpoints. Like face_visible, rewarding smiles requires a new face/expression model pass over the images (similar to the YOLO detection run). Tracked as a pending component.",
+    face_note: faceSmileIndex
+      ? "face_visible_score is populated from the face/smile overlay (YuNet). Visible face -> higher (graded by detector confidence), no face -> 0, no overlay row -> null (skipped)."
+      : "face_visible_score is NULL/pending: no face/smile overlay was passed (--face-smile). Run scripts/detect_faces_smiles.py and pass its ndjson to populate it.",
+    smile_note: faceSmileIndex
+      ? "smile_score is populated from the face/smile overlay (FER+ P(happiness)). Mouths occluded by a phone/hand arrive as 0 from the detector. No overlay/face -> null (skipped). Weight 0.1 of domain-fit (provisional, tune after a full-set review)."
+      : "smile_score is NULL/pending: no face/smile overlay was passed (--face-smile).",
     brightness_note:
       "brightnessScore was retuned to reward a brighter, 'light' frame (sweet spot ~120-195 luma); blown-out frames are still penalized via exposure highlight-clipping.",
     body_visible_note:
@@ -1000,9 +1039,13 @@ async function main() {
     composition_note:
       "composition_score (keypoint-only) rewards a horizontally centered subject with head + feet in frame and sensible headroom. Modest weight (0.1 of domain-fit).",
     keypoint_index_meta: kpMeta,
-    pending_components: pixelsEnabled
-      ? ["aesthetic_score", "face_visible_score", "smile_score"]
-      : ["aesthetic_score", "technical_quality_score", "face_visible_score", "smile_score"],
+    face_smile_overlay: faceSmilePath,
+    face_smile_meta: faceSmileIndex ? faceSmileIndex.meta : null,
+    pending_components: [
+      "aesthetic_score",
+      ...(pixelsEnabled ? [] : ["technical_quality_score"]),
+      ...(faceSmileIndex ? [] : ["face_visible_score", "smile_score"]),
+    ],
     cv_index_meta: cvIndex.meta,
     card_coverage_basis:
       "Without a realized crop_spec, body_card_coverage uses the position-independent best-achievable 3:4 crop (croppability ceiling), since YOLO metrics have no bbox position. Rows with a crop_spec are scored against that realized window.",
