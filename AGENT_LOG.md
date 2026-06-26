@@ -33,6 +33,28 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-25 19:15 EDT — Claude Code — Committed index.dev.html frontend work (pre-compaction)
+
+**Did:** Committed `index.dev.html` (was uncommitted all session) so the dev-storefront
+frontend work has history before a context compaction. What it now contains, all wired to
+the dev DB + the dev_24–dev_30 search function:
+- Low-res thumbnail hiding (client `thumbSharpnessRatio`/`hideCardIfLowRes`) + a
+  `guardCropDistortion` fallback (object-fit:fill→cover when a crop window isn't ~3:4,
+  e.g. EXIF-rotated).
+- Result header reads the RPC's `match_count` ("Found N results in <cat>") with a
+  full-width "<remainder> close matches in <cat>" divider at the matches→remainder edge;
+  falls back to `total_count` when no measurements entered.
+- Collapsible low-prominence "More measurements" disclosure (inseam / bust-in / weeks
+  pregnant / age — the sparse hard filters), a "Clear" button, light example placeholders.
+- Mobile layout (`@media max-width:640px`): sidebar overlays content with a tap-to-close
+  backdrop, content full-width, 2-col grid, starts collapsed on phones.
+- **Separately committed the concurrent session's in-flight files** (tools/other-category-approval/*,
+  scripts/*-other-categor*, scraping tools) in their own commit to protect them before
+  compaction — NOT my work, attribution noted in that commit.
+
+**Open / handoff:** index.dev.html is committed but the human is still actively iterating on
+it, so expect further changes. Nothing blocking.
+
 ## 2026-06-25 19:05 EDT — Claude Code — Tightened the "matches" tolerances (dev)
 
 **Did:** `20260625_dev_30_tighter_match_tolerances.sql` (APPLIED to dev) — plain

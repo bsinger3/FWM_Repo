@@ -180,6 +180,12 @@
         box-sizing: border-box;
         width: 100%;
       }
+      /* Example values are hints, not entered text — keep them clearly light
+         so they don't read as already-filled-in. */
+      input::placeholder {
+        color: #c4c4c4;
+        opacity: 1; /* Firefox dims placeholders by default; pin it */
+      }
       .require-toggle {
         display: flex;
         align-items: center;
@@ -207,6 +213,86 @@
       button:hover {
         background: #333;
       }
+      /* Search + Clear sit side by side so the Clear control adds no extra
+         vertical height (the sidebar still fits without scrolling). */
+      .button-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .button-row > button {
+        margin-top: 0;
+      }
+      .button-row > button[type="submit"] {
+        flex: 1;
+      }
+      .btn-secondary {
+        flex: 0 0 auto;
+        width: auto;
+        padding-left: 14px;
+        padding-right: 14px;
+        background: #fff;
+        color: #333;
+        border: 1px solid #ddd;
+      }
+      .btn-secondary:hover {
+        background: #f0f0f0;
+      }
+      /* Low-prominence disclosure for sparse, rarely-populated metrics. Collapsed
+         by default so it doesn't compete with the main fields or grow the sidebar. */
+      .advanced-filters {
+        margin-top: 6px;
+      }
+      /* Small, low-key disclosure (not a primary button). The caret points right
+         when collapsed and down when expanded to signal it drops open. */
+      .advanced-filters > summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        color: #888;
+        cursor: pointer;
+        list-style: none;
+        padding: 3px 8px;
+        border: 1px solid #e6e6e6;
+        border-radius: 4px;
+        background: #fafafa;
+        user-select: none;
+      }
+      .advanced-filters > summary:hover {
+        background: #f0f0f0;
+        color: #666;
+      }
+      .advanced-filters > summary::-webkit-details-marker {
+        display: none;
+      }
+      .advanced-filters > summary::before {
+        content: "▸";
+        font-size: 10px;
+        color: #aaa;
+        line-height: 1;
+      }
+      .advanced-filters[open] > summary::before {
+        content: "▾";
+      }
+      .advanced-filters[open] > summary {
+        margin-bottom: 8px;
+      }
+      .advanced-note {
+        font-size: 11px;
+        color: #999;
+        line-height: 1.4;
+        margin: 0 0 8px;
+      }
+      .advanced-filters .field-group {
+        gap: 4px;
+        margin-bottom: 6px;
+      }
+      .sublabel-hint {
+        font-weight: 400;
+        font-size: 11px;
+        color: #aaa;
+      }
       .result-count {
         padding: 16px 20px;
         padding-left: 68px;
@@ -224,6 +310,20 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 12px;
+      }
+      /* Full-width separator between the measurement matches and the ranked
+         "close matches" remainder below them. */
+      .close-matches-divider {
+        grid-column: 1 / -1;
+        padding: 16px 4px 4px;
+        margin-top: 6px;
+        border-top: 1px solid #e6e6e6;
+        font-size: 13px;
+        color: #888;
+      }
+      .close-matches-divider strong {
+        color: #555;
+        font-weight: 600;
       }
       .card {
         border: 1px solid #ddd;
@@ -468,6 +568,48 @@
         opacity: 0;
         transition: opacity 0.5s ease;
       }
+      /* Dim layer behind the mobile filter overlay (hidden on desktop). */
+      .backdrop {
+        display: none;
+      }
+
+      /* ── Mobile / narrow-viewport layout ─────────────────────────────────
+         On phones the 280px filter panel shouldn't push the content — it slides
+         OVER it, so you land on the photo grid. The existing toggle button opens
+         it as a slide-over with a tap-to-dismiss backdrop. Desktop is untouched. */
+      @media (max-width: 640px) {
+        .main-content,
+        .main-content.expanded {
+          margin-left: 0;
+        }
+        .main-content {
+          padding: 16px 12px;
+        }
+        .sidebar {
+          width: min(86vw, 320px);
+          z-index: 200;
+          box-shadow: 2px 0 16px rgba(0, 0, 0, 0.18);
+        }
+        .sidebar.collapsed {
+          transform: translateX(-100%);
+        }
+        .toggle-btn {
+          z-index: 250;
+        }
+        /* Show + dim only while the sidebar is open (not collapsed). */
+        .sidebar:not(.collapsed) ~ .backdrop {
+          display: block;
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.4);
+          z-index: 150;
+        }
+        /* Two comfortable columns on a phone. */
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -487,11 +629,11 @@
             <div class="height-group">
               <label class="input-label">
                 Feet
-                <input id="h-ft" type="number" min="4" max="7" step="1" />
+                <input id="h-ft" type="number" min="4" max="7" step="1" placeholder="5" />
               </label>
               <label class="input-label">
                 Inches
-                <input id="h-in" type="number" min="0" max="11" step="1" />
+                <input id="h-in" type="number" min="0" max="11" step="1" placeholder="2" />
               </label>
             </div>
             <label class="require-toggle" data-require-label="height" title="Require results to match this measurement">
@@ -503,7 +645,7 @@
         <div class="field-group">
           <div class="field-label">Weight lb</div>
           <div class="field-row">
-            <input id="w" type="number" min="70" max="400" step="1" />
+            <input id="w" type="number" min="70" max="400" step="1" placeholder="160" />
             <label class="require-toggle" data-require-label="weight" title="Require results to match this measurement">
               <input id="require-weight" type="checkbox" disabled />
               <span>Require</span>
@@ -541,7 +683,7 @@
         <div class="field-group">
           <div class="field-label">Waist in</div>
           <div class="field-row">
-            <input id="waist" type="number" min="20" max="70" step="0.5" />
+            <input id="waist" type="number" min="20" max="70" step="0.5" placeholder='32"' />
             <label class="require-toggle" data-require-label="waist" title="Require results to match this measurement">
               <input id="require-waist" type="checkbox" disabled />
               <span>Require</span>
@@ -551,7 +693,7 @@
         <div class="field-group">
           <div class="field-label">Hips in</div>
           <div class="field-row">
-            <input id="p" type="number" min="20" max="70" step="0.5" />
+            <input id="p" type="number" min="20" max="70" step="0.5" placeholder='44"' />
             <label class="require-toggle" data-require-label="hips" title="Require results to match this measurement">
               <input id="require-hips" type="checkbox" disabled />
               <span>Require</span>
@@ -564,7 +706,35 @@
             <option value="">All Types</option>
           </select>
         </label>
-        <button type="submit">Search</button>
+        <details class="advanced-filters">
+          <summary>More measurements</summary>
+          <p class="advanced-note">
+            Few shoppers list these, so adding one will narrow your results to a
+            limited set.
+          </p>
+          <div class="field-group">
+            <div class="field-label">Inseam in</div>
+            <input id="inseam" type="number" min="20" max="40" step="0.5" placeholder='30"' />
+          </div>
+          <div class="field-group">
+            <div class="field-label">
+              Bust in <span class="sublabel-hint">— full bust, not band</span>
+            </div>
+            <input id="bust-in" type="number" min="25" max="60" step="0.5" placeholder='36"' />
+          </div>
+          <div class="field-group">
+            <div class="field-label">Weeks pregnant</div>
+            <input id="weeks-pregnant" type="number" min="1" max="42" step="1" placeholder="30" />
+          </div>
+          <div class="field-group">
+            <div class="field-label">Age</div>
+            <input id="age" type="number" min="13" max="90" step="1" placeholder="30" />
+          </div>
+        </details>
+        <div class="button-row">
+          <button type="submit">Search</button>
+          <button type="button" id="clear-inputs" class="btn-secondary">Clear</button>
+        </div>
       </form>
 
       <p style="font-size: 12px; color: #666; margin-top: 8px">
@@ -573,6 +743,9 @@
         <a href="/terms.html" class="norewrite nooptimize" style="color: inherit">Terms</a>
       </p>
     </div>
+
+    <!-- Mobile-only dim layer behind the open filter sidebar; tap to close. -->
+    <div class="backdrop" id="backdrop"></div>
 
     <div class="main-content" id="main">
       <div id="result-count-container"></div>
@@ -709,6 +882,11 @@
       let isLoading = false;
       let hasMore = true;
       let totalResultCount = 0;
+      // Count of results that match >=1 entered measurement (RPC match_count); the
+      // rest of totalResultCount are the ranked "close matches". The divider that
+      // separates the two groups in the grid is inserted at most once per search.
+      let serverMatchCount = 0;
+      let closeMatchesDividerShown = false;
       let supportsCupSizeRpc = true;
       let supportsCupSizeSearchRpc = true;
       const trackedProductCardImpressions = new Set();
@@ -823,31 +1001,68 @@
       // (RPC returns it via count(*) over()), so the header shows the full
       // scrollable total — e.g. "Found 19,212 results in Bottoms" — rather than
       // how many have loaded so far.
+      // True if the user entered any of the five body measurements that only
+      // *rank* (not filter) the catalog. These are what "matches" is measured
+      // against; clothing type / cup / the sparse advanced fields already filter.
+      function softMeasurementsEntered() {
+        const p = currentSearchParams;
+        return !!(
+          p &&
+          (p.in_height != null ||
+            p.in_weight != null ||
+            p.in_bust != null ||
+            p.in_waist != null ||
+            p.in_hips != null)
+        );
+      }
+
+      // Human category label for headers ("Bottoms" / "all clothing categories").
+      function searchCategoryLabel() {
+        const activeTypeId =
+          currentSearchParams && currentSearchParams.in_clothing_type_id;
+        const activeTypeLabel = activeTypeId
+          ? clothingTypeLabels[activeTypeId] || activeTypeId
+          : null;
+        return activeTypeLabel
+          ? activeTypeLabel.replace(/\b\w/g, (c) => c.toUpperCase())
+          : "all clothing categories";
+      }
+
       function updateResultCount(count) {
         if (count === null || count === undefined) {
           resultCountContainer.innerHTML = "";
           return;
         }
 
-        // Name the searched category, or say "all clothing categories" when the
-        // search isn't scoped to one. Title-case the label for display.
-        const activeTypeId =
-          currentSearchParams && currentSearchParams.in_clothing_type_id;
-        const activeTypeLabel = activeTypeId
-          ? clothingTypeLabels[activeTypeId] || activeTypeId
-          : null;
-        const categoryText = activeTypeLabel
-          ? `in <strong>${activeTypeLabel.replace(/\b\w/g, (c) => c.toUpperCase())}</strong>`
-          : `in <strong>all clothing categories</strong>`;
+        const categoryText = `in <strong>${searchCategoryLabel()}</strong>`;
+        const fmt = (n) =>
+          n === 1 ? "1 result" : `${n.toLocaleString()} results`;
+        const total = totalResultCount;
 
-        if (count === 0) {
-          resultCountContainer.innerHTML = `<div class="result-count">Found <strong>0 results</strong> ${categoryText}</div>`;
-          return;
+        let inner;
+        if (!softMeasurementsEntered()) {
+          // No measurements entered -> the whole set IS the result count.
+          inner = `Found <strong>${fmt(total)}</strong> ${categoryText}`;
+        } else if (serverMatchCount > 0) {
+          // Header counts only rows matching >=1 measurement; the rest show up
+          // below the "close matches" divider as you scroll.
+          inner = `Found <strong>${fmt(serverMatchCount)}</strong> ${categoryText}`;
+        } else {
+          // Measurements entered but nothing within tolerance.
+          const m = total === 1 ? "close match" : "close matches";
+          inner = `<strong>No exact matches</strong> — ${total.toLocaleString()} ${m} ${categoryText}`;
         }
+        resultCountContainer.innerHTML = `<div class="result-count">${inner}</div>`;
+      }
 
-        const countText =
-          count === 1 ? "1 result" : `${count.toLocaleString()} results`;
-        resultCountContainer.innerHTML = `<div class="result-count">Found <strong>${countText}</strong> ${categoryText}</div>`;
+      // Full-width grid divider announcing the ranked remainder ("close matches").
+      function buildCloseMatchesDivider() {
+        const div = document.createElement("div");
+        div.className = "close-matches-divider";
+        const remaining = Math.max(0, totalResultCount - serverMatchCount);
+        const label = remaining === 1 ? "close match" : "close matches";
+        div.innerHTML = `${remaining.toLocaleString()} ${label} in <strong>${searchCategoryLabel()}</strong>`;
+        return div;
       }
 
       // Maps high-level mother_category_id -> human label (e.g. "bottoms" ->
@@ -1145,6 +1360,35 @@
         syncRequireToggle(fieldName);
       });
 
+      // Clear all search inputs and return to the default browse view.
+      const clearInputsBtn = document.getElementById("clear-inputs");
+      clearInputsBtn.addEventListener("click", () => {
+        ["h-ft", "h-in", "w", "b", "cup-size", "waist", "p",
+         "inseam", "bust-in", "weeks-pregnant", "age"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+        const clothingType = document.getElementById("clothing-type");
+        if (clothingType) clothingType.value = "";
+        // Collapse the advanced section back to its hidden default.
+        const advanced = document.querySelector(".advanced-filters");
+        if (advanced) advanced.open = false;
+        // Re-sync require toggles -> they disable + uncheck when no value.
+        Object.keys(measurementFieldIds).forEach((fieldName) =>
+          syncRequireToggle(fieldName),
+        );
+        // Reset search state and restore the initial random gallery.
+        currentSearchParams = null;
+        currentOffset = 0;
+        hasMore = true;
+        totalResultCount = 0;
+        serverMatchCount = 0;
+        closeMatchesDividerShown = false;
+        out.innerHTML = "";
+        updateResultCount(null);
+        loadRandomResults();
+      });
+
       // Toggle sidebar
       toggleBtn.addEventListener("click", () => {
         sidebar.classList.toggle("collapsed");
@@ -1157,6 +1401,24 @@
         } else {
           toggleBtn.textContent = "←";
         }
+      });
+
+      // Mobile: collapse the filter sidebar so you land on the photo grid, and
+      // let a tap on the dim backdrop close it. (Desktop keeps the panel open.)
+      const backdrop = document.getElementById("backdrop");
+      function collapseSidebar() {
+        sidebar.classList.add("collapsed");
+        toggleBtn.classList.add("collapsed");
+        mainContent.classList.add("expanded");
+        toggleBtn.textContent = "🔍";
+      }
+      if (backdrop) backdrop.addEventListener("click", collapseSidebar);
+      const mobileMq = window.matchMedia("(max-width: 640px)");
+      if (mobileMq.matches) collapseSidebar();
+      // Collapse when crossing into mobile width (e.g. toggling device mode
+      // without a reload) so testing on a laptop behaves like a phone.
+      mobileMq.addEventListener("change", (e) => {
+        if (e.matches) collapseSidebar();
       });
 
       // Load random results on initial page load
@@ -1252,6 +1514,11 @@
           ) || null,
           in_waist: waistVal,
           in_hips: num(document.getElementById("p").value),
+          // 'Less common' sparse filters (advanced section). Null when blank.
+          in_inseam: num(document.getElementById("inseam").value),
+          in_bust_inches: num(document.getElementById("bust-in").value),
+          in_weeks_pregnant: num(document.getElementById("weeks-pregnant").value),
+          in_age: num(document.getElementById("age").value),
           require_height:
             totalHeightInches > 0 &&
             document.getElementById("require-height").checked,
@@ -1312,6 +1579,8 @@
         currentOffset = 0;
         hasMore = true;
         totalResultCount = 0;
+        serverMatchCount = 0;
+        closeMatchesDividerShown = false;
         out.innerHTML = "";
         updateResultCount(null); // Clear count while loading
 
@@ -1507,20 +1776,22 @@
           });
 
           if (filtered.length > 0) {
+            // Capture the server counts BEFORE rendering so the render pass can
+            // drop the "close matches" divider at the matches→remainder edge.
+            // (Same on every page — the RPC returns them via window aggregates.)
+            const serverTotal = Number(data[0] && data[0].total_count);
+            totalResultCount = Number.isFinite(serverTotal)
+              ? serverTotal
+              : out.querySelectorAll(".card").length;
+            const serverMatch = Number(data[0] && data[0].match_count);
+            serverMatchCount = Number.isFinite(serverMatch) ? serverMatch : 0;
+
             render(filtered, true); // true = append mode
             if (supportsCupSizeSearchRpc) {
               currentOffset += data.length;
             } else {
               currentOffset = nextOffset;
             }
-
-            // True total of matches for these params (same on every page),
-            // returned by the RPC via count(*) over(). Fall back to the
-            // displayed-card count only if the column is somehow missing.
-            const serverTotal = Number(data[0] && data[0].total_count);
-            totalResultCount = Number.isFinite(serverTotal)
-              ? serverTotal
-              : out.querySelectorAll(".card").length;
           }
 
           if (supportsCupSizeSearchRpc && data.length < 24) {
@@ -1563,6 +1834,14 @@
         const showClothingTypeChip = !(
           currentSearchParams && currentSearchParams.in_clothing_type_id
         );
+
+        // Show a "close matches" divider once, where the within-tolerance matches
+        // end and the ranked remainder begins. Only when measurements were entered
+        // and there's both a matches group and a remainder.
+        const showCloseMatchesDivider =
+          softMeasurementsEntered() &&
+          serverMatchCount > 0 &&
+          serverMatchCount < totalResultCount;
 
         for (const r of rows) {
           const hasSize =
@@ -1952,6 +2231,17 @@
           a.appendChild(meta);
           a.appendChild(reportBtn);
           a.appendChild(reportDropdown);
+
+          // At the first non-matching card, drop the divider that separates the
+          // measurement matches from the ranked "close matches" below.
+          if (
+            showCloseMatchesDivider &&
+            !closeMatchesDividerShown &&
+            r.matches_any === false
+          ) {
+            out.appendChild(buildCloseMatchesDivider());
+            closeMatchesDividerShown = true;
+          }
           out.appendChild(a);
 
           const impressionKey = [
