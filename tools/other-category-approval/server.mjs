@@ -151,6 +151,7 @@ const server = createServer(async (req, res) => {
             chosen_mother_category_label: d.chosen_mother_category_label || d.chosen_mother_category_id || null,
             is_new_category: Boolean(d.is_new_category),
             clothing_type_id: d.clothing_type_id || null,
+            new_product_title: typeof d.new_product_title === "string" && d.new_product_title.trim() ? d.new_product_title.trim() : null,
             approved_at: new Date().toISOString(),
           };
           saved += 1;

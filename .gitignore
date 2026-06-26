@@ -58,3 +58,6 @@ data-pipelines/products/manual_taxonomy_review/*.json
 
 # Local Google Analytics exports/snapshots (analysis artifacts; keep out of repo)
 GoogleAnalytics/
+
+# Scrape response caches (regenerable; thousands of files — keep out of repo)
+**/.title-scrape-cache/

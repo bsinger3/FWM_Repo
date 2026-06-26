@@ -1,0 +1,59 @@
+FWM — Codex task: scrape missing product TITLES for dev product pages (save locally, NO DB writes)
+Generated 2026-06-25 · dev DB ref gosqgqpftqlawvnyelkt · staging.product_pages
+============================================================================================
+
+CONTEXT
+-------
+There are 8904 rows in the Friends With Measurements dev database (staging.product_pages)
+that have NO product_title_raw on file. They are already categorized — the only thing missing is the
+human-readable product title, which is needed for the product cards. Your job is to scrape the real
+title for each. (Pages already known dead / robots-disallowed have been excluded from this list.)
+
+INPUT
+-----
+Read the companion file:  codex-missing-titles-input.ndjson  (one JSON object per line)
+   {"product_page_id":"…","url":"…","source_site":"…","brand":null,"mother_category_id":"…","source_status":"unknown"}
+Counts by source (8904 total):
+    4605  https://www.amazon.com/
+    3150  https://www.renttherunway.com
+     452  https://bloomchic.com/
+     259  https://www.nuuly.com
+     220  https://www.shopcider.com
+     126  thecommense.com
+      72  www.chicwish.com
+       8  https://www.berlook.com/
+       6  https://shapermint.com/
+       5  www.rihoas.com
+       1  https://www.ever-pretty.com/
+
+YOUR TASK — for EACH row
+------------------------
+1. Fetch the `url`. Be polite: respect robots.txt, rate-limit to ~1 request/sec PER HOST, set a
+   normal User-Agent, and make the run resumable/cached so a re-run doesn't refetch what you have.
+   Per-source notes:
+   - amazon.com (~4.6k, the bulk): a plain GET of the canonical /dp/<ASIN> page returns the title
+     in <title>/og:title/#productTitle — no headless browser needed (see the repo's
+     'amazon taxonomy free fetch' approach). Back off on CAPTCHA/503 and retry later.
+   - renttherunway.com (~3.1k): title is in og:title / JSON-LD Product.name.
+   - bloomchic.com: previously rate-limited (HTTP 429) — slow down, retry; it is NOT dead.
+   - others (nuuly, shopcider, thecommense, chicwish, berlook, shapermint, rihoas, ever-pretty):
+     og:title or JSON-LD Product.name.
+2. Extract:
+   - product_title : the real product name shown on the page (REQUIRED — the whole point).
+   - brand         : brand/designer if easily available (optional bonus; many rows lack it).
+   - breadcrumb    : the site's category breadcrumb path if present (optional bonus).
+   Do NOT guess or synthesize a title. If you cannot get a real one, record the failure (below).
+
+OUTPUT — SAVE LOCALLY ONLY. DO NOT WRITE TO ANY DATABASE.
+--------------------------------------------------------
+Write one NDJSON object per line to:  codex-missing-titles.result.ndjson
+(save it next to this file, in the repo — NOT Downloads, NOT the database). Fields per line:
+   {"product_page_id":"","url":"","product_title":"","brand":"","breadcrumb":"",
+    "scraped_ok":true,"http_status":200,"note":""}
+- Keep product_page_id EXACTLY as given so the result can be joined back to the DB later.
+- On failure set scraped_ok=false, leave product_title empty, and put the reason in note
+  (e.g. "404", "captcha", "429 after retries"). A human will load the results into the DB in a
+  separate, reviewed step — your run must make ZERO database writes.
+
+It is fine to write the result incrementally (append as you go) so progress survives interruptions.
+

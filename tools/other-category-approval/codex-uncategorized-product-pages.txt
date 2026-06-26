@@ -1,0 +1,241 @@
+FWM — Codex task: scrape titles + categories for uncategorized "other" product pages
+Generated 2026-06-25 · dev DB ref gosqgqpftqlawvnyelkt · staging.product_pages
+==========================================================================================
+
+CONTEXT
+-------
+The 93 URLs at the bottom are rows in the Friends With Measurements dev database
+(staging.product_pages) currently bucketed as mother_category_id = 'other' that we could NOT
+auto-suggest a category for — most have no product_title_raw on file (especially the L.L.Bean
+/llb/shop/<id> links), so there is no signal to categorize them. They are women's clothing
+product pages. (The other 'other' rows already have a human-approved category and are not here.)
+
+YOUR TASK — for EACH link below
+-------------------------------
+1. Fetch the product page (a plain HTTP GET is enough for most; respect robots.txt and
+   rate-limit to ~1 request/sec per host). The L.L.Bean /llb/shop/<id> URLs redirect to the
+   real PDP — follow the redirect.
+2. Extract:
+   - product_title      : the real product name shown on the page (the single most important field)
+   - brand              : brand / designer if shown
+   - breadcrumb         : the site’s category breadcrumb path if any (e.g. "Women > Bottoms > Jeans")
+   - observed_item_type : the garment-type word(s) you see (e.g. "joggers", "overalls", "shirtdress")
+   (A few rows already have a title on file — shown as title=… below. For those just confirm and
+   categorize; no need to re-scrape the title.)
+3. Suggest a mother category. PREFER one of the EXISTING categories. Only invent a NEW category
+   if none genuinely fit, and keep it short + lowercase (e.g. "loungewear"). 'other' is NOT a
+   valid answer — every row must get a real category or be flagged not_clothing=true. The whole
+   point of this task is to get these rows OUT of the 'other' bucket.
+
+EXISTING mother categories (prefer these):
+   activewear, bodysuits, bottoms, dresses, intimates, jumpsuits, outerwear, sets, swimwear, tops, accessories
+   Mapping hints: overalls/shortalls/rompers/playsuits/catsuits/boilersuits/flight-suits -> jumpsuits ;
+   skirts/pants/shorts/jeans/joggers/leggings -> bottoms ; shirts/blouses/tanks/camis -> tops ;
+   coats/jackets -> outerwear ; swimsuits/bikinis -> swimwear.
+   NOTE: this site does NOT sell footwear. If a page is footwear (shoes/sandals/flip-flops) or
+   non-apparel (yoga mat, gift card, shipping/protection add-on), set not_clothing=true instead of
+   forcing a clothing category — those rows will be deleted, not categorized. Do NOT use 'other'.
+
+OUTPUT
+------
+Write one NDJSON object per line to: codex-uncategorized-product-pages.result.ndjson
+(save it next to this file — in the repo, not Downloads). Fields per line:
+   {"product_page_id":"","url":"","product_title":"","brand":"","breadcrumb":"",
+    "observed_item_type":"","suggested_mother_category":"","is_new_category":false,
+    "not_clothing":false,"confidence":"high|medium|low","evidence":"short reason"}
+Keep product_page_id EXACTLY as given so the result can be joined back to the DB.
+
+==========================================================================================
+LINKS (93) — grouped by source
+==========================================================================================
+
+### https://www.shopcider.com
+[1] product_page_id=699d8211-ad6f-4b56-972b-59119ea0f1e8
+    https://www.shopcider.com/goods/-32139
+
+### www.llbean.com
+[2] product_page_id=b8b8c9cf-771e-416a-961f-976165d0792b  | brand=llbean
+    https://www.llbean.com/llb/shop/111152
+[3] product_page_id=dd4fdb1b-231b-43e3-a908-0ead00028469  | brand=llbean
+    https://www.llbean.com/llb/shop/111154
+[4] product_page_id=0a4d7f42-369b-493d-80b1-22707147a816  | brand=llbean
+    https://www.llbean.com/llb/shop/115564
+[5] product_page_id=5f29394e-2c81-4beb-bffd-49815e4aa172  | brand=llbean
+    https://www.llbean.com/llb/shop/116153
+[6] product_page_id=c2feb548-ae06-4c33-b2dd-f2d61e0be3f6  | brand=llbean
+    https://www.llbean.com/llb/shop/118005
+[7] product_page_id=aebc9982-6450-44ce-917e-6c240644f9f2  | brand=llbean
+    https://www.llbean.com/llb/shop/118952
+[8] product_page_id=849193a2-c147-498e-a489-9111f2a39433  | brand=llbean
+    https://www.llbean.com/llb/shop/119051
+[9] product_page_id=269ac7c0-0274-4a51-9334-a5f7a75def0d  | brand=llbean
+    https://www.llbean.com/llb/shop/119312
+[10] product_page_id=2bfc7fef-bf9c-4b2e-82de-0cd2a0215840  | brand=llbean
+    https://www.llbean.com/llb/shop/119322
+[11] product_page_id=eeaa34ff-7a0d-41aa-99d0-f2badb149ffe  | brand=llbean
+    https://www.llbean.com/llb/shop/120052
+[12] product_page_id=02ec7ce6-0d08-4f9f-90d5-63458aadf61f  | brand=llbean
+    https://www.llbean.com/llb/shop/120060
+[13] product_page_id=a8a13497-33b6-4122-840e-dfaba5fbd1ab  | brand=llbean
+    https://www.llbean.com/llb/shop/120713
+[14] product_page_id=412abeaf-a2f9-43a6-9014-f8af1438a03e  | brand=llbean
+    https://www.llbean.com/llb/shop/120731
+[15] product_page_id=39f772c5-9fd5-42ad-b221-67c1e218ae4f  | brand=llbean
+    https://www.llbean.com/llb/shop/120739
+[16] product_page_id=4939f00d-9e41-40a0-b140-f50e0f6b3422  | brand=llbean
+    https://www.llbean.com/llb/shop/120956
+[17] product_page_id=2d682b69-54c9-4bf7-954e-bac1d049afd7  | brand=llbean
+    https://www.llbean.com/llb/shop/120957
+[18] product_page_id=35bb8864-c335-40bb-920e-a73f3102d661  | brand=llbean
+    https://www.llbean.com/llb/shop/120958
+[19] product_page_id=88b6297d-4bb1-482f-be1c-48635f856a38  | brand=llbean
+    https://www.llbean.com/llb/shop/122031
+[20] product_page_id=f101703e-e3df-4cf2-8eab-09937096ca01  | brand=llbean
+    https://www.llbean.com/llb/shop/122052
+[21] product_page_id=1b438e17-f10f-4ad5-9a76-c1c8fbaf61ea  | brand=llbean
+    https://www.llbean.com/llb/shop/122071
+[22] product_page_id=3de8a279-89ca-4f4d-a725-b45ace9ab705  | brand=llbean
+    https://www.llbean.com/llb/shop/122143
+[23] product_page_id=5f5202d0-209c-4fc1-afcf-437e3145473f  | brand=llbean
+    https://www.llbean.com/llb/shop/122144
+[24] product_page_id=3e0f6524-f36a-4baa-9b8b-7b56bcb3e999  | brand=llbean
+    https://www.llbean.com/llb/shop/122539
+[25] product_page_id=e7193288-c860-4c34-9452-466077e7e945  | brand=llbean
+    https://www.llbean.com/llb/shop/123123
+[26] product_page_id=ea2221e3-2bef-4b04-a1ad-426f9a02a2cc  | brand=llbean
+    https://www.llbean.com/llb/shop/123128
+[27] product_page_id=78daa5cc-94fa-4798-9ed7-b5c3305fb979  | brand=llbean
+    https://www.llbean.com/llb/shop/123522
+[28] product_page_id=92dd1893-08a3-46d5-99e6-9a68efbd2273  | brand=llbean
+    https://www.llbean.com/llb/shop/123523
+[29] product_page_id=31e5b92f-2892-4f01-8722-0a5205fc6bf4  | brand=llbean
+    https://www.llbean.com/llb/shop/123696
+[30] product_page_id=60a907ec-ad41-4d6b-9bee-6be79e36a968  | brand=llbean
+    https://www.llbean.com/llb/shop/123708
+[31] product_page_id=d2c9d9a4-1f14-4911-b849-65547c4cf2a1  | brand=llbean
+    https://www.llbean.com/llb/shop/123838
+[32] product_page_id=2594c414-43e7-45a0-83d7-3be3efa5e7bf  | brand=llbean
+    https://www.llbean.com/llb/shop/123866
+[33] product_page_id=a84d2a55-4c8e-48f3-82d3-564ed9cad52e  | brand=llbean
+    https://www.llbean.com/llb/shop/124200
+[34] product_page_id=935ddf7e-8506-49fe-a867-6743807ff95b  | brand=llbean
+    https://www.llbean.com/llb/shop/124458
+[35] product_page_id=edda513e-192b-481d-8f00-7daf92a3a01a  | brand=llbean
+    https://www.llbean.com/llb/shop/124459
+[36] product_page_id=f3fd782b-0158-49ce-8513-793e791066c9  | brand=llbean
+    https://www.llbean.com/llb/shop/124460
+[37] product_page_id=cf3601bd-8857-4a06-87c0-055b53842c40  | brand=llbean
+    https://www.llbean.com/llb/shop/124462
+[38] product_page_id=02a4a9c8-310c-4c0e-a588-669ac9069096  | brand=llbean
+    https://www.llbean.com/llb/shop/124464
+[39] product_page_id=7fa70626-6e36-4e25-b5a1-bd9fc08a8046  | brand=llbean
+    https://www.llbean.com/llb/shop/124571
+[40] product_page_id=23dca66e-ba45-4e1d-9786-912d1e97eb4b  | brand=llbean
+    https://www.llbean.com/llb/shop/124941
+[41] product_page_id=dc608d11-dae7-48fc-b852-65ca45f536b6  | brand=llbean
+    https://www.llbean.com/llb/shop/124950
+[42] product_page_id=257e98a4-41f5-4ed3-94a9-e25ed4f65fe8  | brand=llbean
+    https://www.llbean.com/llb/shop/125195
+[43] product_page_id=b2ca9cf2-51da-4b63-8965-eb27639d71d8  | brand=llbean
+    https://www.llbean.com/llb/shop/125795
+[44] product_page_id=30174e9e-02b5-4b44-90d7-6dddaec57435  | brand=llbean
+    https://www.llbean.com/llb/shop/126037
+[45] product_page_id=7d32d7c4-246c-4a68-b5c2-9afa1f33ef59  | brand=llbean
+    https://www.llbean.com/llb/shop/126284
+[46] product_page_id=186e2b14-25cb-4d95-ba09-bd04771ed00b  | brand=llbean
+    https://www.llbean.com/llb/shop/126465
+[47] product_page_id=a919742b-4d95-46f9-af44-7c4d445ca903  | brand=llbean
+    https://www.llbean.com/llb/shop/126471
+[48] product_page_id=d9efc4dd-f90b-4e76-8a1d-791c87f4b710  | brand=llbean
+    https://www.llbean.com/llb/shop/126591
+[49] product_page_id=ff1b1b4c-9be5-4c7b-adff-53fe3f2e0d22  | brand=llbean
+    https://www.llbean.com/llb/shop/126593
+[50] product_page_id=269ef289-16ca-43d7-b178-1e1f5486600b  | brand=llbean
+    https://www.llbean.com/llb/shop/126594
+[51] product_page_id=261041d9-d4bc-42a4-8c09-0d9aa1a49112  | brand=llbean
+    https://www.llbean.com/llb/shop/126614
+[52] product_page_id=f94cbcff-024e-4219-b35a-bf6fc9fe2f1f  | brand=llbean
+    https://www.llbean.com/llb/shop/126618
+[53] product_page_id=63948ef8-b11e-498e-8e00-1a67ff6a53cf  | brand=llbean
+    https://www.llbean.com/llb/shop/126766
+[54] product_page_id=801ebc24-79f3-4ead-a9f6-fd728b746ca6  | brand=llbean
+    https://www.llbean.com/llb/shop/127087
+[55] product_page_id=d4f08934-5d9e-46ab-8bc1-51084ccd11dc  | brand=llbean
+    https://www.llbean.com/llb/shop/127331
+[56] product_page_id=ed7f0c44-53f6-432d-8b54-dd82a3c2dda4  | brand=llbean
+    https://www.llbean.com/llb/shop/127499
+[57] product_page_id=7f6a0fee-b416-49c8-beda-5c6cf8f1bb04  | brand=llbean
+    https://www.llbean.com/llb/shop/127617
+[58] product_page_id=f7fe1ea2-8290-4f4e-aca1-f0f7f296d7d4  | brand=llbean
+    https://www.llbean.com/llb/shop/127923
+[59] product_page_id=550f11bb-3919-463e-a057-60517e678c14  | brand=llbean
+    https://www.llbean.com/llb/shop/128062
+[60] product_page_id=301f29d1-ebd9-4fe2-bbc1-3ded4ea3c12a  | brand=llbean
+    https://www.llbean.com/llb/shop/128070
+[61] product_page_id=7efbd08e-0ee7-486a-a587-a594ded0c1fa  | brand=llbean
+    https://www.llbean.com/llb/shop/128315
+[62] product_page_id=5b5cd520-fa2a-4848-94fd-2fb31e3a9ecf  | brand=llbean
+    https://www.llbean.com/llb/shop/128906
+[63] product_page_id=b02c2b73-cc62-44a9-bd72-6ec7cbb420e8  | brand=llbean
+    https://www.llbean.com/llb/shop/128910
+[64] product_page_id=321fd4f0-f711-476b-ba10-99a7788d078b  | brand=llbean
+    https://www.llbean.com/llb/shop/129263
+[65] product_page_id=cbdc0a3e-5a53-407c-be90-e13b4ba0b31d  | brand=llbean
+    https://www.llbean.com/llb/shop/129268
+[66] product_page_id=5e5f6dd4-0a81-44f8-b02b-e335c457596d  | brand=llbean
+    https://www.llbean.com/llb/shop/22383
+[67] product_page_id=bd3a0778-424f-44bd-9a4f-aff6c295b38f  | brand=llbean
+    https://www.llbean.com/llb/shop/23794
+[68] product_page_id=58e63ee9-9d85-45b3-855b-eb76c5ab0407  | brand=llbean
+    https://www.llbean.com/llb/shop/31109
+[69] product_page_id=82b3bcd1-947a-43d4-95d4-b29af23fc513  | brand=llbean
+    https://www.llbean.com/llb/shop/32708
+[70] product_page_id=de3559ee-530a-4c6f-a749-9bf19c85b5cc  | brand=llbean
+    https://www.llbean.com/llb/shop/32709
+[71] product_page_id=2a0c7786-6fc5-48a5-8374-7057bb246449  | brand=llbean
+    https://www.llbean.com/llb/shop/34032
+[72] product_page_id=7a48aa4f-bf1c-4daf-95bf-7312582b0585  | brand=llbean
+    https://www.llbean.com/llb/shop/40104
+[73] product_page_id=0b6387eb-e7c8-444b-8896-e5fbcb2fdea4  | brand=llbean
+    https://www.llbean.com/llb/shop/51535
+[74] product_page_id=078b0a08-0412-42eb-9e85-b0c69d060510  | brand=llbean
+    https://www.llbean.com/llb/shop/56777
+[75] product_page_id=f8741560-7dac-42f1-bcbd-52f65599aebf  | brand=llbean
+    https://www.llbean.com/llb/shop/58704
+[76] product_page_id=3cc5e4bb-1f5d-4dfa-b6d3-2343639e1aa6  | brand=llbean
+    https://www.llbean.com/llb/shop/65033
+[77] product_page_id=16081775-e5ac-4861-bb32-47a97bc66fdf  | brand=llbean
+    https://www.llbean.com/llb/shop/65963
+[78] product_page_id=9aaf65af-4f88-4dd1-83f2-2683a3820cfe  | brand=llbean
+    https://www.llbean.com/llb/shop/70362
+[79] product_page_id=071c61c4-8462-49b2-b45c-8682d860d6a0  | brand=llbean
+    https://www.llbean.com/llb/shop/71542
+[80] product_page_id=a108caf3-b9e1-4a82-a8b2-54324785fa5a  | brand=llbean
+    https://www.llbean.com/llb/shop/74880
+[81] product_page_id=32b123fc-f396-4ecd-96f2-2981b102df0b  | brand=llbean
+    https://www.llbean.com/llb/shop/75211
+[82] product_page_id=e954566d-8034-46d0-b280-027ff36b83f8  | brand=llbean
+    https://www.llbean.com/llb/shop/77475
+[83] product_page_id=7d3dda21-69d2-49cf-be0f-4b26268c7a21  | brand=llbean
+    https://www.llbean.com/llb/shop/77625
+[84] product_page_id=d5df3d23-4fcf-4e22-b40f-57a19d37f61a  | brand=llbean
+    https://www.llbean.com/llb/shop/82592
+[85] product_page_id=34fbb73e-38a5-474c-84ac-a77f78957cdb  | brand=llbean
+    https://www.llbean.com/llb/shop/83542
+[86] product_page_id=1b856d4f-9bd7-494f-8c9e-c3b0b81e7736  | brand=llbean
+    https://www.llbean.com/llb/shop/84842
+[87] product_page_id=ee3955e0-66c7-4a04-979c-18c9a73a00e5  | brand=llbean
+    https://www.llbean.com/llb/shop/86637
+[88] product_page_id=6aae7985-329d-4b93-8bd0-a59bd58391fd  | brand=llbean
+    https://www.llbean.com/llb/shop/86735
+[89] product_page_id=c0624ef7-0440-4feb-860c-bbde8f7f35bb  | brand=llbean
+    https://www.llbean.com/llb/shop/90069
+[90] product_page_id=b28dfd22-db45-4200-9674-3302c5b2daa2  | brand=llbean
+    https://www.llbean.com/llb/shop/91389
+[91] product_page_id=dc30ffdc-ae49-4202-996c-28025f8624ba  | brand=llbean
+    https://www.llbean.com/llb/shop/91391
+[92] product_page_id=a3b1a34d-6041-4e5a-b9b3-29e901d2e700  | brand=llbean
+    https://www.llbean.com/llb/shop/91599
+[93] product_page_id=800a2817-b6df-4a6d-b831-ea97cf8d1eec  | brand=llbean
+    https://www.llbean.com/llb/shop/92211
+

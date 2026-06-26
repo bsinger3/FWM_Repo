@@ -32,6 +32,10 @@
        text-transform:uppercase; letter-spacing:.04em; }
   tr.approved { background:rgba(46,204,113,.07); }
   .name { font-weight:600; }
+  .tinylabel { display:block; font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--mut); margin-bottom:3px; }
+  input.titlein { width:100%; max-width:340px; font:inherit; color:var(--txt); background:#0e1117; border:1px solid var(--line);
+                  border-radius:7px; padding:6px 9px; font-weight:600; }
+  input.titlein:focus { border-color:var(--accent); outline:none; }
   .meta { color:var(--mut); font-size:12px; margin-top:3px; word-break:break-word; }
   .meta a { color:var(--accent); text-decoration:none; }
   .tags { margin-top:4px; display:flex; gap:5px; flex-wrap:wrap; }
@@ -49,7 +53,14 @@
   .choice input.newcat { min-width:130px; }
   .newbadge { color:var(--new); font-size:11px; }
   td.approve { text-align:center; white-space:nowrap; }
-  td.approve input { width:18px; height:18px; cursor:pointer; }
+  td.approve input { width:16px; height:16px; cursor:pointer; vertical-align:middle; }
+  .status { display:block; font-size:12px; font-weight:700; border-radius:6px; padding:3px 8px; margin-bottom:6px; }
+  .status.ok { background:rgba(46,204,113,.18); color:var(--good); }
+  .status.rm { background:rgba(229,90,90,.18); color:#e08a8a; }
+  .status.none { background:#222734; color:var(--mut); font-weight:400; }
+  .approveline { display:inline-block; font-size:11px; color:var(--mut); margin-bottom:6px; }
+  label.hidedecided { display:inline-flex; align-items:center; gap:5px; }
+  label.hidedecided input { width:15px; height:15px; }
   .colcat { width:230px; }
   .colchoice { width:300px; }
   .colapp { width:130px; }
@@ -84,12 +95,14 @@
   <button id="approveAllSug" class="primary">✓ Select all with a suggestion</button>
   <button id="approveAllVisible" class="ghost">Select all (filtered)</button>
   <button id="clearAll" class="ghost">Clear all</button>
+  <label class="hint hidedecided"><input type="checkbox" id="hideDecided" checked /> Hide decided rows</label>
+  <span class="stat"><b id="s-left">0</b> left to decide</span>
   <span class="spacer"></span>
   <label class="hint">Filter:
     <select id="filter">
       <option value="all">All rows</option>
       <option value="suggested">Has suggestion</option>
-      <option value="nosug">No suggestion</option>
+      <option value="nosug" selected>No suggestion (need a category)</option>
       <option value="approved">Approved</option>
       <option value="unapproved">Not approved</option>
       <option value="remove">Marked for removal</option>
@@ -140,12 +153,13 @@ async function boot() {
 
   for (const it of DATA.items) {
     const prev = DATA.decisions[it.product_page_id];
+    const baseTitle = (prev && prev.new_product_title) || it.product_title || "";
     if (prev && prev.decision === "remove") {
-      state.set(it.product_page_id, { approved:false, removed:true, chosen:it.suggested_mother_category_id || "", isNew:false, typeId:it.suggested_clothing_type_id || null });
+      state.set(it.product_page_id, { approved:false, removed:true, chosen:it.suggested_mother_category_id || "", isNew:false, typeId:it.suggested_clothing_type_id || null, title:baseTitle });
     } else if (prev) {
-      state.set(it.product_page_id, { approved:true, removed:false, chosen:prev.chosen_mother_category_id, isNew:prev.is_new_category, typeId:prev.clothing_type_id });
+      state.set(it.product_page_id, { approved:true, removed:false, chosen:prev.chosen_mother_category_id, isNew:prev.is_new_category, typeId:prev.clothing_type_id, title:baseTitle });
     } else {
-      state.set(it.product_page_id, { approved:false, removed:false, chosen:it.suggested_mother_category_id || "", isNew:false, typeId:it.suggested_clothing_type_id || null });
+      state.set(it.product_page_id, { approved:false, removed:false, chosen:it.suggested_mother_category_id || "", isNew:false, typeId:it.suggested_clothing_type_id || null, title:baseTitle });
     }
   }
 
@@ -164,10 +178,16 @@ function categoryOptions(selected) {
   return opts.join("");
 }
 
+function isDecided(st) {
+  return st.removed || (st.approved && st.chosen && st.chosen !== "other");
+}
+
 function visibleItems() {
   const f = $("filter").value, src = $("sourceFilter").value, q = $("search").value.trim().toLowerCase();
+  const hideDecided = $("hideDecided").checked;
   return DATA.items.filter((it) => {
     const st = state.get(it.product_page_id);
+    if (hideDecided && isDecided(st)) return false;
     if (src !== "all" && it.source_site !== src) return false;
     if (f === "suggested" && !it.suggested_mother_category_id) return false;
     if (f === "nosug" && it.suggested_mother_category_id) return false;
@@ -219,9 +239,12 @@ function render() {
          <input class="newcat" data-id="${esc(it.product_page_id)}" placeholder="new category" value="${showNew?esc(st.chosen):""}" style="display:${showNew?"inline-block":"none"}" />
          ${showNew?'<span class="newbadge">new</span>':""}`;
 
+    const origTitle = it.product_title || "(none on record)";
     tr.innerHTML = `
       <td>
-        <div class="name">${esc(name)}</div>
+        <label class="tinylabel">Product title (editable)</label>
+        <input class="titlein" data-id="${esc(it.product_page_id)}" value="${esc(st.title || "")}" placeholder="type the correct product title…" />
+        <div class="meta">on record: ${esc(origTitle)} · slug: ${esc(it.url_slug || "—")}</div>
         <div class="meta"><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${esc(it.url)}</a></div>
         <a class="open" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">Open product ↗</a>
         <div class="tags">${tags.join("")}</div>
@@ -229,7 +252,12 @@ function render() {
       <td>${sugHtml}</td>
       <td class="choice">${choiceCell}</td>
       <td class="approve">
-        <input type="checkbox" data-id="${esc(it.product_page_id)}" class="appbox" ${st.approved?"checked":""} ${st.removed?"disabled":""} />
+        ${st.removed
+          ? `<span class="status rm">🗑 Will be removed</span>`
+          : (st.approved && st.chosen && st.chosen !== "other")
+            ? `<span class="status ok">✓ Approved → ${esc(st.chosen)}</span>`
+            : `<span class="status none">undecided</span>`}
+        <label class="approveline"><input type="checkbox" data-id="${esc(it.product_page_id)}" class="appbox" ${st.approved?"checked":""} ${st.removed?"disabled":""} /> approve</label>
         <button class="rm ${st.removed?"active":""}" data-id="${esc(it.product_page_id)}">${st.removed?"↩ Undo remove":"🗑 Not clothing / remove"}</button>
       </td>
     `;
@@ -240,17 +268,27 @@ function render() {
 }
 
 function bindRows() {
+  document.querySelectorAll(".titlein").forEach((inp) => {
+    inp.oninput = () => { state.get(inp.dataset.id).title = inp.value; };
+    // Save the corrected title whenever the row already has a decision.
+    inp.onchange = () => { const st = state.get(inp.dataset.id); if (st.approved || st.removed) persist([inp.dataset.id]); };
+  });
   document.querySelectorAll(".catsel").forEach((sel) => {
     sel.onchange = () => {
       const id = sel.dataset.id, st = state.get(id);
       if (sel.value === "__new__") { st.isNew = true; st.chosen = st.chosen && !CATS.includes(st.chosen) ? st.chosen : ""; }
-      else { st.isNew = false; st.chosen = sel.value; }
+      else {
+        st.isNew = false; st.chosen = sel.value;
+        // Picking a real category IS the approval — no separate checkbox needed.
+        st.approved = Boolean(sel.value) && sel.value !== "other";
+      }
+      if (st.approved) persist([id]);
       render();
     };
   });
   document.querySelectorAll(".newcat").forEach((inp) => {
-    inp.oninput = () => { const st = state.get(inp.dataset.id); st.chosen = inp.value; st.isNew = true; };
-    inp.onchange = () => { if (state.get(inp.dataset.id).approved) persist([inp.dataset.id]); };
+    inp.oninput = () => { const st = state.get(inp.dataset.id); st.chosen = inp.value; st.isNew = true; st.approved = Boolean(inp.value.trim()); };
+    inp.onchange = () => { const st = state.get(inp.dataset.id); if (st.chosen && st.chosen.trim()) { st.approved = true; persist([inp.dataset.id]); render(); } };
   });
   document.querySelectorAll(".appbox").forEach((box) => {
     box.onchange = () => {
@@ -281,16 +319,29 @@ function updateCounts() {
   }
   $("s-app").textContent = n;
   $("s-rm").textContent = r;
+  // "left to decide" = undecided rows in the current filter scope (ignoring hide-decided).
+  const f = $("filter").value;
+  let left = 0;
+  for (const it of DATA.items) {
+    if (f === "suggested" && !it.suggested_mother_category_id) continue;
+    if (f === "nosug" && it.suggested_mother_category_id) continue;
+    if (!isDecided(state.get(it.product_page_id))) left++;
+  }
+  $("s-left").textContent = left;
 }
 
 async function persist(ids) {
   const decisions = ids.map((id) => {
     const st = state.get(id);
+    const it = DATA.items.find((i) => i.product_page_id === id);
+    // Only send a title override when the user actually changed it.
+    const newTitle = st.title && st.title.trim() && st.title.trim() !== (it.product_title || "") ? st.title.trim() : null;
     if (st.removed) return { product_page_id: id, decision: "remove" };
     return {
       product_page_id: id, decision: "recategorize", approved: st.approved,
       chosen_mother_category_id: st.chosen, chosen_mother_category_label: st.chosen,
       is_new_category: st.isNew || (st.chosen && !CATS.includes(st.chosen)), clothing_type_id: st.typeId,
+      new_product_title: newTitle,
     };
   });
   const r = await fetch("/api/save", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ decisions }) });
@@ -331,6 +382,7 @@ $("clearAll").onclick = () => {
 };
 $("saveBtn").onclick = () => persist([...state.keys()].filter((id) => { const st = state.get(id); return st.approved || st.removed; }));
 ["filter","sourceFilter","search"].forEach((id) => $(id).addEventListener("input", render));
+$("hideDecided").addEventListener("change", render);
 
 boot();
 </script>

@@ -116,6 +116,7 @@ async function main() {
       chosen,
       is_new: !existingCats.has(chosen),
       clothing_type_id: d.clothing_type_id || null,
+      new_product_title: typeof d.new_product_title === "string" && d.new_product_title.trim() ? d.new_product_title.trim() : null,
     });
   }
 
@@ -149,7 +150,8 @@ async function main() {
   }
 
   console.log(`\nDecisions: ${decisions.length} (${recatDecisions.length} recategorize, ${removeDecisions.length} remove)`);
-  console.log(`Will recategorize (still 'other'): ${willUpdate.length}`);
+  const titleOverrides = willUpdate.filter((v) => v.new_product_title).length;
+  console.log(`Will recategorize (still 'other'): ${willUpdate.length}` + (titleOverrides ? ` (incl. ${titleOverrides} title fixes)` : ""));
   console.log(`Skipped (no real category): ${skipped.length}`);
   console.log(`Already non-'other' (left as-is): ${alreadyMoved.length}`);
   console.log(`Will DELETE: ${removeCounts[0]} product_pages, ${removeCounts[1]} images, ${removeCounts[2]} reviews`);
@@ -182,9 +184,9 @@ async function main() {
         runPsql(
           databaseUrl,
           `select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from (
-             select id::text, mother_category_id, category_confidence, category_evidence,
-                    category_source_field, category_extractor_version, observed_clothing_type_ids,
-                    category_checked_at
+             select id::text, mother_category_id, product_title_raw, category_confidence,
+                    category_evidence, category_source_field, category_extractor_version,
+                    observed_clothing_type_ids, category_checked_at
              from staging.product_pages where id in (${updateIds})
            ) t;`,
         ).trim() || "[]",
@@ -236,6 +238,7 @@ async function main() {
     const setTypes = v.clothing_type_id
       ? `observed_clothing_type_ids = ${sqlTextArray([v.clothing_type_id])},`
       : "";
+    const setTitle = v.new_product_title ? `product_title_raw = ${sqlString(v.new_product_title)},` : "";
     stmts.push(
       `update staging.product_pages set
          mother_category_id = ${sqlString(v.chosen)},
@@ -243,7 +246,7 @@ async function main() {
          category_evidence = ${sqlString(`human-approved via other-category dashboard (was 'other')`)},
          category_source_field = ${sqlString(SOURCE_FIELD)},
          category_extractor_version = ${sqlString(EXTRACTOR_VERSION)},
-         ${setTypes}
+         ${setTypes}${setTitle}
          category_checked_at = now(), updated_at = now()
        where id = ${sqlString(v.id)} and mother_category_id = 'other';`,
     );
