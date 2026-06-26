@@ -71,6 +71,15 @@ to the `review-uploads` bucket then inserts a pending `user_review_submissions` 
 reviews+product_pages+2 flagged images → both appeared in `searchable_images`. All test data + storage
 objects then deleted; dev is clean (0 submissions / 0 user images / 0 objects).
 
+**PII hardening (dev_33):** `user_review_submissions` holds reviewer_email. RLS already blocked anon
+reads, but Supabase's default grants still gave anon/authenticated full SELECT/UPDATE/DELETE on the
+table (RLS was the only layer). dev_33 revokes everything from anon/authenticated except INSERT, so the
+read privilege for the PII no longer exists. Verified via the anon key: SELECT → `42501 permission
+denied`, INSERT pending → 201, INSERT status=approved → 401 (WITH CHECK). Deliberately did NOT
+`FORCE ROW LEVEL SECURITY` — the approval script connects as the owner (postgres) and relies on
+owner-bypass; forcing would break moderation. The prod port must re-apply this revoke (default
+privileges will re-grant on the prod table).
+
 **Heads-up #2:** approval-script result parsing originally grabbed psql's `COMMIT` status line (with
 `--tuples-only`) instead of the SELECT row — fixed to pick the 4-field pipe-delimited line. If you add
 more trailing statements, keep that in mind. Storage objects can't be deleted via SQL
