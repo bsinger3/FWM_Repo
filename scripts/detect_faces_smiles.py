@@ -27,6 +27,7 @@ import json
 import math
 import os
 import sys
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 
 import cv2
@@ -288,8 +289,21 @@ def main():
     written = 0
     out = open(args.output, mode)
     try:
+        # Bound in-flight downloads to a sliding window (~2x workers). Using a
+        # plain pool.map here would eagerly submit every row and buffer all the
+        # decoded images (~35 MB each) in memory faster than the serial detect()
+        # consumer drains them — on a low-RAM machine that overflows into swap.
         with ThreadPoolExecutor(max_workers=args.workers) as pool:
-            for row, rec, bgr, err in pool.map(download, rows):
+            it = iter(rows)
+            inflight = deque()
+            window = args.workers * 2
+            for _ in range(window):
+                try:
+                    inflight.append(pool.submit(download, next(it)))
+                except StopIteration:
+                    break
+            while inflight:
+                row, rec, bgr, err = inflight.popleft().result()
                 if bgr is None:
                     rec["error"] = err
                 else:
@@ -302,6 +316,10 @@ def main():
                 if written % 50 == 0:
                     out.flush()
                     print(f"{written}/{total}", file=sys.stderr, flush=True)
+                try:
+                    inflight.append(pool.submit(download, next(it)))
+                except StopIteration:
+                    pass
     finally:
         out.close()
     print(f"done: wrote {written}", file=sys.stderr)

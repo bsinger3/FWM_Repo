@@ -33,6 +33,20 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-27 13:55 EDT — Claude Code — Fix unbounded-memory bug in detect_faces_smiles.py
+
+**Did:** `scripts/detect_faces_smiles.py` was OOM-ing an 8 GB machine (~33 GB RSS, ~9 GB
+swap) during the full 45,573-image run. Root cause: `ThreadPoolExecutor.map(download, rows)`
+eagerly submitted every row and buffered decoded images (~35 MB numpy arrays each) far
+faster than the serial main-thread `detect()` could drain them. Replaced `pool.map` with a
+bounded sliding window (`pool.submit` + a FIFO `deque`, window = 2× workers) — caps in-RAM
+decoded images to ~24, preserves output order, keeps all workers busy. Verified: RSS now
+steady ~1.9 GB, swap draining. Restarted the run with `--resume` (no progress lost).
+
+**Heads-up:** behaviour is otherwise identical — same records, same order, same `--resume`
+semantics. Only the download/iteration mechanism changed.
+**Open / handoff:** the full run was still in progress at commit time (~17.5k/45.5k done).
+
 ## 2026-06-26 16:10 EDT — Claude Code — User-submitted reviews: plumbing (table + storage bucket)
 
 **Did:** Started the "Submit your own review" feature. Two dev migrations, applied to dev + verified:
