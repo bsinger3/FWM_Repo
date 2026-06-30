@@ -2270,3 +2270,29 @@ when she's ready to Save. Nothing written to prod; dev only.
   good/great lighting labels to refine the upper end.
 - **No server left running** (stopped the localhost:8791 reports/save-server for relaunch).
   Restart it with `node scripts/lighting-label-server.mjs` when Bri wants the dashboards.
+
+### 2026-06-30 — Claude Code — Face/smile pass complete + prettiness review dashboard
+
+- **Face/smile detection COMPLETE** over all 45,269 images: `scripts/detect_faces_smiles.py`
+  (YuNet face + FER+ smile via cv2.dnn + cheek-reference mouth-occlusion gate). Output
+  `../FWM_Data/_cache/face_smile_full.ndjson` (28,201 faces, 11,545 smiling, 4,271 occluded).
+  NOTE: overlapping `--resume` restarts produced duplicate lines (50,873); I deduped in
+  place to 45,269 unique (0 missing), backup at `.bak`. Models in `../FWM_Data/_models/`
+  (yunet 227KB, ferplus 33MB) — not in git. (Codex committed `8c83413` fixing unbounded
+  memory in the detector's download pipeline — verify before a re-run.)
+- **Integrated into scorer**: new `scripts/lib/face-smile-index.mjs`; scorer gains
+  `--face-smile=<ndjson>`; `face_visible_score` + `smile_score` now populate the blend
+  (smile weight 0.1, provisional). Only `aesthetic_score` (CLIP) remains pending.
+- **Review dashboards**: `scripts/build-smile-validation-dashboard.mjs` and
+  `scripts/build-prettiness-review-dashboard.mjs` (per-image comments + bulk labels;
+  saves to `_reports/prettiness_annotations_*.json` via the label server's new
+  `/save-annotations` route). Label server is `scripts/lighting-label-server.mjs` on :8791
+  — needs `dangerouslyDisableSandbox` to bind now that the cmd sandbox tightened.
+- **Bri's first annotations (28)** flagged: dominant = **bad lighting (~16)**, then
+  cluttered bg, hazy/blurry, bad angle, head-covered, "wrong subject (male — REMOVE from
+  images table, not a scoring issue)". Diagnosis: bad-lighting images still score ~0.80
+  on lighting (global pixel stats can't see perceptual bad lighting) AND lighting is only
+  ~11% of the blend (technical clamped to 25%). **Next:** add a sharpness/blur signal
+  (quick, covers hazy/blurry), rebalance lighting weight, and this is the strongest case
+  yet for building the deferred CLIP/aesthetic bucket. Bri to bulk-label a bigger batch.
+- All committed. Nothing pushed. Server being stopped for the night.
