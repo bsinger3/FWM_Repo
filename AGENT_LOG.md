@@ -2296,3 +2296,22 @@ when she's ready to Save. Nothing written to prod; dev only.
   (quick, covers hazy/blurry), rebalance lighting weight, and this is the strongest case
   yet for building the deferred CLIP/aesthetic bucket. Bri to bulk-label a bigger batch.
 - All committed. Nothing pushed. Server being stopped for the night.
+
+### 2026-06-30 (eve) — Claude Code — Sharpness signal, technical rebalance, wrong-subject removal
+
+- **Sharpness/blur signal** added: `scripts/lib/pixel-stats.mjs` computes `sharpness`
+  (variance of Laplacian on a dedicated 256px decode — 96px couldn't separate blur).
+  Scorer `sharpnessScore` (anchors 180/600) in the technical bucket. Catches FOCUS
+  blur, not atmospheric haze.
+- **Technical rebalance**: `TECHNICAL_INTERIM_CAP` 0.25 -> 0.40; technical weights now
+  lighting .40 / sharpness .20 / colorfulness .20 / clutter .20. (committed `05f6f8c`)
+- **Bad lighting is still the open problem**: most bad-lighting images score lighting
+  0.90+ (global pixel stats can't perceive perceptual bad lighting), so the rebalance
+  only helps the correctly-low ones. This is the strongest case for building the
+  deferred CLIP/aesthetic bucket — recommended next major piece.
+- **Wrong-subject removal**: new `scripts/exclude-dev-images.mjs` — reversible soft-hide
+  via removed_at/removed_reason (+ pre-write snapshot, gated by FWM_DEV_DB_WRITE_OK).
+  Applied to the 3 male-subject images Bri flagged. Snapshot in `_reports/`. (`2de43fe`)
+- Review dashboard palette seeded from Bri's comment themes; she's labelling more.
+- Label server (`scripts/lighting-label-server.mjs` :8791) needs dangerouslyDisableSandbox
+  to bind now. Stopped for relaunch. Nothing pushed.
