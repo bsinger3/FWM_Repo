@@ -70,16 +70,24 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === "POST" && req.url.split("?")[0] === "/save-labels") {
+  if (req.method === "POST" && ["/save-labels", "/save-annotations"].includes(req.url.split("?")[0])) {
     try {
       const raw = await readBody(req);
       const parsed = JSON.parse(raw); // validate it is JSON before writing
-      const count = Array.isArray(parsed.labels) ? parsed.labels.length : null;
-      const filename = `lighting_labels_${ts()}.json`;
+      const count = Array.isArray(parsed.labels)
+        ? parsed.labels.length
+        : Array.isArray(parsed.annotations)
+          ? parsed.annotations.length
+          : null;
+      // Caller can pick the file stem via save_name (sanitised); defaults by route.
+      const stem = String(parsed.save_name || (req.url.includes("annotations") ? "prettiness_annotations" : "lighting_labels"))
+        .replace(/[^a-z0-9_-]/gi, "_")
+        .slice(0, 64);
+      const filename = `${stem}_${ts()}.json`;
       const outPath = path.join(ROOT, filename);
       await mkdir(ROOT, { recursive: true });
       await writeFile(outPath, JSON.stringify(parsed, null, 2) + "\n", "utf8");
-      console.log(`[save-labels] wrote ${count ?? "?"} labels -> ${outPath}`);
+      console.log(`[save] wrote ${count ?? "?"} entries -> ${outPath}`);
       res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
       res.end(JSON.stringify({ ok: true, path: outPath, filename, count }));
     } catch (error) {
