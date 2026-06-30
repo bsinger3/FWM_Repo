@@ -375,6 +375,15 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Opened from an email link in a browser (no Supabase JWT) — auth is the HMAC
+# token in the URL, so JWT verification must be off.
+[functions.moderate-submission]
+verify_jwt = false
+
+# Called by the DB webhook with the (public) anon key as Bearer — keep JWT on.
+[functions.notify-submission]
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327

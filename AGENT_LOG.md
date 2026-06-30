@@ -33,6 +33,47 @@ other. This file is how a handoff survives from one session to the next.
 
 ---
 
+## 2026-06-29 22:10 EDT — Claude Code — Review submissions: email notify + one-tap approve loop
+
+**Did:** Built the moderation-notification loop on top of the user-review-submission feature. All in
+DEV, verified end-to-end.
+- **`dev_34`** — `approve_user_submission(id, storage_base_url)` / `reject_user_submission(id, reason)`
+  / `refresh_searchable_images()` as SECURITY DEFINER functions (EXECUTE → service_role only). The
+  promotion logic now lives in ONE place (the Edge Function and the CLI both promote the same way).
+- **`dev_35`** — `pg_net` + AFTER INSERT trigger on `user_review_submissions` that async-POSTs the row
+  id to the notify-submission function (Authorization = the PUBLIC dev anon key, which is committed in
+  the migration — fine, same key as config.dev.js). Errors are swallowed so a notify hiccup never
+  blocks a submission insert.
+- **Edge Function `notify-submission`** (verify_jwt=true) — re-fetches the row with the service role
+  (never trusts the webhook body), emails the operator via Resend with HMAC-signed Approve/Reject links.
+- **Edge Function `moderate-submission`** (verify_jwt=false; HMAC token IS the auth) — GET renders a
+  confirmation page (no mutation, prefetch-safe), POST executes via the dev_34 RPCs. config.toml has the
+  per-function verify_jwt settings.
+- **Secrets on dev** (Supabase secret manager, set by `supabase secrets set`): `RESEND_API_KEY`,
+  `MODERATION_HMAC_KEY`, `NOTIFY_EMAIL=bsinger3@gmail.com`. Local copies in `.env` (gitignored).
+
+**Verified:** INSERT → pg_net logged `200 "notified"` (auto email sent) → moderate GET shows the
+confirm page → POST returns "Approved ✅" → submission approved + review/page/image created. Reject RPC
+flips status=rejected. All test data + storage objects deleted afterward; dev clean.
+
+**Heads-up — Supabase edge secret caching:** updating a secret value does NOT reliably propagate to a
+deployed function (even after redeploy + minutes). The running function kept the FIRST value set. Two
+takeaways: (1) this is fine in practice — notify (signs) and moderate (verify) read the SAME runtime
+secret, so links are internally consistent regardless of the value; (2) if you ever NEED to rotate the
+HMAC key, expect to set it under a NEW secret name (I had to: `MODERATION_SIGNING_SECRET` →
+`MODERATION_HMAC_KEY`). Don't waste time trying to verify a new secret value by computing tokens
+locally — generate test tokens from the function itself.
+
+**Commands need sandbox off:** `supabase secrets set` / `functions deploy` and any curl to
+`*.supabase.co/functions` or `/storage` hit non-allowlisted hosts — run them with the sandbox disabled.
+Also: the command-sandbox silently blocks writes to `.env`.
+
+**Open / handoff:** Resend's `onboarding@resend.dev` sender works because the email goes to the Resend
+account owner (bsinger3@gmail.com) — for ANY other recipient you must verify a domain. NOT ported to
+prod: prod needs the dev_34/35 SQL applied (with the PROD anon key + prod function URL in the trigger),
+the two functions deployed to prod, the three secrets set on prod, and the prod anon-key wired. The
+RESEND_API_KEY shown in chat earlier should still be rotated.
+
 ## 2026-06-27 13:55 EDT — Claude Code — Fix unbounded-memory bug in detect_faces_smiles.py
 
 **Did:** `scripts/detect_faces_smiles.py` was OOM-ing an 8 GB machine (~33 GB RSS, ~9 GB
