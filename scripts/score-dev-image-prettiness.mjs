@@ -65,7 +65,11 @@ const PLAN_BLEND = { aesthetic: 0.55, technical: 0.25, domain_fit: 0.2 };
 // While aesthetic is null, technical keeps at most its planned 25% share and the
 // trusted domain-fit signal absorbs the orphaned aesthetic weight (-> 75%),
 // instead of renormalization handing technical 56%.
-const TECHNICAL_INTERIM_CAP = 0.25;
+// Raised 0.25 -> 0.40 (2026-06-30): Bri's review showed bad-lighting/blurry photos
+// ranking too high because technical barely counted. Now that technical carries
+// real signals (recalibrated lighting + colorfulness + clutter + sharpness), give
+// it more pull. prettiness = 0.40*technical + 0.60*domain_fit while aesthetic null.
+const TECHNICAL_INTERIM_CAP = 0.4;
 // Sub-weights inside the domain-fit component (sum to 1). Body-centric because
 // fit-shopping usefulness is the point; null components are skipped + renormalized.
 // body_visible is keypoint-aware (head/feet must survive the card crop);
@@ -81,9 +85,9 @@ const DOMAIN_FIT_WEIGHTS = {
   smile: 0.1,
 };
 // Sub-weights inside the technical-quality component. Lighting is trustworthy;
-// colorfulness rewards vivid frames; clutter is a coarse whole-frame proxy, so it
-// is weighted lowest.
-const TECHNICAL_WEIGHTS = { lighting: 0.45, colorfulness: 0.25, clutter: 0.3 };
+// sharpness catches blur; colorfulness rewards vivid frames; clutter is a coarse
+// whole-frame proxy, so it is weighted lowest.
+const TECHNICAL_WEIGHTS = { lighting: 0.4, sharpness: 0.2, colorfulness: 0.2, clutter: 0.2 };
 // Lighting sub-scoring (exposure/brightness/contrast/cast) lives in
 // ./lib/lighting-score.mjs so the calibration dashboard shares the exact logic;
 // LIGHTING_WEIGHTS is re-exported from there and imported above.
@@ -379,12 +383,25 @@ function backgroundClutterScore(stats) {
   return clamp01((CLUTTER_BUSYNESS_BUSY - stats.edge_busyness) / (CLUTTER_BUSYNESS_BUSY - CLUTTER_BUSYNESS_CLEAN));
 }
 
+// Penalize blurry / soft / out-of-focus frames (variance of the Laplacian on the
+// 256px decode — see pixel-stats SHARP_PX). Calibrated 2026-06-30 against Bri's
+// hazy/blurry flags (sharpness ~110-143) vs the reference population (p10 632,
+// median 1313): <= BLURRY -> 0, >= SHARP -> 1. NOTE: catches FOCUS blur, not
+// atmospheric haze (a hazy-but-in-focus frame stays sharp here).
+const SHARP_BLURRY = 180; // at/below this reads as blurry -> 0
+const SHARP_CLEAR = 600; // at/above this reads as crisp -> 1
+function sharpnessScore(stats) {
+  if (!stats || !Number.isFinite(stats.sharpness)) return null;
+  return clamp01((stats.sharpness - SHARP_BLURRY) / (SHARP_CLEAR - SHARP_BLURRY));
+}
+
 function technicalQualityScore(stats) {
   if (!stats) return null;
   return weightedMean([
     [lightingScore(stats), TECHNICAL_WEIGHTS.lighting],
     [colorfulnessScore(stats), TECHNICAL_WEIGHTS.colorfulness],
     [backgroundClutterScore(stats), TECHNICAL_WEIGHTS.clutter],
+    [sharpnessScore(stats), TECHNICAL_WEIGHTS.sharpness],
   ]);
 }
 
@@ -480,8 +497,9 @@ function scoreOne(row, metadata, cv, pixelStats, cropSpecOverride, kpa, fs) {
     face_visible_score: faceVisibleScore(cv, fs),
     // Smile from the face/smile overlay (FER+); null when no overlay/face (skipped).
     smile_score: smileScore(fs),
-    // Technical bucket: deterministic lighting + colorfulness + coarse clutter.
+    // Technical bucket: deterministic lighting + sharpness + colorfulness + clutter.
     lighting_score: lightingScore(pixelStats),
+    sharpness_score: sharpnessScore(pixelStats),
     colorfulness_score: colorfulnessScore(pixelStats),
     background_clutter_score: backgroundClutterScore(pixelStats),
     technical_quality_score: technicalQualityScore(pixelStats),
@@ -640,6 +658,7 @@ function summarize(results) {
     "face_visible_score",
     "smile_score",
     "lighting_score",
+    "sharpness_score",
     "colorfulness_score",
     "background_clutter_score",
     "technical_quality_score",
@@ -747,7 +766,7 @@ function card(result) {
         <div>${htmlEscape(result.dimensions?.width)}&times;${htmlEscape(result.dimensions?.height)} ${htmlEscape(result.dimensions?.format || "")}</div>
         <div>aspect ${htmlEscape(c.aspect_score)} &middot; res ${htmlEscape(c.resolution_score)}</div>
         <div>body ${htmlEscape(c.body_visible_score)} &middot; cardfit ${htmlEscape(c.body_card_coverage_score)} &middot; comp ${htmlEscape(c.composition_score)} &middot; face ${htmlEscape(c.face_visible_score)} &middot; smile ${htmlEscape(c.smile_score)}</div>
-        <div>light ${htmlEscape(c.lighting_score)} &middot; color ${htmlEscape(c.colorfulness_score)} &middot; clutter ${htmlEscape(c.background_clutter_score)} &middot; tech ${htmlEscape(c.technical_quality_score)}</div>
+        <div>light ${htmlEscape(c.lighting_score)} &middot; sharp ${htmlEscape(c.sharpness_score)} &middot; color ${htmlEscape(c.colorfulness_score)} &middot; clutter ${htmlEscape(c.background_clutter_score)} &middot; tech ${htmlEscape(c.technical_quality_score)}</div>
         ${cmpLine}
         <div>${coverageLine}</div>
         <div class="site">fullbody=${htmlEscape(result.derived_full_body_visible)} &middot; head=${htmlEscape(result.keypoint_frame?.head_in_frame)} feet=${htmlEscape(result.keypoint_frame?.feet_in_frame)}</div>
@@ -867,6 +886,7 @@ function buildCsv(results) {
     "face_visible_score",
     "smile_score",
     "lighting_score",
+    "sharpness_score",
     "colorfulness_score",
     "background_clutter_score",
     "derived_full_body_visible",
@@ -902,6 +922,7 @@ function buildCsv(results) {
       r.components?.face_visible_score,
       r.components?.smile_score,
       r.components?.lighting_score,
+      r.components?.sharpness_score,
       r.components?.colorfulness_score,
       r.components?.background_clutter_score,
       r.derived_full_body_visible,

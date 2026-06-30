@@ -11,6 +11,7 @@
 import sharp from "sharp";
 
 const THUMB_PX = 96; // stats don't need resolution; small = fast + stable.
+const SHARP_PX = 256; // sharpness needs more pixels — 96px compresses blur vs sharp.
 const SHADOW_CLIP = 4; // luma <= this counts as crushed shadow
 const HIGHLIGHT_CLIP = 251; // luma >= this counts as blown highlight
 const EDGE_THRESHOLD = 48; // Sobel gradient magnitude (0..~1020) counted as an edge
@@ -26,7 +27,8 @@ function luma(r, g, b) {
 // heightFrac } — pass it to measure the CARD window (post-autocrop) rather than
 // the full source image.
 export async function computePixelStats(buffer, { size = THUMB_PX, crop = null } = {}) {
-  let pipeline = sharp(buffer);
+  // Resolve the crop window to an extract rect once, shared by both decodes.
+  let extract = null;
   if (crop) {
     const meta = await sharp(buffer).metadata();
     const W = meta.width;
@@ -36,15 +38,36 @@ export async function computePixelStats(buffer, { size = THUMB_PX, crop = null }
       const top = Math.min(H - 1, Math.max(0, Math.round(crop.topFrac * H)));
       const width = Math.max(1, Math.min(W - left, Math.round(crop.widthFrac * W)));
       const height = Math.max(1, Math.min(H - top, Math.round(crop.heightFrac * H)));
-      pipeline = sharp(buffer).extract({ left, top, width, height });
+      extract = { left, top, width, height };
     }
   }
-  const { data, info } = await pipeline
+  const base = () => (extract ? sharp(buffer).extract(extract) : sharp(buffer));
+
+  const { data, info } = await base()
     .resize(size, size, { fit: "inside", withoutEnlargement: false })
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  return statsFromRaw(data, info.width, info.height, info.channels);
+  const stats = statsFromRaw(data, info.width, info.height, info.channels);
+
+  // Sharpness on a larger grayscale decode (96px can't tell blur from sharp).
+  if (stats) {
+    const sg = await base()
+      .resize(SHARP_PX, SHARP_PX, { fit: "inside", withoutEnlargement: false })
+      .greyscale()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    stats.sharpness = laplacianVar(toFloatGrid(sg.data, sg.info.channels), sg.info.width, sg.info.height);
+  }
+  return stats;
+}
+
+function toFloatGrid(data, channels) {
+  if (channels === 1) return data;
+  const n = Math.floor(data.length / channels);
+  const out = new Float64Array(n);
+  for (let i = 0; i < n; i += 1) out[i] = data[i * channels];
+  return out;
 }
 
 // Pure: raw interleaved channel bytes -> stats. Exported for unit testing.
@@ -120,7 +143,32 @@ export function statsFromRaw(data, width, height, channels = 3) {
     color_cast: colorCast,
     colorfulness,
     edge_busyness: edgeBusyness(lumaGrid, width, height),
+    // sharpness is computed in computePixelStats on a larger decode (see SHARP_PX).
   };
+}
+
+// Variance of the Laplacian — the classic focus/blur measure. A crisp frame has
+// lots of high-frequency detail (high variance); a hazy/blurry/soft frame has
+// little (low variance). Measured on the same small thumbnail as the other stats,
+// so values are modest; the scorer calibrates the threshold. 4-neighbour kernel.
+function laplacianVar(lumaGrid, width, height) {
+  if (width < 3 || height < 3) return 0;
+  let sum = 0;
+  let sumSq = 0;
+  let n = 0;
+  for (let y = 1; y < height - 1; y += 1) {
+    for (let x = 1; x < width - 1; x += 1) {
+      const idx = y * width + x;
+      const lap =
+        4 * lumaGrid[idx] - lumaGrid[idx - 1] - lumaGrid[idx + 1] - lumaGrid[idx - width] - lumaGrid[idx + width];
+      sum += lap;
+      sumSq += lap * lap;
+      n += 1;
+    }
+  }
+  if (!n) return 0;
+  const mean = sum / n;
+  return Math.max(0, sumSq / n - mean * mean);
 }
 
 // Fraction of interior pixels whose Sobel gradient magnitude exceeds the edge
