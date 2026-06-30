@@ -129,7 +129,14 @@ async function main() {
   var SOURCE = ${JSON.stringify(stem)};
   var AKEY = "prettiness_annotations_v1", PKEY = "prettiness_label_palette_v1";
   var ann = JSON.parse(localStorage.getItem(AKEY) || "{}");
-  var palette = JSON.parse(localStorage.getItem(PKEY) || "null") || ["bad lighting","cluttered background","hazy picture"];
+  // Seed labels distilled from Bri's free-text comments. Always merged in (so
+  // updating this list propagates) on top of any labels she added herself.
+  var SEED = ["bad lighting","cluttered background","hazy or blurry","bad angle","face or head covered","bad crop","wrong subject (not target)"];
+  var stored = JSON.parse(localStorage.getItem(PKEY) || "null") || [];
+  var palette = SEED.slice();
+  stored.forEach(function(l){ if(palette.indexOf(l)<0) palette.push(l); });
+  savePaletteInit();
+  function savePaletteInit(){ localStorage.setItem(PKEY, JSON.stringify(palette)); }
   var selected = {};
   function saveLocal(){ localStorage.setItem(AKEY, JSON.stringify(ann)); }
   function savePalette(){ localStorage.setItem(PKEY, JSON.stringify(palette)); }
