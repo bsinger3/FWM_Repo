@@ -49,8 +49,16 @@ DEV, verified end-to-end.
 - **Edge Function `moderate-submission`** (verify_jwt=false; HMAC token IS the auth) — GET renders a
   confirmation page (no mutation, prefetch-safe), POST executes via the dev_34 RPCs. config.toml has the
   per-function verify_jwt settings.
-- **Secrets on dev** (Supabase secret manager, set by `supabase secrets set`): `RESEND_API_KEY`,
-  `MODERATION_HMAC_KEY`, `NOTIFY_EMAIL=bsinger3@gmail.com`. Local copies in `.env` (gitignored).
+- **Secrets on dev** (Supabase secret manager, set by `supabase secrets set`): `RESEND_KEY`,
+  `MODERATION_HMAC_KEY`, `NOTIFY_EMAIL=bsinger3@gmail.com`. Local copies in `.env` (gitignored; the
+  Resend key is under `RESEND_API_KEY` there, but the FUNCTION reads `RESEND_KEY` from Supabase).
+
+**Resend key saga (resolved):** the operator rotated the originally-exposed key, which invalidated the
+value the function had cached. Same Supabase secret-cache problem as the HMAC key, so the fix was a
+fresh secret NAME: function now reads `RESEND_KEY` (not `RESEND_API_KEY`). Confirmed a direct Resend
+send returns `last_event:"delivered"` to bsinger3@gmail.com — delivery works; earlier "missing" emails
+were almost certainly spam-filtered (sender is the shared `onboarding@resend.dev`). For prod, a
+verified sending domain will fix deliverability/spam.
 
 **Verified:** INSERT → pg_net logged `200 "notified"` (auto email sent) → moderate GET shows the
 confirm page → POST returns "Approved ✅" → submission approved + review/page/image created. Reject RPC

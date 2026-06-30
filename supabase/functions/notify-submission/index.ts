@@ -18,7 +18,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SIGNING_SECRET = Deno.env.get("MODERATION_HMAC_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+const RESEND_API_KEY = Deno.env.get("RESEND_KEY")!;
 const NOTIFY_EMAIL = Deno.env.get("NOTIFY_EMAIL") || "bsinger3@gmail.com";
 // Resend's shared sender works with no domain setup when emailing your own
 // account address. Swap for a verified-domain sender when porting to prod.
