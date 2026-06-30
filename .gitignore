@@ -61,3 +61,6 @@ GoogleAnalytics/
 
 # Scrape response caches (regenerable; thousands of files — keep out of repo)
 **/.title-scrape-cache/
+
+# JetBrains IDE settings
+.idea/

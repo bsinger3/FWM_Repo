@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     <a href="${approveUrl}" style="display:inline-block;background:#1e8e3e;color:#fff;text-decoration:none;font-weight:600;padding:11px 22px;border-radius:8px;margin-right:10px">Approve</a>
     <a href="${rejectUrl}" style="display:inline-block;background:#c0392b;color:#fff;text-decoration:none;font-weight:600;padding:11px 22px;border-radius:8px">Reject</a>
   </p>
-  <p style="color:#999;font-size:12px">You'll get a confirmation screen before anything is published.</p>
+  <p style="color:#999;font-size:12px">Tapping Approve publishes the review immediately; Reject discards it.</p>
 </div>`;
 
   const res = await fetch("https://api.resend.com/emails", {

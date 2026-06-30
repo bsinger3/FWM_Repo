@@ -76,11 +76,30 @@ locally — generate test tokens from the function itself.
 `*.supabase.co/functions` or `/storage` hit non-allowlisted hosts — run them with the sandbox disabled.
 Also: the command-sandbox silently blocks writes to `.env`.
 
+**EOD update (2026-06-29 ~23:30 EDT) — loop user-tested + two fixes:**
+- **Resend key:** operator rotated the exposed key; new valid key is set as Supabase secret `RESEND_KEY`
+  (function reads `RESEND_KEY`, not `RESEND_API_KEY`). Delivery confirmed `delivered` by Resend. Gmail
+  files the rich notification emails into **Spam/Promotions** (shared `onboarding@resend.dev` sender) —
+  a normal Gmail search excludes Spam, so use `in:anywhere`. Verified domain is the real fix, for prod.
+- **moderate-submission rewrite:** Supabase edge runtime FORCES `content-type: text/plain` on function
+  responses (can't serve rendered HTML on supabase.co), so the HTML confirm-page-with-button could
+  never render (showed raw source) and `req.url` gave the wrong POST target. Rewrote to **one-tap**:
+  GET performs the action via the RPCs and returns a plain-text result. Verified by pulling a real
+  token from a sent email (via Resend's GET /emails/:id) and approving a fresh submission through the
+  function. Email footer copy updated to match (one-tap, no confirm screen).
+- **Form tweaks (index.dev.html):** removed the "Name or handle" field (was never displayed, misleading
+  placeholder + needless PII); reworded the full-body checkbox to "These are full-length photos (head to
+  toe)" (the old "full body" read as a nudity question). Brand/retailer/price-from-URL is a deferred
+  follow-up (spawned task chip).
+- **User ran the whole loop successfully:** submit form → email (in spam) → tap Approve → review live →
+  found it as the #1 search result. Dev is the proven, working reference for the prod port.
+
 **Open / handoff:** Resend's `onboarding@resend.dev` sender works because the email goes to the Resend
 account owner (bsinger3@gmail.com) — for ANY other recipient you must verify a domain. NOT ported to
 prod: prod needs the dev_34/35 SQL applied (with the PROD anon key + prod function URL in the trigger),
-the two functions deployed to prod, the three secrets set on prod, and the prod anon-key wired. The
-RESEND_API_KEY shown in chat earlier should still be rotated.
+the two functions deployed to prod, the three secrets set on prod (`RESEND_KEY`, `MODERATION_HMAC_KEY`,
+`NOTIFY_EMAIL`), and the form added to the real `index.html`. One open dev row: a 2nd pending
+"Independent" submission (2ce60fbe) left for the operator to test the email Approve button.
 
 ## 2026-06-27 13:55 EDT — Claude Code — Fix unbounded-memory bug in detect_faces_smiles.py
 

@@ -1086,7 +1086,7 @@
               </div>
               <div class="review-field full">
                 <label class="review-checkbox">
-                  <input id="review-fullbody" type="checkbox" /> These photos show my full body
+                  <input id="review-fullbody" type="checkbox" /> These are full-length photos (head to toe)
                 </label>
               </div>
             </div>
@@ -1095,13 +1095,9 @@
           <div class="review-section">
             <div class="review-section-title">About you (optional)</div>
             <div class="review-grid">
-              <div class="review-field">
-                <label>Name or handle</label>
-                <input id="review-name" type="text" placeholder="Shown with your review" />
-              </div>
-              <div class="review-field">
-                <label>Email</label>
-                <input id="review-email" type="email" placeholder="Follow-up only — never shown" />
+              <div class="review-field full">
+                <label>Email <span style="color:#999;font-weight:400">(optional, for follow-up — never shown publicly)</span></label>
+                <input id="review-email" type="email" placeholder="you@example.com" />
               </div>
               <div class="review-field full">
                 <label>Review / notes</label>
@@ -2908,7 +2904,6 @@
               status: "pending",
               anon_id: FWM_ANON_ID,
               session_id: FWM_SESSION_ID,
-              reviewer_name: val("review-name"),
               reviewer_email: val("review-email"),
               height_in_total: heightTotal,
               weight_lbs: num(val("review-weight")),
