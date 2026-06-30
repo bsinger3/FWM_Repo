@@ -87,8 +87,8 @@ Deno.serve(async (req) => {
     }
   } catch (e) {
     const msg = String((e as { message?: string })?.message ?? e);
-    if (/not pending|already exists/i.test(msg)) {
-      return reply("This submission was already handled — no action taken.");
+    if (/not pending|already exists|no submission found/i.test(msg)) {
+      return reply("This submission is no longer available — it was already handled or removed. No action needed.");
     }
     return reply(`Something went wrong: ${msg}`, 500);
   }
