@@ -1,46 +1,18 @@
 <!doctype html>
 <html>
   <head>
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-98WRHGEPZG"
-    ></script>
+    <!--
+      Google Analytics is intentionally DISABLED on this dev preview page.
+      index.dev.html is a local testing harness; loading GA here would pollute
+      the production G-98WRHGEPZG property with localhost traffic. gtag is
+      stubbed as a no-op so any incidental references don't throw, and the
+      GTM library is never loaded, so no hits are sent.
+    -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
-      // Internal-traffic tagging. Visit the live site once per browser with
-      // ?internal=1 to persist a flag in localStorage (use ?internal=0 to
-      // clear it). When set, every hit from that browser carries
-      // traffic_type=internal, which GA4's built-in "Internal Traffic" data
-      // filter can exclude from reports. This is browser-based (not IP-based),
-      // so it follows each laptop across any network.
-      (function () {
-        try {
-          var params = new URLSearchParams(window.location.search);
-          if (params.has("internal")) {
-            if (params.get("internal") === "0") {
-              localStorage.removeItem("fwm_internal_traffic");
-            } else {
-              localStorage.setItem("fwm_internal_traffic", "1");
-            }
-          }
-        } catch (e) {}
-      })();
-      var FWM_IS_INTERNAL = (function () {
-        try {
-          return localStorage.getItem("fwm_internal_traffic") === "1";
-        } catch (e) {
-          return false;
-        }
-      })();
-      gtag("js", new Date());
-      gtag(
-        "config",
-        "G-98WRHGEPZG",
-        FWM_IS_INTERNAL ? { traffic_type: "internal" } : {},
-      );
     </script>
     <title>
       FriendsWithMeasurements • Find looks that match your measurements
@@ -65,7 +37,7 @@
         width: 280px;
         background: #f8f8f8;
         border-right: 1px solid #ddd;
-        padding: 20px;
+        padding: 16px 20px;
         box-sizing: border-box;
         position: fixed;
         height: 100vh;
@@ -76,8 +48,8 @@
         transform: translateX(-280px);
       }
       .sidebar h1 {
-        margin: 0 0 20px;
-        font-size: 20px;
+        margin: 0 0 6px;
+        font-size: 18px;
       }
       .toggle-btn {
         position: fixed;
@@ -124,13 +96,13 @@
       form {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 6px;
       }
       .intro-copy {
-        font-size: 13px;
+        font-size: 12.5px;
         color: #666;
-        margin: 0 0 20px;
-        line-height: 1.5;
+        margin: 0 0 6px;
+        line-height: 1.4;
       }
       .helper-copy {
         font-size: 12px;
@@ -141,8 +113,8 @@
       .field-group {
         display: flex;
         flex-direction: column;
-        gap: 8px;
-        padding: 10px 12px;
+        gap: 4px;
+        padding: 6px 12px;
         border: 1px solid #e4e4e4;
         border-radius: 8px;
         background: #fff;
@@ -151,6 +123,22 @@
         font-size: 14px;
         font-weight: 600;
         color: #111;
+      }
+      /* Row that holds the measurement input(s) and the require checkbox
+         side by side, so the toggle no longer needs its own line. */
+      .field-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .field-row > input,
+      .field-row > .height-group,
+      .field-row > .bra-size-group {
+        flex: 1;
+        min-width: 0;
+      }
+      .field-row > input {
+        margin-top: 0;
       }
       .height-group {
         display: flex;
@@ -168,31 +156,46 @@
         flex: 1;
         min-width: 0;
       }
+      /* Sub-labels inside the side-by-side groups (Feet/Inches, Underbust/Cup)
+         get a smaller font so "Underbust" stays on one line in its narrow column. */
+      .height-group .input-label,
+      .bra-size-group .input-label {
+        font-size: 12px;
+      }
       .input-label {
         display: flex;
         flex-direction: column;
         font-size: 14px;
         font-weight: 500;
-        margin-bottom: 4px;
+        margin-bottom: 0;
       }
       input,
       select,
       button {
-        padding: 8px;
+        padding: 6px 8px;
         font-size: 14px;
         border: 1px solid #ddd;
         border-radius: 4px;
-        margin-top: 4px;
+        margin-top: 2px;
         box-sizing: border-box;
         width: 100%;
+      }
+      /* Example values are hints, not entered text — keep them clearly light
+         so they don't read as already-filled-in. */
+      input::placeholder {
+        color: #c4c4c4;
+        opacity: 1; /* Firefox dims placeholders by default; pin it */
       }
       .require-toggle {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         font-size: 12px;
         color: #555;
         font-weight: 500;
+        flex: 0 0 auto;
+        white-space: nowrap;
+        cursor: help;
       }
       .require-toggle input {
         margin: 0;
@@ -205,10 +208,90 @@
         color: #fff;
         cursor: pointer;
         border: none;
-        margin-top: 8px;
+        margin-top: 4px;
       }
       button:hover {
         background: #333;
+      }
+      /* Search + Clear sit side by side so the Clear control adds no extra
+         vertical height (the sidebar still fits without scrolling). */
+      .button-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .button-row > button {
+        margin-top: 0;
+      }
+      .button-row > button[type="submit"] {
+        flex: 1;
+      }
+      .btn-secondary {
+        flex: 0 0 auto;
+        width: auto;
+        padding-left: 14px;
+        padding-right: 14px;
+        background: #fff;
+        color: #333;
+        border: 1px solid #ddd;
+      }
+      .btn-secondary:hover {
+        background: #f0f0f0;
+      }
+      /* Low-prominence disclosure for sparse, rarely-populated metrics. Collapsed
+         by default so it doesn't compete with the main fields or grow the sidebar. */
+      .advanced-filters {
+        margin-top: 6px;
+      }
+      /* Small, low-key disclosure (not a primary button). The caret points right
+         when collapsed and down when expanded to signal it drops open. */
+      .advanced-filters > summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        color: #888;
+        cursor: pointer;
+        list-style: none;
+        padding: 3px 8px;
+        border: 1px solid #e6e6e6;
+        border-radius: 4px;
+        background: #fafafa;
+        user-select: none;
+      }
+      .advanced-filters > summary:hover {
+        background: #f0f0f0;
+        color: #666;
+      }
+      .advanced-filters > summary::-webkit-details-marker {
+        display: none;
+      }
+      .advanced-filters > summary::before {
+        content: "▸";
+        font-size: 10px;
+        color: #aaa;
+        line-height: 1;
+      }
+      .advanced-filters[open] > summary::before {
+        content: "▾";
+      }
+      .advanced-filters[open] > summary {
+        margin-bottom: 8px;
+      }
+      .advanced-note {
+        font-size: 11px;
+        color: #999;
+        line-height: 1.4;
+        margin: 0 0 8px;
+      }
+      .advanced-filters .field-group {
+        gap: 4px;
+        margin-bottom: 6px;
+      }
+      .sublabel-hint {
+        font-weight: 400;
+        font-size: 11px;
+        color: #aaa;
       }
       .result-count {
         padding: 16px 20px;
@@ -228,10 +311,27 @@
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 12px;
       }
+      /* Full-width separator between the measurement matches and the ranked
+         "close matches" remainder below them. */
+      .close-matches-divider {
+        grid-column: 1 / -1;
+        padding: 16px 4px 4px;
+        margin-top: 6px;
+        border-top: 1px solid #e6e6e6;
+        font-size: 13px;
+        color: #888;
+      }
+      .close-matches-divider strong {
+        color: #555;
+        font-weight: 600;
+      }
       .card {
         border: 1px solid #ddd;
         border-radius: 8px;
-        overflow: hidden;
+        /* overflow stays visible so the report dropdown (wider than the card)
+           is not clipped at the card edges. The thumb rounds its own top
+           corners below to keep the rounded-card look. */
+        overflow: visible;
         text-decoration: none;
         color: #111;
         background: #fff;
@@ -243,10 +343,21 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
-      .card img {
+      .thumb {
+        position: relative;
         width: 100%;
         aspect-ratio: 3/4;
+        overflow: hidden;
+        background: #f3f3f3;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+      }
+      .thumb img {
+        width: 100%;
+        height: 100%;
         object-fit: cover;
+        transform-origin: center center;
+        display: block;
         background: #f3f3f3;
       }
       .meta {
@@ -283,6 +394,19 @@
       .meta-pill-value.match-height,
       .meta-pill-value.match-weight {
         font-weight: 700;
+      }
+      /* High-level clothing type chip, shown on cards when the search is not
+         already scoped to a single clothing type. */
+      .meta-type {
+        display: inline-block;
+        background: #f0eef7;
+        color: #5a4a8a;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 999px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
       }
       .match-height {
         color: #c62828;
@@ -444,6 +568,262 @@
         opacity: 0;
         transition: opacity 0.5s ease;
       }
+      /* Dim layer behind the mobile filter overlay (hidden on desktop). */
+      .backdrop {
+        display: none;
+      }
+
+      /* ── Mobile / narrow-viewport layout ─────────────────────────────────
+         On phones the 280px filter panel shouldn't push the content — it slides
+         OVER it, so you land on the photo grid. The existing toggle button opens
+         it as a slide-over with a tap-to-dismiss backdrop. Desktop is untouched. */
+      @media (max-width: 640px) {
+        .main-content,
+        .main-content.expanded {
+          margin-left: 0;
+        }
+        .main-content {
+          padding: 16px 12px;
+        }
+        .sidebar {
+          width: min(86vw, 320px);
+          z-index: 200;
+          box-shadow: 2px 0 16px rgba(0, 0, 0, 0.18);
+        }
+        .sidebar.collapsed {
+          transform: translateX(-100%);
+        }
+        .toggle-btn {
+          z-index: 250;
+        }
+        /* Show + dim only while the sidebar is open (not collapsed). */
+        .sidebar:not(.collapsed) ~ .backdrop {
+          display: block;
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.4);
+          z-index: 150;
+        }
+        /* Two comfortable columns on a phone. */
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .review-modal {
+          padding: 18px 16px 22px;
+        }
+        .review-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ---- Submit-your-own-review ---------------------------------------- */
+      .submit-review-btn {
+        width: 100%;
+        margin-top: 10px;
+        padding: 9px 10px;
+        background: #fff;
+        color: #111;
+        border: 1.5px solid #111;
+        border-radius: 6px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .submit-review-btn:hover {
+        background: #111;
+        color: #fff;
+      }
+      .review-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: flex-start;
+        justify-content: center;
+        z-index: 500;
+        overflow-y: auto;
+        padding: 24px 16px;
+      }
+      .review-overlay.open {
+        display: flex;
+      }
+      .review-modal {
+        background: #fff;
+        border-radius: 12px;
+        width: min(620px, 100%);
+        padding: 22px 24px 26px;
+        box-sizing: border-box;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+      }
+      .review-modal h2 {
+        margin: 0 0 4px;
+        font-size: 19px;
+      }
+      .review-modal .modal-intro {
+        margin: 0 0 16px;
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+      }
+      .review-modal-close {
+        float: right;
+        width: auto;
+        margin: 0;
+        padding: 2px 8px;
+        background: transparent;
+        color: #888;
+        border: none;
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+      }
+      .review-modal-close:hover {
+        background: transparent;
+        color: #111;
+      }
+      .review-section {
+        margin: 0 0 16px;
+      }
+      .review-section-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #999;
+        margin: 0 0 8px;
+      }
+      .review-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 12px;
+      }
+      .review-field {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .review-field.full {
+        grid-column: 1 / -1;
+      }
+      .review-field label {
+        font-size: 12px;
+        color: #555;
+        font-weight: 500;
+      }
+      .review-field .req {
+        color: #c0392b;
+      }
+      .review-field input,
+      .review-field select,
+      .review-field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 7px 8px;
+        font-size: 13px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin: 0;
+        background: #fff;
+        color: #111;
+      }
+      .review-field textarea {
+        resize: vertical;
+        min-height: 56px;
+        font-family: inherit;
+      }
+      .review-inline {
+        display: flex;
+        gap: 8px;
+      }
+      .review-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 13px;
+        color: #444;
+        font-weight: 500;
+      }
+      .review-checkbox input {
+        width: auto;
+        margin: 0;
+      }
+      .photo-drop {
+        border: 1.5px dashed #bbb;
+        border-radius: 8px;
+        padding: 14px;
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        cursor: pointer;
+        background: #fafafa;
+      }
+      .photo-drop:hover {
+        border-color: #111;
+        color: #111;
+      }
+      .photo-previews {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .photo-thumb {
+        position: relative;
+        width: 72px;
+        height: 96px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+      }
+      .photo-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .photo-thumb button {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        border: none;
+        font-size: 13px;
+        line-height: 1;
+        cursor: pointer;
+        margin: 0;
+      }
+      .review-submit-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 4px;
+      }
+      .review-submit-row button[type="submit"] {
+        flex: 1;
+        background: #111;
+        color: #fff;
+      }
+      .review-submit-row button[type="submit"]:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .review-status {
+        font-size: 13px;
+        margin-top: 10px;
+        min-height: 18px;
+        line-height: 1.45;
+      }
+      .review-status.error {
+        color: #c0392b;
+      }
+      .review-status.success {
+        color: #1e8e3e;
+      }
     </style>
   </head>
   <body>
@@ -452,84 +832,87 @@
     <div class="sidebar" id="sidebar">
       <h1>Friends With Measurements</h1>
       <p class="intro-copy">
-        Search real product photos from people with your exact measurements.
-        Find clothing that actually fits by browsing looks from shoppers with
-        similar height, weight, bust, and hips.
+        Browse real product photos from shoppers with measurements like yours to
+        find clothing that actually fits.
       </p>
 
       <form id="f">
         <div class="field-group">
           <div class="field-label">Height</div>
-          <div class="height-group">
-            <label class="input-label">
-              Feet
-              <input id="h-ft" type="number" min="4" max="7" step="1" />
-            </label>
-            <label class="input-label">
-              Inches
-              <input id="h-in" type="number" min="0" max="11" step="1" />
+          <div class="field-row">
+            <div class="height-group">
+              <label class="input-label">
+                Feet
+                <input id="h-ft" type="number" min="4" max="7" step="1" placeholder="5" />
+              </label>
+              <label class="input-label">
+                Inches
+                <input id="h-in" type="number" min="0" max="11" step="1" placeholder="2" />
+              </label>
+            </div>
+            <label class="require-toggle" data-require-label="height" title="Require results to match this measurement">
+              <input id="require-height" type="checkbox" disabled />
+              <span>Require</span>
             </label>
           </div>
-          <label class="require-toggle" data-require-label="height">
-            <input id="require-height" type="checkbox" disabled />
-            <span>Require results to match this measurement</span>
-          </label>
         </div>
         <div class="field-group">
-          <label class="input-label">
-            <span class="field-label">Weight lb</span>
-            <input id="w" type="number" min="70" max="400" step="1" />
-          </label>
-          <label class="require-toggle" data-require-label="weight">
-            <input id="require-weight" type="checkbox" disabled />
-            <span>Require results to match this measurement</span>
-          </label>
+          <div class="field-label">Weight lb</div>
+          <div class="field-row">
+            <input id="w" type="number" min="70" max="400" step="1" placeholder="160" />
+            <label class="require-toggle" data-require-label="weight" title="Require results to match this measurement">
+              <input id="require-weight" type="checkbox" disabled />
+              <span>Require</span>
+            </label>
+          </div>
         </div>
         <div class="field-group">
           <div class="field-label">Bra size</div>
-          <div class="bra-size-group">
-            <label class="input-label">
-              Under bust
-              <input id="b" type="number" min="20" max="60" step="0.5" placeholder='34"' />
-            </label>
-            <label class="input-label">
-              Cup size
-              <input
-                id="cup-size"
-                type="text"
-                list="cup-size-options"
-                placeholder="DD"
-                autocomplete="off"
-                autocapitalize="characters"
-                spellcheck="false"
-              />
+          <div class="field-row">
+            <div class="bra-size-group">
+              <label class="input-label">
+                Underbust
+                <input id="b" type="number" min="20" max="60" step="0.5" placeholder='34"' />
+              </label>
+              <label class="input-label">
+                Cup size
+                <input
+                  id="cup-size"
+                  type="text"
+                  list="cup-size-options"
+                  placeholder="DD"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                />
+              </label>
+            </div>
+            <label class="require-toggle" data-require-label="bust" title="Require results to match this measurement">
+              <input id="require-bust" type="checkbox" disabled />
+              <span>Require</span>
             </label>
           </div>
           <datalist id="cup-size-options"></datalist>
-          <label class="require-toggle" data-require-label="bust">
-            <input id="require-bust" type="checkbox" disabled />
-            <span>Require results to match this measurement</span>
-          </label>
         </div>
         <div class="field-group">
-          <label class="input-label">
-            <span class="field-label">Waist in</span>
-            <input id="waist" type="number" min="20" max="70" step="0.5" />
-          </label>
-          <label class="require-toggle" data-require-label="waist">
-            <input id="require-waist" type="checkbox" disabled />
-            <span>Require results to match this measurement</span>
-          </label>
+          <div class="field-label">Waist in</div>
+          <div class="field-row">
+            <input id="waist" type="number" min="20" max="70" step="0.5" placeholder='32"' />
+            <label class="require-toggle" data-require-label="waist" title="Require results to match this measurement">
+              <input id="require-waist" type="checkbox" disabled />
+              <span>Require</span>
+            </label>
+          </div>
         </div>
         <div class="field-group">
-          <label class="input-label">
-            <span class="field-label">Hips in</span>
-            <input id="p" type="number" min="20" max="70" step="0.5" />
-          </label>
-          <label class="require-toggle" data-require-label="hips">
-            <input id="require-hips" type="checkbox" disabled />
-            <span>Require results to match this measurement</span>
-          </label>
+          <div class="field-label">Hips in</div>
+          <div class="field-row">
+            <input id="p" type="number" min="20" max="70" step="0.5" placeholder='44"' />
+            <label class="require-toggle" data-require-label="hips" title="Require results to match this measurement">
+              <input id="require-hips" type="checkbox" disabled />
+              <span>Require</span>
+            </label>
+          </div>
         </div>
         <label class="input-label">
           <span class="field-label">Clothing Type</span>
@@ -537,22 +920,201 @@
             <option value="">All Types</option>
           </select>
         </label>
-        <button type="submit">Search</button>
+        <details class="advanced-filters">
+          <summary>More measurements</summary>
+          <p class="advanced-note">
+            Few shoppers list these, so adding one will narrow your results to a
+            limited set.
+          </p>
+          <div class="field-group">
+            <div class="field-label">Inseam in</div>
+            <input id="inseam" type="number" min="20" max="40" step="0.5" placeholder='30"' />
+          </div>
+          <div class="field-group">
+            <div class="field-label">
+              Bust in <span class="sublabel-hint">— full bust, not band</span>
+            </div>
+            <input id="bust-in" type="number" min="25" max="60" step="0.5" placeholder='36"' />
+          </div>
+          <div class="field-group">
+            <div class="field-label">Weeks pregnant</div>
+            <input id="weeks-pregnant" type="number" min="1" max="42" step="1" placeholder="30" />
+          </div>
+          <div class="field-group">
+            <div class="field-label">Age</div>
+            <input id="age" type="number" min="13" max="90" step="1" placeholder="30" />
+          </div>
+        </details>
+        <div class="button-row">
+          <button type="submit">Search</button>
+          <button type="button" id="clear-inputs" class="btn-secondary">Clear</button>
+        </div>
       </form>
 
-      <p style="font-size: 12px; color: #666; margin-top: 20px">
+      <button type="button" class="submit-review-btn" id="open-review-modal">
+        ✎ Submit your own review
+      </button>
+
+      <p style="font-size: 12px; color: #666; margin-top: 8px">
         <a href="/about.html" class="norewrite nooptimize" style="color: inherit">About</a> •
         <a href="/privacy.html" class="norewrite nooptimize" style="color: inherit">Privacy</a> •
         <a href="/terms.html" class="norewrite nooptimize" style="color: inherit">Terms</a>
       </p>
     </div>
 
+    <!-- Mobile-only dim layer behind the open filter sidebar; tap to close. -->
+    <div class="backdrop" id="backdrop"></div>
+
     <div class="main-content" id="main">
       <div id="result-count-container"></div>
       <div id="out" class="grid"></div>
     </div>
 
-    <script src="./config.js"></script>
+    <!-- "Submit your own review" form. Hidden until the sidebar button opens it. -->
+    <div
+      class="review-overlay"
+      id="review-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-title"
+    >
+      <div class="review-modal">
+        <button type="button" class="review-modal-close" id="review-close" aria-label="Close">×</button>
+        <h2 id="review-title">Submit your own review</h2>
+        <p class="modal-intro">
+          Share a product you bought, your measurements, and up to 5 photos.
+          Submissions are reviewed before they appear on the site.
+        </p>
+        <form id="review-form">
+          <div class="review-section">
+            <div class="review-section-title">Photos <span class="req">*</span></div>
+            <div class="photo-drop" id="photo-drop">
+              Click to add photos (up to 5). Big images are shrunk automatically before upload.
+            </div>
+            <input id="review-photos" type="file" accept="image/*" multiple hidden />
+            <div class="photo-previews" id="photo-previews"></div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-title">The product</div>
+            <div class="review-grid">
+              <div class="review-field">
+                <label>Size purchased <span class="req">*</span></label>
+                <input id="review-size" type="text" placeholder="M, 8, 32, etc." />
+              </div>
+              <div class="review-field">
+                <label>Category</label>
+                <select id="review-category">
+                  <option value="">Choose…</option>
+                </select>
+              </div>
+              <div class="review-field">
+                <label>Brand</label>
+                <input id="review-brand" type="text" placeholder="e.g. Levi's" />
+              </div>
+              <div class="review-field">
+                <label>Color</label>
+                <input id="review-color" type="text" placeholder="e.g. Indigo" />
+              </div>
+              <div class="review-field full">
+                <label>Product page URL</label>
+                <input id="review-url" type="url" placeholder="https://…" />
+              </div>
+              <div class="review-field">
+                <label>Retailer / site</label>
+                <input id="review-site" type="text" placeholder="e.g. Nordstrom" />
+              </div>
+              <div class="review-field">
+                <label>Price paid</label>
+                <input id="review-price" type="text" placeholder="e.g. $48" />
+              </div>
+            </div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-title">Your measurements</div>
+            <div class="review-grid">
+              <div class="review-field">
+                <label>Height</label>
+                <div class="review-inline">
+                  <input id="review-h-ft" type="number" min="4" max="7" step="1" placeholder="5 ft" />
+                  <input id="review-h-in" type="number" min="0" max="11" step="1" placeholder="2 in" />
+                </div>
+              </div>
+              <div class="review-field">
+                <label>Weight (lb)</label>
+                <input id="review-weight" type="number" min="70" max="400" step="1" placeholder="160" />
+              </div>
+              <div class="review-field">
+                <label>Bra band — underbust (in)</label>
+                <input id="review-band" type="number" min="20" max="60" step="0.5" placeholder="34" />
+              </div>
+              <div class="review-field">
+                <label>Cup size</label>
+                <input
+                  id="review-cup"
+                  type="text"
+                  placeholder="DD"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                />
+              </div>
+              <div class="review-field">
+                <label>Full bust (in)</label>
+                <input id="review-bust" type="number" min="25" max="60" step="0.5" placeholder="36" />
+              </div>
+              <div class="review-field">
+                <label>Waist (in)</label>
+                <input id="review-waist" type="number" min="20" max="70" step="0.5" placeholder="32" />
+              </div>
+              <div class="review-field">
+                <label>Hips (in)</label>
+                <input id="review-hips" type="number" min="20" max="70" step="0.5" placeholder="44" />
+              </div>
+              <div class="review-field">
+                <label>Inseam (in)</label>
+                <input id="review-inseam" type="number" min="20" max="40" step="0.5" placeholder="30" />
+              </div>
+              <div class="review-field">
+                <label>Age</label>
+                <input id="review-age" type="number" min="13" max="90" step="1" placeholder="30" />
+              </div>
+              <div class="review-field">
+                <label>Weeks pregnant</label>
+                <input id="review-weeks" type="number" min="1" max="42" step="1" placeholder="—" />
+              </div>
+              <div class="review-field full">
+                <label class="review-checkbox">
+                  <input id="review-fullbody" type="checkbox" /> These are full-length photos (head to toe)
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-section-title">About you (optional)</div>
+            <div class="review-grid">
+              <div class="review-field full">
+                <label>Email <span style="color:#999;font-weight:400">(optional, for follow-up — never shown publicly)</span></label>
+                <input id="review-email" type="email" placeholder="you@example.com" />
+              </div>
+              <div class="review-field full">
+                <label>Review / notes</label>
+                <textarea id="review-comment" placeholder="How did it fit? True to size?"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-submit-row">
+            <button type="submit" id="review-submit">Submit review</button>
+          </div>
+          <div class="review-status" id="review-status"></div>
+        </form>
+      </div>
+    </div>
+
+    <script src="./config.dev.js"></script>
     <script type="text/javascript">
       if (window.SOVRN_COMMERCE_API_KEY) {
         window.vglnk = {
@@ -682,10 +1244,28 @@
       let isLoading = false;
       let hasMore = true;
       let totalResultCount = 0;
+      // Count of results that match >=1 entered measurement (RPC match_count); the
+      // rest of totalResultCount are the ranked "close matches". The divider that
+      // separates the two groups in the grid is inserted at most once per search.
+      let serverMatchCount = 0;
+      let closeMatchesDividerShown = false;
       let supportsCupSizeRpc = true;
       let supportsCupSizeSearchRpc = true;
       const trackedProductCardImpressions = new Set();
       const trackedProductCardViews = new Set();
+      const EXPECTED_DEV_SUPABASE_URL = "https://gosqgqpftqlawvnyelkt.supabase.co";
+
+      function assertDevPreviewConfig() {
+        if (window.FWM_ENV !== "dev") return;
+        if (window.SUPABASE_URL !== EXPECTED_DEV_SUPABASE_URL) {
+          throw new Error(
+            `Dev preview must use ${EXPECTED_DEV_SUPABASE_URL}, got ${window.SUPABASE_URL || "unset"}`,
+          );
+        }
+        console.info("FWM dev preview using approved dev Supabase project.");
+      }
+
+      assertDevPreviewConfig();
       const productCardViewObserver =
         "IntersectionObserver" in window
           ? new IntersectionObserver(
@@ -778,37 +1358,106 @@
         };
       }
 
-      // Update result count display
-      function updateResultCount(count, hasMoreResults) {
+      // Update result count display.
+      // `count` is the TRUE total of matches for the current search params
+      // (RPC returns it via count(*) over()), so the header shows the full
+      // scrollable total — e.g. "Found 19,212 results in Bottoms" — rather than
+      // how many have loaded so far.
+      // True if the user entered any of the five body measurements that only
+      // *rank* (not filter) the catalog. These are what "matches" is measured
+      // against; clothing type / cup / the sparse advanced fields already filter.
+      function softMeasurementsEntered() {
+        const p = currentSearchParams;
+        return !!(
+          p &&
+          (p.in_height != null ||
+            p.in_weight != null ||
+            p.in_bust != null ||
+            p.in_waist != null ||
+            p.in_hips != null)
+        );
+      }
+
+      // Human category label for headers ("Bottoms" / "all clothing categories").
+      function searchCategoryLabel() {
+        const activeTypeId =
+          currentSearchParams && currentSearchParams.in_clothing_type_id;
+        const activeTypeLabel = activeTypeId
+          ? clothingTypeLabels[activeTypeId] || activeTypeId
+          : null;
+        return activeTypeLabel
+          ? activeTypeLabel.replace(/\b\w/g, (c) => c.toUpperCase())
+          : "all clothing categories";
+      }
+
+      function updateResultCount(count) {
         if (count === null || count === undefined) {
           resultCountContainer.innerHTML = "";
           return;
         }
 
-        if (count === 0) {
-          resultCountContainer.innerHTML = `<div class="result-count">Found <strong>0 results</strong></div>`;
-          return;
-        }
+        const categoryText = `in <strong>${searchCategoryLabel()}</strong>`;
+        const fmt = (n) =>
+          n === 1 ? "1 result" : `${n.toLocaleString()} results`;
+        const total = totalResultCount;
 
-        const countText = count === 1 ? "1 result" : `${count.toLocaleString()} results`;
-        const moreText = hasMoreResults ? "+" : "";
-        resultCountContainer.innerHTML = `<div class="result-count">Found <strong>${countText}${moreText}</strong></div>`;
+        let inner;
+        if (!softMeasurementsEntered()) {
+          // No measurements entered -> the whole set IS the result count.
+          inner = `Found <strong>${fmt(total)}</strong> ${categoryText}`;
+        } else if (serverMatchCount > 0) {
+          // Header counts only rows matching >=1 measurement; the rest show up
+          // below the "close matches" divider as you scroll.
+          inner = `Found <strong>${fmt(serverMatchCount)}</strong> ${categoryText}`;
+        } else {
+          // Measurements entered but nothing within tolerance.
+          const m = total === 1 ? "close match" : "close matches";
+          inner = `<strong>No exact matches</strong> — ${total.toLocaleString()} ${m} ${categoryText}`;
+        }
+        resultCountContainer.innerHTML = `<div class="result-count">${inner}</div>`;
       }
 
-      // Load clothing types
+      // Full-width grid divider announcing the ranked remainder ("close matches").
+      function buildCloseMatchesDivider() {
+        const div = document.createElement("div");
+        div.className = "close-matches-divider";
+        const remaining = Math.max(0, totalResultCount - serverMatchCount);
+        const label = remaining === 1 ? "close match" : "close matches";
+        div.innerHTML = `${remaining.toLocaleString()} ${label} in <strong>${searchCategoryLabel()}</strong>`;
+        return div;
+      }
+
+      // Maps high-level mother_category_id -> human label (e.g. "bottoms" ->
+      // "Bottoms"), populated by loadClothingTypes() and used for the result-count
+      // header and the per-card category chip.
+      const clothingTypeLabels = {};
+
+      // Load high-level clothing categories (mother categories) for the dropdown.
+      // Sourced from public.clothing_mother_categories, which mirrors the curated
+      // staging vocabulary; the granular public.clothing_types is no longer used
+      // for search/display because per-image clothing_type_id is unreliable.
       async function loadClothingTypes() {
         const { data, error } = await sb
-          .from("clothing_types")
+          .from("clothing_mother_categories")
           .select("id, label, sort_order")
           .order("sort_order", { ascending: true });
 
         if (!error && data) {
           const select = document.getElementById("clothing-type");
+          const reviewSelect = document.getElementById("review-category");
           data.forEach((ct) => {
+            clothingTypeLabels[ct.id] = ct.label;
             const option = document.createElement("option");
             option.value = ct.id;
             option.textContent = ct.label;
             select.appendChild(option);
+            // The submit-a-review modal reuses the same high-level categories.
+            if (reviewSelect) {
+              const reviewOption = document.createElement("option");
+              reviewOption.value = ct.id;
+              reviewOption.textContent = ct.label;
+              reviewSelect.appendChild(reviewOption);
+            }
           });
         }
       }
@@ -817,6 +1466,172 @@
 
       function normalizeCupSize(value) {
         return value ? value.trim().toUpperCase() : "";
+      }
+
+      function parseCropSpec(value) {
+        if (!value) return null;
+        if (typeof value === "object") return value;
+        if (typeof value === "string") {
+          try {
+            return JSON.parse(value);
+          } catch {
+            return null;
+          }
+        }
+        return null;
+      }
+
+      function applyCropSpec(img, value) {
+        const cropSpec = parseCropSpec(value);
+        if (!cropSpec) return;
+
+        img.style.objectPosition = "";
+        img.style.transform = "";
+
+        // Auto crops (source: "auto") store an explicit crop window as percentages
+        // of the source image. Render it by sizing the image so the window fills
+        // the 3:4 .thumb frame and offsetting to the window's top-left. object-fit
+        // fill is distortion-free here because the window shares the card aspect.
+        if (cropSpec.mode === "cover-window") {
+          const ww = Number(cropSpec.windowWPct);
+          const wh = Number(cropSpec.windowHPct);
+          const wx = Number(cropSpec.windowXPct);
+          const wy = Number(cropSpec.windowYPct);
+          if ([ww, wh, wx, wy].every(Number.isFinite) && ww > 0 && wh > 0) {
+            img.style.objectFit = "fill";
+            img.style.position = "absolute";
+            img.style.maxWidth = "none";
+            img.style.width = (10000 / ww).toFixed(4) + "%";
+            img.style.height = (10000 / wh).toFixed(4) + "%";
+            img.style.left = (-(wx / ww) * 100).toFixed(4) + "%";
+            img.style.top = (-(wy / wh) * 100).toFixed(4) + "%";
+            const rot = ((Number(cropSpec.rotationDeg ?? cropSpec.rotation_deg ?? 0) % 360) + 360) % 360;
+            if ([90, 180, 270].includes(rot)) img.style.transform = `rotate(${rot}deg)`;
+            return;
+          }
+        }
+
+        const x = Number(cropSpec.objectPositionXPct ?? cropSpec.object_position_x_pct);
+        const y = Number(cropSpec.objectPositionYPct ?? cropSpec.object_position_y_pct);
+        if (Number.isFinite(x) && Number.isFinite(y)) {
+          img.style.objectPosition = `${Math.min(100, Math.max(0, x))}% ${Math.min(100, Math.max(0, y))}%`;
+        }
+
+        const zoom = Number(cropSpec.zoom ?? cropSpec.crop_zoom ?? 1);
+        const rawRotation = Number(cropSpec.rotationDeg ?? cropSpec.rotation_deg ?? 0);
+        const normalizedRotation = ((rawRotation % 360) + 360) % 360;
+        const rotation = [0, 90, 180, 270].includes(normalizedRotation) ? normalizedRotation : 0;
+        const rotationCoverScale = rotation === 90 || rotation === 270 ? 4 / 3 : 1;
+        const scale = Math.max(
+          Number.isFinite(zoom) && zoom > 1 ? Math.min(1.6, zoom) : 1,
+          rotationCoverScale,
+        );
+        const transforms = [];
+        if (scale > 1) transforms.push(`scale(${scale})`);
+        if (rotation !== 0) transforms.push(`rotate(${rotation}deg)`);
+        if (transforms.length) img.style.transform = transforms.join(" ");
+      }
+
+      // ── Hide low-resolution thumbnails (client-side belt-and-suspenders) ──
+      // Source resolution IS now stored server-side (public.images.source_width_px
+      // / source_height_px), and match_by_measurements already drops images whose
+      // precomputed min_thumb_sharpness < 0.9 at a 360x480 device-px reference
+      // (see 20260625_dev_27). This client check stays because the server uses a
+      // FIXED reference (180x240 @ dpr 2); here we judge sharpness against THIS
+      // display's actual thumb size and devicePixelRatio, catching the remaining
+      // cases (e.g. dpr 3) and any image whose dimensions weren't probed (NULL
+      // server-side = kept). After the garment-aware crop zooms into a window
+      // (windowWPct/HPct), a small source gets stretched to fill the thumb and
+      // looks pixelated. We compute how many *source* pixels actually land in the
+      // thumb on this display and hide the card when that falls below what it needs.
+      //
+      // ratio = (source px kept) / (device px the thumb needs).
+      //   ratio >= 1  -> enough detail (downscaling, crisp)
+      //   ratio <  1  -> upscaling (soft / pixelated)
+      // Tune MIN_THUMB_SHARPNESS to trade grid density for sharpness:
+      // lower = keep more (allow softer), higher = hide more aggressively.
+      const MIN_THUMB_SHARPNESS = 0.9;
+
+      function thumbSharpnessRatio(img, thumbEl, cropSpecValue) {
+        const nw = img.naturalWidth;
+        const nh = img.naturalHeight;
+        if (!nw || !nh) return Infinity; // unknown size -> never hide
+        const rect = thumbEl.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const needW = (rect.width || 180) * dpr;
+        const needH = (rect.height || 240) * dpr;
+
+        let ww = 100;
+        let wh = 100;
+        let scale = 1;
+        const cs = parseCropSpec(cropSpecValue);
+        if (cs) {
+          if (cs.mode === "cover-window") {
+            const a = Number(cs.windowWPct);
+            const b = Number(cs.windowHPct);
+            if (Number.isFinite(a) && a > 0) ww = a;
+            if (Number.isFinite(b) && b > 0) wh = b;
+          } else {
+            const z = Number(cs.zoom ?? cs.crop_zoom ?? 1);
+            if (Number.isFinite(z) && z > 1) scale = Math.min(1.6, z);
+          }
+        }
+        const haveW = (nw * ww) / 100;
+        const haveH = (nh * wh) / 100;
+        // The binding dimension (whichever is most starved) decides sharpness.
+        return Math.min(haveW / (needW * scale), haveH / (needH * scale));
+      }
+
+      function hideCardIfLowRes(img, card, thumbEl, cropSpecValue) {
+        const check = () => {
+          if (thumbSharpnessRatio(img, thumbEl, cropSpecValue) < MIN_THUMB_SHARPNESS) {
+            card.style.display = "none";
+            card.dataset.lowRes = "1";
+          }
+        };
+        if (img.complete && img.naturalWidth) check();
+        else img.addEventListener("load", check, { once: true });
+      }
+
+      // ── Crop-distortion safety net ──────────────────────────────────────
+      // applyCropSpec renders a cover-window crop with object-fit:fill, which is
+      // distortion-free ONLY when the stored window is genuinely 3:4 for the
+      // *decoded* image. A few images have a stored window that doesn't match the
+      // decoded dimensions (classic cause: EXIF orientation, where the crop
+      // pipeline and the browser disagree on width vs height) — fill then
+      // stretches them. We can only tell once the image has loaded and we know
+      // its real naturalWidth/Height. When the window's true aspect strays too
+      // far from 3:4, fall back to object-fit:cover (a centered crop that never
+      // distorts). The precise garment-aware crop is kept for the ~all images
+      // whose window is correct.
+      const CROP_ASPECT_TOLERANCE = 0.12; // |windowAspect / (3/4) - 1| above this -> fall back
+
+      function guardCropDistortion(img, cropSpecValue) {
+        const cs = parseCropSpec(cropSpecValue);
+        if (!cs || cs.mode !== "cover-window") return;
+        const ww = Number(cs.windowWPct);
+        const wh = Number(cs.windowHPct);
+        if (!(ww > 0 && wh > 0)) return;
+
+        const check = () => {
+          if (!img.naturalWidth || !img.naturalHeight) return;
+          const windowAspect =
+            ((ww / 100) * img.naturalWidth) / ((wh / 100) * img.naturalHeight);
+          if (Math.abs(windowAspect / (3 / 4) - 1) <= CROP_ASPECT_TOLERANCE) return;
+          // Stored window isn't 3:4 for this decoded image -> reset the fill crop
+          // back to a distortion-free cover crop (the .thumb img CSS default).
+          img.style.objectFit = "cover";
+          img.style.position = "";
+          img.style.maxWidth = "";
+          img.style.width = "";
+          img.style.height = "";
+          img.style.left = "";
+          img.style.top = "";
+          img.style.transform = "";
+          img.dataset.cropFallback = "cover";
+        };
+        if (img.complete && img.naturalWidth) check();
+        else img.addEventListener("load", check, { once: true });
       }
 
       async function loadCupSizes(query = "") {
@@ -915,6 +1730,35 @@
         syncRequireToggle(fieldName);
       });
 
+      // Clear all search inputs and return to the default browse view.
+      const clearInputsBtn = document.getElementById("clear-inputs");
+      clearInputsBtn.addEventListener("click", () => {
+        ["h-ft", "h-in", "w", "b", "cup-size", "waist", "p",
+         "inseam", "bust-in", "weeks-pregnant", "age"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+        const clothingType = document.getElementById("clothing-type");
+        if (clothingType) clothingType.value = "";
+        // Collapse the advanced section back to its hidden default.
+        const advanced = document.querySelector(".advanced-filters");
+        if (advanced) advanced.open = false;
+        // Re-sync require toggles -> they disable + uncheck when no value.
+        Object.keys(measurementFieldIds).forEach((fieldName) =>
+          syncRequireToggle(fieldName),
+        );
+        // Reset search state and restore the initial random gallery.
+        currentSearchParams = null;
+        currentOffset = 0;
+        hasMore = true;
+        totalResultCount = 0;
+        serverMatchCount = 0;
+        closeMatchesDividerShown = false;
+        out.innerHTML = "";
+        updateResultCount(null);
+        loadRandomResults();
+      });
+
       // Toggle sidebar
       toggleBtn.addEventListener("click", () => {
         sidebar.classList.toggle("collapsed");
@@ -929,6 +1773,24 @@
         }
       });
 
+      // Mobile: collapse the filter sidebar so you land on the photo grid, and
+      // let a tap on the dim backdrop close it. (Desktop keeps the panel open.)
+      const backdrop = document.getElementById("backdrop");
+      function collapseSidebar() {
+        sidebar.classList.add("collapsed");
+        toggleBtn.classList.add("collapsed");
+        mainContent.classList.add("expanded");
+        toggleBtn.textContent = "🔍";
+      }
+      if (backdrop) backdrop.addEventListener("click", collapseSidebar);
+      const mobileMq = window.matchMedia("(max-width: 640px)");
+      if (mobileMq.matches) collapseSidebar();
+      // Collapse when crossing into mobile width (e.g. toggling device mode
+      // without a reload) so testing on a laptop behaves like a phone.
+      mobileMq.addEventListener("change", (e) => {
+        if (e.matches) collapseSidebar();
+      });
+
       // Load random results on initial page load
       async function loadRandomResults() {
         isLoading = true;
@@ -937,19 +1799,41 @@
 
         console.log("Loading random results...");
 
-        const { data, error } = await sb
+        const selectCols =
+          "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_display, color_display, bust_in_number_display, cupsize_display, waist_in, hips_in_display, inseam_inches_display, age_years_display, crop_spec, mother_category_id, review_id, product_page_id, full_body_visible, weeks_pregnant, prettiness_score, featured_rank";
+
+        // Prefer the CLIP-curated "best photos" pool (featured_rank set on the top
+        // ~100). Pull the pool and show a random 24 each load so it varies but stays
+        // high quality. Falls back to the original query if the pool isn't populated.
+        let data, error;
+        ({ data, error } = await sb
           .from("images")
-          .select(
-            "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_display, color_display, bust_in_number_display, cupsize_display, waist_in, hips_in_display, inseam_inches_display, age_years_display",
-          )
+          .select(selectCols)
+          .not("featured_rank", "is", null)
           .not("original_url_display", "is", null)
-          .not("size_display", "is", null)
-          .neq("size_display", "")
-          .neq("size_display", "unknown")
-          .or(
-            "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_number_display.not.is.null,hips_in_display.not.is.null,waist_in.not.is.null",
-          )
-          .limit(24);
+          .order("featured_rank", { ascending: true })
+          .limit(200));
+
+        if (!error && data && data.length) {
+          for (let i = data.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [data[i], data[j]] = [data[j], data[i]];
+          }
+          data = data.slice(0, 24);
+        } else {
+          if (error) console.warn("featured pool query failed, falling back:", error.message);
+          ({ data, error } = await sb
+            .from("images")
+            .select(selectCols)
+            .not("original_url_display", "is", null)
+            .not("size_display", "is", null)
+            .neq("size_display", "")
+            .neq("size_display", "unknown")
+            .or(
+              "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_number_display.not.is.null,hips_in_display.not.is.null,waist_in.not.is.null",
+            )
+            .limit(24));
+        }
 
         console.log("Random results data:", data);
         console.log("Random results error:", error);
@@ -1022,6 +1906,11 @@
           ) || null,
           in_waist: waistVal,
           in_hips: num(document.getElementById("p").value),
+          // 'Less common' sparse filters (advanced section). Null when blank.
+          in_inseam: num(document.getElementById("inseam").value),
+          in_bust_inches: num(document.getElementById("bust-in").value),
+          in_weeks_pregnant: num(document.getElementById("weeks-pregnant").value),
+          in_age: num(document.getElementById("age").value),
           require_height:
             totalHeightInches > 0 &&
             document.getElementById("require-height").checked,
@@ -1082,6 +1971,8 @@
         currentOffset = 0;
         hasMore = true;
         totalResultCount = 0;
+        serverMatchCount = 0;
+        closeMatchesDividerShown = false;
         out.innerHTML = "";
         updateResultCount(null); // Clear count while loading
 
@@ -1256,7 +2147,7 @@
           hasMore = false;
           if (currentOffset === 0) {
             out.textContent = "No matches";
-            updateResultCount(0, false);
+            updateResultCount(0);
           }
         } else {
           // Filter out records with unknown/missing size before rendering
@@ -1277,16 +2168,22 @@
           });
 
           if (filtered.length > 0) {
+            // Capture the server counts BEFORE rendering so the render pass can
+            // drop the "close matches" divider at the matches→remainder edge.
+            // (Same on every page — the RPC returns them via window aggregates.)
+            const serverTotal = Number(data[0] && data[0].total_count);
+            totalResultCount = Number.isFinite(serverTotal)
+              ? serverTotal
+              : out.querySelectorAll(".card").length;
+            const serverMatch = Number(data[0] && data[0].match_count);
+            serverMatchCount = Number.isFinite(serverMatch) ? serverMatch : 0;
+
             render(filtered, true); // true = append mode
             if (supportsCupSizeSearchRpc) {
               currentOffset += data.length;
             } else {
               currentOffset = nextOffset;
             }
-
-            // Update the total count based on cards currently displayed
-            const displayedCards = out.querySelectorAll('.card').length;
-            totalResultCount = displayedCards;
           }
 
           if (supportsCupSizeSearchRpc && data.length < 24) {
@@ -1298,7 +2195,7 @@
           }
 
           // Update result count display
-          updateResultCount(totalResultCount, hasMore);
+          updateResultCount(totalResultCount);
         }
 
         isLoading = false;
@@ -1323,6 +2220,20 @@
         let skipped = 0;
         const baseCardPosition = append ? out.querySelectorAll(".card").length : 0;
         const impressionEvents = [];
+
+        // When results aren't scoped to a single clothing type, each card shows
+        // its own clothing-type chip so mixed results stay legible.
+        const showClothingTypeChip = !(
+          currentSearchParams && currentSearchParams.in_clothing_type_id
+        );
+
+        // Show a "close matches" divider once, where the within-tolerance matches
+        // end and the ranked remainder begins. Only when measurements were entered
+        // and there's both a matches group and a remainder.
+        const showCloseMatchesDivider =
+          softMeasurementsEntered() &&
+          serverMatchCount > 0 &&
+          serverMatchCount < totalResultCount;
 
         for (const r of rows) {
           const hasSize =
@@ -1375,6 +2286,13 @@
             : null;
 
           img.src = proxied || r.original_url_display;
+
+          const thumb = document.createElement("div");
+          thumb.className = "thumb";
+          thumb.appendChild(img);
+          applyCropSpec(img, r.crop_spec);
+          hideCardIfLowRes(img, a, thumb, r.crop_spec);
+          guardCropDistortion(img, r.crop_spec);
 
           img.onerror = () => {
             if (proxied && img.src === proxied && r.original_url_display) {
@@ -1457,6 +2375,16 @@
             sizeText = sizeText.replace(/^Size:\s*/i, "");
           }
           const primaryRow = createMetaRow();
+          if (showClothingTypeChip && r.mother_category_id) {
+            const typeLabel =
+              clothingTypeLabels[r.mother_category_id] ||
+              r.mother_category_id.charAt(0).toUpperCase() +
+                r.mother_category_id.slice(1);
+            const typeChip = document.createElement("span");
+            typeChip.className = "meta-type";
+            typeChip.textContent = typeLabel;
+            primaryRow.appendChild(typeChip);
+          }
           appendMetaPill(primaryRow, "Size", sizeText);
           if (r.color_display && r.color_display.toLowerCase() !== "unknown") {
             appendMetaPill(primaryRow, "", r.color_display);
@@ -1691,10 +2619,21 @@
             if (!isOpen) reportDropdown.classList.add("open");
           });
 
-          a.appendChild(img);
+          a.appendChild(thumb);
           a.appendChild(meta);
           a.appendChild(reportBtn);
           a.appendChild(reportDropdown);
+
+          // At the first non-matching card, drop the divider that separates the
+          // measurement matches from the ranked "close matches" below.
+          if (
+            showCloseMatchesDivider &&
+            !closeMatchesDividerShown &&
+            r.matches_any === false
+          ) {
+            out.appendChild(buildCloseMatchesDivider());
+            closeMatchesDividerShown = true;
+          }
           out.appendChild(a);
 
           const impressionKey = [
@@ -1817,6 +2756,225 @@
       document.addEventListener("click", () => {
         document.querySelectorAll(".report-dropdown.open").forEach((d) => d.classList.remove("open"));
       });
+
+      // ===================================================================
+      // "Submit your own review" modal: client-side photo resize, upload to
+      // the review-uploads bucket, then insert a pending user_review_submissions
+      // row. No server: the browser does the resize, supabase-js does the rest.
+      // ===================================================================
+      (() => {
+        const overlay = document.getElementById("review-overlay");
+        const openBtn = document.getElementById("open-review-modal");
+        const closeBtn = document.getElementById("review-close");
+        const form = document.getElementById("review-form");
+        const drop = document.getElementById("photo-drop");
+        const fileInput = document.getElementById("review-photos");
+        const previews = document.getElementById("photo-previews");
+        const statusEl = document.getElementById("review-status");
+        const submitBtn = document.getElementById("review-submit");
+        if (!overlay || !form) return;
+
+        const MAX_PHOTOS = 5;
+        const MAX_EDGE = 1600; // px — longest side after downscale
+        const JPEG_QUALITY = 0.8;
+        let photos = []; // [{ blob, url }]
+
+        function openModal() {
+          overlay.classList.add("open");
+          document.body.style.overflow = "hidden";
+        }
+        function closeModal() {
+          overlay.classList.remove("open");
+          document.body.style.overflow = "";
+        }
+        openBtn?.addEventListener("click", openModal);
+        closeBtn?.addEventListener("click", closeModal);
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) closeModal();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && overlay.classList.contains("open")) closeModal();
+        });
+
+        function setStatus(msg, kind) {
+          statusEl.textContent = msg;
+          statusEl.className = "review-status" + (kind ? " " + kind : "");
+        }
+
+        drop.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", async () => {
+          const files = Array.from(fileInput.files || []);
+          fileInput.value = ""; // let the same file be re-picked later
+          for (const file of files) {
+            if (photos.length >= MAX_PHOTOS) {
+              setStatus(`Up to ${MAX_PHOTOS} photos — extras were skipped.`, "error");
+              break;
+            }
+            if (!file.type.startsWith("image/")) continue;
+            try {
+              const blob = await downscaleImage(file);
+              photos.push({ blob, url: URL.createObjectURL(blob) });
+            } catch (err) {
+              console.error("image resize failed", err);
+              setStatus("One photo couldn't be processed — try a different file.", "error");
+            }
+          }
+          renderPreviews();
+        });
+
+        function renderPreviews() {
+          previews.innerHTML = "";
+          photos.forEach((p, i) => {
+            const thumb = document.createElement("div");
+            thumb.className = "photo-thumb";
+            const img = document.createElement("img");
+            img.src = p.url;
+            const rm = document.createElement("button");
+            rm.type = "button";
+            rm.textContent = "×";
+            rm.title = "Remove";
+            rm.addEventListener("click", () => {
+              URL.revokeObjectURL(p.url);
+              photos.splice(i, 1);
+              renderPreviews();
+            });
+            thumb.appendChild(img);
+            thumb.appendChild(rm);
+            previews.appendChild(thumb);
+          });
+        }
+
+        // Downscale to a max long edge and re-encode JPEG so uploads stay small.
+        function downscaleImage(file) {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objUrl = URL.createObjectURL(file);
+            img.onload = () => {
+              URL.revokeObjectURL(objUrl);
+              const scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height));
+              const w = Math.max(1, Math.round(img.width * scale));
+              const h = Math.max(1, Math.round(img.height * scale));
+              const canvas = document.createElement("canvas");
+              canvas.width = w;
+              canvas.height = h;
+              canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+              canvas.toBlob(
+                (blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))),
+                "image/jpeg",
+                JPEG_QUALITY,
+              );
+            };
+            img.onerror = () => {
+              URL.revokeObjectURL(objUrl);
+              reject(new Error("image load failed"));
+            };
+            img.src = objUrl;
+          });
+        }
+
+        function val(id) {
+          const el = document.getElementById(id);
+          const v = el ? el.value.trim() : "";
+          return v === "" ? null : v;
+        }
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          setStatus("", "");
+
+          const size = val("review-size");
+          if (!size) {
+            setStatus("Size purchased is required.", "error");
+            return;
+          }
+          if (photos.length === 0) {
+            setStatus("Please add at least one photo.", "error");
+            return;
+          }
+
+          submitBtn.disabled = true;
+          setStatus("Uploading photos…", "");
+
+          try {
+            // Unguessable per-submission folder so objects can't be enumerated.
+            const folder =
+              (crypto.randomUUID && crypto.randomUUID()) ||
+              String(Date.now()) + "-" + Math.round(Math.random() * 1e9);
+            const imagePaths = [];
+            for (let i = 0; i < photos.length; i++) {
+              const path = `${folder}/${i}.jpg`;
+              const { error: upErr } = await sb.storage
+                .from("review-uploads")
+                .upload(path, photos[i].blob, {
+                  contentType: "image/jpeg",
+                  upsert: false,
+                });
+              if (upErr) throw upErr;
+              imagePaths.push(path);
+            }
+
+            setStatus("Saving your review…", "");
+
+            const band = num(val("review-band"));
+            const ft = num(val("review-h-ft"));
+            const inch = num(val("review-h-in"));
+            const heightTotal =
+              ft !== null || inch !== null ? (ft || 0) * 12 + (inch || 0) : null;
+            const cup = val("review-cup");
+
+            const payload = {
+              status: "pending",
+              anon_id: FWM_ANON_ID,
+              session_id: FWM_SESSION_ID,
+              reviewer_email: val("review-email"),
+              height_in_total: heightTotal,
+              weight_lbs: num(val("review-weight")),
+              bra_band_in: band,
+              bust_in_number: band !== null ? Math.round(band) : null,
+              cup_size: cup ? cup.toUpperCase() : null,
+              bust_full_in: num(val("review-bust")),
+              waist_in: num(val("review-waist")),
+              hips_in: num(val("review-hips")),
+              inseam_in: num(val("review-inseam")),
+              age_years: num(val("review-age")),
+              weeks_pregnant: num(val("review-weeks")),
+              full_body_visible: document.getElementById("review-fullbody").checked,
+              brand: val("review-brand"),
+              product_page_url: val("review-url"),
+              source_site: val("review-site"),
+              size_purchased: size,
+              color: val("review-color"),
+              price: val("review-price"),
+              mother_category_id: val("review-category"),
+              user_comment: val("review-comment"),
+              image_paths: imagePaths,
+            };
+
+            const { error: insErr } = await sb
+              .from("user_review_submissions")
+              .insert(payload);
+            if (insErr) throw insErr;
+
+            setStatus(
+              "Thanks! Your review was submitted and will appear after a quick check.",
+              "success",
+            );
+            photos.forEach((p) => URL.revokeObjectURL(p.url));
+            photos = [];
+            renderPreviews();
+            form.reset();
+            setTimeout(closeModal, 2400);
+          } catch (err) {
+            console.error("review submission failed", err);
+            setStatus(
+              "Something went wrong submitting your review. Please try again.",
+              "error",
+            );
+          } finally {
+            submitBtn.disabled = false;
+          }
+        });
+      })();
     </script>
   </body>
 </html>
