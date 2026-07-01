@@ -1,0 +1,7 @@
+# Cloudflare Pages custom headers.
+# config.js carries the live Supabase project URL + anon key. It must never be
+# served stale: a browser holding a cached config.js from before the 2026-06-30
+# project cutover pointed the storefront at the old (archived) backend, which
+# blanked the page. Force revalidation so a config change always takes effect.
+/config.js
+  Cache-Control: no-cache, must-revalidate

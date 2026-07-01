@@ -1142,7 +1142,7 @@
       </div>
     </div>
 
-    <script src="./config.js"></script>
+    <script src="./config.js?v=cutover-20260630"></script>
     <script type="text/javascript">
       if (window.SOVRN_COMMERCE_API_KEY) {
         window.vglnk = {
@@ -1283,11 +1283,13 @@
       const trackedProductCardViews = new Set();
       const EXPECTED_SUPABASE_URL = "https://gosqgqpftqlawvnyelkt.supabase.co";
 
-      // Fail loudly if the wrong Supabase project is ever loaded via config.js.
+      // Warn (do NOT throw) if the wrong Supabase project is loaded via config.js.
+      // A throw here would halt all page JS and blank the storefront — e.g. if a
+      // browser serves a stale cached config.js after a project cutover.
       function assertConfig() {
         if (window.SUPABASE_URL !== EXPECTED_SUPABASE_URL) {
-          throw new Error(
-            `Config error: expected ${EXPECTED_SUPABASE_URL}, got ${window.SUPABASE_URL || "unset"}`,
+          console.error(
+            `Config warning: expected ${EXPECTED_SUPABASE_URL}, got ${window.SUPABASE_URL || "unset"} (stale cached config.js?)`,
           );
         }
       }
@@ -2294,8 +2296,12 @@
           const cardPosition = baseCardPosition + displayed;
 
           const a = document.createElement("a");
-          a.className = "card";
           const productUrl = getProductUrl(r);
+          // Amazon links carry our own Associates tag; mark them norewrite so
+          // Sovrn/VigLink doesn't overwrite the href and strip our tag on load.
+          a.className = isAmazonProductUrl(productUrl)
+            ? "card norewrite nooptimize"
+            : "card";
           a.href = productUrl;
           a.target = "_blank";
           a.rel = "noopener noreferrer sponsored";
@@ -2745,8 +2751,21 @@
         productCardViewObserver.observe(card);
       }
 
+      function isAmazonProductUrl(url) {
+        return /^https?:\/\/[^/]*\bamazon\.[a-z.]+/i.test(String(url || ""));
+      }
+
       function getProductUrl(row) {
         const config = getSovrnCommerceConfig();
+        // Amazon: always use our own Amazon Associates tagged link. Sovrn does
+        // not monetize Amazon, and sending the plain URL through it would drop
+        // our tag, so Amazon bypasses preferPlainProductUrls entirely.
+        if (
+          isAmazonProductUrl(row.product_page_url_display) &&
+          row.monetized_product_url_display
+        ) {
+          return row.monetized_product_url_display;
+        }
         if (config.preferPlainProductUrls && row.product_page_url_display) {
           return row.product_page_url_display;
         }
@@ -2757,6 +2776,7 @@
         const config = getSovrnCommerceConfig();
         if (
           !url ||
+          isAmazonProductUrl(url) ||
           !config.enabled ||
           !config.useDynamicOpen ||
           event.button !== 0 ||
