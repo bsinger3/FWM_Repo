@@ -1799,19 +1799,41 @@
 
         console.log("Loading random results...");
 
-        const { data, error } = await sb
+        const selectCols =
+          "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_display, color_display, bust_in_number_display, cupsize_display, waist_in, hips_in_display, inseam_inches_display, age_years_display, crop_spec, mother_category_id, review_id, product_page_id, full_body_visible, weeks_pregnant, prettiness_score, featured_rank";
+
+        // Prefer the CLIP-curated "best photos" pool (featured_rank set on the top
+        // ~100). Pull the pool and show a random 24 each load so it varies but stays
+        // high quality. Falls back to the original query if the pool isn't populated.
+        let data, error;
+        ({ data, error } = await sb
           .from("images")
-          .select(
-            "id, original_url_display, product_page_url_display, monetized_product_url_display, brand, source_site_display, height_in_display, weight_display_display, size_display, color_display, bust_in_number_display, cupsize_display, waist_in, hips_in_display, inseam_inches_display, age_years_display, crop_spec, mother_category_id, review_id, product_page_id, full_body_visible, weeks_pregnant, prettiness_score",
-          )
+          .select(selectCols)
+          .not("featured_rank", "is", null)
           .not("original_url_display", "is", null)
-          .not("size_display", "is", null)
-          .neq("size_display", "")
-          .neq("size_display", "unknown")
-          .or(
-            "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_number_display.not.is.null,hips_in_display.not.is.null,waist_in.not.is.null",
-          )
-          .limit(24);
+          .order("featured_rank", { ascending: true })
+          .limit(200));
+
+        if (!error && data && data.length) {
+          for (let i = data.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [data[i], data[j]] = [data[j], data[i]];
+          }
+          data = data.slice(0, 24);
+        } else {
+          if (error) console.warn("featured pool query failed, falling back:", error.message);
+          ({ data, error } = await sb
+            .from("images")
+            .select(selectCols)
+            .not("original_url_display", "is", null)
+            .not("size_display", "is", null)
+            .neq("size_display", "")
+            .neq("size_display", "unknown")
+            .or(
+              "height_in_display.not.is.null,weight_display_display.not.is.null,bust_in_number_display.not.is.null,hips_in_display.not.is.null,waist_in.not.is.null",
+            )
+            .limit(24));
+        }
 
         console.log("Random results data:", data);
         console.log("Random results error:", error);
