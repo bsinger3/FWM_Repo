@@ -35,8 +35,22 @@ function redactText(raw, replacements) {
   }
 
   const patterns = [
+    // OpenAI + Anthropic (sk-ant-… also matches the generic sk- rule below, but
+    // list it first for an accurate label).
+    [/sk-ant-[A-Za-z0-9_-]{20,}/g, "[REDACTED_ANTHROPIC_API_KEY]"],
     [/sk-proj-[A-Za-z0-9_-]{20,}/g, "[REDACTED_OPENAI_API_KEY]"],
     [/sk-[A-Za-z0-9_-]{20,}/g, "[REDACTED_OPENAI_API_KEY]"],
+    // Other provider keys/tokens — distinctive prefixes, won't over-match prose.
+    // Length floors are set above typical placeholders (re_your_key_here, etc.).
+    [/re_[A-Za-z0-9_]{20,}/g, "[REDACTED_RESEND_KEY]"],
+    [/(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}/g, "[REDACTED_GITHUB_TOKEN]"],
+    [/github_pat_[A-Za-z0-9_]{22,}/g, "[REDACTED_GITHUB_TOKEN]"],
+    [/xox[baprs]-[A-Za-z0-9-]{10,}/g, "[REDACTED_SLACK_TOKEN]"],
+    [/xapp-[0-9]-[A-Za-z0-9-]{10,}/g, "[REDACTED_SLACK_APP_TOKEN]"],
+    [/sk_(?:live|test)_[A-Za-z0-9]{16,}/g, "[REDACTED_STRIPE_SECRET_KEY]"],
+    [/rk_(?:live|test)_[A-Za-z0-9]{16,}/g, "[REDACTED_STRIPE_RESTRICTED_KEY]"],
+    [/AIza[A-Za-z0-9_-]{35}/g, "[REDACTED_GOOGLE_API_KEY]"],
+    [/SG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}/g, "[REDACTED_SENDGRID_KEY]"],
     [/AKIA[0-9A-Z]{16}/g, "[REDACTED_AWS_ACCESS_KEY_ID]"],
     [/(aws_secret_access_key\s*[=:]\s*)[^\s"'`\\]+/gi, "$1[REDACTED_AWS_SECRET_ACCESS_KEY]"],
     [/(SUPABASE_SERVICE_ROLE_KEY\s*[=:]\s*)[^\s"'`\\]+/gi, "$1[REDACTED_SUPABASE_SERVICE_ROLE_KEY]"],
